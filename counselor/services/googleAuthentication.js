@@ -34,7 +34,6 @@ router.get('/auth/google/callback', async (req, res) => {
     oauth2Client.setCredentials(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
-    console.log(counsellorInfo.data)
     const { email, name, picture } = counsellorInfo.data;
 
     // Save user information to the database if not already exists
@@ -45,6 +44,9 @@ router.get('/auth/google/callback', async (req, res) => {
         personal_info: {
           name,
           profile_pic: picture,
+          location: {
+            city: 'jaipur'
+          }
         },
       });
       await counsellor.save();

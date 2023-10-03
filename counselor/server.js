@@ -7,7 +7,8 @@ const cors = require('cors');
 require('dotenv').config();
 const { PORT, MONGODB_URI } = process.env;
 
-// Middleware to parse JSON data in the request body
+// Parse URL-encoded form data
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // security options
@@ -26,6 +27,7 @@ mongoose.connection.on('connected', () => {
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
+
 
 // Routes
 readdirSync('./routes').map((r) => app.use('/', require('./routes/' + r)));

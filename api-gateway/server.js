@@ -1,7 +1,7 @@
 const gateway = require('fast-gateway')
 require('dotenv').config();
 
-const { PORT, USER_PORT, COUNSELLOR_PORT, ENTRANCE_PREPARATIONS_PORT, VOCATIONAL_COURSES_PORT, WEBINARS_PORT } = process.env;
+const { PORT, USER_PORT, COUNSELLOR_PORT, ENTRANCE_PREPARATIONS_PORT, VOCATIONAL_COURSES_PORT, WEBINARS_PORT, NOTIFICATION_SERVICES_PORT } = process.env;
 const server = gateway({
   routes: [
     {
@@ -23,6 +23,10 @@ const server = gateway({
     {
       prefix: '/webinars',
       target: `http://127.0.0.1:${WEBINARS_PORT}`
+    },
+    {
+      prefix: '/notification',
+      target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
     },
   ]
 })

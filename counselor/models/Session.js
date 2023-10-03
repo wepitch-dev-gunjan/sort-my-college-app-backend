@@ -4,7 +4,7 @@ const counselingSessionSchema = new Schema(
   {
     session_counselor: {
       type: Schema.Types.ObjectId,
-      ref: 'Counselor',
+      ref: 'Counsellor',
     },
     session_user: {
       type: Schema.Types.ObjectId,
@@ -28,6 +28,7 @@ const counselingSessionSchema = new Schema(
     session_fee: {
       type: Number,
       required: true,
+      default: 0
     },
     session_status: {
       type: String,

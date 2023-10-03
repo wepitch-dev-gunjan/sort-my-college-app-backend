@@ -1,31 +1,41 @@
-const { sessionTimeIntoMinutes } = require("../helpers/sessionHelpers");
-const Counsellor = require("../models/Counsellor");
+const { sessionTimeIntoMinutes, isSessionBefore24Hours } = require("../helpers/sessionHelpers");
 const Session = require("../models/Session");
-const CounselingSession = require("../models/Session");
-const globalSocket = require("../server");
 
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { status } = req.query;
-    const { counselor } = req.params;
+    const { id } = req;
 
     // Check if a status query is requested
-    if (status) {
-      const counselingSessions = await CounselingSession.find({
-        counselor,
-        status,
-      });
+    const counselingSessions = await Session.find({
+      session_counselor: id
+    });
 
-      res.status(200).json(counselingSessions);
-    } else {
-      // If no status query is requested, send all sessions of the counselor
-      const allCounselingSessions = await CounselingSession.find({
-        counselor,
-      });
+    if (!counselingSessions)
+      res.status(200).json({ message: "Sessions not found" });
 
-      res.status(200).json(allCounselingSessions);
-    }
+    res.status(200).json(counselingSessions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getSession = async (req, res) => {
+  try {
+    const { id } = req;
+    const { session_id } = req.params;
+
+    // Check if a status query is requested
+    const counselingSessions = await Session.findOne({
+      _id: session_id,
+      session_counselor: id
+    });
+
+    if (!counselingSessions)
+      res.status(200).json({ message: "Session not found" });
+
+    res.status(200).json(counselingSessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -38,6 +48,10 @@ exports.addSession = async (req, res) => {
     // Extract data from the request body
     const { id } = req;
     const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
+
+    if (!isSessionBefore24Hours(session_date, session_time)) {
+      return res.status(404).json({ error: "Can't add session before 24 hours" })
+    }
 
     // Check if any of the required fields are missing
     if (!session_date || !session_time || !session_duration || !session_type || !session_fee) {
@@ -73,7 +87,6 @@ exports.addSession = async (req, res) => {
       return res.status(400).send({
         error: "A session already exists at this date and time"
       });
-      return;
     }
 
     // Create a new session object
@@ -145,35 +158,46 @@ exports.bookSession = async (req, res) => {
 // PUT
 exports.updateSession = async (req, res) => {
   try {
-    const { sessionId } = req.params;
+    const { session_id } = req.params;
 
     // Extract updated data from the request body
     const {
-      sessionType,
-      sessionDate,
-      duration,
-      status,
+      session_type,
+      session_date,
+      session_time,
+      session_duration,
+      session_status,
     } = req.body;
 
+    if (session_status === 'Booked') {
+      return res.status(400).json({ error: "You can't updtae a session status after a user booked it" });
+    }
     // Find the counseling session by ID
-    const counselingSession = await CounselingSession.findById(sessionId);
+    const counselingSession = await Session.findById(session_id);
 
     if (!counselingSession) {
       return res.status(404).json({ error: 'Counseling session not found' });
     }
 
     // Update the attributes
-    if (status) {
-      counselingSession.status = status;
+    if (session_status) {
+      Session.session_status = session_status;
     }
-    if (duration) {
-      counselingSession.duration = duration;
+    if (session_duration) {
+      Session.session_duration = session_duration;
     }
-    if (sessionType) {
-      counselingSession.sessionType = sessionType;
+    if (session_type) {
+      Session.session_type = session_type;
     }
-    if (sessionDate) {
-      counselingSession.sessionDate = sessionDate;
+    if (session_date) {
+      Session.session_date = session_date;
+    }
+    if (session_time) {
+      Session.session_time = session_time;
+    }
+
+    if (!isSessionBefore24Hours(session_date, session_time)) {
+      return res.status(404).json({ error: "Can't add session before 24 hours" })
     }
 
     // Save the updated counseling session
@@ -181,6 +205,38 @@ exports.updateSession = async (req, res) => {
 
     // Respond with a success message
     res.status(200).json({ message: 'Counseling session updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// DELETE 
+exports.deleteSession = async (req, res) => {
+  try {
+    const { id } = req;
+    const { session_id } = req.params;
+
+    // Check if a status query is requested
+    const counselingSession = await Session.findOne({
+      _id: session_id,
+      session_counselor: id
+    });
+
+    if (!counselingSession)
+      res.status(200).json({ message: "Session not found" });
+
+    const { session_date, session_time, session_status } = counselingSession;
+
+    if (session_status === 'Booked') {
+      return res.status(400).json({ error: "You can't updtae a session status after a user booked it" });
+    }
+
+    if (!isSessionBefore24Hours(session_date, session_time)) {
+      return res.status(404).json({ error: "Can't add session before 24 hours" })
+    }
+
+    res.status(200).json(counselingSession);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

@@ -5,7 +5,7 @@ const counsellorSchema = new Schema({
     type: String,
   },
   phone_no: {
-    type: Number,
+    type: String,
   },
   personal_info: {
     name: {
@@ -42,7 +42,6 @@ const counsellorSchema = new Schema({
       type: String,
     }
   ],
-  next_appointment: Date,
   work_experience: Number,
   total_appointed_sessions: Number,
   reward_points: Number,
@@ -70,9 +69,20 @@ const counsellorSchema = new Schema({
       ref: 'Feed'
     }
   ],
+  how_will_i_help: [
+    {
+      type: String,
+    }
+  ],
   emergency_contact: {
     type: Number,
   },
+  followers: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }
+  ]
 }, {
   timestamps: true
 });
