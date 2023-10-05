@@ -7,7 +7,8 @@ const commentSchema = new Schema({
   },
   comment_replies: [
     {
-      type: Schema.Types.Object
+      type: Schema.Types.Object,
+      ref: 'Comment'
     }
   ]
 });

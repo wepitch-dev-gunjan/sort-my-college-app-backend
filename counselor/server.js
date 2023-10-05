@@ -6,6 +6,7 @@ const cors = require('cors');
 
 require('dotenv').config();
 const { PORT, MONGODB_URI } = process.env;
+const { PORT } = process.env.PORT;
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: false }));

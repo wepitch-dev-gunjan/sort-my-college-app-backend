@@ -1,52 +1,125 @@
 const User = require("../models/User");
 
-// GET
-exports.getUsers = async (req, res) => {
+exports.createUser = async (req, res) => {
   try {
-    res.send('hello')
+    const userData = req.body;
+    const newUser = new User(userData);
+    const savedUser = await newUser.save();
+
+    res.status(201).json(savedUser); // Respond with the saved user object
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-// POST
-exports.createUser = async (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
-    // Extract user data from the request body
-    const { personal_info, email, password, /* other user fields */ } = req.body;
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
 
-    // Check if a user with the same email already exists
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'User with this email already exists' });
+    if (!user) {
+      return res.status(400).send({ error: 'User not found' });
     }
 
-    // Create a new user instance
-    const newUser = new User({
-      personal_info,
-      email,
-      password, // You should hash the password before saving it in a production environment
-      // Add other user fields here
-    });
+    res.status(200).send(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
 
-    // Save the new user to the database
-    await newUser.save();
+exports.editProfile = async (req, res) => {
+  try {
+    const { user_id } = req.params;
 
-    // Respond with a success message
-    res.status(201).json(newUser);
+    const user = await User.findById(user_id);
+
+    if (!user) {
+      return res.status(404).send({ error: 'User not found' });
+    }
+
+    const updatedProfileData = {
+      personal_info: {
+        name: req.body.personal_info.name,
+        contact_number: req.body.personal_info.contact_number,
+        gender: req.body.personal_info.gender,
+        date_of_birth: req.body.personal_info.date_of_birth,
+        location: {
+          city: req.body.personal_info.location.city
+        }
+      }
+    };
+    user.set(updatedProfileData);
+
+    await user.save();
+
+    res.status(200).send({ message: 'Profile updated successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 
-exports.getSingleUser = async (req, res) => {
+
+exports.rescheduleRequest = (req, res) => {
   try {
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.cancelRequest = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.saveCounsellor = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { counsellor_id } = req.body;
+    if (user.saved_counsellors.includes(counsellor_id)) return res.status(400).json({ error: "Counsellor is already saved" });
+
+    user.saved_counsellors.push(counsellor_id);
+
+    await user.save();
+    res.status(200).send({ messeage: "Counsellor successfully saved" })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 }
+
+exports.unsaveCounsellor = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { counsellor_id } = req.body;
+    if (!user.saved_counsellors.includes(counsellor_id)) return res.status(404).json({ error: "Counsellor is already unsaved" });
+
+    user.saved_counsellors.filter(counsellorId => counsellorId !== counsellor_id);
+
+    await user.save();
+    res.status(200).send({ message: "Counsellor unsaved successfully" })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

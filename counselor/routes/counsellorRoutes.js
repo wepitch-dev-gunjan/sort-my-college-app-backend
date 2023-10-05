@@ -1,18 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { getCounsellors, getSingleCounsellor, createCounsellor, getProfile, editProfile } = require('../controllers/counsellorController');
+const { getCounsellors, editProfile, followCounsellor, unfollowCounsellor, postReviewCounsellor, getCounsellor, getFollowers, getReviewsCounsellor, createCounsellor, getProfilePic, uploadProfilePic, deleteProfilePic, getTotalRatings } = require('../controllers/counsellorController');
 const { counsellorAuth } = require('../middlewares/authMiddleware');
 
-// user authorised routes
 // GET
-// router.get('/:counselor_id', getSingleCounsellor);
-// router.get('/', getCounsellors);
+router.get('/', getCounsellors);
+router.get('/:counsellor_id', getCounsellor);
+router.get('/:counsellor_id/followers', getFollowers);
+router.get('/:counsellor_id/profile-pic', getProfilePic);
+router.get('/:counsellor_id/review', getReviewsCounsellor);
+router.get('/:counsellor_id/total-ratings', getTotalRatings);
 
-// counsellor authorised routes
-router.get('/', counsellorAuth, getProfile);
 // PUT
-router.put('/', counsellorAuth, editProfile);
+router.put('/', editProfile);
+router.put('/:counsellor_id/follow', followCounsellor);
+router.put('/:counsellor_id/unfollow', unfollowCounsellor);
 
+// POST
+router.post('/', createCounsellor);
+router.post('/:counsellor_id/review', postReviewCounsellor);
+router.post('/:counsellor_id/profile-pic', uploadProfilePic);
 
+// DELETE
+router.delete('/:counsellor_id/profile-pic', deleteProfilePic);
 
 module.exports = router;

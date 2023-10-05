@@ -1,13 +1,13 @@
 const { Schema, model } = require('mongoose');
 
 const userSchema = new Schema({
+  email: String,
   personal_info: {
     name: {
       type: String,
       required: true,
     },
     contact_number: String,
-    email: String,
     gender: {
       type: String,
       enum: ['Male', 'Female', 'Other'],
@@ -18,25 +18,31 @@ const userSchema = new Schema({
     location: {
       city: String
     },
+    profile_pic: {
+      type: String,
+    }
   },
-  my_counselling_sessions: [
+  saved_counsellors: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'Counselling'
+      type: String
     },
   ],
-  my_vocational_courses: [
+  saved_vocational_courses: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'EntrancePreparation'
+      type: String
     },
   ],
-  my_entrance_preparations: [
+  saved_entrance_preparations: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'VocationalCourse'
+      type: String
     },
   ],
+  saved_feeds: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Feed'
+    }
+  ]
 }, {
   timestamps: true
 });

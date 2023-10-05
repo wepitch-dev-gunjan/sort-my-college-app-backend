@@ -4,9 +4,11 @@ const counsellorSchema = new Schema({
   email: {
     type: String,
   },
+
   phone_no: {
     type: String,
   },
+
   personal_info: {
     name: {
       type: String,
@@ -22,67 +24,95 @@ const counsellorSchema = new Schema({
       country: String
     }
   },
+
   qualifications: [
     {
       type: String,
     }
   ],
+
   specializations: [
     {
       type: String,
     }
   ],
+
   languages_spoken: [
     {
       type: String,
     }
   ],
+
   client_focus: [
     {
       type: String,
     }
   ],
+
   work_experience: Number,
+
   total_appointed_sessions: Number,
+
   reward_points: Number,
+
   client_testimonials: [
     {
       rating: Number,
       comment: String,
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-      }
+      user_id: String,
     },
   ],
+
   total_ratings: Number,
+
   average_rating: Number,
+
   sessions: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'CounselingSession'
+      ref: 'Session'
     }
   ],
+
   feeds: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Feed'
     }
   ],
+
   how_will_i_help: [
     {
       type: String,
     }
   ],
+
   emergency_contact: {
     type: Number,
   },
+
   followers: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
+      type: String,
     }
-  ]
+  ],
+
+  degree_focused: {
+    type: String,
+    default: 'PG',
+    enum: ['UG', 'PG']
+  },
+
+  locations_focused: [{
+    type: String,
+    enum: ['INDIA', 'ABROAD']
+  }],
+
+  courses_focused: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Course'
+  }],
+
 }, {
   timestamps: true
 });

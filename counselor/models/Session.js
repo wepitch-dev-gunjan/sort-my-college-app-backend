@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const counselingSessionSchema = new Schema(
+const sessionSchema = new Schema(
   {
     session_counselor: {
       type: Schema.Types.ObjectId,
@@ -44,4 +44,4 @@ const counselingSessionSchema = new Schema(
   }
 );
 
-module.exports = model('CounselingSession', counselingSessionSchema);
+module.exports = model('Session', sessionSchema);

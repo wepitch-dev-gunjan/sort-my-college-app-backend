@@ -1,18 +1,20 @@
+const { uploadToS3 } = require('../helpers/feedHelpers');
+const { upload } = require('../middlewares/formMiddlewares');
 const Counsellor = require('../models/Counsellor');
 
 // GET
-exports.getProfile = async (req, res) => {
+exports.getCounsellor = async (req, res) => {
   try {
-    const { id } = req;
-    const profile = await Counsellor.findOne({ _id: id });
+    const { counsellor_id } = req.params;
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
-    if (!profile) {
+    if (!counsellor) {
       return res.status(404).send({
         eerror: "Unauthorised user"
       })
     }
 
-    res.status(200).send(profile);
+    res.status(200).send(counsellor);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -21,56 +23,205 @@ exports.getProfile = async (req, res) => {
 
 exports.getCounsellors = async (req, res) => {
   try {
-    // Extract query parameters from the request
-    const { degree, country, city, course, saved } = req.query;
+    const { locations_focused, degree_focused, courses_focused } = req.query;
 
-    // Construct a filter object based on the query parameters
-    const filter = {};
-    if (degree) {
-      filter.degree = degree;
-    }
-    if (country) {
-      filter.country = country;
-    }
-    if (city) {
-      filter.residing_city = city;
-    }
-    if (course) {
-      filter.course = course;
-    }
-    if (saved) {
-      filter.saved = saved;
+    const queryObject = {};
+
+    if (degree_focused) {
+      queryObject.degree_focused = { $in: degree_focused };
     }
 
-    // Query the database using the filter
-    const counselors = await Counsellor.find(filter);
+    if (locations_focused) {
+      queryObject.locations_focused = { $in: locations_focused };
+    }
 
-    // Respond with the filtered counselors
-    res.status(200).json(counselors);
+    if (courses_focused) {
+      queryObject.courses_focused = { $in: courses_focused };
+    }
+
+    const counsellors = await Counsellor.find(queryObject);
+
+    if (counsellors.length === 0) {
+      return res.status(404).send({ error: "No counselors found" });
+    }
+
+    res.status(200).send(counsellors);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.getSingleCounsellor = async (req, res) => {
+exports.getProfilePic = (req, res) => {
   try {
-    const { counselor_id } = req.params;
 
-    // Find the counselor by ID in the database
-    const counselor = await Counsellor.findById({ _id: counselor_id });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
 
-    if (!counselor) {
-      return res.status(404).json({ error: 'Counselor not found' });
+exports.uploadProfilePic = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.deleteProfilePic = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getFollowers = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const counsellor = await Counsellor.find({ _id: counsellor_id });
+
+    if (!counsellor) return res.status(400).send({
+      error: "Counsellor not found"
+    });
+
+    const followers = counsellor.followers;
+    res.status(200).send(followers);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" })
+  }
+}
+
+exports.getReviewsCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const counsellor = await Counsellor.find({ _id: counsellor_id });
+
+    if (!counsellor) return res.status(400).send({
+      error: "Counsellor not found"
+    });
+
+    const reviews = counsellor.reviews;
+    res.status(200).send(reviews);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" })
+  }
+}
+
+exports.getSessions = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.getSession = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.createFeed = async (req, res) => {
+  try {
+    upload.single('file')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const { feed_link } = req.body;
+
+      // Additional validation for feed_link if needed
+      // ...
+
+      try {
+        const s3CdnLink = await uploadToS3(req.file);
+        const newFeed = await saveFeedToDatabase(s3CdnLink);
+
+        res.status(201).json({ message: 'Feed created successfully', feed: newFeed });
+      } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+};
+
+exports.getFeeds = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.getFeed = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.getFeedComments = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.getTotalRatings = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    // Find the counsellor by ID
+    const counsellor = await Counsellor.findById(counsellor_id);
+
+    if (!counsellor) {
+      return res.status(404).json({ error: 'Counsellor not found' });
     }
 
-    // Respond with the counselor's details
-    res.status(200).json({ counselor });
+    // Calculate total ratings based on client testimonials
+    let sumOfRatings = 0;
+    let ratingsCount = 0;
+    let userGivenRatingsCount = 0;
+
+    // Iterate through client testimonials and sum up the ratings
+    for (const testimonial of counsellor.client_testimonials) {
+      if (testimonial.rating && testimonial.rating !== 0) {
+        sumOfRatings += testimonial.rating;
+        ratingsCount++;
+      }
+    }
+
+    const avgRatings = sumOfRatings / ratingsCount;
+
+    // Return the total ratings in the response
+    res.status(200).json({ avgRatings, ratingsCount });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // POST
 exports.createCounsellor = async (req, res) => {
@@ -82,13 +233,15 @@ exports.createCounsellor = async (req, res) => {
       qualifications,
       specializations,
       languages_spoken,
-      next_appointment,
       work_experience,
       total_appointed_sessions,
       reward_points,
       client_testimonials,
       total_ratings,
       average_rating,
+      degree_focused,
+      locations_focused,
+      courses_focused,
     } = req.body;
 
     // Create a new counselor object
@@ -98,17 +251,20 @@ exports.createCounsellor = async (req, res) => {
       qualifications,
       specializations,
       languages_spoken,
-      next_appointment,
       work_experience,
       total_appointed_sessions,
       reward_points,
       client_testimonials,
       total_ratings,
       average_rating,
+      degree_focused,
+      locations_focused,
+      courses_focused,
     });
 
     // Save the new counselor to the database
     const createdCounsellor = await newCounsellor.save();
+
     // Respond with the created counselor's details
     res.status(201).json(createdCounsellor);
   } catch (error) {
@@ -206,5 +362,221 @@ exports.editProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+exports.followCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    // Find the counsellor by ID
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+
+    if (!counsellor) {
+      return res.status(404).json({ error: 'Counsellor not found' });
+    }
+
+    const { user_id } = req.body;
+
+    if (counsellor.followers.includes(user_id)) {
+      return res.status(400).json({ error: 'User is already following this counsellor' });
+    }
+
+    counsellor.followers.push(user_id);
+
+    await counsellor.save();
+
+    res.status(200).json({ message: 'User is now following the counsellor' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.unfollowCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    // Find the counsellor by ID
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+
+
+    if (!counsellor) {
+      return res.status(404).json({ error: 'Counsellor not found' });
+    }
+
+    // Assuming you have user information in req.user (replace with your actual user data)
+    const { user_id } = req.body;
+
+    // Check if the user is already following the counsellor
+    const isFollowing = counsellor.followers.includes(user_id);
+
+    if (!isFollowing) {
+      return res.status(400).json({ error: 'User is not following this counsellor' });
+    }
+
+    // Remove the user's ID from the followers array
+    counsellor.followers = counsellor.followers.filter((followerId) => followerId !== user_id);
+
+    await counsellor.save();
+
+    res.status(200).json({ message: 'User has unfollowed the counsellor' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.cancelSession = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.bookSession = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.cancelSession = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.rescheduleSession = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.unlikeFeed = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.editFeedComment = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.hideFeedComment = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.unhideFeedComment = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.postReviewCounsellor = async (req, res) => {
+  try {
+    const { rating, comment, user_id } = req.body;
+    const obj = {};
+
+    if (rating)
+      obj.rating = rating;
+
+    if (comment)
+      obj.comment = comment;
+
+    if (user_id)
+      obj.user_id = user_id;
+
+    const { counsellor_id } = req.params;
+
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+
+    console.log(counsellor.client_testimonials);
+    if (counsellor.client_testimonials.some(testimonial => testimonial.user_id === user_id)) {
+      return res.status(200).send({ message: " you are already posted a review before" });
+    }
+
+    counsellor.client_testimonials.push(obj);
+
+    await counsellor.save();
+
+    res.status(200).send({ message: "Review posted succesfully" })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.likeFeed = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.saveFeed = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.unsaveFeed = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.postFeedComment = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.deleteFeedComment = (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+
 
 

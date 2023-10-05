@@ -4,11 +4,11 @@ const Session = require("../models/Session");
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { id } = req;
+    const { counsellor_id } = req.params;
 
     // Check if a status query is requested
     const counselingSessions = await Session.find({
-      session_counselor: id
+      session_counselor: counsellor_id
     });
 
     if (!counselingSessions)
@@ -23,13 +23,11 @@ exports.getSessions = async (req, res) => {
 
 exports.getSession = async (req, res) => {
   try {
-    const { id } = req;
     const { session_id } = req.params;
 
     // Check if a status query is requested
     const counselingSessions = await Session.findOne({
       _id: session_id,
-      session_counselor: id
     });
 
     if (!counselingSessions)
@@ -226,14 +224,10 @@ exports.deleteSession = async (req, res) => {
     if (!counselingSession)
       res.status(200).json({ message: "Session not found" });
 
-    const { session_date, session_time, session_status } = counselingSession;
+    const { session_status } = counselingSession;
 
     if (session_status === 'Booked') {
       return res.status(400).json({ error: "You can't updtae a session status after a user booked it" });
-    }
-
-    if (!isSessionBefore24Hours(session_date, session_time)) {
-      return res.status(404).json({ error: "Can't add session before 24 hours" })
     }
 
     res.status(200).json(counselingSession);
