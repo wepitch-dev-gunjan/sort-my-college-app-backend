@@ -1,6 +1,8 @@
 const { uploadToS3 } = require('../helpers/feedHelpers');
 const { upload } = require('../middlewares/formMiddlewares');
+const Comment = require('../models/Comment');
 const Counsellor = require('../models/Counsellor');
+const Feed = require('../models/Feed');
 
 // GET
 exports.getCounsellor = async (req, res) => {
@@ -133,55 +135,69 @@ exports.getSession = (req, res) => {
 
 exports.createFeed = async (req, res) => {
   try {
-    upload.single('file')(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
+    const { file, caption } = req.body;
+    const { counsellor_id } = req.params;
 
-      if (!req.file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-      }
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if (!counsellor) return res.status(404).send({ error: 'Counsellor not found' });
 
-      const { feed_link } = req.body;
-
-      // Additional validation for feed_link if needed
-      // ...
-
-      try {
-        const s3CdnLink = await uploadToS3(req.file);
-        const newFeed = await saveFeedToDatabase(s3CdnLink);
-
-        res.status(201).json({ message: 'Feed created successfully', feed: newFeed });
-      } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error: error.message });
-      }
+    const newFeed = new Feed({
+      feed_owner: counsellor_id,
+      feed_link: file,
+      feed_caption: caption,
     });
+
+    await newFeed.save();
+
+    res.status(200).send({ message: 'Feed created successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-exports.getFeeds = (req, res) => {
+exports.getFeeds = async (req, res) => {
   try {
+    const { counsellor_id } = req.params;
+    const { feed_visibility } = req.query;
 
+    if (!feed_visibility) feed_visibility = true;
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if (!counsellor) return res.status(404).send({ error: 'Counsellor not found' });
+
+    const feeds = await Feed.find({ feed_owner: counsellor_id, feed_visibility });
+    res.status(200).send(feeds);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.getFeed = (req, res) => {
+exports.getFeed = async (req, res) => {
   try {
+    const { feed_id } = req.params;
 
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    res.status(200).send(feed);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.getFeedComments = (req, res) => {
+exports.getFeedComments = async (req, res) => {
   try {
+    const { feed_id } = req.params;
 
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    const comments = await Comment.find({ feed_id });
+
+
+    res.status(200).send(comments);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -202,7 +218,6 @@ exports.getTotalRatings = async (req, res) => {
     // Calculate total ratings based on client testimonials
     let sumOfRatings = 0;
     let ratingsCount = 0;
-    let userGivenRatingsCount = 0;
 
     // Iterate through client testimonials and sum up the ratings
     for (const testimonial of counsellor.client_testimonials) {
@@ -219,6 +234,21 @@ exports.getTotalRatings = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getLikes = async (req, res) => {
+  try {
+    const { feed_id } = req.params;
+
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: 'Feed not found' });
+
+    const likes = feed.feed_likes.length;
+    res.status(200).send({ likes });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 
@@ -461,36 +491,73 @@ exports.rescheduleSession = (req, res) => {
   }
 }
 
-exports.unlikeFeed = (req, res) => {
+exports.unlikeFeed = async (req, res) => {
   try {
+    const { feed_id } = req.params;
+    const { user_id } = req.body; // change it after auth
 
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    if (!feed.feed_likes.includes(user_id)) return res.status(404).send({ error: "Feed already unliked" });
+
+    feed.feed_likes = feed.feed_likes.filter(e => e != user_id);
+
+    await feed.save();
+    res.status(200).send({ message: "Feed has been unliked" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.editFeedComment = (req, res) => {
+exports.editFeedComment = async (req, res) => {
   try {
+    const { comment_id } = req.params;
+    const { comment_text } = req.body;
 
+    const comment = await Comment.findById(comment_id);
+    if (!comment) return res.status(404).send({ error: "Comment not found" });
+
+    if (comment_text) comment.comment_text = comment_text;
+
+    comment.save();
+
+    res.status(200).send({ message: "Comment has been updated" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.hideFeedComment = (req, res) => {
+exports.hideFeedComment = async (req, res) => {
   try {
+    const { comment_id } = req.params;
 
+    const comment = await Comment.findById(comment_id);
+    if (!comment) return res.status(404).send({ error: "Comment not found" });
+
+    if (comment.comment_visibility === true) comment.comment_visibility = false;
+
+    await comment.save();
+    res.status(200).send({ message: "Comment has been hidden successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.unhideFeedComment = (req, res) => {
+exports.unhideFeedComment = async (req, res) => {
   try {
+    const { comment_id } = req.params;
 
+    const comment = await Comment.findById(comment_id);
+    if (!comment) return res.status(404).send({ error: "Comment not found" });
+
+    if (comment.comment_visibility === false) comment.comment_visibility = true;
+
+    await comment.save();
+    res.status(200).send({ message: "Comment has been unhide successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -516,7 +583,6 @@ exports.postReviewCounsellor = async (req, res) => {
     const counsellor = await Counsellor.findById(counsellor_id);
     if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
 
-    console.log(counsellor.client_testimonials);
     if (counsellor.client_testimonials.some(testimonial => testimonial.user_id === user_id)) {
       return res.status(200).send({ message: " you are already posted a review before" });
     }
@@ -532,9 +598,19 @@ exports.postReviewCounsellor = async (req, res) => {
   }
 }
 
-exports.likeFeed = (req, res) => {
+exports.likeFeed = async (req, res) => {
   try {
+    const { feed_id } = req.params;
+    const { user_id } = req.body; // change it after auth
 
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    if (feed.feed_likes.includes(user_id)) return res.status(404).send({ error: "Feed already liked" });
+    feed.feed_likes.push(user_id);
+
+    await feed.save();
+    res.status(200).send({ message: "Feed has been liked" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -559,23 +635,118 @@ exports.unsaveFeed = (req, res) => {
   }
 };
 
-exports.postFeedComment = (req, res) => {
+exports.postFeedComment = async (req, res) => {
   try {
+    const { feed_id } = req.params;
+    const { comment_text } = req.body;
 
+    if (!comment_text) return res.status(404).send({ error: "Comment text is neccessary" });
+
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    const comment = new Comment({
+      comment_text,
+      feed_id
+    });
+
+    await comment.save();
+    res.status(200).send({ message: "Comment sent", comment });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
 
-exports.deleteFeedComment = (req, res) => {
+exports.deleteFeedComment = async (req, res) => {
   try {
+    const { comment_id } = req.params;
 
+    const comment = await Comment.findByIdAndDelete(comment_id);
+
+    if (!comment) return res.status(404).send({ error: "Comment not found" });
+
+    res.status(200).send({ message: "Comment deleted" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
+
+exports.editFeed = async (req, res) => {
+  try {
+    const { file, caption } = req.body;
+    const { feed_id } = req.params;
+
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: 'Feed not found' });
+
+    if (file) feed.feed_link = file;
+    if (caption) feed.feed_caption = caption;
+
+    await feed.save();
+
+    res.status(200).send({ message: 'Feed edited successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.deleteFeed = async (req, res) => {
+  try {
+    const { feed_id } = req.params;
+
+    const feed = await Feed.findOneAndDelete({ _id: feed_id });
+
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    res.status(200).send({ message: "Feed deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.hideFeed = async (req, res) => {
+  try {
+    const { feed_id } = req.params;
+
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    if (feed.feed_visibility === false) return res.status(405).send({ error: "Feed is already hidden" });
+
+    if (feed.feed_visibility === true) feed.feed_visibility = false;
+
+    await feed.save();
+
+    res.status(200).send({ message: "Feed has been hidden successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.unhideFeed = async (req, res) => {
+  try {
+    const { feed_id } = req.params;
+
+    const feed = await Feed.findById(feed_id);
+    if (!feed) return res.status(404).send({ error: "Feed not found" });
+
+    if (feed.feed_visibility === true) return res.status(405).send({ error: "Feed is already visible" });
+
+    if (feed.feed_visibility === false) feed.feed_visibility = true;
+
+    await feed.save();
+
+    res.status(200).send({ message: "Feed has been unhide successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
 
 
 

@@ -5,12 +5,16 @@ const commentSchema = new Schema({
     type: String,
     required: true
   },
-  comment_replies: [
-    {
-      type: Schema.Types.Object,
-      ref: 'Comment'
-    }
-  ]
+  feed_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'Feed'
+  },
+  comment_visibility: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
 });
 
 module.exports = model('Comment', commentSchema);

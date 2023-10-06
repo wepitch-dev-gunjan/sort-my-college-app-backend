@@ -44,7 +44,7 @@ exports.getSession = async (req, res) => {
 exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
-    const { id } = req;
+    const { counsellor_id } = req.params;
     const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
 
     if (!isSessionBefore24Hours(session_date, session_time)) {
@@ -89,7 +89,7 @@ exports.addSession = async (req, res) => {
 
     // Create a new session object
     const newSession = new Session({
-      session_counselor: id,
+      session_counselor: counsellor_id,
       session_time: parsedSessionTime,
       session_date: parsedSessionDate,
       session_duration: parsedSessionDuration,

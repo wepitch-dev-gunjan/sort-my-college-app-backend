@@ -63,21 +63,10 @@ const counsellorSchema = new Schema({
     },
   ],
 
-  total_ratings: Number,
-
-  average_rating: Number,
-
   sessions: [
     {
       type: Schema.Types.ObjectId,
       ref: 'Session'
-    }
-  ],
-
-  feeds: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Feed'
     }
   ],
 
