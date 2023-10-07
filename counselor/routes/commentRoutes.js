@@ -3,9 +3,9 @@ const { editFeedComment, hideFeedComment, unhideFeedComment, deleteFeedComment }
 const router = express.Router();
 
 // PUT
-router.put('/counsellor/comment/:comment_id', editFeedComment);
-router.put('/counsellor/comment/:comment_id/hide', hideFeedComment);
-router.put('/counsellor/comment/:comment_id/unhide', unhideFeedComment);
+router.put('/comment/:comment_id', editFeedComment);
+router.put('/comment/:comment_id/hide', hideFeedComment);
+router.put('/comment/:comment_id/unhide', unhideFeedComment);
 
-router.delete('/counsellor/comment/:comment_id', deleteFeedComment)
+router.delete('/comment/:comment_id', deleteFeedComment)
 module.exports = router;
