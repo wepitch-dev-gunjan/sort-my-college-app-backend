@@ -9,6 +9,11 @@ const counsellorSchema = new Schema({
     type: String,
   },
 
+  profile_pic: {
+    type: String,
+
+  },
+
   personal_info: {
     name: {
       type: String,

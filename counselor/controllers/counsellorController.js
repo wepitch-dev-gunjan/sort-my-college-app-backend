@@ -54,8 +54,37 @@ exports.getCounsellors = async (req, res) => {
   }
 }
 
-exports.getProfilePic = (req, res) => {
+exports.getProfilePic = async (req, res) => {
   try {
+    const { cousellor_id } = req.params;
+
+    const counsellor = await Counsellor.findById(cousellor_id);
+    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+
+    if (!counsellor.profile_pic) return res.status(404).send({ error: "ProfilePic not found" });
+
+    res.status(200).send(counsellor.profile_pic);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.uploadProfilePic = async (req, res) => {
+  try {
+    const { cousellor_id } = req.params;
+    const { profile_pic } = req.body;
+
+    const counsellor = await Counsellor.findById(cousellor_id);
+    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+
+    const newProfilePic = new Profile_pic({
+      profile_pic,
+    });
+
+    await newProfilePic.save();
+
+    res.status(200).send({ message: 'Profile pic uploaded successfully' });
 
   } catch (error) {
     console.log(error);
@@ -63,18 +92,18 @@ exports.getProfilePic = (req, res) => {
   }
 };
 
-exports.uploadProfilePic = (req, res) => {
+exports.deleteProfilePic = async (req, res) => {
   try {
+    const { cousellor_id } = req.params;
 
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
-  }
-};
+    const counsellor = await Counsellor.findById(cousellor_id);
+    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
 
-exports.deleteProfilePic = (req, res) => {
-  try {
+    const profile_pic = await Counsellor.findOneAndDelete(profile_pic);
 
+    if (!profile_pic) return res.status(404).send({ error: "Profile pic not found" });
+
+    res.status(200).send({ message: "Profile pic deleted successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
