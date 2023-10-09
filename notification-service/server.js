@@ -9,6 +9,10 @@ const PORT = process.env.PORT || 8005;
 app.use(express.json());
 app.use(cors());
 
+app.get('/', (req, res) => {
+  res.send('welcome to smcapp notification service')
+})
+
 readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 
 app.listen(PORT, () => {
