@@ -995,8 +995,7 @@ exports.cancelledSessionCounsellorEmailNotification = (req, res) => {
                           <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
                         </a>
                       </td>
-                    </tr>
-                    
+                    </tr>                    
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
@@ -1004,10 +1003,7 @@ exports.cancelledSessionCounsellorEmailNotification = (req, res) => {
                           We hope this message finds you well. We hope this message finds 
                           you well. We regret to inform you that your upcoming
                            counseling session scheduled for ${date} and ${time} with ${client} has been cancelled. <br><br>
-                           
-                          
-                          <br><br>
-                          
+                          <br><br>                          
                           Thank you for your continued commitment to our counseling service.<br><br>
                           Best regards, <br />
                           The
@@ -1023,8 +1019,7 @@ exports.cancelledSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
-    </body>
-    
+    </body>    
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -1075,11 +1070,8 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
                           Hello ${username} <br><br>
                           We hope this message finds you well. We sent this mail to inform you that your
                            counseling session whiich is scheduled for ${date} and ${time} with ${client} has been 
-                           got a review. <br><br>
-                           
-                          
-                          <br><br>
-                          
+                           got a review. <br><br>                 
+                          <br><br>                          
                           You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           portal.<br><br>
                           Best regards, <br />
@@ -1096,8 +1088,7 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
-    </body>
-    
+    </body>    
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
