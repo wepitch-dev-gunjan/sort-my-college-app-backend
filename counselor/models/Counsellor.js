@@ -11,7 +11,6 @@ const counsellorSchema = new Schema({
 
   profile_pic: {
     type: String,
-
   },
 
   personal_info: {

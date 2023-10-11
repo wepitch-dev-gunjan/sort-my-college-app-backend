@@ -69,23 +69,34 @@ exports.getProfilePic = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+// const { cousellor_id } = req.params;
+    // const { profile_pic } = req.body;
 
+    // const counsellor = await Counsellor.findById(cousellor_id);
+    // if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+
+    // const newProfilePic = new Profile_pic({
+    //   profile_pic,
+    // });
+
+    // await newProfilePic.save();
+
+    // res.status(200).send({ message: 'Profile pic uploaded successfully' });
 exports.uploadProfilePic = async (req, res) => {
   try {
-    const { cousellor_id } = req.params;
-    const { profile_pic } = req.body;
+    // validate counsellor
+    const { counellor_id } = req.params;
 
-    const counsellor = await Counsellor.findById(cousellor_id);
-    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if(!counsellor) return res.status(404).send({error: "Counsellor not found"});
 
-    const newProfilePic = new Profile_pic({
-      profile_pic,
-    });
+    // fetch profile_pic from the request form data
 
-    await newProfilePic.save();
+    // validate profile_pic
 
-    res.status(200).send({ message: 'Profile pic uploaded successfully' });
+    // update profile_pic of the counsellor with provided counsellor_id
 
+    // send response
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });

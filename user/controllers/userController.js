@@ -15,7 +15,7 @@ exports.createUser = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
@@ -60,7 +60,6 @@ exports.editProfile = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
-
 
 exports.rescheduleRequest = (req, res) => {
   try {

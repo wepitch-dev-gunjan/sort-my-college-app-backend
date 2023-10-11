@@ -1,50 +1,90 @@
-// services/authService.js
-const OTP_LENGTH = 4; // Length of the OTP
+const crypto = require('crypto');
+const Otp = require('../models/Otp');
+const User = require('../models/User');
 
-// Simulated temporary storage for OTPs (Replace with a database in production)
-const otpCache = new Map();
-
-// Function to generate a random OTP
-exports.generateOTP = () => {
-  const otp = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit OTP
-  return otp.toString();
-};
-
-// Function to send OTP via SMS (Replace with actual SMS gateway integration)
-exports.sendOTPViaSMS = async (phoneNumber, otp) => {
+// Generate and store a 4-Digit OTP for a User
+exports.generateOtp = async (req, res) => {
   try {
-    // Implement code to send SMS using an SMS gateway library (e.g., Twilio, Nexmo)
-    // Replace this with the actual code to send an SMS
-    // Example (using Twilio):
-    // const twilio = require('twilio');
-    // const client = new twilio('TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN');
-    // const message = await client.messages.create({
-    //   body: `Your OTP is: ${otp}`,
-    //   from: 'YOUR_TWILIO_PHONE_NUMBER',
-    //   to: phoneNumber,
-    // });
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) return res.status(400).send({ error: "Phone number is required" });
 
-    // For the sake of this example, we'll just log the OTP
-    console.log(`OTP sent to ${phoneNumber}: ${otp}`);
+    const user = await User.findOne({ phoneNumber });
+    if (user && user.verified === true) return res.status(400).send({ error: "User is already verified" })
+    // Generate a random 4-digit OTP
+    console.log(user);
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+    // Hash the OTP using SHA-256 for storage
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    const expirationTime = new Date(); // Set the expiration time (e.g., 5 minutes from now)
+    expirationTime.setMinutes(expirationTime.getMinutes() + 5);
+
+    let otpObj = await Otp.findOne({ phoneNumber });
+    if (otpObj) {
+      otpObj.expiresAt = expirationTime;
+      otpObj.hashedOtp = hashedOtp;
+      otpObj.attempts = 0;
+    } else {
+      otpObj = new Otp({
+        phoneNumber,
+        hashedOtp,
+        expiresAt: expirationTime,
+      });
+    }
+
+    await otpObj.save();
+    // Send the OTP to the client (avoid logging it)
+    res.status(200).send({
+      message: "OTP sent to the client",
+      otp
+    });
   } catch (error) {
-    console.error('Error sending OTP via SMS:', error);
-    throw error;
+    console.log(error);
+    res.status(500).send({ error: "Internal server error" });
   }
 };
 
-// Function to verify OTP
-exports.verifyOTP = async (phoneNumber, userOTP) => {
+// Verify the 4-Digit OTP sent by the client
+exports.verifyOtp = async (req, res) => {
   try {
-    const storedOTP = otpCache.get(phoneNumber);
+    const { phoneNumber, otp } = req.body;
 
-    if (!storedOTP) {
-      return false; // OTP not found in cache, likely expired or never generated
+    const isPhoneNumber = await User.findOne({ phoneNumber });
+    if (isPhoneNumber && isPhoneNumber.verified === true) return res.status(401).send({
+      error: "Phone number is already verified"
+    });
+
+    let otpObj = await Otp.findOne({ phoneNumber });
+
+    if (!otpObj) return res.status(404).send({ error: "Phone number not found" });
+
+    if (otpObj.attempts >= 3 || new Date() > otpObj.expiresAt) {
+      // Handle cases where too many attempts or OTP expiration
+      return res.status(401).send({ error: "Invalid OTP token" });
     }
 
-    // Compare the user-provided OTP with the stored OTP
-    return userOTP === storedOTP;
+    // Hash the received OTP from the client
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    // Verify if the hashed OTP from the client matches the hashed OTP stored in your data storage
+    if (hashedOtp !== otpObj.hashedOtp) {
+      // Increment the attempts on failed verification
+      otpObj.attempts++;
+      await otpObj.save();
+      return res.status(401).send({ error: "Invalid OTP token" });
+    }
+
+    // If OTP is valid, you can proceed with user verification
+    const user = new User({
+      phoneNumber,
+      verified: true,
+    });
+
+    await user.save();
+    res.status(200).send({ message: "User has verified OTP" });
   } catch (error) {
-    console.error('Error verifying OTP:', error);
-    throw error;
+    console.log(error);
+    res.status(500).send({ error: "Internal server error" });
   }
 };
