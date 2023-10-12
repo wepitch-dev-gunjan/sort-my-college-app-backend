@@ -3,8 +3,13 @@ const { Schema, model } = require('mongoose');
 const otpSchema = new Schema({
   phoneNumber: {
     type: Number,
-    required: true,
     unique: true,
+    sparse: true,
+  },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   hashedOtp: {
     type: String,

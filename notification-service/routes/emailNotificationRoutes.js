@@ -8,17 +8,18 @@ const {
   reminderSessionCounsellorEmailNotification,
   attendedSessionUserEmailNotification,
   attendedSessionCounsellorEmailNotification,
-  generateOtp,
-  verifyOtp
+  generatedOtpNotification,
+  verifiedOtpNotification
 } = require("../controllers/emailNotificationControllers");
 const router = express.Router();
+
+router.post('/generateOtp', generatedOtpNotification);
+router.post('/verifiedOtp', verifiedOtpNotification);
 
 router.post("/user/welcome", welcomeUserEmailNotification);
 router.post("/user/sessionbooked", bookedSessionUserEmailNotification);
 router.post("/user/reminder", reminderSessionUserEmailNotification);
 router.post("/user/attended/", attendedSessionUserEmailNotification);
-router.post('/user/generateOtp', generateOtp);
-router.post('/user/verifyOtp', verifyOtp);
 
 router.post("/counsellor/welcome", welcomeCounsellorEmailNotification);
 router.post("/counsellor/sessionbooked", bookedSessionCounsellorEmailNotification
