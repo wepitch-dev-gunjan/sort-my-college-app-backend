@@ -1,11 +1,17 @@
 const { Schema, model } = require('mongoose');
 
 const userSchema = new Schema({
-  email: String,
+  email: {
+    type: String,
+    unique: true,
+  },
+  phoneNumber: {
+    type: Number,
+    unique: true,
+  },
   personal_info: {
     name: {
       type: String,
-      required: true,
     },
     contact_number: String,
     gender: {
@@ -43,6 +49,10 @@ const userSchema = new Schema({
       ref: 'Feed'
     }
   ],
+  verified: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });

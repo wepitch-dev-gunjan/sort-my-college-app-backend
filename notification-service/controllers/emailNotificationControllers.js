@@ -1,10 +1,208 @@
 const fs = require("fs");
 const { transporter } = require("../services/emailService");
+const { validationResult } = require('express-validator');
 
-const welcomeEmailTemplate = fs.readFileSync(
-  "emailFormats/user_welcome.html",
-  "utf-8"
-);
+exports.generatedOtpNotification = (req, res) => {
+  try {
+    // Validate the request parameters
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { to, otp } = req.body;
+
+    const mailOptions = {
+      to,
+      subject: "OTP verification",
+      html: `
+      <body>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td align="center" bgcolor="#ffffff">
+              <table border="0" cellpadding="0" cellspacing="0" width="600">
+                <!-- Header Section -->
+                <tr>
+                  <td align="center" valign="top">
+                    <a href="https://sortmycollege.com/">
+                      <img
+                        src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png"
+                        alt=""
+                        width="200"
+                        height="50"
+                      />
+                    </a>
+                  </td>
+                </tr>
+  
+                <!-- Content Section -->
+                <tr>
+                  <td align="center">
+                    <h1
+                      style="
+                        font-family: 'Arial', 'Helvetica', sans-serif;
+                        font-size: 24px;
+                        color: #1f0a68;
+                      "
+                    >
+                      Welcome to
+                      <a
+                        href="https://sortmycollege.com/"
+                        style="
+                          color: #1f0a68;
+                          font-weight: 700;
+                          text-decoration: none;
+                        "
+                      >
+                        SortMyCollege
+                      </a>
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-family: 'Arial', 'Helvetica', sans-serif;
+                        font-size: 16px;
+                        color: #333;
+                      "
+                    >
+                      Dear ${to},<br /><br />
+                      <!-- You can insert the OTP dynamically here -->
+                      Your OTP is: <b>${otp}</b><br /><br />
+                      We're delighted to have you join our community of
+                      individuals seeking support, guidance, and personal growth.
+                      At
+                      <a
+                        href="https://sortmycollege.com/"
+                        style="
+                          color: #1f0a68;
+                          font-weight: 700;
+                          text-decoration: none;
+                        "
+                      >
+                        SortMyCollege
+                      </a>, we understand that life can present its challenges...
+                      <!-- Continue customizing the email content as needed -->
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Error sending email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.json({ message: "Email sent successfully" });
+      }
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.verifiedOtpNotification = (req, res) => {
+  try {
+    const { to } = req.body;
+
+    if (!to) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const mailOptions = {
+      from: 'your@email.com', // Set your "from" email address
+      to,
+      subject: "Account Verified",
+      html: `
+        <body>
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td align="center" bgcolor="#ffffff">
+                <table border="0" cellpadding="0" cellspacing="0" width="600">
+                  <!-- Header Section -->
+                  <tr>
+                    <td align="center" valign="top">
+                      <a href="https://sortmycollege.com/">
+                        <img
+                          src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png"
+                          alt=""
+                          width="200"
+                          height="50"
+                        />
+                      </a>
+                    </td>
+                  </tr>
+    
+                  <!-- Content Section -->
+                  <tr>
+                    <td align="center">
+                      <h1
+                        style="
+                          font-family: 'Arial', 'Helvetica', sans-serif;
+                          font-size: 24px;
+                          color: #1f0a68;
+                        "
+                      >
+                        Account Verified
+                      </h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p
+                        style="
+                          font-family: 'Arial', 'Helvetica', sans-serif;
+                          font-size: 16px;
+                          color: #333;
+                        "
+                      >
+                        Dear User,
+                        <br /><br />
+                        Your account has been successfully verified.
+                        <br /><br />
+                        Thank you for choosing our service. You can now access all the features and benefits of your verified account.
+                        <br /><br />
+                        Best regards,
+                        <br />
+                        Sort My College
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Error sending email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.json({ message: "Email sent successfully" });
+      }
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 exports.welcomeUserEmailNotification = (req, res) => {
   try {
@@ -141,7 +339,6 @@ exports.welcomeUserEmailNotification = (req, res) => {
         res.send("Email sent successfully");
       }
     });
-    console.log("running");
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Internal Server Error" });

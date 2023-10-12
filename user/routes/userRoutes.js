@@ -4,7 +4,7 @@ const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // GET
-router.get('/:user_id', getProfile);
+router.get('/', userAuth, getProfile);
 
 // PUT
 router.put('/:user_id', editProfile);
