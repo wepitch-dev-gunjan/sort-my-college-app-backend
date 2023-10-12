@@ -3,7 +3,8 @@ const app = express();
 const mongoose = require('mongoose');
 const { readdirSync } = require('fs')
 require('dotenv').config();
-const { PORT, MONGODB_URI } = process.env;
+const PORT = process.env.PORT || 8000
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/sort-my-college';
 
 // Middleware to parse JSON data in the request body
 app.use(express.json());
