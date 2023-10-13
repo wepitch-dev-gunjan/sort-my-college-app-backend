@@ -1,10 +1,10 @@
 const express = require('express');
 const { getProfile, editProfile, createUser, rescheduleRequest, cancelRequest, saveCounsellor, unsaveCounsellor } = require('../controllers/userController');
-const { userAuth } = require('../middlewares/authMiddleware');
+// const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // GET
-router.get('/', userAuth, getProfile);
+router.get('/', getProfile);
 
 // PUT
 router.put('/:user_id', editProfile);

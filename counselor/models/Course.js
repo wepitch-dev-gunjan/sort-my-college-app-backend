@@ -8,7 +8,7 @@ const courseSchema = new Schema({
   },
   course_counsellors: [
     {
-      type: String
+      type: Schema.Types.ObjectId
     }
   ]
 });
