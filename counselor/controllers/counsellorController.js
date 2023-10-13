@@ -70,25 +70,25 @@ exports.getProfilePic = async (req, res) => {
   }
 };
 // const { cousellor_id } = req.params;
-    // const { profile_pic } = req.body;
+// const { profile_pic } = req.body;
 
-    // const counsellor = await Counsellor.findById(cousellor_id);
-    // if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
+// const counsellor = await Counsellor.findById(cousellor_id);
+// if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
 
-    // const newProfilePic = new Profile_pic({
-    //   profile_pic,
-    // });
+// const newProfilePic = new Profile_pic({
+//   profile_pic,
+// });
 
-    // await newProfilePic.save();
+// await newProfilePic.save();
 
-    // res.status(200).send({ message: 'Profile pic uploaded successfully' });
+// res.status(200).send({ message: 'Profile pic uploaded successfully' });
 exports.uploadProfilePic = async (req, res) => {
   try {
     // validate counsellor
     const { counellor_id } = req.params;
 
     const counsellor = await Counsellor.findById(counsellor_id);
-    if(!counsellor) return res.status(404).send({error: "Counsellor not found"});
+    if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
 
     // fetch profile_pic from the request form data
 
@@ -782,6 +782,21 @@ exports.unhideFeed = async (req, res) => {
     await feed.save();
 
     res.status(200).send({ message: "Feed has been unhide successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getCourses = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if (counsellor) return res.status(404).send({
+      error: "Counsellor not found"
+    })
+
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
