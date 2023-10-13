@@ -44,7 +44,7 @@ exports.verifyOTPPhone = async (req, res) => {
 // Controller to send OTP to the user's email
 exports.sendOTPEmail = async (req, res) => {
   try {
-    const { phoneNumber } = req.body.phoneNumber;
+    const { email } = req.body.phoneNumber;
     const otp = await generateOTP();
 
     // Send the OTP via SMS (You will need to implement this)

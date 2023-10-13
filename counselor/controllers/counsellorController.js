@@ -2,6 +2,7 @@ const { uploadToS3 } = require('../helpers/feedHelpers');
 const { upload } = require('../middlewares/formMiddlewares');
 const Comment = require('../models/Comment');
 const Counsellor = require('../models/Counsellor');
+const Course = require('../models/Course');
 const Feed = require('../models/Feed');
 
 // GET
@@ -795,7 +796,9 @@ exports.getCourses = async (req, res) => {
     const counsellor = await Counsellor.findById(counsellor_id);
     if (counsellor) return res.status(404).send({
       error: "Counsellor not found"
-    })
+    });
+
+    const courses = await Course.findById({})
 
   } catch (error) {
     console.log(error);
