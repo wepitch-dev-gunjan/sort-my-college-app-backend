@@ -101,10 +101,9 @@ const counsellorSchema = new Schema({
     enum: ['INDIA', 'ABROAD']
   }],
 
-  // courses_focused: [{
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'Course'
-  // }],
+  courses_focused: [{
+    type: String
+  }],
 
 }, {
   timestamps: true
