@@ -889,6 +889,13 @@ exports.addCounsellorInCourse = async (req, res) => {
       });
     }
 
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+    if (!counsellor) return res.status(404).send({
+      error: "Counsellor not found"
+    });
+
+    counsellor.courses_focused.push(course.course_name);
+
     if (course.course_counsellors.includes(counsellor_id)) {
       return res.status(400).send({
         error: "Counsellor already exists in the course"
@@ -897,6 +904,7 @@ exports.addCounsellorInCourse = async (req, res) => {
 
     course.course_counsellors.push(counsellor_id);
     await course.save();
+    await counsellor.save();
 
     res.status(200).send({
       message: "Counsellor added to the course successfully"
