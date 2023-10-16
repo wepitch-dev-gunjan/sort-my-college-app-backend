@@ -1,18 +1,22 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
 const entranceCourseSchema = new Schema({
   course_name: {
-    type: String
+    type: String,
+    unique: true,
   },
   course_degree: {
-    type: String
+    type: String,
+    enum: ["UG", "PG"],
   },
   online: {
-    type: Boolean
+    type: Boolean,
+    default: false,
   },
   offline: {
-    type: Boolean
-  }
+    type: Boolean,
+    default: true,
+  },
 });
 
-module.exports = model('EntranceCourse', entranceCourseSchema);
+module.exports = model("EntranceCourse", entranceCourseSchema);
