@@ -17,6 +17,10 @@ const entranceInstituteSchema = new Schema({
     default: 'PG',
     enum: ['UG', 'PG']
   },
+  degree_focused: [{
+    type: String,
+    enum: ['UG', 'PG']
+  }],
   country: {
     type: String
   },
