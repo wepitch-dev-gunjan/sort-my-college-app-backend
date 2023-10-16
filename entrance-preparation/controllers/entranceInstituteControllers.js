@@ -1,5 +1,6 @@
 const { response } = require("express");
 const EntranceInstitute = require("../models/EntranceInstitute");
+const fs = require("fs");
 
 exports.createInstitute = async (req, res) => {
   try {
@@ -250,6 +251,14 @@ exports.editInstitute = async (req, res) => {
         error: "Atleast one field is required",
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.sendEnquiry = async (req, res) => {
+  try {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
