@@ -85,3 +85,53 @@ exports.deleteCourse = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.editCourse = async (req, res) => {
+  try {
+    const { course_id } = req.params;
+    const { course_name, course_degree, online, offline } = req.body;
+    console.log(req.body);
+    if (course_name || course_degree || online || offline) {
+      let course = await EntranceCourse.findById(course_id);
+      if (!course) return res.status(404).send({ error: "Course not found" });
+
+      const updateFields = {};
+      if (course_name) {
+        updateFields["course_name"] = course_name;
+      }
+
+      if (course_degree) {
+        updateFields["course_degree"] = course_degree;
+      }
+
+      if (online) {
+        updateFields["online"] = online;
+      }
+
+      if (offline) {
+        updateFields["offline"] = offline;
+      }
+
+      course = await EntranceCourse.findOne({ course_name });
+      if (course)
+        return res.status(400).send({ error: "Course name already exists" });
+
+      const updatedCourse = await EntranceCourse.findByIdAndUpdate(
+        course_id,
+        updateFields
+      );
+
+      if (!updatedCourse)
+        return res.status(400).json({ error: "Course can't be updated" });
+
+      res.status(200).json({ message: "Course updated successfully" });
+    } else {
+      return res.status(400).send({
+        error: "Atleast one field is required",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
