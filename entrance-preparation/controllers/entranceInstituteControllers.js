@@ -144,3 +144,114 @@ exports.deleteInstitute = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.editInstitute = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const {
+      name,
+      email,
+      profile_pic,
+      degree_focused,
+      country,
+      state,
+      city,
+      area,
+      working_time,
+      working_experience,
+      client_testimonials,
+      emergency_contact,
+    } = req.body;
+    console.log(req.body);
+    if (
+      name ||
+      email ||
+      profile_pic ||
+      degree_focused ||
+      country ||
+      state ||
+      city ||
+      area ||
+      working_time ||
+      working_experience ||
+      client_testimonials ||
+      emergency_contact
+    ) {
+      let course = await EntranceInstitute.findById(institute_id);
+      if (!course)
+        return res.status(404).send({ error: "Institute not found" });
+
+      const updateFields = {};
+      if (name) {
+        updateFields["name"] = name;
+      }
+
+      if (email) {
+        updateFields["email"] = email;
+      }
+
+      if (profile_pic) {
+        updateFields["profile_pic"] = profile_pic;
+      }
+
+      if (degree_focused) {
+        updateFields["degree_focused"] = degree_focused;
+      }
+
+      if (country) {
+        updateFields["country"] = country;
+      }
+
+      if (state) {
+        updateFields["state"] = state;
+      }
+
+      if (city) {
+        updateFields["city"] = city;
+      }
+
+      if (area) {
+        updateFields["area"] = area;
+      }
+
+      if (working_time) {
+        updateFields["working_time"] = working_time;
+      }
+
+      if (working_experience) {
+        updateFields["working_experience"] = working_experience;
+      }
+
+      if (client_testimonials) {
+        updateFields["client_testimonials"] = client_testimonials;
+      }
+
+      if (emergency_contact) {
+        updateFields["emergency_contact"] = emergency_contact;
+      }
+
+      course = await EntranceInstitute.findOne({ name });
+      if (course)
+        return res.status(400).send({ error: "Institute name already exists" });
+
+      const updatedInstitute = await EntranceInstitute.findByIdAndUpdate(
+        institute_id,
+        updateFields
+      );
+
+      if (!updatedInstitute)
+        return res.status(400).json({ error: "institute can't be updated" });
+
+      res
+        .status(200)
+        .json({ message: "institute details updated successfully" });
+    } else {
+      return res.status(400).send({
+        error: "Atleast one field is required",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
