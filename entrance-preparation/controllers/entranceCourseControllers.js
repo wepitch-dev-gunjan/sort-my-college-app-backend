@@ -53,3 +53,35 @@ exports.getCourses = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.getCourse = async (req, res) => {
+  try {
+    const { course_id } = req.params;
+
+    const course = await EntranceCourse.findById(course_id);
+    if (!course) {
+      return res.status(404).send({ error: "Course not found" });
+    }
+
+    res.status(200).send(course);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.deleteCourse = async (req, res) => {
+  try {
+    const { course_id } = req.params;
+
+    const course = await EntranceCourse.findByIdAndDelete(course_id);
+    if (!course) {
+      return res.status(404).send({ error: "Course not found" });
+    }
+
+    res.status(200).send({ message: "Course Deleted Successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
