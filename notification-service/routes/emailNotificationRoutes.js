@@ -8,6 +8,13 @@ const {
   reminderSessionCounsellorEmailNotification,
   attendedSessionUserEmailNotification,
   attendedSessionCounsellorEmailNotification,
+  verifiedOtpNotification,
+  generatedOtpNotification,
+  notattendedSessionUserEmailNotification,
+  cancelledSessionUserEmailNotification,
+  notattendedSessionCounsellorEmailNotification,
+  cancelledSessionCounsellorEmailNotification,
+  gotreviewSessionCounsellorEmailNotification,
 } = require("../controllers/emailNotificationControllers");
 const router = express.Router();
 
