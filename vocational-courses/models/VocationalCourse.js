@@ -12,11 +12,13 @@ const vocationalCourseSchema = new Schema({
     type: String,
     required: true,
   },
-  course_category: {
-    type: String,
-    required: true,
-    unique: true,
-  },
+  course_category: [
+    {
+      type: String,
+      required: true,
+      unique: true,
+    },
+  ],
   course_image: {
     type: String,
   },
