@@ -1,4 +1,5 @@
 const express = require("express");
+const { createWebinar, getWebinars, getWebinar, deleteWebinar, editWebinar } = require("../controllers/webinarControllers");
 const router = express.Router();
 
 router.post("/webinar", createWebinar);
