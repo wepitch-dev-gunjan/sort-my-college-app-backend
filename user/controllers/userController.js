@@ -11,15 +11,15 @@ exports.createUser = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.getProfile = async (req, res) => {
   try {
-    const { user_id } = req;
+    const { user_id } = req.params;
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(400).send({ error: 'User not found' });
+      return res.status(400).send({ error: "User not found" });
     }
 
     res.status(200).send(user);
@@ -27,7 +27,7 @@ exports.getProfile = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.editProfile = async (req, res) => {
   try {
@@ -36,7 +36,7 @@ exports.editProfile = async (req, res) => {
     const user = await User.findById(user_id);
 
     if (!user) {
-      return res.status(404).send({ error: 'User not found' });
+      return res.status(404).send({ error: "User not found" });
     }
 
     const updatedProfileData = {
@@ -46,36 +46,34 @@ exports.editProfile = async (req, res) => {
         gender: req.body.personal_info.gender,
         date_of_birth: req.body.personal_info.date_of_birth,
         location: {
-          city: req.body.personal_info.location.city
-        }
-      }
+          city: req.body.personal_info.location.city,
+        },
+      },
     };
     user.set(updatedProfileData);
 
     await user.save();
 
-    res.status(200).send({ message: 'Profile updated successfully' });
+    res.status(200).send({ message: "Profile updated successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.rescheduleRequest = (req, res) => {
   try {
-
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.cancelRequest = (req, res) => {
   try {
-
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -85,21 +83,22 @@ exports.saveCounsellor = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { counsellor_id } = req.body;
-    if (user.saved_counsellors.includes(counsellor_id)) return res.status(400).json({ error: "Counsellor is already saved" });
+    if (user.saved_counsellors.includes(counsellor_id))
+      return res.status(400).json({ error: "Counsellor is already saved" });
 
     user.saved_counsellors.push(counsellor_id);
 
     await user.save();
-    res.status(200).send({ messeage: "Counsellor successfully saved" })
+    res.status(200).send({ messeage: "Counsellor successfully saved" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.unsaveCounsellor = async (req, res) => {
   try {
@@ -107,18 +106,46 @@ exports.unsaveCounsellor = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { counsellor_id } = req.body;
-    if (!user.saved_counsellors.includes(counsellor_id)) return res.status(404).json({ error: "Counsellor is already unsaved" });
+    if (!user.saved_counsellors.includes(counsellor_id))
+      return res.status(404).json({ error: "Counsellor is already unsaved" });
 
-    user.saved_counsellors.filter(counsellorId => counsellorId !== counsellor_id);
+    user.saved_counsellors.filter(
+      (counsellorId) => counsellorId !== counsellor_id
+    );
 
     await user.save();
-    res.status(200).send({ message: "Counsellor unsaved successfully" })
+    res.status(200).send({ message: "Counsellor unsaved successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.saveVocationalCourse = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log(user);
+
+    const { course_id } = req.body;
+    if (user.saved_courses.includes(course_id))
+      return res.status(400).json({ error: "Course is already saved" });
+
+    user.saved_courses.push(course_id);
+
+    await user.save();
+    res.status(200).send({ message: "Course successfully saved" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
