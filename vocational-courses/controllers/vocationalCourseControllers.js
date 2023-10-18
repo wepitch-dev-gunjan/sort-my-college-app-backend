@@ -2,18 +2,40 @@ const VocationalCourse = require("../models/VocationalCourse");
 
 exports.createVocationalCourse = async (req, res) => {
   try {
-    const { course_name, course_degree, online, offline } = req.body;
+    const {
+      course_owner_name,
+      course_owner_email,
+      course_name,
+      course_category,
+      course_image,
+      online,
+      offline,
+      city,
+    } = req.body;
 
-    if (!course_name || !course_degree || !online || !offline)
+    if (
+      !course_owner_name ||
+      !course_owner_email ||
+      !course_name ||
+      !course_category ||
+      !course_image ||
+      !online ||
+      !offline ||
+      !city
+    )
       return res.status(400).send({
         error: " All fields are required",
       });
 
     course = new VocationalCourse({
+      course_owner_name,
+      course_owner_email,
       course_name,
-      course_degree,
+      course_category,
+      course_image,
       online,
       offline,
+      city,
     });
 
     course = await course.save();
@@ -29,15 +51,7 @@ exports.createVocationalCourse = async (req, res) => {
 
 exports.getVocationalCourses = async (req, res) => {
   try {
-    const { course_degree, online, offline } = req.query;
     const filters = {};
-
-    if (course_degree)
-      filters.course_degree = Array.isArray(course_degree)
-        ? { $in: course_degree }
-        : [course_degree];
-    if (online) filters.online = online;
-    if (offline) filters.offline = offline;
 
     const courses = await VocationalCourse.find(filters);
 
@@ -83,19 +97,37 @@ exports.deleteVocationalCourse = async (req, res) => {
 exports.editVocationalCourse = async (req, res) => {
   try {
     const { course_id } = req.params;
-    const { course_name, course_degree, online, offline } = req.body;
+    const {
+      course_owner_name,
+      course_owner_email,
+      course_name,
+      course_category,
+      course_image,
+      online,
+      offline,
+      city,
+    } = req.body;
     console.log(req.body);
-    if (course_name || course_degree || online || offline) {
+    if (
+      course_owner_name ||
+      course_owner_email ||
+      course_name ||
+      course_category ||
+      course_image ||
+      online ||
+      offline ||
+      city
+    ) {
       let course = await VocationalCourse.findById(course_id);
       if (!course) return res.status(404).send({ error: "Course not found" });
 
       const updateFields = {};
-      if (course_name) {
-        updateFields["course_name"] = course_name;
+      if (course_owner_name) {
+        updateFields["course_owner_name"] = course_owner_name;
       }
 
-      if (course_degree) {
-        updateFields["course_degree"] = course_degree;
+      if (course_owner_email) {
+        updateFields["course_owner_email"] = course_owner_email;
       }
 
       if (online) {
@@ -104,6 +136,22 @@ exports.editVocationalCourse = async (req, res) => {
 
       if (offline) {
         updateFields["offline"] = offline;
+      }
+
+      if (course_name) {
+        updateFields["course_name"] = course_name;
+      }
+
+      if (course_category) {
+        updateFields["course_category"] = course_category;
+      }
+
+      if (course_image) {
+        updateFields["course_image"] = course_image;
+      }
+
+      if (city) {
+        updateFields["city"] = city;
       }
 
       course = await VocationalCourse.findOne({ course_name });
