@@ -5,7 +5,7 @@ const { readdirSync } = require('fs');
 const cors = require('cors');
 
 require('dotenv').config();
-const PORT = process.env.PORT || 8001
+const PORT = process.env.PORT || 8004
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/sort-my-college';
 
 // Parse URL-encoded form data
@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // security options
-app.use(cors())
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {

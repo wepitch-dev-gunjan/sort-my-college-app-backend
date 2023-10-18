@@ -2,8 +2,7 @@ const express = require('express');
 const { google } = require('googleapis');
 const { FRONTEND_URL, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI } = process.env;
 const jwt = require('jsonwebtoken');
-const { generateToken } = require('../helpers/instituteHelpers');
-const EntranceInstitute = require('../models/EntranceInstitute');
+const { generateToken } = require('../helpers/webinarHelpers');
 
 const router = express.Router();
 
@@ -31,15 +30,15 @@ router.get('/auth/google/callback', async (req, res) => {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
-    const instituteInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
-    const { email, name, picture } = instituteInfo.data;
+    const webinarInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
+    const { email, name, picture } = webinarInfo.data;
 
     // Save user information to the database if not already exists
     let institute = await EntranceInstitute.findOne({ email });
     if (!institute) {
       institute = new EntranceInstitute({
-        email,
-        name,
+        webinar_email: email,
+        webinar_name,
         profile_pic: picture
       });
       await EntranceInstitute.save();
