@@ -1,4 +1,3 @@
-const { response } = require("express");
 const VocationalCourse = require("../models/VocationalCourse");
 
 exports.createVocationalCourse = async (req, res) => {
@@ -9,10 +8,6 @@ exports.createVocationalCourse = async (req, res) => {
       return res.status(400).send({
         error: " All fields are required",
       });
-
-    let course = await VocationalCourse.findOne({ course_name });
-    if (course)
-      return res.status(400).send({ error: "Course name already exists" });
 
     course = new VocationalCourse({
       course_name,
@@ -28,7 +23,6 @@ exports.createVocationalCourse = async (req, res) => {
       course,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).send({ error: error.message });
   }
 };
