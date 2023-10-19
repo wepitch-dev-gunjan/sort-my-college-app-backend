@@ -1,10 +1,12 @@
 const fs = require("fs");
 const { transporter } = require("../services/emailService");
-const { validationResult } = require('express-validator');
+const { validationResult } = require("express-validator");
 
+// otp
 exports.generatedOtpNotification = (req, res) => {
   try {
     // Validate the request parameters
+    const adminTransporter = transporter(req);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -34,7 +36,7 @@ exports.generatedOtpNotification = (req, res) => {
                     </a>
                   </td>
                 </tr>
-  
+
                 <!-- Content Section -->
                 <tr>
                   <td align="center">
@@ -96,7 +98,7 @@ exports.generatedOtpNotification = (req, res) => {
     `,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
+    adminTransporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email:", error);
         res.status(500).json({ error: "Error sending email" });
@@ -105,10 +107,9 @@ exports.generatedOtpNotification = (req, res) => {
         res.json({ message: "Email sent successfully" });
       }
     });
-
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -121,7 +122,7 @@ exports.verifiedOtpNotification = (req, res) => {
     }
 
     const mailOptions = {
-      from: 'your@email.com', // Set your "from" email address
+      from: "your@email.com", // Set your "from" email address
       to,
       subject: "Account Verified",
       html: `
@@ -143,7 +144,7 @@ exports.verifiedOtpNotification = (req, res) => {
                       </a>
                     </td>
                   </tr>
-    
+
                   <!-- Content Section -->
                   <tr>
                     <td align="center">
@@ -196,14 +197,13 @@ exports.verifiedOtpNotification = (req, res) => {
         res.json({ message: "Email sent successfully" });
       }
     });
-
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-
+// user
 exports.welcomeUserEmailNotification = (req, res) => {
   try {
     const { to, subject, username } = req.body;
@@ -345,80 +345,6 @@ exports.welcomeUserEmailNotification = (req, res) => {
   }
 };
 
-exports.welcomeCounsellorEmailNotification = (req, res) => {
-  try {
-    const { from, to, subject, username } = req.body;
-    console.log(req.body);
-    const mailOptions = {
-      from,
-      to,
-      subject,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="700" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
-                        <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="200" height="50" style="display: block;">
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td align="center">
-                        <h1 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size: 3vh; color: black;">
-                          Welcome to
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                        </h1>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black; font-size: 2vh; font-family: Georgia; color: black; font-size: 2vh; font-family: Georgia; color: black;">
-                          Dear ${username}, <br /><br />
-                          We are thrilled to have you join our platform as a counselor. Your dedication to helping others is truly commendable, and we are excited to have you as part of our growing community <br /><br />
-                          As a counselor on our platform, you play a vital role in providing support, guidance, and understanding to individuals seeking your expertise. Whether you are an experienced professional or just starting your counseling journey, you are a valued member of our team, and your contributions will make a difference in the lives of those you assist. <br /><br />
-                          Thank you for choosing
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          to share your expertise and make a positive impact on the mental well-being of others. We are here to support you every step of the way. <br /><br />
-                          If you have any questions or need assistance with your profile setup or any other aspect of our platform, please don't hesitate to reach out. Together, we can create a healthier, happier world. <br /><br />
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        res.status(500).send("Error sending email");
-      } else {
-        console.log("Email sent:", info.response);
-        res.send("Email sent successfully");
-      }
-    });
-    console.log("running");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
 exports.bookedSessionUserEmailNotification = (req, res) => {
   try {
     const {
@@ -524,7 +450,524 @@ exports.bookedSessionUserEmailNotification = (req, res) => {
         </tr>
       </table>
     </body>
-    
+
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.attendedSessionUserEmailNotification = (req, res) => {
+  try {
+    const { to, subject, username } = req.body;
+    console.log(req.body);
+    const mailOptions = {
+      to,
+      subject,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Hello ${username} <br><br>
+                          "Thank you for choosing <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a> for your
+                          counseling needs. We're grateful that you've entrusted us to be a
+                           part of your journey towards personal growth and well-being.  <br><br>
+
+                          <br><br>
+
+                          Our team of experienced and compassionate counselors is here to assist you every step of the way. If you have any questions or need any assistance before your session, please don't hesitate to reach out to our customer support team at [Customer Support Email or Phone Number]. <br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.reminderSessionUserEmailNotification = (req, res) => {
+  try {
+    const { to, date, time, counsellor, subject, username } = req.body;
+    console.log(req.body);
+    const mailOptions = {
+      date,
+      time,
+      counsellor,
+      to,
+      subject,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center">
+
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Hello ${username} <br><br>
+                          We're looking forward to your upcoming counseling session with us! Here are the details of your session: <br><br>
+                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
+                            <tr>
+                              <td><b>Date and Time:</b></td>
+                              <td> ${date} ${time}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Counsellor Name:</b></td>
+                              <td>${counsellor}</td>
+                            </tr>
+
+                          </table>
+                          <br><br>
+
+                          Please make sure you're prepared and in a quiet, comfortable space for your session. If you have any specific topics or concerns you'd like to discuss during the session, feel free to jot them down so you can get the most out of your time with the counselor. <br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.notattendedSessionUserEmailNotification = (req, res) => {
+  try {
+    const { to, date, time, subject, username } = req.body;
+    console.log(req.body);
+    const mailOptions = {
+      to,
+      subject,
+      date,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Hello ${username} <br><br>
+                          We hope this message finds you well. We understand that life can
+                          sometimes throw unexpected challenges our way, and we want to acknowledge
+                          that you were unable to attend your scheduled counseling session on ${date} and ${time}. <br><br>
+
+                          <br><br>
+
+                          Thank you for considering our counseling service, and we look forward to assisting you in your journey to emotional well-being.<br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.cancelledSessionUserEmailNotification = (req, res) => {
+  try {
+    const { to, date, time, subject, username, counsellor } = req.body;
+    console.log(req.body);
+    const mailOptions = {
+      to,
+      subject,
+      date,
+      counsellor,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Hello ${username} <br><br>
+                          We hope this message finds you well. We hope this message finds
+                          you well. We regret to inform you that your upcoming
+                           counseling session scheduled for ${date} and ${time} with ${counsellor} has been cancelled. <br><br>
+
+                          <br><br>
+
+                          Thank you for considering our counseling service, and we look forward to assisting you in your journey to emotional well-being.<br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.sessionCancelRequestUserAdminEmailNotification = (req, res) => {
+  try {
+    const { from, to, date, time, subject, counsellor } = req.body;
+    const userTransporter = transporter(req);
+    console.log(req.body);
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      date,
+      counsellor,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Dear Admin <br><br>
+                          This email is from : ${from} <br><br>
+                          I hope this message finds you well. I am writing to request
+                           the cancellation of a counseling session that I had previously
+                            scheduled with ${counsellor} on ${date} and ${time} . <br><br>
+                            Unfortunately, due to unforeseen circumstances, I am unable to attend this session as planned.             
+                          <br><br>I kindly request your assistance in the cancellation process. If there are any administrative
+                           steps that I need to follow or if you need any further information from me to facilitate the
+                            cancellation, please let me know. I am more than willing to cooperate to ensure a smooth process.<br><br>                         
+                            <button style="background-color: #1f0a68; color: #fff; padding: 10px 20px; border: none; cursor: pointer;">
+                            <a href="https://sortmycollege.com/" style="color: white; font-weight: 700; text-decoration: none;">Approve Request</a></button><br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    userTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.sessionRescheduleRequestUserAdminEmailNotification = (req, res) => {
+  try {
+    const { from, to, date, time, subject, counsellor } = req.body;
+    const userTransporter = transporter(req);
+    console.log(req.body);
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      date,
+      counsellor,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Dear Admin <br><br>
+                          This email is from : ${from} <br><br>
+                          I hope this message finds you well. I am writing to request for
+                           rescheduling of a counseling session that I had previously
+                            scheduled with ${counsellor} on ${date} and ${time} . <br><br>
+                            Unfortunately, due to unforeseen circumstances, I am unable to attend this session as planned.             
+                          <br><br>I kindly request your assistance in the rescheduling process. If there are any administrative
+                           steps that I need to follow or if you need any further information from me to facilitate the
+                            rescheduling, please let me know. I am more than willing to cooperate to ensure a smooth process.<br><br>                         
+                            <button style="background-color: #1f0a68; color: #fff; padding: 10px 20px; border: none; cursor: pointer;">
+                            <a href="https://sortmycollege.com/" style="color: white; font-weight: 700; text-decoration: none;">Approve Request</a></button><br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    userTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+//counsellor
+exports.welcomeCounsellorEmailNotification = (req, res) => {
+  try {
+    const { from, to, subject, username } = req.body;
+    console.log(req.body);
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="700" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="200" height="50" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center">
+                        <h1 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size: 3vh; color: black;">
+                          Welcome to
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                        </h1>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black; font-size: 2vh; font-family: Georgia; color: black; font-size: 2vh; font-family: Georgia; color: black;">
+                          Dear ${username}, <br /><br />
+                          We are thrilled to have you join our platform as a counselor. Your dedication to helping others is truly commendable, and we are excited to have you as part of our growing community <br /><br />
+                          As a counselor on our platform, you play a vital role in providing support, guidance, and understanding to individuals seeking your expertise. Whether you are an experienced professional or just starting your counseling journey, you are a valued member of our team, and your contributions will make a difference in the lives of those you assist. <br /><br />
+                          Thank you for choosing
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          to share your expertise and make a positive impact on the mental well-being of others. We are here to support you every step of the way. <br /><br />
+                          If you have any questions or need assistance with your profile setup or any other aspect of our platform, please don't hesitate to reach out. Together, we can create a healthier, happier world. <br /><br />
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -623,7 +1066,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                             </tr>
                           </table>
                           <br><br>
-                          
+
                           Please ensure that you are available and prepared for the scheduled session. If you have any questions or need further information about this booking, please do not hesitate to contact us <br><br>
                           Thank you for your commitment to providing counseling services through our platform. We appreciate your dedication to helping individuals in need
                           <br /><br />Best regards, <br />
@@ -641,7 +1084,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
         </tr>
       </table>
     </body>
-    
+
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -685,7 +1128,7 @@ exports.reminderSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
@@ -693,10 +1136,10 @@ exports.reminderSessionCounsellorEmailNotification = (req, res) => {
                           This is a reminder for an upcoming counseling session with ${client}
                            on ${date} at ${time}. The session will be conducted via
                            <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a><br><br>
-                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">                            
+                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
                           </table>
                           <br><br>
-                          
+
                           Please ensure that you are available and prepared for the scheduled session. If you have any questions or need further information about this booking, please do not hesitate to contact us <br><br>
                           Thank you for your commitment to providing counseling services through our platform. We appreciate your dedication to helping individuals in need
                           <br /><br />Best regards, <br />
@@ -714,158 +1157,7 @@ exports.reminderSessionCounsellorEmailNotification = (req, res) => {
         </tr>
       </table>
     </body>
-    
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        res.status(500).send("Error sending email");
-      } else {
-        console.log("Email sent:", info.response);
-        res.send("Email sent successfully");
-      }
-    });
-    console.log("running");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
-  }
-};
 
-exports.reminderSessionUserEmailNotification = (req, res) => {
-  try {
-    const { to, date, time, counsellor, subject, username } = req.body;
-    console.log(req.body);
-    const mailOptions = {
-      date,
-      time,
-      counsellor,
-      to,
-      subject,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
-                        <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td align="center">
-                        
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          We're looking forward to your upcoming counseling session with us! Here are the details of your session: <br><br>
-                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
-                            <tr>
-                              <td><b>Date and Time:</b></td>
-                              <td> ${date} ${time}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Counsellor Name:</b></td>
-                              <td>${counsellor}</td>
-                            </tr>
-                            
-                          </table>
-                          <br><br>
-                          
-                          Please make sure you're prepared and in a quiet, comfortable space for your session. If you have any specific topics or concerns you'd like to discuss during the session, feel free to jot them down so you can get the most out of your time with the counselor. <br><br>
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        res.status(500).send("Error sending email");
-      } else {
-        console.log("Email sent:", info.response);
-        res.send("Email sent successfully");
-      }
-    });
-    console.log("running");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
-exports.attendedSessionUserEmailNotification = (req, res) => {
-  try {
-    const { to, subject, username } = req.body;
-    console.log(req.body);
-    const mailOptions = {
-      to,
-      subject,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
-                        <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
-                        </a>
-                      </td>
-                    </tr>
-                    
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          "Thank you for choosing <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a> for your 
-                          counseling needs. We're grateful that you've entrusted us to be a
-                           part of your journey towards personal growth and well-being.  <br><br>
-                          
-                          <br><br>
-                          
-                          Our team of experienced and compassionate counselors is here to assist you every step of the way. If you have any questions or need any assistance before your session, please don't hesitate to reach out to our customer support team at [Customer Support Email or Phone Number]. <br><br>
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -906,14 +1198,13 @@ exports.attendedSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
                           Hello ${username} <br><br>
                           I wanted to take a moment to express my gratitude for the insightful and supportive counseling session today. Your guidance and expertise have been invaluable to us, and I truly appreciate your dedication to helping us work through our challenges. <br><br>
-                        
-                          
+
                           Thank you for being a source of guidance and support during this time. I look forward to our next session and continuing this journey of self-discovery and growth with your help.<br><br>
                           Best regards, <br />
                           The
@@ -930,7 +1221,7 @@ exports.attendedSessionCounsellorEmailNotification = (req, res) => {
         </tr>
       </table>
     </body>
-    
+
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -974,7 +1265,7 @@ exports.notattendedSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
@@ -987,11 +1278,10 @@ Here are the details of the session: <br>
 Client's Name: ${client}<br><br>
 Despite multiple reminders and confirmations sent to the client via email and SMS, they failed to show up for their scheduled appointment. We understand that unforeseen circumstances can sometimes lead to missed sessions, and we have attempted to reach out to the client to reschedule or understand their situation better.
 
-We kindly request that you review your schedule to determine if any rescheduling is necessary, and if you have 
+We kindly request that you review your schedule to determine if any rescheduling is necessary, and if you have
 any specific instructions or preferences for handling such situations, please let us know. If you would like
  us to follow up with the client on your behalf or make any changes to your availability, please inform us accordingly.<br><br>
-                        
-                          
+
                           Best regards, <br />
                           The
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
@@ -1007,149 +1297,7 @@ any specific instructions or preferences for handling such situations, please le
         </tr>
       </table>
     </body>
-    
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        res.status(500).send("Error sending email");
-      } else {
-        console.log("Email sent:", info.response);
-        res.send("Email sent successfully");
-      }
-    });
-    console.log("running");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
-  }
-};
 
-exports.notattendedSessionUserEmailNotification = (req, res) => {
-  try {
-    const { to, date, time, subject, username } = req.body;
-    console.log(req.body);
-    const mailOptions = {
-      to,
-      subject,
-      date,
-      time,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
-                        <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
-                        </a>
-                      </td>
-                    </tr>
-                    
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          We hope this message finds you well. We understand that life can 
-                          sometimes throw unexpected challenges our way, and we want to acknowledge 
-                          that you were unable to attend your scheduled counseling session on ${date} and ${time}. <br><br>
-                          
-                          <br><br>
-                          
-                          Thank you for considering our counseling service, and we look forward to assisting you in your journey to emotional well-being.<br><br>
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    
-    `,
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        res.status(500).send("Error sending email");
-      } else {
-        console.log("Email sent:", info.response);
-        res.send("Email sent successfully");
-      }
-    });
-    console.log("running");
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Internal Server Error" });
-  }
-};
-
-exports.cancelledSessionUserEmailNotification = (req, res) => {
-  try {
-    const { to, date, time, subject, username, counsellor } = req.body;
-    console.log(req.body);
-    const mailOptions = {
-      to,
-      subject,
-      date,
-      counsellor,
-      time,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
-                        <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
-                        </a>
-                      </td>
-                    </tr>
-                    
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          We hope this message finds you well. We hope this message finds 
-                          you well. We regret to inform you that your upcoming
-                           counseling session scheduled for ${date} and ${time} with ${counsellor} has been cancelled. <br><br>
-
-                          
-                          <br><br>
-                          
-                          Thank you for considering our counseling service, and we look forward to assisting you in your journey to emotional well-being.<br><br>
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -1192,15 +1340,15 @@ exports.cancelledSessionCounsellorEmailNotification = (req, res) => {
                           <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
                         </a>
                       </td>
-                    </tr>                    
+                    </tr>
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
                           Hello ${username} <br><br>
-                          We hope this message finds you well. We hope this message finds 
+                          We hope this message finds you well. We hope this message finds
                           you well. We regret to inform you that your upcoming
                            counseling session scheduled for ${date} and ${time} with ${client} has been cancelled. <br><br>
-                          <br><br>                          
+                          <br><br>
                           Thank you for your continued commitment to our counseling service.<br><br>
                           Best regards, <br />
                           The
@@ -1216,7 +1364,7 @@ exports.cancelledSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
-    </body>    
+    </body>
     `,
     };
     transporter.sendMail(mailOptions, (error, info) => {
@@ -1260,17 +1408,92 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
                           Hello ${username} <br><br>
                           We hope this message finds you well. We sent this mail to inform you that your
-                           counseling session whiich is scheduled for ${date} and ${time} with ${client} has been 
-                           got a review. <br><br>                 
-                          <br><br>                          
+                           counseling session whiich is scheduled for ${date} and ${time} with ${client} has been
+                           got a review. <br><br>
+                          <br><br>
                           You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           portal.<br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.sessionCancelRequestCounsellorAdminEmailNotification = (req, res) => {
+  try {
+    const { from, to, date, time, subject, client } = req.body;
+    const counsellorTransporter = transporter(req);
+    console.log(req.body);
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      date,
+      client,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Dear Admin <br><br>
+                          This email is from : ${from} <br><br>
+                          I hope this message finds you well. I am writing to request
+                           the cancellation of a counseling session that I had previously
+                            scheduled with ${client} on ${date} and ${time} . <br><br>
+                            Unfortunately, due to unforeseen circumstances, I am unable to conduct this session as planned.             
+                          <br><br>If you could assist me with the cancellation process and any related administrative tasks,
+                           I would greatly appreciate it. If there are any specific procedures or forms that need to be completed,
+                            please let me know, and I will promptly take care of them.<br><br>                         
+                            <button style="background-color: #1f0a68; color: #fff; padding: 10px 20px; border: none; cursor: pointer;">
+                            <a href="https://sortmycollege.com/" style="color: white; font-weight: 700; text-decoration: none;">Approve Request</a></button><br><br>
                           Best regards, <br />
                           The
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
@@ -1288,7 +1511,85 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
     </body>    
     `,
     };
-    transporter.sendMail(mailOptions, (error, info) => {
+    counsellorTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+    console.log("running");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.sessionRescheduleRequestCounsellorAdminEmailNotification = (
+  req,
+  res
+) => {
+  try {
+    const { from, to, date, time, subject, client } = req.body;
+    const userTransporter = transporter(req);
+    console.log(req.body);
+    const mailOptions = {
+      from,
+      to,
+      subject,
+      date,
+      client,
+      time,
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Dear Admin <br><br>
+                          This email is from : ${from} <br><br>
+                          I hope this message finds you well. I am writing to request for
+                           rescheduling of a counseling session that I had previously
+                            scheduled with ${client} on ${date} and ${time} . <br><br>
+                            Unfortunately, due to unforeseen circumstances, I am unable to attend this session as planned.             
+                          <br><br>I kindly request your assistance in the rescheduling process. If there are any administrative
+                           steps that I need to follow or if you need any further information from me to facilitate the
+                            rescheduling, please let me know. I am more than willing to cooperate to ensure a smooth process.<br><br>                         
+                            <button style="background-color: #1f0a68; color: #fff; padding: 10px 20px; border: none; cursor: pointer;">
+                            <a href="https://sortmycollege.com/" style="color: white; font-weight: 700; text-decoration: none;">Approve Request</a></button><br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    userTransporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending email:", error);
         res.status(500).send("Error sending email");
