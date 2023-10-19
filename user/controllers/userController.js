@@ -134,16 +134,84 @@ exports.saveVocationalCourse = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log(user);
-
     const { course_id } = req.body;
-    if (user.saved_courses.includes(course_id))
+    if (user.saved_vocational_courses.includes(course_id))
       return res.status(400).json({ error: "Course is already saved" });
 
-    user.saved_courses.push(course_id);
+    user.saved_vocational_courses.push(course_id);
 
     await user.save();
     res.status(200).send({ message: "Course successfully saved" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.unsaveVocationalCourse = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { course_id } = req.body;
+    if (!user.saved_vocational_courses.includes(course_id))
+      return res.status(404).json({ error: "Course is already unsaved" });
+
+    // user.saved_vocational_courses.filter((courseId) => courseId !== course_id);
+    user.saved_vocational_courses.pop(course_id);
+
+    await user.save();
+    res.status(200).send({ message: "Course unsaved successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.saveEntranceInstitute = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { institute_id } = req.body;
+    if (user.saved_entrance_preparations.includes(institute_id))
+      return res.status(400).json({ error: "Institute is already saved" });
+
+    user.saved_entrance_preparations.push(institute_id);
+
+    await user.save();
+    res.status(200).send({ message: "Institute successfully saved" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.unsaveEntranceInstitute = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findOne({ _id: user_id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const { institute_id } = req.body;
+    if (!user.saved_entrance_preparations.includes(institute_id))
+      return res.status(400).json({ error: "Institute is already unsaved" });
+
+    user.saved_entrance_preparations.pop(institute_id);
+
+    await user.save();
+    res.status(200).send({ message: "Institute successfully unsaved" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
