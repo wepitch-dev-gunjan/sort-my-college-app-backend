@@ -5,7 +5,74 @@ const Counsellor = require('../models/Counsellor');
 const Course = require('../models/Course');
 const Feed = require('../models/Feed');
 
-// GET
+// SMCMA-86
+exports.createCounsellor = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const {
+      name,
+      email,
+      phone_no,
+      profile_pic,
+      cover_image,
+      gender,
+      location,
+      destination,
+      qualifications,
+      languages_spoken,
+      experience_in_years,
+      how_will_i_help,
+      degree_focused,
+      locations_focused,
+      courses_focused,
+    } = req.body;
+
+    // Search for courses in the Course database based on the values in courses_focused array
+    const existingCourses = await Course.find({ course_name: { $in: courses_focused } });
+    const existingCourseNames = existingCourses.map(course => course.course_name);
+    // Create new entries for missing courses
+    if (courses_focused) {
+      const missingCourses = courses_focused.filter(course => !existingCourseNames.includes(course));
+      for (const course of missingCourses) {
+        const newCourse = new Course({
+          course_name: course,
+        });
+        await newCourse.save();
+      }
+    }
+
+    const messagedCounsellor = {};
+
+    if (name) messagedCounsellor.name = name;
+    if (email) messagedCounsellor.email = email;
+    if (phone_no) messagedCounsellor.phone_no = phone_no;
+    if (profile_pic) messagedCounsellor.profile_pic = profile_pic;
+    if (cover_image) messagedCounsellor.cover_image = cover_image;
+    if (gender) messagedCounsellor.gender = gender;
+    if (location) messagedCounsellor.location = location;
+    if (destination) messagedCounsellor.destination = destination;
+    if (qualifications) messagedCounsellor.qualifications = qualifications;
+    if (languages_spoken) messagedCounsellor.languages_spoken = languages_spoken;
+    if (experience_in_years) messagedCounsellor.experience_in_years = experience_in_years;
+    if (how_will_i_help) messagedCounsellor.how_will_i_help = how_will_i_help;
+    if (degree_focused) messagedCounsellor.degree_focused = degree_focused;
+    if (locations_focused) messagedCounsellor.locations_focused = locations_focused;
+    if (courses_focused) messagedCounsellor.courses_focused = courses_focused;
+
+    // Create a new counselor object
+    const newCounsellor = new Counsellor(messagedCounsellor);
+
+    // Save the new counselor to the database
+    const createdCounsellor = await newCounsellor.save();
+
+    // Respond with the created counselor's details
+    res.status(201).json(createdCounsellor);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 exports.getCounsellor = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
@@ -13,16 +80,200 @@ exports.getCounsellor = async (req, res) => {
 
     if (!counsellor) {
       return res.status(404).send({
-        eerror: "Unauthorised user"
-      })
+        error: "Unauthorised user"
+      });
     }
 
-    res.status(200).send(counsellor);
+    // Calculate followers count
+    const followers_count = counsellor.followers.length;
+
+    // Calculate total sessions attended
+    let total_sessions_attended = 0;
+    if (counsellor.sessions) {
+      total_sessions_attended = counsellor.sessions.length;
+    }
+
+    // Calculate age from date of birth
+    let age = null;
+    if (counsellor.date_of_birth) {
+      const birthDate = new Date(counsellor.date_of_birth);
+      const ageDiff = Date.now() - birthDate.getTime();
+      age = new Date(ageDiff).getUTCFullYear() - 1970;
+    }
+
+    // Calculate minimum price of group session
+    let group_session_price = null;
+    if (counsellor.group_sessions) {
+      group_session_price = Math.min(...counsellor.group_sessions.map(session => session.price));
+    }
+
+    // Calculate minimum price of personal session
+    let personal_session_price = null;
+    if (counsellor.personal_sessions) {
+      personal_session_price = Math.min(...counsellor.personal_sessions.map(session => session.price));
+    }
+
+    const messagedCounsellor = {
+      name: counsellor.name,
+      email: counsellor.email,
+      average_rating: counsellor.average_rating,
+      followers_count,
+      experience_in_years: counsellor.experience_in_years,
+      total_sessions_attended,
+      reviews: counsellor.reviews,
+      how_will_i_help: counsellor.how_will_i_help,
+      qualifications: counsellor.qualifications,
+      languages_spoken: counsellor.languages_spoken,
+      location: counsellor.location,
+      gender: counsellor.gender,
+      age,
+      client_testimonials: counsellor.client_testimonials,
+      group_session_price,
+      personal_session_price,
+    };
+
+    res.status(200).send(messagedCounsellor);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
+
+exports.editProfile = async (req, res) => {
+  try {
+    const updateFields = {};
+
+    if (req.body.email) {
+      updateFields.email = req.body.email;
+    }
+
+    if (req.body.phone_no) {
+      updateFields.phone_no = req.body.phone_no;
+    }
+
+    if (req.body.profile_pic) {
+      updateFields.profile_pic = req.body.profile_pic;
+    }
+
+    if (req.body.gender) {
+      updateFields.gender = req.body.gender;
+    }
+
+    if (req.body.location) {
+      updateFields.location = {};
+
+      if (req.body.location.pin_code) {
+        updateFields.location.pin_code = req.body.location.pin_code;
+      }
+
+      if (req.body.location.city) {
+        updateFields.location.city = req.body.location.city;
+      }
+
+      if (req.body.location.state) {
+        updateFields.location.state = req.body.location.state;
+      }
+
+      if (req.body.location.country) {
+        updateFields.location.country = req.body.location.country;
+      }
+    }
+
+    if (req.body.designation) {
+      updateFields.designation = req.body.designation;
+    }
+
+    if (req.body.qualifications) {
+      updateFields.qualifications = req.body.qualifications;
+    }
+
+    if (req.body.next_session_time) {
+      updateFields.next_session_time = req.body.next_session_time;
+    }
+
+    if (req.body.languages_spoken) {
+      updateFields.languages_spoken = req.body.languages_spoken;
+    }
+
+    if (req.body.experience_in_years) {
+      updateFields.experience_in_years = req.body.experience_in_years;
+    }
+
+    if (req.body.total_appointed_sessions) {
+      updateFields.total_appointed_sessions = req.body.total_appointed_sessions;
+    }
+
+    if (req.body.reward_points) {
+      updateFields.reward_points = req.body.reward_points;
+    }
+
+    if (req.body.client_testimonials) {
+      updateFields.client_testimonials = req.body.client_testimonials;
+    }
+
+    if (req.body.average_rating) {
+      updateFields.average_rating = req.body.average_rating;
+    }
+
+    if (req.body.sessions) {
+      updateFields.sessions = req.body.sessions;
+    }
+
+    if (req.body.how_will_i_help) {
+      updateFields.how_will_i_help = req.body.how_will_i_help;
+    }
+
+    if (req.body.emergency_contact) {
+      updateFields.emergency_contact = req.body.emergency_contact;
+    }
+
+    if (req.body.followers) {
+      updateFields.followers = req.body.followers;
+    }
+
+    if (req.body.degree_focused) {
+      updateFields.degree_focused = req.body.degree_focused;
+    }
+
+    if (req.body.locations_focused) {
+      updateFields.locations_focused = req.body.locations_focused;
+    }
+
+    if (req.body.courses_focused) {
+      updateFields.courses_focused = req.body.courses_focused;
+    }
+
+    const updatedUser = await Counsellor.findByIdAndUpdate(req.id, updateFields, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+exports.deleteCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const counsellor = await Counsellor.findByIdAndDelete(counsellor_id);
+
+    if (!counsellor) {
+      return res.status(404).send({
+        error: 'Counsellor not found'
+      });
+    }
+
+    res.send({ message: 'Counsellor deleted successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+// end SMCMA-86
 
 exports.getCounsellors = async (req, res) => {
   try {
@@ -48,7 +299,23 @@ exports.getCounsellors = async (req, res) => {
       return res.status(404).send({ error: "No counselors found" });
     }
 
-    res.status(200).send(counsellors);
+
+    const massagedCounsellors = counsellors.map(counsellor => {
+      return {
+        name: counsellor.personal_info.name,
+        designation: counsellor.designation,
+        specializations: counsellor.specializations,
+        city: counsellor.personal_info.city,
+        next_session: counsellor.next_session,
+        average_rating: counsellor.average_rating,
+        experience_in_years: counsellor.experience_in_years,
+        total_sessions: counsellor.sessions.length,
+        reward_points: counsellor.reward_points,
+        reviews: counsellor.client_testimonials.length,
+      }
+    })
+
+    res.status(200).send(massagedCounsellors);
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -290,147 +557,6 @@ exports.getLikes = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
-  }
-};
-
-
-// POST
-exports.createCounsellor = async (req, res) => {
-  try {
-    // Extract data from the request body
-    const {
-      email,
-      personal_info,
-      qualifications,
-      specializations,
-      languages_spoken,
-      work_experience,
-      total_appointed_sessions,
-      reward_points,
-      client_testimonials,
-      total_ratings,
-      average_rating,
-      degree_focused,
-      locations_focused,
-      courses_focused,
-    } = req.body;
-
-    // Create a new counselor object
-    const newCounsellor = new Counsellor({
-      email,
-      personal_info,
-      qualifications,
-      specializations,
-      languages_spoken,
-      work_experience,
-      total_appointed_sessions,
-      reward_points,
-      client_testimonials,
-      total_ratings,
-      average_rating,
-      degree_focused,
-      locations_focused,
-      courses_focused,
-    });
-
-    // Save the new counselor to the database
-    const createdCounsellor = await newCounsellor.save();
-
-    // Respond with the created counselor's details
-    res.status(201).json(createdCounsellor);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-// PUT
-exports.editProfile = async (req, res) => {
-  try {
-    const updateFields = {};
-
-    if (req.body.email) {
-      updateFields.email = req.body.email;
-    }
-
-    if (req.body.phone_no) {
-      updateFields.phone_no = req.body.phone_no;
-    }
-
-    if (req.body.personal_info) {
-      updateFields.personal_info = {};
-
-      if (req.body.personal_info.name) {
-        updateFields.personal_info.name = req.body.personal_info.name;
-      }
-
-      if (req.body.personal_info.profile_pic) {
-        updateFields.personal_info.profile_pic = req.body.personal_info.profile_pic;
-      }
-
-      if (req.body.personal_info.gender) {
-        updateFields.personal_info.gender = req.body.personal_info.gender;
-      }
-
-      if (req.body.personal_info.location) {
-        updateFields.personal_info.location = {};
-
-        if (req.body.personal_info.location.city) {
-          updateFields.personal_info.location.city = req.body.personal_info.location.city;
-        }
-
-        if (req.body.personal_info.location.state) {
-          updateFields.personal_info.location.state = req.body.personal_info.location.state;
-        }
-
-        if (req.body.personal_info.location.country) {
-          updateFields.personal_info.location.country = req.body.personal_info.location.country;
-        }
-      }
-    }
-
-    if (req.body.qualifications) {
-      updateFields.qualifications = req.body.qualifications;
-    }
-
-    if (req.body.specializations) {
-      updateFields.specializations = req.body.specializations;
-    }
-
-    if (req.body.languages_spoken) {
-      updateFields.languages_spoken = req.body.languages_spoken;
-    }
-
-    if (req.body.client_focus) {
-      updateFields.client_focus = req.body.client_focus;
-    }
-
-    if (req.body.work_experience) {
-      updateFields.work_experience = req.body.work_experience;
-    }
-
-    if (req.body.total_appointed_sessions) {
-      updateFields.total_appointed_sessions = req.body.total_appointed_sessions;
-    }
-
-    if (req.body.reward_points) {
-      updateFields.reward_points = req.body.reward_points;
-    }
-
-    if (req.body.emergency_contact) {
-      updateFields.emergency_contact = req.body.emergency_contact;
-    }
-
-    const updatedUser = await Counsellor.findByIdAndUpdate(req.id, updateFields);
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -914,6 +1040,7 @@ exports.addCounsellorInCourse = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
 
 
 

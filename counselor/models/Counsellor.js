@@ -1,6 +1,10 @@
 const { Schema, model } = require('mongoose');
 
 const counsellorSchema = new Schema({
+  name: {
+    type: String,
+  },
+
   email: {
     type: String,
   },
@@ -13,20 +17,24 @@ const counsellorSchema = new Schema({
     type: String,
   },
 
-  personal_info: {
-    name: {
-      type: String,
-    },
-    profile_pic: String,
-    gender: {
-      type: String,
-      enum: ['Male', 'Female', 'Other']
-    },
-    location: {
-      city: String,
-      state: String,
-      country: String
-    }
+  cover_image: {
+    type: String,
+  },
+
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other']
+  },
+
+  location: {
+    pin_code: Number,
+    city: String,
+    state: String,
+    country: String
+  },
+
+  designation: {
+    type: String,
   },
 
   qualifications: [
@@ -35,11 +43,10 @@ const counsellorSchema = new Schema({
     }
   ],
 
-  specializations: [
-    {
-      type: String,
-    }
-  ],
+  next_session_time: {
+    type: Date,
+    default: new Date()
+  },
 
   languages_spoken: [
     {
@@ -47,13 +54,7 @@ const counsellorSchema = new Schema({
     }
   ],
 
-  client_focus: [
-    {
-      type: String,
-    }
-  ],
-
-  work_experience: Number,
+  experience_in_years: Number,
 
   total_appointed_sessions: Number,
 
@@ -67,6 +68,8 @@ const counsellorSchema = new Schema({
     },
   ],
 
+  average_rating: Number,
+
   sessions: [
     {
       type: Schema.Types.ObjectId,
@@ -79,10 +82,6 @@ const counsellorSchema = new Schema({
       type: String,
     }
   ],
-
-  emergency_contact: {
-    type: Number,
-  },
 
   followers: [
     {

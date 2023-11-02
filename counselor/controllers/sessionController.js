@@ -1,9 +1,12 @@
 const { sessionTimeIntoMinutes, isSessionBefore24Hours } = require("../helpers/sessionHelpers");
+const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
+const session_slots = 10;
 // GET
 exports.getSessions = async (req, res) => {
   try {
+    const { session_type, session_date, session } = req.query;
     const { counsellor_id } = req.params;
 
     // Check if a status query is requested
@@ -26,14 +29,14 @@ exports.getSession = async (req, res) => {
     const { session_id } = req.params;
 
     // Check if a status query is requested
-    const counselingSessions = await Session.findOne({
+    const counselingSession = await Session.findOne({
       _id: session_id,
     });
 
-    if (!counselingSessions)
+    if (!counselingSession)
       res.status(200).json({ message: "Session not found" });
 
-    res.status(200).json(counselingSessions);
+    res.status(200).json(counselingSession);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -95,10 +98,12 @@ exports.addSession = async (req, res) => {
       session_duration: parsedSessionDuration,
       session_type,
       session_fee,
+      session_slots: session_type === 'Personal' ? 1 : session_slots
     });
 
     // Save the new session to the database
     const createdSession = await newSession.save();
+
     res.status(200).send(createdSession);
   } catch (error) {
     console.error(error);
@@ -108,42 +113,47 @@ exports.addSession = async (req, res) => {
   }
 };
 
-
 exports.bookSession = async (req, res) => {
   try {
-    const { sessionId, counselor, email, sessionType } = req.body;
+    const { session_id } = req.params;
 
-    // Check if the user with the provided ID exists
-    const userId = await getUserIdByEmail(email);
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    const counselingSession = await CounselingSession.findOne(sessionId)
-    if (!counselingSession) {
-      return res.status(404).json({ error: 'Counseling session not found' });
+    let session = await Session.findOne({ _id: session_id });
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
     }
 
     // Check if the session is available
-    const isSessionAvailable = isCounsellingSessionAvailable(sessionId);
-
+    const isSessionAvailable = isCounsellingSessionAvailable(session_id);
     if (!isSessionAvailable) {
-      return res.status(400).json({ error: 'Counseling session is not available' });
+      return res.status(400).json({ error: 'Session is not available' });
     }
 
-    // Add booking details to the counseling session
-    const newCounselingSession = new CounselingSession({
-      counselor,
-      sessionId,
-      user: userId,
-      sessionType
+    // check the slots availability
+    if (session.session_available_slots <= 0) {
+      return res.status(400).send({ error: 'There are no booking slots available in this session, please book another session' });
+    }
+
+    session.session_available_slots--;
+    if (session.session_available_slots <= 0) {
+      session.session_status = 'Booked';
+    }
+
+    const counsellor = await Counsellor.findOne({ _id: session.session_counsellor });
+    if (!counsellor) return res.status(404).send({
+      error: 'Counselor has left the account, please choose another counselor'
     });
 
-    // Save the updated counseling session
-    await newCounselingSession.save();
-    globalSocket.emit('bookingsUpdated', newCounselingSession);
+    const sessionDateTime = new Date(`${session.session_date} ${session.session_time}`);
+    const nextSessionDateTime = new Date(`${counsellor.next_session_time}`);
+
+    // Compare session times and update next_session_time if needed
+    if (sessionDateTime > nextSessionDateTime) {
+      counsellor.next_session_time = sessionDateTime;
+    }
+
+    // Save the updated session and counselor data
+    await session.save();
+    await counsellor.save();
 
     // Respond with a success message
     res.status(201).json({ message: 'Counseling session booked successfully' });
@@ -151,7 +161,7 @@ exports.bookSession = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
 
 // PUT
 exports.updateSession = async (req, res) => {
