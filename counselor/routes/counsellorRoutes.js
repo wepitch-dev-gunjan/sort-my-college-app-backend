@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getCounsellors, editProfile, followCounsellor, unfollowCounsellor, postReviewCounsellor, getCounsellor, getFollowers, getReviewsCounsellor, createCounsellor, getProfilePic, uploadProfilePic, deleteProfilePic, getTotalRatings } = require('../controllers/counsellorController');
+const { getCounsellors, editProfile, followCounsellor, unfollowCounsellor, postReviewCounsellor, getCounsellor, getFollowers, getReviewsCounsellor, createCounsellor, getProfilePic, uploadProfilePic, deleteProfilePic, getTotalRatings, deleteCounsellor } = require('../controllers/counsellorController');
 const { counsellorAuth } = require('../middlewares/authMiddleware');
 
 // GET
@@ -23,5 +23,6 @@ router.post('/:counsellor_id/profile-pic', uploadProfilePic);
 
 // DELETE
 router.delete('/:counsellor_id/profile-pic', deleteProfilePic);
+router.delete('/:counsellor_id', deleteCounsellor);
 
 module.exports = router;

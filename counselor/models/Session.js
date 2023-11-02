@@ -37,6 +37,15 @@ const sessionSchema = new Schema(
     },
     session_query: {
       type: String
+    },
+    session_slots: {
+      type: Number,
+      required: true
+    },
+    session_available_slots: {
+      type: Number,
+      default: this.session_slots,
+      required: true,
     }
   },
   {
