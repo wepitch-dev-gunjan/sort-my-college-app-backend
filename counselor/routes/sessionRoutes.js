@@ -2,11 +2,13 @@ const express = require('express');
 const { updateSession, bookSession, getSessions, addSession, getSession } = require('../controllers/sessionController');
 const { counsellorAuth } = require('../middlewares/authMiddleware');
 const { rescheduleSession, cancelSession } = require('../controllers/counsellorController');
+const { generateZoomToken } = require('../helpers/sessionHelpers');
 const router = express.Router();
 
 // GET
 router.get('/:counsellor_id/sessions', getSessions);
 router.get('/sessions/:session_id', getSession);
+router.get('/zoomtoken', generateZoomToken);
 
 // POST
 router.post('/sessions', addSession);

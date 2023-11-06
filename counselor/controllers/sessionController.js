@@ -1,4 +1,4 @@
-const { sessionTimeIntoMinutes, isSessionBefore24Hours } = require("../helpers/sessionHelpers");
+const { sessionTimeIntoMinutes, isSessionBefore24Hours, generateSignature } = require("../helpers/sessionHelpers");
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
@@ -47,8 +47,12 @@ exports.getSession = async (req, res) => {
 exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
-    const { counsellor_id } = req.params;
-    const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
+    const { counsellor_id, session_date, session_time, session_duration, session_type, session_fee } = req.body;
+
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+    if (!counsellor) return res.status(404).send({
+      error: "Counsellor not found"
+    })
 
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res.status(404).json({ error: "Can't add session before 24 hours" })
@@ -90,7 +94,9 @@ exports.addSession = async (req, res) => {
       });
     }
 
-    // Create a new session object
+    const meeting_sdk_jwt = await generateSignature(process.env.ZOOM_CLIENT_ID, process.env.ZOOM_CLIENT_SECRET, 123456789, 0);
+
+    // Create a new session object with Zoom meeting details
     const newSession = new Session({
       session_counselor: counsellor_id,
       session_time: parsedSessionTime,
@@ -98,7 +104,8 @@ exports.addSession = async (req, res) => {
       session_duration: parsedSessionDuration,
       session_type,
       session_fee,
-      session_slots: session_type === 'Personal' ? 1 : session_slots
+      session_slots: session_type === 'Personal' ? 1 : session_slots,
+      meeting_sdk_jwt
     });
 
     // Save the new session to the database
