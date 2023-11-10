@@ -315,39 +315,31 @@ exports.deleteSession = async (req, res) => {
   }
 };
 
-// need to be changed
 exports.cancelSession = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const { session_id } = req.params;
-    console.log(counsellor_id);
-
-    // Find the session to be deleted
-    const counselingSession = await Session.findOne({
-      _id: session_id,
-      session_counselor: counsellor_id
-    });
-
+    
+    // Find and update the session to be cancelled
+    const counselingSession = await Session.findOneAndUpdate(
+      { _id: session_id, session_counselor: counsellor_id, session_status: 'Booked' },
+      { $set: { session_status: 'Cancelled' } },
+      { new: true } // This option returns the modified document
+    );
+    
     if (!counselingSession) {
-      return res.status(404).json({ message: "Session not found" });
+      return res.status(404).json({ message: "Session not found or already cancelled" });
     }
-
-    const { session_status } = counselingSession;
-
-    if (session_status === 'Booked') {
-      return res.status(400).json({ error: "You can't delete a session after a user booked it" });
-    }
-
-    // Delete the session
-    await Session.deleteOne({ _id: session_id, session_counselor: counsellor_id });
-
-    res.status(200).json({ message: "Session deleted successfully" });
+    
+    res.status(200).json({ message: "Session cancelled successfully", session: counselingSession });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
+
+// need to be changed
 exports.rescheduleSession = async (req, res) => {
   try {
     const { counsellor_id } = req;
