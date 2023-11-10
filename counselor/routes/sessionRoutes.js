@@ -1,17 +1,15 @@
 const express = require('express');
-const { updateSession, bookSession, getSessions, addSession, getSession } = require('../controllers/sessionController');
+const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession } = require('../controllers/sessionController');
 const { counsellorAuth } = require('../middlewares/authMiddleware');
 const { rescheduleSession, cancelSession } = require('../controllers/counsellorController');
-const { generateZoomToken } = require('../helpers/sessionHelpers');
 const router = express.Router();
 
 // GET
 router.get('/:counsellor_id/sessions', getSessions);
 router.get('/sessions/:session_id', getSession);
-router.get('/zoomtoken', generateZoomToken);
 
 // POST
-router.post('/sessions', addSession);
+router.post('/sessions', counsellorAuth, addSession);
 
 // PUT
 router.put('/sessions/:session_id', updateSession);
@@ -22,6 +20,6 @@ router.put('/counsellor/sessions/:session_id/cancel', cancelSession);
 // router.put('/session/:counseling_id/cancel', cancelSession);
 
 // DELETE
-// router.delete('/session/:session_id', removeSession);
+router.delete('/sessions/:session_id', counsellorAuth, deleteSession);
 
 module.exports = router;

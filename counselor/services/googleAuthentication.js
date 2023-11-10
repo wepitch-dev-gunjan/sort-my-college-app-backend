@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable no-undef */
 const express = require('express');
 const { google } = require('googleapis');
 const { FRONTEND_URL, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI } = process.env;
-const jwt = require('jsonwebtoken');
 const { generateToken } = require('../helpers/counsellorHelpers');
 const Counsellor = require('../models/Counsellor');
 
@@ -19,6 +16,7 @@ router.get('/auth/google', (req, res) => {
     scope: [
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/calendar'
     ],
   });
 
@@ -32,6 +30,7 @@ router.get('/auth/google/callback', async (req, res) => {
     // Assuming you have previously set up oauth2Client
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+    console.log(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
     const { email, name, picture } = counsellorInfo.data;
@@ -41,20 +40,16 @@ router.get('/auth/google/callback', async (req, res) => {
     if (!counsellor) {
       counsellor = new Counsellor({
         email,
-        personal_info: {
-          name,
-          profile_pic: picture,
-          location: {
-            city: 'jaipur'
-          }
-        },
+        name,
+        profile_pic: picture,
       });
       await counsellor.save();
     }
 
-    const token = generateToken({ email }, '7d');
+    const token = generateToken({ email, name, picture, tokens }, '7d');
     // Redirect to homepage or dashboard
     res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
+    res.cookie('user', { email, name, picture })
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);

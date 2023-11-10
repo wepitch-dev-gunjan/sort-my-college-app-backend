@@ -423,24 +423,6 @@ exports.getReviewsCounsellor = async (req, res) => {
   }
 }
 
-exports.getSessions = (req, res) => {
-  try {
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-}
-
-exports.getSession = (req, res) => {
-  try {
-
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-}
-
 exports.createFeed = async (req, res) => {
   try {
     const { file, caption } = req.body;
