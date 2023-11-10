@@ -48,7 +48,7 @@ exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
-    const { session_date, session_time, session_duration, session_type, session_fee } = req.bod
+    const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res
         .status(404)

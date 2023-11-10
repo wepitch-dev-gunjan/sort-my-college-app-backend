@@ -49,7 +49,7 @@ router.get('/auth/google/callback', async (req, res) => {
     const token = generateToken({ email, name, picture, tokens }, '7d');
     // Redirect to homepage or dashboard
     res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.cookie('user', { email, name, picture })
+    res.cookie('user', { email, name, picture }, { maxAge: 7 * 24 * 60 * 60 * 1000 })
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
