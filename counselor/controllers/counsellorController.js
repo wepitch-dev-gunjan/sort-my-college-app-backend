@@ -451,7 +451,30 @@ exports.getReviewsCounsellor = async (req, res) => {
     res.status(200).send(reviews);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    res.status(500).send({ error: "Internal Server Error" })
+  }
+}
+
+exports.createFeed = async (req, res) => {
+  try {
+    const { file, caption } = req.body;
+    const { counsellor_id } = req.params;
+
+    const counsellor = await Counsellor.findById(counsellor_id);
+    if (!counsellor) return res.status(404).send({ error: 'Counsellor not found' });
+
+    const newFeed = new Feed({
+      feed_owner: counsellor_id,
+      feed_link: file,
+      feed_caption: caption,
+    });
+
+    await newFeed.save();
+
+    res.status(200).send({ message: 'Feed created successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 

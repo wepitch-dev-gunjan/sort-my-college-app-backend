@@ -1,8 +1,4 @@
-const {
-  sessionTimeIntoMinutes,
-  isSessionBefore24Hours,
-  generateSignature,
-} = require("../helpers/sessionHelpers");
+const { sessionTimeIntoMinutes, isSessionBefore24Hours, createMeeting, getSessionDateTime } = require("../helpers/sessionHelpers");
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
@@ -14,14 +10,14 @@ exports.getSessions = async (req, res) => {
     const { counsellor_id } = req.params;
 
     // Check if a status query is requested
-    const counselingSessions = await Session.find({
-      session_counselor: counsellor_id,
+    const sessions = await Session.find({
+      session_counselor: counsellor_id
     });
 
-    if (!counselingSessions)
+    if (!sessions)
       res.status(200).json({ message: "Sessions not found" });
 
-    res.status(200).json(counselingSessions);
+    res.status(200).json(sessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -51,21 +47,8 @@ exports.getSession = async (req, res) => {
 exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
-    const {
-      counsellor_id,
-      session_date,
-      session_time,
-      session_duration,
-      session_type,
-      session_fee,
-    } = req.body;
-
-    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-    if (!counsellor)
-      return res.status(404).send({
-        error: "Counsellor not found",
-      });
-
+    const { counsellor_id, refresh_token } = req;
+    const { session_date, session_time, session_duration, session_type, session_fee } = req.bod
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res
         .status(404)
@@ -118,13 +101,13 @@ exports.addSession = async (req, res) => {
       });
     }
 
-    const meeting_sdk_jwt = await generateSignature(
-      process.env.ZOOM_CLIENT_ID,
-      process.env.ZOOM_CLIENT_SECRET,
-      123456789,
-      0
-    );
 
+    // Calculate start and end DateTimes for the meeting
+    const startDateTime = getSessionDateTime(parsedSessionDate, parsedSessionTime);
+    const endDateTime = getSessionDateTime(parsedSessionDate, parsedSessionTime + parsedSessionDuration);
+
+    // Create Google Calendar event and get the meeting details
+    const meetingDetails = await createMeeting(startDateTime, endDateTime, refresh_token)
     // Create a new session object with Zoom meeting details
     const newSession = new Session({
       session_counselor: counsellor_id,
@@ -133,14 +116,14 @@ exports.addSession = async (req, res) => {
       session_duration: parsedSessionDuration,
       session_type,
       session_fee,
-      session_slots: session_type === "Personal" ? 1 : session_slots,
-      meeting_sdk_jwt,
+      session_slots: session_type === 'Personal' ? 1 : session_slots,
+      session_link: meetingDetails.data.hangoutLink
     });
 
     // Save the new session to the database
     const createdSession = await newSession.save();
 
-    res.status(200).send(createdSession);
+    res.status(200).send({ message: "Session successfully added", session: createdSession });
   } catch (error) {
     console.error(error);
     res.status(500).send({
@@ -211,148 +194,121 @@ exports.bookSession = async (req, res) => {
 // PUT
 exports.updateSession = async (req, res) => {
   try {
+    // Extract data from the request body
+    const { counsellor_id } = req;
     const { session_id } = req.params;
-
-    // Extract updated data from the request body
     const {
-      session_type,
       session_date,
       session_time,
       session_duration,
+      session_type,
+      session_fee,
       session_status,
+      session_available_slots,
     } = req.body;
 
-    if (session_status === "Booked") {
-      return res.status(400).json({
-        error: "You can't updtae a session status after a user booked it",
-      });
-    }
-    // Find the counseling session by ID
-    const counselingSession = await Session.findById(session_id);
 
-    if (!counselingSession) {
-      return res.status(404).json({ error: "Counseling session not found" });
-    }
+    // Parse session_date and session_duration to Date objects
+    const parsedSessionDate = new Date(session_date);
+    const parsedSessionTime = sessionTimeIntoMinutes(session_time);
+    const parsedSessionDuration = parseInt(session_duration, 10);
 
-    // Update the attributes
-    if (session_status) {
-      Session.session_status = session_status;
-    }
-    if (session_duration) {
-      Session.session_duration = session_duration;
-    }
-    if (session_type) {
-      Session.session_type = session_type;
-    }
-    if (session_date) {
-      Session.session_date = session_date;
-    }
-    if (session_time) {
-      Session.session_time = session_time;
+    // Validate session_date and session_duration
+    if (isNaN(parsedSessionDate.getTime()) || isNaN(parsedSessionDuration) || parsedSessionDuration <= 0) {
+      return res.status(400).json({ error: "Invalid session date or duration" });
     }
 
-    if (!isSessionBefore24Hours(session_date, session_time)) {
-      return res
-        .status(404)
-        .json({ error: "Can't add session before 24 hours" });
+    // Check for existing session
+    const sessionToUpdate = await Session.findById(session_id);
+
+    if (!sessionToUpdate) {
+      return res.status(404).json({ error: "Session not found" });
     }
 
-    // Save the updated counseling session
-    await counselingSession.save();
+    // Check if the session belongs to the counsellor
+    if (sessionToUpdate.session_counselor.toString() !== counsellor_id) {
+      return res.status(403).json({ error: "You can only update your own sessions" });
+    }
 
-    // Respond with a success message
-    res
-      .status(200)
-      .json({ message: "Counseling session updated successfully" });
+    // Check if the session is already booked and is not allowed to be changed
+    if (sessionToUpdate.session_status === 'Booked' && session_status !== 'Booked') {
+      return res.status(400).json({ error: "Cannot update a session that is already booked" });
+    }
+
+
+    // Calculate new time limits
+    const lowerTimeLimit = parsedSessionTime - 30;
+    const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
+
+    // Check for time conflicts
+    const conflictingSession = await Session.findOne({
+      _id: { $ne: session_id },
+      session_counselor: counsellor_id,
+      session_date: parsedSessionDate,
+      session_time: {
+        $gte: lowerTimeLimit,
+        $lt: upperTimeLimit,
+      },
+    });
+
+    if (conflictingSession) {
+      return res.status(400).json({ error: "A conflicting session exists at this date and time" });
+    }
+
+    // Update the session
+    const updatedSession = await Session.findByIdAndUpdate(
+      session_id,
+      {
+        session_date: parsedSessionDate,
+        session_time: parsedSessionTime,
+        session_duration: parsedSessionDuration,
+        session_type,
+        session_fee,
+        session_status,
+        session_available_slots,
+        // Include any additional fields you want to update
+      },
+      { new: true }
+    );
+
+    if (!updatedSession) {
+      return res.status(500).json({ error: "Failed to update the session" });
+    }
+
+    res.status(200).json({ message: "Session updated successfully", session: updatedSession });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// DELETE
+// DELETE 
 exports.deleteSession = async (req, res) => {
   try {
-    const { id } = req;
+    const { counsellor_id } = req;
     const { session_id } = req.params;
+    console.log(counsellor_id);
 
-    // Check if a status query is requested
+    // Find the session to be deleted
     const counselingSession = await Session.findOne({
       _id: session_id,
-      session_counselor: id,
+      session_counselor: counsellor_id
     });
 
-    if (!counselingSession)
-      res.status(200).json({ message: "Session not found" });
+    if (!counselingSession) {
+      return res.status(404).json({ message: "Session not found" });
+    }
 
     const { session_status } = counselingSession;
 
-    if (session_status === "Booked") {
-      return res.status(400).json({
-        error: "You can't updtae a session status after a user booked it",
-      });
+    if (session_status === 'Booked') {
+      return res.status(400).json({ error: "You can't delete a session after a user booked it" });
     }
 
-    res.status(200).json(counselingSession);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+    // Delete the session
+    await Session.deleteOne({ _id: session_id, session_counselor: counsellor_id });
 
-// these controller are not done
-exports.rescheduleSession = async (req, res) => {
-  try {
-    const { id } = req;
-    const { session_id } = req.params;
-
-    // Check if a status query is requested
-    const counselingSession = await Session.findOne({
-      _id: session_id,
-      session_counselor: id,
-    });
-
-    if (!counselingSession)
-      res.status(200).json({ message: "Session not found" });
-
-    const { session_status } = counselingSession;
-
-    if (session_status === "Booked") {
-      return res.status(400).json({
-        error: "You can't updtae a session status after a user booked it",
-      });
-    }
-
-    res.status(200).json(counselingSession);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-exports.cancelSession = async (req, res) => {
-  try {
-    const { id } = req;
-    const { session_id } = req.params;
-
-    // Check if a status query is requested
-    const counselingSession = await Session.findOne({
-      _id: session_id,
-      session_counselor: id,
-    });
-
-    if (!counselingSession)
-      res.status(200).json({ message: "Session not found" });
-
-    const { session_status } = counselingSession;
-
-    if (session_status === "Booked") {
-      return res.status(400).json({
-        error: "You can't updtae a session status after a user booked it",
-      });
-    }
-
-    res.status(200).json(counselingSession);
+    res.status(200).json({ message: "Session deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

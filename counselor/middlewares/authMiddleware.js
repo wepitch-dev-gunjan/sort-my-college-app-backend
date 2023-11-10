@@ -21,8 +21,8 @@ exports.counsellorAuth = async (req, res, next) => {
     }
 
     req.email = decoded.email;
-    req.phoneNo = decoded.phoneNo;
-    req.id = counsellor._id;
+    req.counsellor_id = counsellor._id;
+    req.refresh_token = decoded.tokens.refresh_token;
 
     next();
   } catch (error) {

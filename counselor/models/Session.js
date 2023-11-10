@@ -47,8 +47,9 @@ const sessionSchema = new Schema(
       default: this.session_slots,
       // required: true,
     },
-    meeting_sdk_jwt: {
-      type: String
+    session_link: {
+      type: String,
+      required: true
     }
   },
   {
