@@ -45,7 +45,10 @@ const sessionSchema = new Schema(
     session_available_slots: {
       type: Number,
       default: this.session_slots,
-      required: true,
+      // required: true,
+    },
+    meeting_sdk_jwt: {
+      type: String
     }
   },
   {
