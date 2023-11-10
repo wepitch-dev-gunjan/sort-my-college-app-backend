@@ -314,3 +314,68 @@ exports.deleteSession = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// need to be changed
+exports.cancelSession = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const { session_id } = req.params;
+    console.log(counsellor_id);
+
+    // Find the session to be deleted
+    const counselingSession = await Session.findOne({
+      _id: session_id,
+      session_counselor: counsellor_id
+    });
+
+    if (!counselingSession) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const { session_status } = counselingSession;
+
+    if (session_status === 'Booked') {
+      return res.status(400).json({ error: "You can't delete a session after a user booked it" });
+    }
+
+    // Delete the session
+    await Session.deleteOne({ _id: session_id, session_counselor: counsellor_id });
+
+    res.status(200).json({ message: "Session deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.rescheduleSession = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const { session_id } = req.params;
+    console.log(counsellor_id);
+
+    // Find the session to be deleted
+    const counselingSession = await Session.findOne({
+      _id: session_id,
+      session_counselor: counsellor_id
+    });
+
+    if (!counselingSession) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const { session_status } = counselingSession;
+
+    if (session_status === 'Booked') {
+      return res.status(400).json({ error: "You can't delete a session after a user booked it" });
+    }
+
+    // Delete the session
+    await Session.deleteOne({ _id: session_id, session_counselor: counsellor_id });
+
+    res.status(200).json({ message: "Session deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
