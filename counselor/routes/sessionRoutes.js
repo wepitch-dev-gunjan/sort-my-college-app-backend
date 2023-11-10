@@ -12,10 +12,10 @@ router.get('/sessions/:session_id', getSession);
 router.post('/sessions', counsellorAuth, addSession);
 
 // PUT
-router.put('/sessions/:session_id', updateSession);
-router.put('/sessions/:session_id/book', bookSession);
-router.put('/sessions/:session_id/reschedule', rescheduleSession);
-router.put('/counsellor/sessions/:session_id/cancel', cancelSession);
+router.put("/sessions/:session_id", updateSession);
+router.put("/sessions/:session_id/book", bookSession);
+router.put("/sessions/:session_id/reschedule", rescheduleSession);
+router.put("/counsellor/sessions/:session_id/cancel", cancelSession);
 // router.put('/session/:counseling_id/reschedule', rescheduleSession);
 // router.put('/session/:counseling_id/cancel', cancelSession);
 
