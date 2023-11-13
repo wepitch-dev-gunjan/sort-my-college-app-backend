@@ -53,6 +53,7 @@ exports.addSession = async (req, res) => {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
     const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
+
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res
         .status(404)
@@ -92,12 +93,14 @@ exports.addSession = async (req, res) => {
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
     const existingSession = await Session.findOne({
+      session_counselor: counsellor_id,
       session_date: parsedSessionDate,
       session_time: {
         $gte: lowerTimeLimit, // Replace with the lower limit of session_time
         $lt: upperTimeLimit, // Replace with the upper limit of session_time
       },
     });
+    console.log(existingSession)
 
     if (existingSession) {
       return res.status(400).send({
