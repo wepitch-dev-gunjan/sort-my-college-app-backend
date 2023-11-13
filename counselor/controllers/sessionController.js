@@ -1,4 +1,9 @@
-const { sessionTimeIntoMinutes, isSessionBefore24Hours, createMeeting, getSessionDateTime } = require("../helpers/sessionHelpers");
+const {
+  sessionTimeIntoMinutes,
+  isSessionBefore24Hours,
+  createMeeting,
+  getSessionDateTime,
+} = require("../helpers/sessionHelpers");
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
@@ -11,11 +16,10 @@ exports.getSessions = async (req, res) => {
 
     // Check if a status query is requested
     const sessions = await Session.find({
-      session_counselor: counsellor_id
+      session_counselor: counsellor_id,
     });
 
-    if (!sessions)
-      res.status(200).json({ message: "Sessions not found" });
+    if (!sessions) res.status(200).json({ message: "Sessions not found" });
 
     res.status(200).json(sessions);
   } catch (error) {
@@ -48,7 +52,8 @@ exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
-    const { session_date, session_time, session_duration, session_type, session_fee } = req.bod
+    const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
+
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res
         .status(404)
@@ -88,12 +93,14 @@ exports.addSession = async (req, res) => {
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
     const existingSession = await Session.findOne({
+      session_counselor: counsellor_id,
       session_date: parsedSessionDate,
       session_time: {
         $gte: lowerTimeLimit, // Replace with the lower limit of session_time
         $lt: upperTimeLimit, // Replace with the upper limit of session_time
       },
     });
+    console.log(existingSession)
 
     if (existingSession) {
       return res.status(400).send({
@@ -101,13 +108,22 @@ exports.addSession = async (req, res) => {
       });
     }
 
-
     // Calculate start and end DateTimes for the meeting
-    const startDateTime = getSessionDateTime(parsedSessionDate, parsedSessionTime);
-    const endDateTime = getSessionDateTime(parsedSessionDate, parsedSessionTime + parsedSessionDuration);
+    const startDateTime = getSessionDateTime(
+      parsedSessionDate,
+      parsedSessionTime
+    );
+    const endDateTime = getSessionDateTime(
+      parsedSessionDate,
+      parsedSessionTime + parsedSessionDuration
+    );
 
     // Create Google Calendar event and get the meeting details
-    const meetingDetails = await createMeeting(startDateTime, endDateTime, refresh_token)
+    const meetingDetails = await createMeeting(
+      startDateTime,
+      endDateTime,
+      refresh_token
+    );
     // Create a new session object with Zoom meeting details
     const newSession = new Session({
       session_counselor: counsellor_id,
@@ -116,14 +132,16 @@ exports.addSession = async (req, res) => {
       session_duration: parsedSessionDuration,
       session_type,
       session_fee,
-      session_slots: session_type === 'Personal' ? 1 : session_slots,
-      session_link: meetingDetails.data.hangoutLink
+      session_slots: session_type === "Personal" ? 1 : session_slots,
+      session_link: meetingDetails.data.hangoutLink,
     });
 
     // Save the new session to the database
     const createdSession = await newSession.save();
 
-    res.status(200).send({ message: "Session successfully added", session: createdSession });
+    res
+      .status(200)
+      .send({ message: "Session successfully added", session: createdSession });
   } catch (error) {
     console.error(error);
     res.status(500).send({
@@ -207,15 +225,20 @@ exports.updateSession = async (req, res) => {
       session_available_slots,
     } = req.body;
 
-
     // Parse session_date and session_duration to Date objects
     const parsedSessionDate = new Date(session_date);
     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
     const parsedSessionDuration = parseInt(session_duration, 10);
 
     // Validate session_date and session_duration
-    if (isNaN(parsedSessionDate.getTime()) || isNaN(parsedSessionDuration) || parsedSessionDuration <= 0) {
-      return res.status(400).json({ error: "Invalid session date or duration" });
+    if (
+      isNaN(parsedSessionDate.getTime()) ||
+      isNaN(parsedSessionDuration) ||
+      parsedSessionDuration <= 0
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Invalid session date or duration" });
     }
 
     // Check for existing session
@@ -227,14 +250,20 @@ exports.updateSession = async (req, res) => {
 
     // Check if the session belongs to the counsellor
     if (sessionToUpdate.session_counselor.toString() !== counsellor_id) {
-      return res.status(403).json({ error: "You can only update your own sessions" });
+      return res
+        .status(403)
+        .json({ error: "You can only update your own sessions" });
     }
 
     // Check if the session is already booked and is not allowed to be changed
-    if (sessionToUpdate.session_status === 'Booked' && session_status !== 'Booked') {
-      return res.status(400).json({ error: "Cannot update a session that is already booked" });
+    if (
+      sessionToUpdate.session_status === "Booked" &&
+      session_status !== "Booked"
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Cannot update a session that is already booked" });
     }
-
 
     // Calculate new time limits
     const lowerTimeLimit = parsedSessionTime - 30;
@@ -252,7 +281,9 @@ exports.updateSession = async (req, res) => {
     });
 
     if (conflictingSession) {
-      return res.status(400).json({ error: "A conflicting session exists at this date and time" });
+      return res
+        .status(400)
+        .json({ error: "A conflicting session exists at this date and time" });
     }
 
     // Update the session
@@ -275,14 +306,19 @@ exports.updateSession = async (req, res) => {
       return res.status(500).json({ error: "Failed to update the session" });
     }
 
-    res.status(200).json({ message: "Session updated successfully", session: updatedSession });
+    res
+      .status(200)
+      .json({
+        message: "Session updated successfully",
+        session: updatedSession,
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-// DELETE 
+// DELETE
 exports.deleteSession = async (req, res) => {
   try {
     const { counsellor_id } = req;
@@ -292,7 +328,7 @@ exports.deleteSession = async (req, res) => {
     // Find the session to be deleted
     const counselingSession = await Session.findOne({
       _id: session_id,
-      session_counselor: counsellor_id
+      session_counselor: counsellor_id,
     });
 
     if (!counselingSession) {
@@ -301,16 +337,173 @@ exports.deleteSession = async (req, res) => {
 
     const { session_status } = counselingSession;
 
-    if (session_status === 'Booked') {
-      return res.status(400).json({ error: "You can't delete a session after a user booked it" });
+    if (session_status === "Booked") {
+      return res
+        .status(400)
+        .json({ error: "You can't delete a session after a user booked it" });
     }
 
     // Delete the session
-    await Session.deleteOne({ _id: session_id, session_counselor: counsellor_id });
+    await Session.deleteOne({
+      _id: session_id,
+      session_counselor: counsellor_id,
+    });
 
     res.status(200).json({ message: "Session deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.cancelSession = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const { session_id } = req.params;
+
+    // Find and update the session to be cancelled
+    const counselingSession = await Session.findOneAndUpdate(
+      {
+        _id: session_id,
+        session_counselor: counsellor_id,
+        session_status: "Booked",
+      },
+      { $set: { session_status: "Cancelled" } },
+      { new: true } // This option returns the modified document
+    );
+
+    if (!counselingSession) {
+      return res
+        .status(404)
+        .json({ message: "Session not found or already cancelled" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Session cancelled successfully",
+        session: counselingSession,
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// need to be changed
+exports.rescheduleSession = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { counsellor_id, refresh_token } = req;
+    const { session_id } = req.params;
+    const {
+      session_date,
+      session_time,
+      session_duration,
+      session_type,
+      session_fee,
+    } = req.body;
+
+    // Check if any of the required fields are missing
+    if (
+      !session_date ||
+      !session_time ||
+      !session_duration ||
+      !session_type ||
+      !session_fee
+    ) {
+      return res.status(400).send({
+        error: "Missing required fields",
+      });
+    }
+
+    // Parse session_date and session_duration to Date objects
+    const parsedSessionDate = new Date(session_date);
+    const parsedSessionTime = sessionTimeIntoMinutes(session_time);
+    const parsedSessionDuration = parseInt(session_duration, 10);
+
+    // Check if session_date is a valid date and session_duration is a positive number
+    if (
+      isNaN(parsedSessionDate) ||
+      isNaN(parsedSessionDuration) ||
+      parsedSessionDuration <= 0
+    ) {
+      return res.status(400).send({
+        error: "Invalid session_date",
+      });
+    }
+
+    const lowerTimeLimit = parsedSessionTime - 30;
+    const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
+
+    // Check for overlapping sessions
+    const existingSession = await Session.findOne({
+      _id: session_id,
+      session_counselor: counsellor_id,
+    });
+
+    if (!existingSession) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    const overlappingSession = await Session.findOne({
+      _id: { $ne: session_id },
+      session_date: parsedSessionDate,
+      session_time: {
+        $gte: lowerTimeLimit,
+        $lt: upperTimeLimit,
+      },
+    });
+
+    if (overlappingSession) {
+      return res.status(400).send({
+        error: "A session already exists at the rescheduled date and time",
+      });
+    }
+
+    // Calculate start and end DateTimes for the rescheduled meeting
+    const startDateTime = getSessionDateTime(
+      parsedSessionDate,
+      parsedSessionTime
+    );
+    const endDateTime = getSessionDateTime(
+      parsedSessionDate,
+      parsedSessionTime + parsedSessionDuration
+    );
+
+    // Update the session with new details
+    existingSession.session_date = parsedSessionDate;
+    existingSession.session_time = parsedSessionTime;
+    existingSession.session_duration = parsedSessionDuration;
+    existingSession.session_type = session_type;
+    existingSession.session_fee = session_fee;
+    existingSession.session_slots =
+      session_type === "Personal" ? 1 : session_slots;
+
+    // Create or update Google Calendar event and get the meeting details
+    const meetingDetails = await createOrUpdateMeeting(
+      existingSession.session_link,
+      startDateTime,
+      endDateTime,
+      refresh_token
+    );
+
+    // Update the session link with the new meeting link
+    existingSession.session_link = meetingDetails.data.hangoutLink;
+
+    // Save the updated session to the database
+    const updatedSession = await existingSession.save();
+
+    res
+      .status(200)
+      .send({
+        message: "Session successfully rescheduled",
+        session: updatedSession,
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
   }
 };

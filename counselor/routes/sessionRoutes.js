@@ -1,7 +1,6 @@
 const express = require('express');
-const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession } = require('../controllers/sessionController');
+const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession, rescheduleSession, cancelSession } = require('../controllers/sessionController');
 const { counsellorAuth } = require('../middlewares/authMiddleware');
-const { rescheduleSession, cancelSession } = require('../controllers/counsellorController');
 const router = express.Router();
 
 // GET
