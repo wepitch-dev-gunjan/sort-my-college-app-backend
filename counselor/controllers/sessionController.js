@@ -52,7 +52,13 @@ exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
-    const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
+    const {
+      session_date,
+      session_time,
+      session_duration,
+      session_type,
+      session_fee,
+    } = req.body;
     if (!isSessionBefore24Hours(session_date, session_time)) {
       return res
         .status(404)
@@ -303,12 +309,10 @@ exports.updateSession = async (req, res) => {
       return res.status(500).json({ error: "Failed to update the session" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Session updated successfully",
-        session: updatedSession,
-      });
+    res.status(200).json({
+      message: "Session updated successfully",
+      session: updatedSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -375,12 +379,10 @@ exports.cancelSession = async (req, res) => {
         .json({ message: "Session not found or already cancelled" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Session cancelled successfully",
-        session: counselingSession,
-      });
+    res.status(200).json({
+      message: "Session cancelled successfully",
+      session: counselingSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -491,12 +493,10 @@ exports.rescheduleSession = async (req, res) => {
     // Save the updated session to the database
     const updatedSession = await existingSession.save();
 
-    res
-      .status(200)
-      .send({
-        message: "Session successfully rescheduled",
-        session: updatedSession,
-      });
+    res.status(200).send({
+      message: "Session successfully rescheduled",
+      session: updatedSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send({
