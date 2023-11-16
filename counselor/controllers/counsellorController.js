@@ -89,7 +89,7 @@ exports.getCounsellor = async (req, res) => {
 
     if (!counsellor) {
       return res.status(404).send({
-        error: "Unauthorised user",
+        error: "No counsellor found with the provided id",
       });
     }
 
@@ -129,6 +129,7 @@ exports.getCounsellor = async (req, res) => {
     const messagedCounsellor = {
       name: counsellor.name,
       email: counsellor.email,
+      cover_image: counsellor.cover_image,
       average_rating: counsellor.average_rating,
       followers_count,
       experience_in_years: counsellor.experience_in_years,
@@ -328,6 +329,7 @@ exports.getCounsellors = async (req, res) => {
       console.log(counsellor);
       return {
         name: counsellor.name,
+        profile_pic: counsellor.profile_pic,
         designation: counsellor.designation,
         qualifications: counsellor.specializations,
         next_session: counsellor.next_session,
@@ -338,6 +340,8 @@ exports.getCounsellors = async (req, res) => {
         reviews: counsellor.client_testimonials.length,
       };
     });
+
+    console.log(massagedCounsellors)
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
