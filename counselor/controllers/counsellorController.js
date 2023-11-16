@@ -127,6 +127,7 @@ exports.getCounsellor = async (req, res) => {
     }
 
     const messagedCounsellor = {
+      _id: counsellor._id,
       name: counsellor.name,
       email: counsellor.email,
       cover_image: counsellor.cover_image,
@@ -328,6 +329,7 @@ exports.getCounsellors = async (req, res) => {
     const massagedCounsellors = counsellors.map((counsellor) => {
       console.log(counsellor);
       return {
+        _id: counsellor._id,
         name: counsellor.name,
         profile_pic: counsellor.profile_pic,
         designation: counsellor.designation,
