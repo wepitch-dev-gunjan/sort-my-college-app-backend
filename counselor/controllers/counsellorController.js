@@ -47,6 +47,11 @@ exports.createCounsellor = async (req, res) => {
       }
     }
 
+    const counsellor = await Counsellor.findOne({ email });
+    if (counsellor) return res.status(400).send({
+      error: "Email already exists"
+    })
+
     const messagedCounsellor = {};
 
     if (name) messagedCounsellor.name = name;
