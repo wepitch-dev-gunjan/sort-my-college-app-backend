@@ -52,7 +52,11 @@ server.get('/', (req, res) => {
   res.send('welcome');
 });
 
-const httpsServer = https.createServer(serverOptions, server.app);
+const httpsServer = https.createServer(serverOptions, server);
+
+httpsServer.on('error', (err) => {
+  console.error('HTTPS server encountered an error:', err);
+});
 
 httpsServer.listen(PORT, () => {
   console.log('HTTPS server started at port: ' + PORT);
