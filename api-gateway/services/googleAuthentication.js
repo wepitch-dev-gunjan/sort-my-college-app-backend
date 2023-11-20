@@ -1,7 +1,7 @@
 const express = require('express');
 const { google } = require('googleapis');
 const { FRONTEND_URL, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI } = process.env;
-const { generateToken } = require('../helpers/counsellorHelpers');
+const { generateToken } = require('../../counselor/helpers/counsellorHelpers');
 const Counsellor = require('../../counselor/models/Counsellor');
 
 const router = express.Router();
