@@ -50,9 +50,22 @@ router.get('/auth/google/callback', async (req, res) => {
     const _id = counsellor._id;
 
     const token = generateToken({ email, name, picture, tokens }, '7d');
-    // Redirect to homepage or dashboard
-    res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, { maxAge: 7 * 24 * 60 * 60 * 1000 })
+    // Setting cookies with appropriate flags
+    const cookieOptions = {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'strict',
+      domain: `${FRONTEND_URL}`, // Replace with your domain
+      path: '/',
+    };
+
+    // Set secure flag only in production (HTTPS)
+    if (process.env.NODE_ENV === 'production') {
+      cookieOptions.secure = true;
+    }
+
+    res.cookie('token', token, cookieOptions);
+    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, cookieOptions);
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
