@@ -51,23 +51,9 @@ router.get('/auth/google/callback', async (req, res) => {
 
     const token = generateToken({ email, name, picture, tokens }, '7d');
     // Setting cookies with appropriate flags for secure connections
-    res.cookie('token', token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: true, // Set to true for HTTPS connections
-      sameSite: 'strict',
-      domain: `${FRONTEND_URL}`,
-      path: '/',
-    });
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: true,
-      sameSite: 'strict',
-      domain: `${FRONTEND_URL}`,
-      path: '/',
-    });
-    const redirectURL = `${FRONTEND_URL}/store-data?token=${token}&_id=${_id}&email=${email}&name=${name}&profile_pic=${counsellor.profile_pic}`;
-    // res.redirect(`${FRONTEND_URL}/`);
-    res.redirect(redirectURL);
+    res.cookie('token', token);
+    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic });
+    res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
     res.redirect(`${FRONTEND_URL}/login`);

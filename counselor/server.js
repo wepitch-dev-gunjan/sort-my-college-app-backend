@@ -15,9 +15,7 @@ app.use(express.json());
 
 // Configure CORS
 const corsOptions = {
-  origin: "https://counsellor.sortmycollege.com",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type,Authorization",
+  origin: "*",
   credentials: true, // Allow cookies to be sent cross-origin
 };
 
