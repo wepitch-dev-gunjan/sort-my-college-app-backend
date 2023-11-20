@@ -65,7 +65,9 @@ router.get('/auth/google/callback', async (req, res) => {
       domain: `${FRONTEND_URL}`,
       path: '/',
     });
-    res.redirect(`${FRONTEND_URL}/`);
+    const redirectURL = `${FRONTEND_URL}/store-data?token=${token}&_id=${_id}&email=${email}&name=${name}&profile_pic=${counsellor.profile_pic}`;
+    // res.redirect(`${FRONTEND_URL}/`);
+    res.redirect(redirectURL);
   } catch (error) {
     console.error(error);
     res.redirect(`${FRONTEND_URL}/login`);
