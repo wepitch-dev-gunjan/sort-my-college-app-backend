@@ -1,5 +1,6 @@
 const gateway = require('fast-gateway');
 const https = require('https');
+const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
@@ -13,10 +14,11 @@ const {
   NOTIFICATION_SERVICES_PORT
 } = process.env;
 
+
 const serverOptions = {
-  key: fs.readFileSync('private.key'),
-  cert: fs.readFileSync('certificate.crt'),
-  ca: fs.readFileSync('ca_bundle.crt')
+  key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
+  cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
+  ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
 };
 
 const server = gateway({
