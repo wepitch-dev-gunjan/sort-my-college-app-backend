@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const { readdirSync } = require("fs");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
 
 require("dotenv").config();
 const PORT = process.env.PORT || 8001;
@@ -11,6 +12,7 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/sort-m
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(cookieParser());
 
 // CORS configuration
 app.use(cors());

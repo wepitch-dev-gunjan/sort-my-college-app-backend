@@ -52,15 +52,15 @@ router.get('/auth/google/callback', async (req, res) => {
     const token = generateToken({ email, name, picture, tokens }, '7d');
     // Setting cookies with appropriate flags for secure connections
     res.cookie('token', token, {
-      maxAge: 900000,
-      // httpOnly: true
+      maxAge: 24 * 60 * 60,
+      httpOnly: true, // Ensures the cookie is only accessed through HTTP requests
+      secure: true, // Makes the cookie secure (works only in HTTPS)
     });
     res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, {
-      maxAge: 900000,
-      // httpOnly: true
+      maxAge: 24 * 60 * 60,
+      httpOnly: true, // Ensures the cookie is only accessed through HTTP requests
+      secure: true, // Makes the cookie secure (works only in HTTPS)
     });
-    res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
