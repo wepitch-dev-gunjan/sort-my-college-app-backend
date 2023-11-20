@@ -25,6 +25,7 @@ router.get('/auth/google', (req, res) => {
 
 // Route to handle the Google OAuth2 callback
 router.get('/auth/google/callback', async (req, res) => {
+  console.log('code');
   const { code } = req.query;
   try {
     // Assuming you have previously set up oauth2Client
