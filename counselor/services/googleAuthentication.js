@@ -11,6 +11,7 @@ const oauth2Client = new google.auth.OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECR
 
 // Route for initiating Google OAuth2 authentication
 router.get('/auth/google', (req, res) => {
+  console.log(OAUTH2_REDIRECT_URI);
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -25,7 +26,6 @@ router.get('/auth/google', (req, res) => {
 
 // Route to handle the Google OAuth2 callback
 router.get('/auth/google/callback', async (req, res) => {
-  console.log('code');
   const { code } = req.query;
   try {
     // Assuming you have previously set up oauth2Client
@@ -51,22 +51,8 @@ router.get('/auth/google/callback', async (req, res) => {
 
     const token = generateToken({ email, name, picture, tokens }, '7d');
     // Setting cookies with appropriate flags for secure connections
-    res.cookie('token', token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true, // Set to true for HTTPS connections
-      sameSite: 'strict',
-      domain: `${FRONTEND_URL}`,
-      path: '/',
-    });
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      domain: `${FRONTEND_URL}`,
-      path: '/',
-    });
+    res.cookie('token', token);
+    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic });
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
