@@ -48,6 +48,20 @@ const server = gateway({
   ]
 });
 
+// Middleware to set CORS headers and allow credentials
+server.use((req, res, next) => {
+  // Set the Access-Control-Allow-Origin to the incoming Origin if using HTTPS
+  const origin = req.headers.origin;
+  if (origin && origin.startsWith('https://')) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  next();
+});
+
 server.get('/', (req, res) => {
   res.send('welcome');
 });
