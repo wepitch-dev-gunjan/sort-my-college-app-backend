@@ -53,11 +53,11 @@ router.get('/auth/google/callback', async (req, res) => {
     // Setting cookies with appropriate flags for secure connections
     res.cookie('token', token, {
       maxAge: 900000,
-      httpOnly: true
+      // httpOnly: true
     });
     res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, {
       maxAge: 900000,
-      httpOnly: true
+      // httpOnly: true
     });
     res.setHeader('Access-Control-Allow-Origin', FRONTEND_URL);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
