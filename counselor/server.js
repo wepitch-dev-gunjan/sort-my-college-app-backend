@@ -13,10 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // CORS configuration
-app.use(cors({
-  origin: "https://counsellor.sortmycollege.com",
-  credentials: true,
-}));
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
@@ -30,15 +27,6 @@ mongoose.connection.on("connected", () => {
 
 mongoose.connection.on("error", (err) => {
   console.error("MongoDB connection error:", err);
-});
-
-// Middleware to set CORS headers and allow credentials
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://counsellor.sortmycollege.com");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  next();
 });
 
 // Routes
