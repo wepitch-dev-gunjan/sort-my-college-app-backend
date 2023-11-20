@@ -15,7 +15,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 // CORS configuration
-app.use(cors());
+app.use(
+  cors({
+    origin: 'https://counsellor.sortmycollege.com', // Replace with your Vercel app URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Allows cookies and authorization headers
+  })
+);
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
