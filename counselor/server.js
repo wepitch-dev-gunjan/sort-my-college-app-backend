@@ -13,8 +13,15 @@ const MONGODB_URI =
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// security options
-app.use(cors());
+// Configure CORS
+const corsOptions = {
+  origin: ["http://yourfrontendurl.com", "https://yourfrontendurl.com"], // Add your frontend URLs here
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true, // Allow cookies to be sent cross-origin
+};
+
+app.use(cors(corsOptions));
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
