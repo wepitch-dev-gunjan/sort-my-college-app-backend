@@ -15,7 +15,7 @@ app.use(express.json());
 
 // Configure CORS
 const corsOptions = {
-  origin: ["http://yourfrontendurl.com", "https://yourfrontendurl.com"], // Add your frontend URLs here
+  origin: ["https://sortmycollege.com"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: "Content-Type,Authorization",
   credentials: true, // Allow cookies to be sent cross-origin
