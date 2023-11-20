@@ -25,27 +25,27 @@ const server = gateway({
   routes: [
     {
       prefix: '/user',
-      target: `http://127.0.0.1:${USER_PORT}`
+      target: `https://127.0.0.1:${USER_PORT}`
     },
     {
       prefix: '/counsellor',
-      target: `http://127.0.0.1:${COUNSELLOR_PORT}`
+      target: `https://127.0.0.1:${COUNSELLOR_PORT}`
     },
     {
       prefix: '/ep',
-      target: `http://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`
+      target: `https://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`
     },
     {
       prefix: '/vc',
-      target: `http://127.0.0.1:${VOCATIONAL_COURSES_PORT}`
+      target: `https://127.0.0.1:${VOCATIONAL_COURSES_PORT}`
     },
     {
       prefix: '/webinars',
-      target: `http://127.0.0.1:${WEBINARS_PORT}`
+      target: `https://127.0.0.1:${WEBINARS_PORT}`
     },
     {
       prefix: '/notification',
-      target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
+      target: `https://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
     },
   ]
 });
