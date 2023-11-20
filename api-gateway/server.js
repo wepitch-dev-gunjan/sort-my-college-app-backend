@@ -1,4 +1,3 @@
-const path = require('path');
 const gateway = require('fast-gateway');
 const https = require('https');
 const fs = require('fs');
@@ -16,9 +15,9 @@ const {
 
 
 const serverOptions = {
-  key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
-  cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
-  ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
+  key: fs.readFileSync('private.key'),
+  cert: fs.readFileSync('certificate.crt'),
+  ca: fs.readFileSync('ca_bundle.crt')
 };
 
 const server = gateway({
