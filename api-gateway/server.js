@@ -1,8 +1,9 @@
-const gateway = require('fast-gateway');
+const express = require('express');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 require('dotenv').config();
 
 const {
@@ -15,6 +16,7 @@ const {
   NOTIFICATION_SERVICES_PORT
 } = process.env;
 
+const app = express();
 
 const serverOptions = {
   key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
@@ -22,51 +24,30 @@ const serverOptions = {
   ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
 };
 
-const server = gateway({
-  routes: [
-    {
-      prefix: '/user',
-      target: `http://127.0.0.1:${USER_PORT}`
-    },
-    {
-      prefix: '/counsellor',
-      target: `http://127.0.0.1:${COUNSELLOR_PORT}`
-    },
-    {
-      prefix: '/ep',
-      target: `http://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`
-    },
-    {
-      prefix: '/vc',
-      target: `http://127.0.0.1:${VOCATIONAL_COURSES_PORT}`
-    },
-    {
-      prefix: '/webinars',
-      target: `http://127.0.0.1:${WEBINARS_PORT}`
-    },
-    {
-      prefix: '/notification',
-      target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
-    },
-  ]
-});
+// Proxy configuration
+app.use('/user', createProxyMiddleware({ target: `http://127.0.0.1:${USER_PORT}`, changeOrigin: true }));
+app.use('/counsellor', createProxyMiddleware({ target: `http://127.0.0.1:${COUNSELLOR_PORT}`, changeOrigin: true }));
+app.use('/ep', createProxyMiddleware({ target: `http://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`, changeOrigin: true }));
+app.use('/vc', createProxyMiddleware({ target: `http://127.0.0.1:${VOCATIONAL_COURSES_PORT}`, changeOrigin: true }));
+app.use('/webinars', createProxyMiddleware({ target: `http://127.0.0.1:${WEBINARS_PORT}`, changeOrigin: true }));
+app.use('/notification', createProxyMiddleware({ target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`, changeOrigin: true }));
 
 // Middleware to set CORS headers and allow credentials
-server.use(
-  cors({
-    origin: 'https://counsellor.sortmycollege.com', // Replace with your Vercel app URL
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Allows cookies and authorization headers
-  })
-);
+app.use(cors({
+  origin: 'https://counsellor.sortmycollege.com', // Replace with your Vercel app URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 
-server.use("/", require("./services/googleAuthentication"));
+// Google Authentication
+app.use("/", require("./services/googleAuthentication"));
 
-server.get('/', (req, res) => {
-  res.send('welcome');
+// Default route
+app.get('/', (req, res) => {
+  res.send('Welcome');
 });
 
-const httpsServer = https.createServer(serverOptions, server);
+const httpsServer = https.createServer(serverOptions, app);
 
 httpsServer.on('error', (err) => {
   console.error('HTTPS server encountered an error:', err);
