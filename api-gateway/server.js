@@ -2,6 +2,7 @@ const gateway = require('fast-gateway');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
 require('dotenv').config();
 
 const {
@@ -51,18 +52,13 @@ const server = gateway({
 });
 
 // Middleware to set CORS headers and allow credentials
-server.use((req, res, next) => {
-  // Set the Access-Control-Allow-Origin to the incoming Origin if using HTTPS
-  const origin = req.headers.origin;
-  if (origin && origin.startsWith('https://')) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  next();
-});
+server.use(
+  cors({
+    origin: 'https://counsellor.sortmycollege.com', // Replace with your Vercel app URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true, // Allows cookies and authorization headers
+  })
+);
 
 server.get('/', (req, res) => {
   res.send('welcome');
