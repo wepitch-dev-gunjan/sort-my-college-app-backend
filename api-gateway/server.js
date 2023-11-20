@@ -60,6 +60,8 @@ server.use(
   })
 );
 
+server.use("/", require("./services/googleAuthentication"));
+
 server.get('/', (req, res) => {
   res.send('welcome');
 });
