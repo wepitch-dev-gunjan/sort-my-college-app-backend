@@ -1,6 +1,6 @@
+const path = require('path');
 const gateway = require('fast-gateway');
 const https = require('https');
-const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
@@ -25,27 +25,27 @@ const server = gateway({
   routes: [
     {
       prefix: '/user',
-      target: `https://127.0.0.1:${USER_PORT}`
+      target: `http://127.0.0.1:${USER_PORT}`
     },
     {
       prefix: '/counsellor',
-      target: `https://127.0.0.1:${COUNSELLOR_PORT}`
+      target: `http://127.0.0.1:${COUNSELLOR_PORT}`
     },
     {
       prefix: '/ep',
-      target: `https://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`
+      target: `http://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`
     },
     {
       prefix: '/vc',
-      target: `https://127.0.0.1:${VOCATIONAL_COURSES_PORT}`
+      target: `http://127.0.0.1:${VOCATIONAL_COURSES_PORT}`
     },
     {
       prefix: '/webinars',
-      target: `https://127.0.0.1:${WEBINARS_PORT}`
+      target: `http://127.0.0.1:${WEBINARS_PORT}`
     },
     {
       prefix: '/notification',
-      target: `https://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
+      target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`
     },
   ]
 });
