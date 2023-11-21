@@ -13,7 +13,8 @@ const {
   ENTRANCE_PREPARATIONS_PORT,
   VOCATIONAL_COURSES_PORT,
   WEBINARS_PORT,
-  NOTIFICATION_SERVICES_PORT
+  NOTIFICATION_SERVICES_PORT,
+  FRONTEND_URL
 } = process.env;
 
 const app = express();
@@ -24,22 +25,34 @@ const serverOptions = {
   ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
 };
 
-// Proxy configuration
-app.use('/user', createProxyMiddleware({ target: `http://127.0.0.1:${USER_PORT}`, changeOrigin: true }));
-app.use('/counsellor', createProxyMiddleware({ target: `http://127.0.0.1:${COUNSELLOR_PORT}`, changeOrigin: true }));
-app.use('/ep', createProxyMiddleware({ target: `http://127.0.0.1:${ENTRANCE_PREPARATIONS_PORT}`, changeOrigin: true }));
-app.use('/vc', createProxyMiddleware({ target: `http://127.0.0.1:${VOCATIONAL_COURSES_PORT}`, changeOrigin: true }));
-app.use('/webinars', createProxyMiddleware({ target: `http://127.0.0.1:${WEBINARS_PORT}`, changeOrigin: true }));
-app.use('/notification', createProxyMiddleware({ target: `http://127.0.0.1:${NOTIFICATION_SERVICES_PORT}`, changeOrigin: true }));
+// Configure proxy for each service
+const proxyConfig = {
+  '/user': USER_PORT,
+  '/counsellor': COUNSELLOR_PORT,
+  '/ep': ENTRANCE_PREPARATIONS_PORT,
+  '/vc': VOCATIONAL_COURSES_PORT,
+  '/webinars': WEBINARS_PORT,
+  '/notification': NOTIFICATION_SERVICES_PORT
+};
+
+Object.keys(proxyConfig).forEach(context => {
+  app.use(context, createProxyMiddleware({
+    target: `http://127.0.0.1:${proxyConfig[context]}`,
+    changeOrigin: true,
+    pathRewrite: {
+      [`^${context}`]: '' // Rewrite the path
+    }
+  }));
+});
 
 // Middleware to set CORS headers and allow credentials
 app.use(cors({
-  origin: 'https://counsellor.sortmycollege.com', // Replace with your Vercel app URL
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: FRONTEND_URL, // Replace with your Vercel app URL
   credentials: true,
 }));
 
 // Google Authentication
+// Ensure you have a service file that handles this
 app.use("/", require("./services/googleAuthentication"));
 
 // Default route

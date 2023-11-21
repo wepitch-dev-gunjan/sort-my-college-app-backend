@@ -11,7 +11,6 @@ const oauth2Client = new google.auth.OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECR
 
 // Route for initiating Google OAuth2 authentication
 router.get('/auth/google', (req, res) => {
-  console.log(OAUTH2_REDIRECT_URI);
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -31,12 +30,12 @@ router.get('/auth/google/callback', async (req, res) => {
     // Assuming you have previously set up oauth2Client
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
     const { email, name, picture } = counsellorInfo.data;
 
     // Save user information to the database if not already exists
+    console.log(await Counsellor.findOne({ email }))
     let counsellor = await Counsellor.findOne({ email });
     if (!counsellor) {
       counsellor = new Counsellor({
