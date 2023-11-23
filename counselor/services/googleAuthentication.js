@@ -11,7 +11,6 @@ const oauth2Client = new google.auth.OAuth2(OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECR
 
 // Route for initiating Google OAuth2 authentication
 router.get('/auth/google', (req, res) => {
-  console.log(OAUTH2_REDIRECT_URI);
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -31,7 +30,6 @@ router.get('/auth/google/callback', async (req, res) => {
     // Assuming you have previously set up oauth2Client
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
     const { email, name, picture } = counsellorInfo.data;
@@ -51,16 +49,17 @@ router.get('/auth/google/callback', async (req, res) => {
 
     const token = generateToken({ email, name, picture, tokens }, '7d');
     // Setting cookies with appropriate flags for secure connections
-    res.cookie('token', token, {
-      maxAge: 24 * 60 * 60,
-      httpOnly: true, // Ensures the cookie is only accessed through HTTP requests
-      secure: true, // Makes the cookie secure (works only in HTTPS)
-    });
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, {
-      maxAge: 24 * 60 * 60,
-      httpOnly: true, // Ensures the cookie is only accessed through HTTP requests
-      secure: true, // Makes the cookie secure (works only in HTTPS)
-    });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None', // or 'Lax' based on your requirement
+      domain: 'sortmycollege.com',
+      maxAge: 24 * 60 * 60
+    };
+
+    res.cookie('token', token, cookieOptions);
+    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, cookieOptions);
     res.redirect(`${FRONTEND_URL}/`);
   } catch (error) {
     console.error(error);
