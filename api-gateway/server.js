@@ -14,8 +14,7 @@ const {
   VOCATIONAL_COURSES_PORT,
   WEBINARS_PORT,
   NOTIFICATION_SERVICES_PORT,
-  FRONTEND_URL,
-  BACKEND_URL
+  FRONTEND_URL
 } = process.env;
 
 const app = express();
@@ -38,7 +37,7 @@ const proxyConfig = {
 
 Object.keys(proxyConfig).forEach(context => {
   app.use(context, createProxyMiddleware({
-    target: `${BACKEND_URL}:${proxyConfig[context]}`,
+    target: `http://127.0.0.1:${proxyConfig[context]}`,
     changeOrigin: true,
     pathRewrite: {
       [`^${context}`]: '' // Rewrite the path
