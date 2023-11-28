@@ -133,6 +133,11 @@ const counsellorSchema = new Schema({
     default: ''
   }],
 
+  verified: {
+    type: Boolean,
+    default: false
+  }
+
 }, {
   timestamps: true
 });

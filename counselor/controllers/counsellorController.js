@@ -1,6 +1,3 @@
-const { uploadToS3 } = require("../helpers/feedHelpers");
-const { upload } = require("../middlewares/formMiddlewares");
-const Comment = require("../models/Comment");
 const Counsellor = require("../models/Counsellor");
 const Course = require("../models/Course");
 const Feed = require("../models/Feed");
@@ -325,6 +322,7 @@ exports.getCounsellors = async (req, res) => {
       queryObject.courses_focused = { $in: courses_focused };
     }
 
+    queryObject.verified = true;
     const counsellors = await Counsellor.find(queryObject);
 
     if (counsellors.length === 0) {
@@ -332,7 +330,6 @@ exports.getCounsellors = async (req, res) => {
     }
 
     const massagedCounsellors = counsellors.map((counsellor) => {
-      console.log(counsellor);
       return {
         _id: counsellor._id,
         name: counsellor.name,
@@ -347,8 +344,6 @@ exports.getCounsellors = async (req, res) => {
         reviews: counsellor.client_testimonials.length,
       };
     });
-
-    console.log(massagedCounsellors)
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
@@ -374,19 +369,7 @@ exports.getProfilePic = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-// const { cousellor_id } = req.params;
-// const { profile_pic } = req.body;
 
-// const counsellor = await Counsellor.findById(cousellor_id);
-// if (!counsellor) return res.status(404).send({ error: "Counsellor not found" });
-
-// const newProfilePic = new Profile_pic({
-//   profile_pic,
-// });
-
-// await newProfilePic.save();
-
-// res.status(200).send({ message: 'Profile pic uploaded successfully' });
 exports.uploadProfilePic = async (req, res) => {
   try {
     // validate counsellor

@@ -14,12 +14,26 @@ exports.getSessions = async (req, res) => {
     const { session_type, session_date, session } = req.query;
     const { counsellor_id } = req.params;
 
-    // Check if a status query is requested
-    const sessions = await Session.find({
-      session_counselor: counsellor_id,
-    });
+    // Define a filter object
+    const filter = { session_counselor: counsellor_id };
 
-    if (!sessions) res.status(200).json({ message: "Sessions not found" });
+    // Check if any query parameter exists and modify the filter accordingly
+    if (session_type) {
+      filter.session_type = session_type;
+    }
+    if (session_date) {
+      filter.session_date = session_date;
+    }
+    if (session) {
+      filter.session = session;
+    }
+
+    // Fetch sessions based on the filter
+    const sessions = await Session.find(filter);
+
+    if (!sessions || sessions.length === 0) {
+      return res.status(200).json({ message: "Sessions not found" });
+    }
 
     res.status(200).json(sessions);
   } catch (error) {
@@ -27,6 +41,7 @@ exports.getSessions = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.getSession = async (req, res) => {
   try {
