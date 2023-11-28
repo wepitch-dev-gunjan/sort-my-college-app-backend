@@ -51,7 +51,7 @@ router.get('/auth/google/callback', async (req, res) => {
     // Setting cookies with appropriate flags for secure connections
 
     const cookieOptions = {
-      httpOnly: true,
+      // httpOnly: true,
       secure: true,
       sameSite: 'None', // or 'Lax' based on your requirement
       // domain: 'counsellor.sortmycollege.com',

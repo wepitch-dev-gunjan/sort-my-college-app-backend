@@ -7,6 +7,8 @@ const { JWT_SECRET } = process.env;
 exports.counsellorAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
+    const cookie = req.headers.cookie;
+    console.log(cookie)
     if (!token) {
       return res.status(401).json({ error: 'No token found, authorization denied' });
     }
