@@ -129,22 +129,10 @@ exports.getCounsellor = async (req, res) => {
     }
 
     const messagedCounsellor = {
-      _id: counsellor._id,
-      name: counsellor.name,
-      email: counsellor.email,
-      cover_image: counsellor.cover_image,
-      average_rating: counsellor.average_rating,
+      ...counsellor._doc,
       followers_count,
-      experience_in_years: counsellor.experience_in_years,
       total_sessions_attended,
-      reviews: counsellor.reviews,
-      how_will_i_help: counsellor.how_will_i_help,
-      qualifications: counsellor.qualifications,
-      languages_spoken: counsellor.languages_spoken,
-      location: counsellor.location,
-      gender: counsellor.gender,
       age,
-      client_testimonials: counsellor.client_testimonials,
       group_session_price,
       personal_session_price,
     };
@@ -268,22 +256,24 @@ exports.editProfile = async (req, res) => {
       updateFields.courses_focused = req.body.courses_focused;
     }
 
-    const updatedUser = await Counsellor.findByIdAndUpdate(
+    const updatedCounselor = await Counsellor.findByIdAndUpdate(
       req.params.counsellor_id,
       updateFields,
       { new: true }
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found" });
+    if (!updatedCounselor) {
+      return res.status(404).json({ error: "Counselor not found" });
     }
 
-    res.status(200).json(updatedUser);
+    console.log(updatedCounselor)
+    res.status(200).json(updatedCounselor);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.deleteCounsellor = async (req, res) => {
   try {

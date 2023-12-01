@@ -12,7 +12,7 @@ const counsellorSchema = new Schema({
 
   phone_no: {
     type: String,
-    unique: true,
+    default: ''
   },
 
   profile_pic: {
@@ -31,6 +31,7 @@ const counsellorSchema = new Schema({
         : 'data:image/jpeg;base64,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' // Female default cover image
     },
   },
+
   gender: {
     type: String,
     enum: ['Male', 'Female', 'Other'],
@@ -44,6 +45,11 @@ const counsellorSchema = new Schema({
     country: String
   },
 
+  nationality: {
+    type: String,
+    default: 'Indian'
+  },
+
   designation: {
     type: String,
   },
@@ -53,6 +59,11 @@ const counsellorSchema = new Schema({
       type: String,
     }
   ],
+
+  date_of_birth: {
+    type: Date,
+    default: new Date()
+  },
 
   next_session_time: {
     type: Date,
@@ -133,6 +144,21 @@ const counsellorSchema = new Schema({
     default: ''
   }],
 
+  approach_of_counselling: {
+    type: String,
+    default: 'Google Meet'
+  },
+
+  group_session_price: {
+    type: Number,
+    default: 0
+  },
+
+  personal_session_price: {
+    type: Number,
+    default: 0
+  },
+
   verified: {
     type: Boolean,
     default: false
@@ -140,6 +166,8 @@ const counsellorSchema = new Schema({
 
 }, {
   timestamps: true
+}, {
+  strict: false
 });
 
 module.exports = model('Counsellor', counsellorSchema);
