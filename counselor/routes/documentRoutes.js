@@ -12,8 +12,8 @@ const router = express.Router();
 router.post("/document", postDocument);
 
 //get
-router.get("/document/:document_id/documents", getDocuments);
-router.get("/document/:document_id/document", getDocument);
+router.get("/document", getDocuments);
+router.get("/document/:document_id", getDocument);
 
 // PUT
 router.put("/document/:document_id", editDocument);
