@@ -256,6 +256,10 @@ exports.editProfile = async (req, res) => {
       updateFields.courses_focused = req.body.courses_focused;
     }
 
+    if (req.body.date_of_birth) {
+      updateFields.date_of_birth = req.body.date_of_birth;
+    }
+
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
       req.params.counsellor_id,
       updateFields,

@@ -9,6 +9,7 @@ const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 exports.sessionTimeIntoMinutes = (time) => {
   const sessionTime = time;
+  console.log(sessionTime)
 
   // Split the session time into hours and minutes
   const [hours, minutes] = sessionTime.split(":").map(Number);

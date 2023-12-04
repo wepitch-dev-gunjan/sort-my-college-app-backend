@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, mongoose } = require('mongoose');
 
 const sessionSchema = new Schema(
   {
@@ -45,7 +45,6 @@ const sessionSchema = new Schema(
     session_available_slots: {
       type: Number,
       default: this.session_slots,
-      // required: true,
     },
     session_link: {
       type: String,
@@ -54,7 +53,9 @@ const sessionSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  }, {
+  strict: false
+}
 );
 
 sessionSchema.pre('save', async function (next) {
@@ -76,14 +77,20 @@ sessionSchema.pre('save', async function (next) {
 
   // Update counsellor's groupSessionPrice if a minimum price exists
   if (minGroupSessionPrice) {
-    session.counsellor.groupSessionPrice = minGroupSessionPrice.price;
+    session.session_price = minGroupSessionPrice.session_price;
   }
 
   // Update counsellor's personalSessionPrice if a minimum price exists
   if (minPersonalSessionPrice) {
-    session.counsellor.personalSessionPrice = minPersonalSessionPrice.price;
+    session.session_price = minPersonalSessionPrice.session_price;
   }
 
+  if (session.isNew) {
+    // Set session_available_slots to session_slots value if it's not already defined
+    if (!session.session_available_slots) {
+      session.session_available_slots = session.session_slots;
+    }
+  }
   next();
 });
 

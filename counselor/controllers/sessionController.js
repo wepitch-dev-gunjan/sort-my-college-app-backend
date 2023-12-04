@@ -11,31 +11,60 @@ const session_slots = 10;
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { session_type, session_date, session } = req.query;
+    const { session_type, session_date } = req.query;
     const { counsellor_id } = req.params;
 
-    // Define a filter object
     const filter = { session_counselor: counsellor_id };
 
-    // Check if any query parameter exists and modify the filter accordingly
     if (session_type) {
       filter.session_type = session_type;
     }
+
     if (session_date) {
-      filter.session_date = session_date;
-    }
-    if (session) {
-      filter.session = session;
+      filter.session_date = new Date(session_date);
     }
 
-    // Fetch sessions based on the filter
-    const sessions = await Session.find(filter);
+    let sessions = await Session.find(filter);
+    let total_available_slots = 0
 
-    if (!sessions || sessions.length === 0) {
-      return res.status(200).json({ message: "Sessions not found" });
+    if (sessions.length > 0) {
+      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      const massagedSessions = sessions.map(session => {
+        total_available_slots += session.session_available_slots;
+        const sessionDate = new Date(session.session_date);
+        let session_date = ''
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (sessionDate.toDateString() == today.toDateString()) {
+          session_date = "today";
+        } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
+          session_date = "tomorrow";
+        } else {
+          const dayDiff = Math.ceil((sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+
+          if (dayDiff <= 7 && dayDiff > 0) {
+            session_date = daysOfWeek[sessionDate.getDay()]
+            // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
+          } else {
+            // Keep the original date if not within the next 7 days
+            session_date = sessionDate.toDateString().slice(3);
+          }
+        }
+        return {
+          ...session._doc,
+          session_date,
+        };
+      });
+      res.status(200).json({
+        total_available_slots,
+        sessions: massagedSessions
+      });
     }
 
-    res.status(200).json(sessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
