@@ -1,4 +1,4 @@
-const DocumentType = require("../models/DocumentTypeType");
+const DocumentType = require("../models/DocumentType");
 
 exports.getDocumentTypes = async (req, res) => {
   try {
@@ -45,7 +45,7 @@ exports.editDocumentType = async (req, res) => {
   }
 };
 
-exports.postDocumentType = async (req, res) => {
+exports.createDocumentType = async (req, res) => {
   try {
     const { name } = req.body;
     const existingDocumentType = await DocumentType.findOne({ name });

@@ -1,22 +1,16 @@
 const express = require("express");
-const {
-  editdocumentType,
-  deletedocumentType,
-  postdocumentType,
-  getdocumentTypes,
-  getdocumentType,
-} = require("../controllers/documentTypeController");
+const { createDocumentType, getDocumentTypes, getDocumentType, editDocumentType, deleteDocumentType } = require("../controllers/documentTypeController");
 const router = express.Router();
 
 //post
-router.post("/documentType", postdocumentType);
+router.post("/documentType", createDocumentType);
 
 //get
-router.get("/documentType/:documentType_id/documentTypes", getdocumentTypes);
-router.get("/documentType/:documentType_id/documentType", getdocumentType);
+router.get("/documentType/:documentType_id/documentTypes", getDocumentTypes);
+router.get("/documentType/:documentType_id/documentType", getDocumentType);
 
 // PUT
-router.put("/documentType/:documentType_id", editdocumentType);
+router.put("/documentType/:documentType_id", editDocumentType);
 
-router.delete("/documentType/:documentType_id", deletedocumentType);
+router.delete("/documentType/:documentType_id", deleteDocumentType);
 module.exports = router;

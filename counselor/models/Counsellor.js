@@ -39,10 +39,22 @@ const counsellorSchema = new Schema({
   },
 
   location: {
-    pin_code: Number,
-    city: String,
-    state: String,
-    country: String
+    pin_code: {
+      type: String,
+      default: 'PIN CODE'
+    },
+    city: {
+      type: String,
+      default: 'CITY'
+    },
+    state: {
+      type: String,
+      default: 'STATE'
+    },
+    country: {
+      type: String,
+      default: 'COUNTRY'
+    }
   },
 
   nationality: {
