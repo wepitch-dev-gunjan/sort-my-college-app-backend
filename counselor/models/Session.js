@@ -14,6 +14,9 @@ const sessionSchema = new Schema(
     session_date: {
       type: Date,
     },
+    session_massaged_date: {
+      type: String,
+    },
     session_time: {
       type: Number,
     },

@@ -33,30 +33,30 @@ exports.getSessions = async (req, res) => {
       const massagedSessions = sessions.map(session => {
         total_available_slots += session.session_available_slots;
         const sessionDate = new Date(session.session_date);
-        let session_date = ''
+        let session_massaged_date = ''
 
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
         if (sessionDate.toDateString() == today.toDateString()) {
-          session_date = "today";
+          session_massaged_date = "today";
         } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
-          session_date = "tomorrow";
+          session_massaged_date = "tomorrow";
         } else {
           const dayDiff = Math.ceil((sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
 
           if (dayDiff <= 7 && dayDiff > 0) {
-            session_date = daysOfWeek[sessionDate.getDay()]
+            session_massaged_date = daysOfWeek[sessionDate.getDay()]
             // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
           } else {
             // Keep the original date if not within the next 7 days
-            session_date = sessionDate.toDateString().slice(3);
+            session_massaged_date = sessionDate.toDateString().slice(3);
           }
         }
         return {
           ...session._doc,
-          session_date,
+          session_massaged_date,
         };
       });
       res.status(200).json({
@@ -65,6 +65,10 @@ exports.getSessions = async (req, res) => {
       });
     }
 
+    res.status(200).json({
+      total_available_slots: 0,
+      sessions: []
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
