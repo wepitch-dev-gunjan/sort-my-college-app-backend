@@ -301,19 +301,19 @@ exports.getCounsellors = async (req, res) => {
     const queryObject = {};
 
     if (degree_focused) {
-      queryObject.degree_focused = { $in: degree_focused };
+      queryObject.degree_focused = degree_focused;
     }
 
     if (locations_focused) {
-      queryObject.locations_focused = { $in: locations_focused };
+      queryObject.locations_focused = locations_focused;
     }
 
     if (courses_focused) {
-      queryObject.courses_focused = { $in: courses_focused };
+      queryObject.courses_focused = courses_focused;
     }
 
-    queryObject.verified = true;
-    const counsellors = await Counsellor.find(queryObject);
+    // If no query parameters are provided, remove the queryObject to fetch all counselors
+    const counsellors = await Counsellor.find(Object.keys(queryObject).length === 0 ? {} : queryObject);
 
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });
