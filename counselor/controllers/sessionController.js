@@ -63,12 +63,12 @@ exports.getSessions = async (req, res) => {
         total_available_slots,
         sessions: massagedSessions
       });
+    } else {
+      res.status(200).json({
+        total_available_slots: 0,
+        sessions: []
+      });
     }
-
-    res.status(200).json({
-      total_available_slots: 0,
-      sessions: []
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

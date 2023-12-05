@@ -32,7 +32,7 @@ router.get('/auth/google/callback', async (req, res) => {
     oauth2Client.setCredentials(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
-    const { email, name, picture } = counsellorInfo.data;
+    let { email, name, picture } = counsellorInfo.data;
 
     // Save user information to the database if not already exists
     let counsellor = await Counsellor.findOne({ email });
@@ -46,8 +46,12 @@ router.get('/auth/google/callback', async (req, res) => {
     }
 
     const _id = counsellor._id;
-
-    const token = generateToken({ email, name, picture, tokens }, '7d');
+    const token = generateToken({
+      email: counsellor.email,
+      name: counsellor.name,
+      picture: counsellor.profile_pic,
+      tokens
+    }, '7d');
     // Setting cookies with appropriate flags for secure connections
 
     const cookieOptions = {

@@ -3,7 +3,7 @@ const Course = require("../models/Course");
 const Feed = require("../models/Feed");
 
 // SMCMA-86
-exports.createCounsellor = async (req, res) => {
+exports.register = async (req, res) => {
   try {
     // Extract data from the request body
     const {
@@ -15,13 +15,79 @@ exports.createCounsellor = async (req, res) => {
       gender,
       location,
       destination,
-      qualifications,
-      languages_spoken,
-      experience_in_years,
-      how_will_i_help,
-      degree_focused,
-      locations_focused,
-      courses_focused,
+    } = req.body;
+
+    // Search for courses in the Course database based on the values in courses_focused array
+    const existingCourses = await Course.find({
+      course_name: { $in: courses_focused },
+    });
+    const existingCourseNames = existingCourses.map(
+      (course) => course.course_name
+    );
+    // Create new entries for missing courses
+    if (courses_focused) {
+      const missingCourses = courses_focused.filter(
+        (course) => !existingCourseNames.includes(course)
+      );
+      for (const course of missingCourses) {
+        const newCourse = new Course({
+          course_name: course,
+        });
+        await newCourse.save();
+      }
+    }
+
+    const counsellor = await Counsellor.findOne({ email });
+    if (counsellor) return res.status(400).send({
+      error: "Email already exists"
+    })
+
+    const messagedCounsellor = {};
+
+    if (name) messagedCounsellor.name = name;
+    if (email) messagedCounsellor.email = email;
+    if (phone_no) messagedCounsellor.phone_no = phone_no;
+    if (profile_pic) messagedCounsellor.profile_pic = profile_pic;
+    if (cover_image) messagedCounsellor.cover_image = cover_image;
+    if (gender) messagedCounsellor.gender = gender;
+    if (location) messagedCounsellor.location = location;
+    if (destination) messagedCounsellor.destination = destination;
+    if (qualifications) messagedCounsellor.qualifications = qualifications;
+    if (languages_spoken)
+      messagedCounsellor.languages_spoken = languages_spoken;
+    if (experience_in_years)
+      messagedCounsellor.experience_in_years = experience_in_years;
+    if (how_will_i_help) messagedCounsellor.how_will_i_help = how_will_i_help;
+    if (degree_focused) messagedCounsellor.degree_focused = degree_focused;
+    if (locations_focused)
+      messagedCounsellor.locations_focused = locations_focused;
+    if (courses_focused) messagedCounsellor.courses_focused = courses_focused;
+
+    // Create a new counselor object
+    const newCounsellor = new Counsellor(messagedCounsellor);
+
+    // Save the new counselor to the database
+    const createdCounsellor = await newCounsellor.save();
+
+    // Respond with the created counselor's details
+    res.status(201).json(createdCounsellor);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+exports.login = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const {
+      name,
+      email,
+      phone_no,
+      profile_pic,
+      cover_image,
+      gender,
+      location,
+      destination,
     } = req.body;
 
     // Search for courses in the Course database based on the values in courses_focused array
@@ -315,6 +381,8 @@ exports.getCounsellors = async (req, res) => {
     if (courses_focused) {
       queryObject.courses_focused = courses_focused;
     }
+
+    queryObject.verified = true;
 
     // If no query parameters are provided, remove the queryObject to fetch all counselors
     const counsellors = await Counsellor.find(Object.keys(queryObject).length === 0 ? {} : queryObject);

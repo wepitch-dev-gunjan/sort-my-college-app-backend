@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const {
+  login,
+  register,
   getCounsellors,
   editProfile,
   followCounsellor,
@@ -9,7 +11,6 @@ const {
   getCounsellor,
   getFollowers,
   getReviewsCounsellor,
-  createCounsellor,
   getProfilePic,
   uploadProfilePic,
   deleteProfilePic,
@@ -32,7 +33,8 @@ router.put("/:counsellor_id/follow", followCounsellor);
 router.put("/:counsellor_id/unfollow", unfollowCounsellor);
 
 // POST
-router.post("/", createCounsellor);
+router.post("/login", login);
+router.post("/register", register);
 router.post("/:counsellor_id/review", postReviewCounsellor);
 router.post("/:counsellor_id/profile-pic", uploadProfilePic);
 
