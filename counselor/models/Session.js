@@ -18,7 +18,7 @@ const sessionSchema = new Schema(
       type: String,
     },
     session_time: {
-      type: Number,
+      type: String,
     },
     session_duration: {
       type: Number,

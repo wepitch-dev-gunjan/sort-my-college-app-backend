@@ -154,7 +154,6 @@ exports.addSession = async (req, res) => {
         $lt: upperTimeLimit, // Replace with the upper limit of session_time
       },
     });
-    console.log(existingSession)
 
     if (existingSession) {
       return res.status(400).send({
@@ -178,10 +177,17 @@ exports.addSession = async (req, res) => {
       endDateTime,
       refresh_token
     );
+
+    const parsedHours = Math.floor(parsedSessionTime / 60); // Get the hours
+    const parsedMinutes = parsedSessionTime % 60; // Get the remaining minutes
+
+    // Format hours and minutes to 'HH:MM' format
+    const formattedTime = `${parsedHours.toString().padStart(2, '0')}:${parsedMinutes.toString().padStart(2, '0')}`;
     // Create a new session object with Zoom meeting details
+    console.log(formattedTime)
     const newSession = new Session({
       session_counselor: counsellor_id,
-      session_time: parsedSessionTime,
+      session_time,
       session_date: parsedSessionDate,
       session_duration: parsedSessionDuration,
       session_type,
