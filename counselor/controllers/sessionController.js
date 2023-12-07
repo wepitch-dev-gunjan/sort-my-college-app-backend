@@ -145,6 +145,7 @@ exports.addSession = async (req, res) => {
     const lowerTimeLimit = parsedSessionTime - 30;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
+
     const existingSession = await Session.findOne({
       session_counselor: counsellor_id,
       session_date: parsedSessionDate,
