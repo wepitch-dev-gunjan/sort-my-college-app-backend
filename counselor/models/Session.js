@@ -28,7 +28,7 @@ const sessionSchema = new Schema(
       type: String,
       enum: ['Personal', 'Group']
     },
-    session_price: {
+    session_fee: {
       type: Number,
       required: true,
       default: 0
