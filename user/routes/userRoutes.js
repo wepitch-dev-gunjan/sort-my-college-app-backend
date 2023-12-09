@@ -1,11 +1,12 @@
 const express = require('express');
-const { rescheduleRequest, cancelRequest, saveCounsellor, unsaveCounsellor, editUser, getUser } = require('../controllers/userController');
+const { rescheduleRequest, cancelRequest, saveCounsellor, unsaveCounsellor, editUser, getUser, findOneUser } = require('../controllers/userController');
 const { userAuth } = require('../middlewares/authMiddleware');
 // const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // user profile
 router.get('/', userAuth, getUser);
+router.get('/users', findOneUser);
 
 // save counsellors
 router.put('/:user_id', userAuth, editUser);

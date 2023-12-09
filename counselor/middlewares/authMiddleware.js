@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Counsellor = require('../models/Counsellor');
 const { generateToken } = require('../helpers/counsellorHelpers');
+const { default: axios } = require('axios');
 require('dotenv').config();
 const { JWT_SECRET } = process.env;
 
@@ -43,7 +44,7 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await User.findOne({ email: decoded.email });
+    const user = await axios.get(`${BACKEND_URL}/user`, { email: decoded.email });
 
     if (!user) {
       return res.status(401).json({ error: 'User not authorized' });

@@ -56,6 +56,26 @@ exports.getUser = async (req, res) => {
   }
 }
 
+exports.findOneUser = async (req, res) => {
+  try {
+    const { email, user_id } = req.params;
+    const query = {};
+    if (email) query.email = email;
+    if (user_id) query._id = user_id;
+
+    const user = await User.findOne(query);
+
+    if (!user) {
+      return res.status(400).send({ error: 'User not found' });
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
 exports.rescheduleRequest = (req, res) => {
   try {
 

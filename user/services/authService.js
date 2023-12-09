@@ -123,9 +123,9 @@ exports.generateOtpByEmail = async (req, res) => {
 
     // Check if the user exists and is already verified.
     const user = await User.findOne({ email });
-    if (user && user.verified === true) {
-      return res.status(400).send({ error: "User is already verified" });
-    }
+    // if (user && user.verified === true) {
+    //   return res.status(400).send({ error: "User is already verified" });
+    // }
 
     // Generate a random 4-digit OTP.
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -179,10 +179,10 @@ exports.verifyOtpByEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const isemail = await User.findOne({ email });
-    if (isemail && isemail.verified === true) return res.status(401).send({
-      error: "Email is already verified"
-    });
+    // const isemail = await User.findOne({ email });
+    // if (isemail && isemail.verified === true) return res.status(401).send({
+    //   error: "Email is already verified"
+    // });
 
     let otpObj = await Otp.findOne({ email });
 

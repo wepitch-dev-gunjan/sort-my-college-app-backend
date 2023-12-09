@@ -1,6 +1,6 @@
 const express = require('express');
 const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession, rescheduleSession, cancelSession } = require('../controllers/sessionController');
-const { counsellorAuth } = require('../middlewares/authMiddleware');
+const { counsellorAuth, userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // GET
@@ -12,7 +12,7 @@ router.post('/sessions', counsellorAuth, addSession);
 
 // PUT
 router.put("/sessions/:session_id", updateSession);
-router.put("/sessions/:session_id/book", bookSession);
+router.put("/sessions/:session_id/book", userAuth, bookSession);
 router.put("/sessions/:session_id/reschedule", rescheduleSession);
 router.put("/counsellor/sessions/:session_id/cancel", cancelSession);
 // router.put('/session/:counseling_id/reschedule', rescheduleSession);

@@ -209,6 +209,7 @@ exports.addSession = async (req, res) => {
 
 exports.bookSession = async (req, res) => {
   try {
+    const { user_id } = req;
     const { session_id } = req.params;
 
     let session = await Session.findOne({ _id: session_id });
