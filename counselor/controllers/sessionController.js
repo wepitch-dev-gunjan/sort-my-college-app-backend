@@ -233,7 +233,6 @@ exports.bookSession = async (req, res) => {
     }
 
 
-    console.log(session)
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
@@ -256,10 +255,15 @@ exports.bookSession = async (req, res) => {
     // Save the updated session and counselor data
     await session.save();
     await counsellor.save();
-    await axios.post(`http://localhost:8000/booking`, {
+    await axios.post(`http://127.0.0.1:8000/booking`, {
       booked_entity: counsellor,
       booking_type: 'Counsellor',
       booking_data: session
+    })
+    await axios.post('https://127.0.0.1:9000/notification', {
+      user_id: counsellor._id,
+      title: 'New Booking',
+      message: `{user.name} booked a {session.session_type} session`
     })
 
     // Respond with a success message
