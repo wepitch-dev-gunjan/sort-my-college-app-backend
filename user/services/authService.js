@@ -215,7 +215,6 @@ exports.verifyOtpByEmail = async (req, res) => {
       await user.save();
     }
     const { _id, phone_number } = user;
-    console.log(user)
     const token = jwt.sign({ _id, email }, JWT_SECRET)
     const { data } = await axios.post(`${BACKEND_URL}/notification/verifiedOtp`, {
       to: email,

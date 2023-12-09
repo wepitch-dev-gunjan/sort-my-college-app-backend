@@ -265,10 +265,11 @@ exports.bookSession = async (req, res) => {
       booking_type: 'Counsellor',
       booking_data: session
     })
+    console.log(session)
     await axios.post(`${BACKEND_URL}/notification`, {
       user_id: counsellor._id,
       title: 'New Booking',
-      message: `${email} booked a {session.session_type} session`
+      message: `${email} booked a ${session.session_type} session`
     })
 
     // Respond with a success message
