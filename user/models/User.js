@@ -4,11 +4,12 @@ const userSchema = new Schema({
   email: {
     type: String,
     unique: true,
+    sparse: true,
   },
   phone_number: {
     type: Number,
-    // unique: true,
-    sparse: true
+    unique: true,
+    sparse: true,
   },
   name: {
     type: String,
@@ -18,10 +19,10 @@ const userSchema = new Schema({
     enum: ['Male', 'Female', 'Other'],
   },
   date_of_birth: {
-    type: String
+    type: String,
   },
   location: {
-    city: String
+    city: String,
   },
   profile_pic: {
     type: String,
@@ -29,16 +30,33 @@ const userSchema = new Schema({
   education_level: {
     type: String,
     enum: ['Student', 'College', 'Graduated'],
-    default: 'Student'
+    default: 'Student',
   },
   verified: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 }, {
-  strict: false
+  strict: false,
 });
+
+// Custom validation to check uniqueness for non-null values
+userSchema.path('phone_number').validate(async function (value) {
+  if (value !== null) {
+    const count = await this.model('User').countDocuments({ phone_number: value, _id: { $ne: this._id } });
+    return !count;
+  }
+  return true;
+}, 'Phone number must be unique except for null values.');
+
+userSchema.path('email').validate(async function (value) {
+  if (value !== null) {
+    const count = await this.model('User').countDocuments({ email: value, _id: { $ne: this._id } });
+    return !count;
+  }
+  return true;
+}, 'Email must be unique except for null values.');
 
 module.exports = model('User', userSchema);
