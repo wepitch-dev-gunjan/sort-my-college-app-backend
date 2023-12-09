@@ -23,6 +23,10 @@ const otpSchema = new Schema({
     type: Number, // Store the number of verification attempts
     default: 0,
   },
+}, {
+  timestamps: true
+}, {
+  strict: false
 });
 
 module.exports = model('Otp', otpSchema);
