@@ -4,6 +4,7 @@ const { generateToken } = require('../helpers/counsellorHelpers');
 const { default: axios } = require('axios');
 require('dotenv').config();
 const { JWT_SECRET } = process.env;
+const { BACKEND_URL } = process.env;
 
 exports.counsellorAuth = async (req, res, next) => {
   try {
