@@ -5,11 +5,13 @@ const otpSchema = new Schema({
     type: Number,
     unique: true,
     sparse: true,
+    default: null
   },
   email: {
     type: String,
     unique: true,
     sparse: true,
+    default: null
   },
   hashedOtp: {
     type: String,
