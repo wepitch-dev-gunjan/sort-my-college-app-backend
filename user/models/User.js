@@ -5,56 +5,39 @@ const userSchema = new Schema({
     type: String,
     unique: true,
   },
-  phoneNumber: {
+  phone_number: {
     type: Number,
     unique: true,
   },
-  personal_info: {
-    name: {
-      type: String,
-    },
-    contact_number: String,
-    gender: {
-      type: String,
-      enum: ['Male', 'Female', 'Other'],
-    },
-    date_of_birth: {
-      type: String
-    },
-    location: {
-      city: String
-    },
-    profile_pic: {
-      type: String,
-    }
+  name: {
+    type: String,
   },
-  saved_counsellors: [
-    {
-      type: String
-    },
-  ],
-  saved_vocational_courses: [
-    {
-      type: String
-    },
-  ],
-  saved_entrance_preparations: [
-    {
-      type: String
-    },
-  ],
-  saved_feeds: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Feed'
-    }
-  ],
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other'],
+  },
+  date_of_birth: {
+    type: String
+  },
+  location: {
+    city: String
+  },
+  profile_pic: {
+    type: String,
+  },
+  education_level: {
+    type: String,
+    enum: ['Student', 'College', 'Graduated'],
+    default: 'Student'
+  },
   verified: {
     type: Boolean,
     default: false
   }
 }, {
   timestamps: true
+}, {
+  strict: false
 });
 
 module.exports = model('User', userSchema);

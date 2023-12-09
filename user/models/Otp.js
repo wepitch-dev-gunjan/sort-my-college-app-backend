@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const otpSchema = new Schema({
-  phoneNumber: {
+  phone_number: {
     type: Number,
     unique: true,
     sparse: true,

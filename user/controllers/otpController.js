@@ -41,6 +41,7 @@ exports.verifyOTPPhone = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 // Controller to send OTP to the user's email
 exports.sendOTPEmail = async (req, res) => {
   try {

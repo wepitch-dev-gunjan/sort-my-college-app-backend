@@ -1,19 +1,46 @@
 const User = require("../models/User");
 
-exports.createUser = async (req, res) => {
+exports.editUser = async (req, res) => {
   try {
-    const userData = req.body;
-    const newUser = new User(userData);
-    const savedUser = await newUser.save();
+    const { user_id } = req;
+    const { email, phone_number, name, gender, date_of_birth, location, profile_pic } = req.body;
 
-    res.status(201).json(savedUser); // Respond with the saved user object
+    // Check if either email or phone_number is provided
+    if (!email && !phone_number) {
+      return res.status(400).json({ error: 'Provide either email or phone_number to identify the user.' });
+    }
+
+    // Find the user based on email or phone_number
+    const query = email ? { email } : { phone_number };
+    const user = await User.findOne(query);
+
+    // If user not found, return an error
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // Update user information
+    if (name) user.name = name;
+    if (gender) user.gender = gender;
+    if (date_of_birth) user.date_of_birth = date_of_birth;
+    if (location && location.city) user.location.city = location.city;
+    if (profile_pic) user.profile_pic = profile_pic;
+    if (verified !== undefined) user.verified = verified;
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({
+      message: 'User information updated successfully.',
+      user
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
-exports.getProfile = async (req, res) => {
+exports.getUser = async (req, res) => {
   try {
     const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
@@ -28,38 +55,6 @@ exports.getProfile = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
-
-exports.editProfile = async (req, res) => {
-  try {
-    const { user_id } = req.params;
-
-    const user = await User.findById(user_id);
-
-    if (!user) {
-      return res.status(404).send({ error: 'User not found' });
-    }
-
-    const updatedProfileData = {
-      personal_info: {
-        name: req.body.personal_info.name,
-        contact_number: req.body.personal_info.contact_number,
-        gender: req.body.personal_info.gender,
-        date_of_birth: req.body.personal_info.date_of_birth,
-        location: {
-          city: req.body.personal_info.location.city
-        }
-      }
-    };
-    user.set(updatedProfileData);
-
-    await user.save();
-
-    res.status(200).send({ message: 'Profile updated successfully' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: 'Internal Server Error' });
-  }
-};
 
 exports.rescheduleRequest = (req, res) => {
   try {
