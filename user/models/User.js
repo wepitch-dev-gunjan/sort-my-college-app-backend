@@ -7,7 +7,7 @@ const userSchema = new Schema({
   },
   phone_number: {
     type: Number,
-    unique: true,
+    // unique: true,
     sparse: true
   },
   name: {
