@@ -1,5 +1,6 @@
 const { google } = require("googleapis");
 const moment = require("moment/moment");
+const Session = require("../models/Session");
 require('dotenv').config();
 const { FRONTEND_URL, OAUTH2_CLIENT_ID, OAUTH2_CLIENT_SECRET, OAUTH2_REDIRECT_URI } = process.env;
 
@@ -17,6 +18,14 @@ exports.sessionTimeIntoMinutes = (time) => {
   // Calculate the total minutes from the start of the day (midnight)
   return hours * 60 + minutes;
 }
+
+exports.isCounsellingSessionAvailable = async (sessionId) => {
+  const session = await Session.findOne({
+    _id: sessionId,
+    status: 'Available',
+  });
+  return session ? true : false;
+};
 
 exports.isSessionBefore24Hours = (session_date, session_time) => {
   // Combine session_date and session_time into a single datetime string

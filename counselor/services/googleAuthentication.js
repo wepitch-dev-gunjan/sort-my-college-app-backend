@@ -27,7 +27,6 @@ router.get('/auth/google', (req, res) => {
 router.get('/auth/google/callback', async (req, res) => {
   const { code } = req.query;
   try {
-    // Assuming you have previously set up oauth2Client
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
 
@@ -52,7 +51,6 @@ router.get('/auth/google/callback', async (req, res) => {
       picture: counsellor.profile_pic,
       tokens
     }, '7d');
-    // Setting cookies with appropriate flags for secure connections
 
     const cookieOptions = {
       // httpOnly: true,

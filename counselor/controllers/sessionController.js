@@ -1,8 +1,10 @@
+const { default: axios } = require("axios");
 const {
   sessionTimeIntoMinutes,
   isSessionBefore24Hours,
   createMeeting,
   getSessionDateTime,
+  isCounsellingSessionAvailable,
 } = require("../helpers/sessionHelpers");
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
@@ -75,7 +77,6 @@ exports.getSessions = async (req, res) => {
   }
 };
 
-
 exports.getSession = async (req, res) => {
   try {
     const { session_id } = req.params;
@@ -147,7 +148,7 @@ exports.addSession = async (req, res) => {
 
 
     const existingSession = await Session.findOne({
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
       session_date: parsedSessionDate,
       session_time: {
         $gte: lowerTimeLimit, // Replace with the lower limit of session_time
@@ -178,15 +179,8 @@ exports.addSession = async (req, res) => {
       refresh_token
     );
 
-    const parsedHours = Math.floor(parsedSessionTime / 60); // Get the hours
-    const parsedMinutes = parsedSessionTime % 60; // Get the remaining minutes
-
-    // Format hours and minutes to 'HH:MM' format
-    const formattedTime = `${parsedHours.toString().padStart(2, '0')}:${parsedMinutes.toString().padStart(2, '0')}`;
-    // Create a new session object with Zoom meeting details
-    console.log(formattedTime)
     const newSession = new Session({
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
       session_time,
       session_date: parsedSessionDate,
       session_duration: parsedSessionDuration,
@@ -238,6 +232,8 @@ exports.bookSession = async (req, res) => {
       session.session_status = "Booked";
     }
 
+
+    console.log(session)
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
@@ -260,6 +256,11 @@ exports.bookSession = async (req, res) => {
     // Save the updated session and counselor data
     await session.save();
     await counsellor.save();
+    await axios.post(`http://localhost:8000/booking`, {
+      booked_entity: counsellor,
+      booking_type: 'Counsellor',
+      booking_data: session
+    })
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
