@@ -4,7 +4,7 @@ const otpSchema = new Schema({
   phone_number: {
     type: Number,
     unique: true,
-    sparse: true,
+    // sparse: true,
   },
   email: {
     type: String,
