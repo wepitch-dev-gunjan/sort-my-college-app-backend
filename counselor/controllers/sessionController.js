@@ -209,7 +209,8 @@ exports.addSession = async (req, res) => {
 
 exports.bookSession = async (req, res) => {
   try {
-    const { user_id } = req;
+    const { email } = req;
+
     const { session_id } = req.params;
 
     let session = await Session.findOne({ _id: session_id });
@@ -267,7 +268,7 @@ exports.bookSession = async (req, res) => {
     await axios.post(`${BACKEND_URL}/notification`, {
       user_id: counsellor._id,
       title: 'New Booking',
-      message: `{user.name} booked a {session.session_type} session`
+      message: `${email} booked a {session.session_type} session`
     })
 
     // Respond with a success message
