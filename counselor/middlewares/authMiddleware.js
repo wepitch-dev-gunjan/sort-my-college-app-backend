@@ -45,7 +45,7 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await axios.get(`${BACKEND_URL}/user`, { email: decoded.email });
+    const user = await axios.get(`${BACKEND_URL}/user/users`, { email: decoded.email });
 
     if (!user) {
       return res.status(401).json({ error: 'User not authorized' });
