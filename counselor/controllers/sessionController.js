@@ -19,7 +19,7 @@ exports.getSessions = async (req, res) => {
     const { session_type, session_date } = req.query;
     const { counsellor_id } = req.params;
 
-    const filter = { session_counselor: counsellor_id };
+    const filter = { session_counsellor: counsellor_id };
 
     if (session_type) {
       filter.session_type = session_type;
