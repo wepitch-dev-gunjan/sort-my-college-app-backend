@@ -8,7 +8,7 @@ const { BACKEND_URL } = process.env;
 exports.createFeedback = async (req, res) => {
   try {
     const { user_id } = req;
-    let { rating, message } = req.body;
+    let { counsellor_id, rating, message } = req.body;
 
     if (!rating) rating = 0;
     if (!message) message = '';
@@ -19,18 +19,35 @@ exports.createFeedback = async (req, res) => {
       }
     });
 
-    const user = userResponse.data; // Extract user data from the response
-
+    const user = userResponse.data;
     if (!user) {
       return res.status(404).send({
         error: "User not found"
       });
     }
 
-    let feedback = await Feedback.findOne({ 'giver._id': user._id })
+    const counsellorResponse = await Counsellor.findOne({ _id: counsellor_id });
+
+    const counsellor = counsellorResponse.data;
+    if (!counsellor) {
+      return res.status(404).send({
+        error: "Counsellor not found"
+      });
+    }
+
+    let feedback = await Feedback.findOne({
+      feedback_from: user._id,
+      feedback_to: counsellor_id
+    })
+
+    if (feedback) return res.status(400).send({
+      error: "Feedback is already given by the user"
+    })
 
     feedback = new Feedback({
-      giver: user._id, // Assuming user._id is the user's unique identifier
+      feedback_from: user._id,
+      feedback_from: counsellor_id,
+      user_name: user.name,
       rating,
       message
     });
@@ -51,19 +68,6 @@ exports.createFeedback = async (req, res) => {
 exports.getFeedbacks = async (req, res) => {
   try {
     const { counsellor_id, user_id, page = 1, limit = 10 } = req.query;
-    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-    if (!counsellor) return res.status(404).send({
-      error: "Counsellor not found"
-    })
-
-    const user = await axios.get(`${BACKEND_URL}/user/users`, {
-      params: {
-        user_id
-      }
-    })
-    if (!user) return res.status(404).send({
-      error: "User not found"
-    })
 
     // Validate page and limit to be positive integers
     const pageNumber = parseInt(page, 10);
@@ -73,19 +77,42 @@ exports.getFeedbacks = async (req, res) => {
       return res.status(400).json({ error: 'Invalid page or limit parameters.' });
     }
 
+    // Fetch counsellor and user data
+    const [counsellor, user] = await Promise.all([
+      Counsellor.findOne({ _id: counsellor_id }),
+      axios.get(`${BACKEND_URL}/user/users`, {
+        params: {
+          user_id,
+        },
+      }),
+    ]);
+
+    // Check if counsellor and user exist
+    if (!counsellor) {
+      return res.status(404).json({ error: 'Counsellor not found' });
+    }
+
+    if (!user.data) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     // Calculate skip value for pagination
     const skip = (pageNumber - 1) * limitNumber;
 
     // Retrieve feedbacks for the specified user with pagination
     const feedbacks = await Feedback.find({ 'giver._id': user_id })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limitNumber)
       .exec();
 
     // Prepare the response
     const response = feedbacks.map((feedback) => ({
-      profile_pic: feedback.giver.profile_pic,
-      name: feedback.giver.name,
+      _id: feedback._id,
+      profile_pic: user.data.profile_pic, // Assuming profile_pic is in user.data
+      user_name: user.data.name, // Assuming name is in user.data
+      feedback_to: feedback.feedback_to,
+      feedback_from: feedback.feedback_from,
       rating: feedback.rating,
       message: feedback.message,
     }));
@@ -96,6 +123,7 @@ exports.getFeedbacks = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 exports.getFeedback = async (req, res) => {
   try {

@@ -1,9 +1,19 @@
 const { Schema, model } = require('mongoose');
 
 const feedbackSchema = new Schema({
-  feedback_giver: {
-    type: Object,
-    default: {}
+  feedback_to: {
+    type: String
+  },
+  feedback_from: {
+    type: String,
+  },
+  profile_pic: {
+    type: String,
+    default: "https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp"
+  },
+  user_name: {
+    type: String,
+    default: 'Anonymous'
   },
   rating: {
     type: Number,
