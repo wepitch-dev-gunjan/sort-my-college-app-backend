@@ -28,7 +28,7 @@ exports.createFeedback = async (req, res) => {
 
     const counsellorResponse = await Counsellor.findOne({ _id: counsellor_id });
 
-    const counsellor = counsellorResponse.data;
+    const counsellor = counsellorResponse?.data;
     if (!counsellor) {
       return res.status(404).send({
         error: "Counsellor not found"
