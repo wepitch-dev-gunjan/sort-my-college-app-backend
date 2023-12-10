@@ -27,7 +27,9 @@ exports.createFeedback = async (req, res) => {
       });
     }
 
-    const feedback = new Feedback({
+    let feedback = await Feedback.findOne({ 'giver._id': user._id })
+
+    feedback = new Feedback({
       giver: user._id, // Assuming user._id is the user's unique identifier
       rating,
       message
