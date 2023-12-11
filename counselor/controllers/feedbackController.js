@@ -104,8 +104,12 @@ exports.getFeedbacks = async (req, res) => {
     // Calculate skip value for pagination
     const skip = (pageNumber - 1) * limitNumber;
 
+    const query = {}
+    if (user_id) query.feedback_from = user_id;
+    if (counsellor_id) query.feedback_to = counsellor_id
+
     // Retrieve feedbacks for the specified user with pagination
-    const feedbacks = await Feedback.find({ feedback_from: user_id, feedback_to: counsellor_id })
+    const feedbacks = await Feedback.find(query)
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limitNumber)
