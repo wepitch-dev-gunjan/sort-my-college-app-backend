@@ -51,6 +51,7 @@ exports.userAuth = async (req, res, next) => {
       }
     });
 
+    console.log(decoded)
     const user = userResponse.data; // Access user data from the response
 
     if (!user) {
