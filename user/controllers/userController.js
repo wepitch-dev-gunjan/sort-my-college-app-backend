@@ -15,7 +15,7 @@ exports.editUser = async (req, res) => {
     // Find the user based on email or phone_number
     if (email) query.email = email;
     if (phone_number) query.phone_number = phone_number;
-    const user = await User.findOne(query);
+    let user = await User.findOne(query);
 
     // If user not found, return an error
     if (!user) {
@@ -28,6 +28,8 @@ exports.editUser = async (req, res) => {
     if (date_of_birth) query.date_of_birth = date_of_birth;
     if (location && location.city) query.location.city = location.city;
     if (profile_pic) query.profile_pic = profile_pic;
+
+    user = { ...user, ...query };
 
     // Save the updated user
     await user.save();
