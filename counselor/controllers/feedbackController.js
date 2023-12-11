@@ -83,11 +83,13 @@ exports.getFeedbacks = async (req, res) => {
     // Fetch counsellor and user data
     const [counsellor, user] = await Promise.all([
       Counsellor.findOne({ _id: counsellor_id }),
-      axios.get(`${BACKEND_URL}/user/users`, {
-        params: {
-          user_id,
-        },
-      }),
+      axios.get(`${BACKEND_URL}/user/users`,
+        null,
+        {
+          params: {
+            user_id,
+          },
+        }),
     ]);
 
     // Check if counsellor and user exist
