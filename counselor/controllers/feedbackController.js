@@ -19,8 +19,8 @@ exports.createFeedback = async (req, res) => {
       }
     });
 
-
     const user = data;
+    console.log(user)
     if (!user) {
       return res.status(404).send({
         error: "User not found"
