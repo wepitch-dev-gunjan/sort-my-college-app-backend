@@ -54,8 +54,8 @@ router.get('/auth/google/callback', async (req, res) => {
 
     const cookieOptions = {
       // httpOnly: true,
-      // secure: true,
-      // sameSite: 'None', // or 'Lax' based on your requirement
+      secure: true,
+      sameSite: 'None', // or 'Lax' based on your requirement
       // domain: 'counsellor.sortmycollege.com',
       // maxAge: 24 * 60 * 60
     };
