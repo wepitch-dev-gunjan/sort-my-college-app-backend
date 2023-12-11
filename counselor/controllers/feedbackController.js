@@ -112,17 +112,17 @@ exports.getFeedbacks = async (req, res) => {
       .exec();
 
     // Prepare the response
-    const response = feedbacks.map((feedback) => ({
-      _id: feedback._id,
-      profile_pic: user.data.profile_pic, // Assuming profile_pic is in user.data
-      user_name: user.data.name, // Assuming name is in user.data
-      feedback_to: feedback.feedback_to,
-      feedback_from: feedback.feedback_from,
-      rating: feedback.rating,
-      message: feedback.message,
-    }));
+    // const response = feedbacks.map((feedback) => ({
+    //   _id: feedback._id,
+    //   profile_pic: user.data.profile_pic, // Assuming profile_pic is in user.data
+    //   user_name: user.data.name, // Assuming name is in user.data
+    //   feedback_to: feedback.feedback_to,
+    //   feedback_from: feedback.feedback_from,
+    //   rating: feedback.rating,
+    //   message: feedback.message,
+    // }));
 
-    res.status(200).json(response);
+    res.status(200).json(feedbacks);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
