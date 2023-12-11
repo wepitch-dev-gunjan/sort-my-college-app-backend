@@ -101,7 +101,7 @@ exports.getFeedbacks = async (req, res) => {
     const skip = (pageNumber - 1) * limitNumber;
 
     // Retrieve feedbacks for the specified user with pagination
-    const feedbacks = await Feedback.find({ 'giver._id': user_id })
+    const feedbacks = await Feedback.find({ feedback_from: user_id, feedback_to: counsellor_id })
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limitNumber)
