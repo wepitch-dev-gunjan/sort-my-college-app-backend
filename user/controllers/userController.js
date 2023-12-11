@@ -10,8 +10,11 @@ exports.editUser = async (req, res) => {
       return res.status(400).json({ error: 'Provide either email or phone_number to identify the user.' });
     }
 
+    const query = {};
+    query._id = user_id;
     // Find the user based on email or phone_number
-    const query = email ? { email } : { phone_number };
+    if (email) query.email = email;
+    if (phone_number) query.phone_number = phone_number;
     const user = await User.findOne(query);
 
     // If user not found, return an error
@@ -20,12 +23,11 @@ exports.editUser = async (req, res) => {
     }
 
     // Update user information
-    if (name) user.name = name;
-    if (gender) user.gender = gender;
-    if (date_of_birth) user.date_of_birth = date_of_birth;
-    if (location && location.city) user.location.city = location.city;
-    if (profile_pic) user.profile_pic = profile_pic;
-    if (verified !== undefined) user.verified = verified;
+    if (name) query.name = name;
+    if (gender) query.gender = gender;
+    if (date_of_birth) query.date_of_birth = date_of_birth;
+    if (location && location.city) query.location.city = location.city;
+    if (profile_pic) query.profile_pic = profile_pic;
 
     // Save the updated user
     await user.save();
