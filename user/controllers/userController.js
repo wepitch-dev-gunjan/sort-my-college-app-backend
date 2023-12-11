@@ -70,6 +70,7 @@ exports.findOneUser = async (req, res) => {
     if (user_id) query._id = user_id;
 
     const user = await User.findOne(query);
+    console.log(user)
 
     if (!user) {
       return res.status(400).send({ error: 'User not found' });
