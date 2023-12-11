@@ -13,13 +13,13 @@ exports.createFeedback = async (req, res) => {
     if (!rating) rating = 0;
     if (!message) message = '';
 
-    const userResponse = await axios.get(`${BACKEND_URL}/user/users`, {
+    const { data } = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
         user_id
       }
     });
 
-    const user = userResponse?.data;
+    const user = data;
     if (!user) {
       return res.status(404).send({
         error: "User not found"
@@ -45,7 +45,7 @@ exports.createFeedback = async (req, res) => {
 
     feedback = new Feedback({
       feedback_from: user._id,
-      feedback_from: counsellor_id,
+      feedback_to: counsellor_id,
       user_name: user.name,
       rating,
       message
