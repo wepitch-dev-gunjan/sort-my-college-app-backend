@@ -19,7 +19,6 @@ exports.createFeedback = async (req, res) => {
       }
     });
 
-    console.log(data);
 
     const user = data;
     if (!user) {
@@ -55,6 +54,7 @@ exports.createFeedback = async (req, res) => {
 
     await feedback.save();
 
+    console.log(feedback);
     res.status(200).send({
       message: "Feedback has been successfully added",
       data: feedback
