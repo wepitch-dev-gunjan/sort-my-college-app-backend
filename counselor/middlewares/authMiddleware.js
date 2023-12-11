@@ -24,6 +24,8 @@ exports.counsellorAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'User not authorized' });
     }
 
+    console.log(decoded)
+
     req.email = decoded.email;
     req.counsellor_id = counsellor._id;
     req.refresh_token = decoded.tokens.refresh_token;
@@ -45,11 +47,13 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const userResponse = await axios.get(`${BACKEND_URL}/user/users`, {
-      params: {
-        email: decoded.email
-      }
-    });
+    const userResponse = await axios.get(`${BACKEND_URL}/user/users`,
+      null,
+      {
+        params: {
+          email: decoded.email
+        }
+      });
 
     console.log(userResponse)
     const user = userResponse.data; // Access user data from the response
