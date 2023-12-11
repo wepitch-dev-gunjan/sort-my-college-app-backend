@@ -19,6 +19,8 @@ exports.createFeedback = async (req, res) => {
       }
     });
 
+    console.log(data);
+
     const user = data;
     if (!user) {
       return res.status(404).send({
