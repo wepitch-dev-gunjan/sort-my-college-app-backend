@@ -64,7 +64,7 @@ exports.getUser = async (req, res) => {
 
 exports.findOneUser = async (req, res) => {
   try {
-    const { email, user_id } = req.params;
+    const { email, user_id } = req.query;
     const query = {};
     if (email) query.email = email;
     if (user_id) query._id = user_id;
