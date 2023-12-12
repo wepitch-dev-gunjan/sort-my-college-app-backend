@@ -52,17 +52,16 @@ router.get('/auth/google/callback', async (req, res) => {
       tokens
     }, '7d');
 
-    const cookieOptions = {
-      // httpOnly: true,
-      secure: true,
-      sameSite: 'None', // or 'Lax' based on your requirement
-      // domain: 'counsellor.sortmycollege.com',
-      // maxAge: 24 * 60 * 60
-    };
+    const user = {
+      _id,
+      email,
+      name,
+      profile_pic: counsellor.profile_pic
+    }
 
-    res.cookie('token', token, cookieOptions);
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, cookieOptions);
-    res.redirect(`${FRONTEND_URL}/`);
+    const redirectURL = `${FRONTEND_URL}/?token=${token}&&user=${user}`;
+
+    res.redirect(redirectURL);
   } catch (error) {
     console.error(error);
     res.redirect(`${FRONTEND_URL}/login`);
