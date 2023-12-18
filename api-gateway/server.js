@@ -1,4 +1,5 @@
 const express = require('express');
+const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
@@ -7,6 +8,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 require('dotenv').config();
 
 const {
+  NODE_ENV, // Access environment variable for determining environment
   PORT,
   USER_PORT,
   COUNSELLOR_PORT,
@@ -18,12 +20,6 @@ const {
 } = process.env;
 
 const app = express();
-
-const serverOptions = {
-  key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
-  cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
-  ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
-};
 
 // Configure proxy for each service
 const proxyConfig = {
@@ -47,7 +43,7 @@ Object.keys(proxyConfig).forEach(context => {
 
 // Middleware to set CORS headers and allow credentials
 app.use(cors({
-  origin: FRONTEND_URL, // Replace with your Vercel app URL
+  origin: FRONTEND_URL,
   credentials: true,
 }));
 
@@ -60,12 +56,26 @@ app.get('/', (req, res) => {
   res.send('Welcome');
 });
 
-const httpsServer = https.createServer(serverOptions, app);
+let server;
 
-httpsServer.on('error', (err) => {
-  console.error('HTTPS server encountered an error:', err);
+if (NODE_ENV === 'production') {
+  // Production mode: HTTPS server with SSL certificate
+  const serverOptions = {
+    key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
+    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
+    ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
+  };
+
+  server = https.createServer(serverOptions, app);
+} else {
+  // Development mode: HTTP server
+  server = http.createServer(app);
+}
+
+server.on('error', (err) => {
+  console.error('Server encountered an error:', err);
 });
 
-httpsServer.listen(PORT, () => {
-  console.log('HTTPS server started at port: ' + PORT);
+server.listen(PORT, () => {
+  console.log(`Server started in ${NODE_ENV} mode at port: ${PORT}`);
 });

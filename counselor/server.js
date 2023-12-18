@@ -17,9 +17,9 @@ app.use(cookieParser());
 // CORS configuration
 app.use(
   cors({
-    origin: ['https://counsellor.sortmycollege.com', 'https://localhost:3000'], // Replace with your Vercel app URL
+    origin: ['https://counsellor.sortmycollege.com', 'http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Allows cookies and authorization headers
+    credentials: true,
   })
 );
 
