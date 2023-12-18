@@ -9,8 +9,6 @@ const { BACKEND_URL } = process.env;
 exports.counsellorAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
-    const cookie = req.headers.cookie;
-    console.log(cookie)
     if (!token) {
       return res.status(401).json({ error: 'No token found, authorization denied' });
     }
@@ -24,10 +22,8 @@ exports.counsellorAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'User not authorized' });
     }
 
-    console.log(decoded)
-
     req.email = decoded.email;
-    req.counsellor_id = counsellor._id;
+    req.counsellor_id = decoded.counsellor_id;
     req.refresh_token = decoded.tokens.refresh_token;
 
     next();

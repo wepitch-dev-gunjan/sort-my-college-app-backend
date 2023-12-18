@@ -139,11 +139,11 @@ const counsellorSchema = new Schema({
     }
   ],
 
-  degree_focused: {
+  degree_focused: [{
     type: String,
     default: 'PG',
     enum: ['UG', 'PG']
-  },
+  }],
 
   locations_focused: [{
     type: String,

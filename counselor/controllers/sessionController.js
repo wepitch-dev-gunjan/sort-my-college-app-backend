@@ -392,12 +392,11 @@ exports.deleteSession = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const { session_id } = req.params;
-    console.log(counsellor_id);
 
     // Find the session to be deleted
     const counselingSession = await Session.findOne({
       _id: session_id,
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
     });
 
     if (!counselingSession) {
@@ -415,7 +414,7 @@ exports.deleteSession = async (req, res) => {
     // Delete the session
     await Session.deleteOne({
       _id: session_id,
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
     });
 
     res.status(200).json({ message: "Session deleted successfully" });

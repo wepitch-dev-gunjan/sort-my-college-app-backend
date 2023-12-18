@@ -32,7 +32,6 @@ router.get('/auth/google/callback', async (req, res) => {
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
     let { email, name, picture } = counsellorInfo.data;
-    console.log(email, name)
 
     // Save user information to the database if not already exists
     let counsellor = await Counsellor.findOne({ email });
@@ -46,6 +45,7 @@ router.get('/auth/google/callback', async (req, res) => {
     }
 
     const token = generateToken({
+      counsellor_id: counsellor._id,
       email: counsellor.email,
       name: counsellor.name,
       picture: counsellor.profile_pic,

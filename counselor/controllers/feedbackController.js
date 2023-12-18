@@ -71,7 +71,6 @@ exports.createFeedback = async (req, res) => {
 exports.getFeedbacks = async (req, res) => {
   try {
     const { counsellor_id, user_id, page = 1, limit = 10 } = req.query;
-
     // Validate page and limit to be positive integers
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);

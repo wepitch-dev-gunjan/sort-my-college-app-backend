@@ -3,8 +3,7 @@ const { Schema, model, mongoose } = require('mongoose');
 const sessionSchema = new Schema(
   {
     session_counsellor: {
-      type: Schema.Types.ObjectId,
-      ref: 'Counsellor',
+      type: String
     },
     session_user: {
       type: Schema.Types.ObjectId,
