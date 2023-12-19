@@ -76,6 +76,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 exports.login = async (req, res) => {
   try {
     // Extract data from the request body
@@ -212,6 +213,7 @@ exports.getCounsellor = async (req, res) => {
 
 exports.editProfile = async (req, res) => {
   try {
+    const { counsellor_id } = req;
     const updateFields = {};
 
     if (req.body.name) {
@@ -327,7 +329,7 @@ exports.editProfile = async (req, res) => {
     }
 
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
-      req.params.counsellor_id,
+      counsellor_id,
       updateFields,
       { new: true }
     );
@@ -343,7 +345,6 @@ exports.editProfile = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 exports.deleteCounsellor = async (req, res) => {
   try {
@@ -362,7 +363,6 @@ exports.deleteCounsellor = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-// end SMCMA-86
 
 exports.getCounsellors = async (req, res) => {
   try {
@@ -474,24 +474,6 @@ exports.deleteProfilePic = async (req, res) => {
   }
 };
 
-exports.getFollowers = async (req, res) => {
-  try {
-    const { counsellor_id } = req.params;
-    const counsellor = await Counsellor.findById(counsellor_id);
-
-    if (!counsellor)
-      return res.status(400).send({
-        error: "Counsellor not found",
-      });
-
-    const followers = counsellor.followers;
-    res.status(200).send(followers);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
 exports.getReviewsCounsellor = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
@@ -567,76 +549,10 @@ exports.getTotalRatings = async (req, res) => {
   }
 };
 
-exports.followCounsellor = async (req, res) => {
-  try {
-    const { counsellor_id } = req.params;
-
-    // Find the counsellor by ID
-    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-
-    if (!counsellor) {
-      return res.status(404).json({ error: "Counsellor not found" });
-    }
-
-    const { user_id } = req.body;
-
-    if (counsellor.followers.includes(user_id)) {
-      return res
-        .status(400)
-        .json({ error: "User is already following this counsellor" });
-    }
-
-    counsellor.followers.push(user_id);
-
-    await counsellor.save();
-
-    res.status(200).json({ message: "User is now following the counsellor" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-exports.unfollowCounsellor = async (req, res) => {
-  try {
-    const { counsellor_id } = req.params;
-
-    // Find the counsellor by ID
-    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-
-    if (!counsellor) {
-      return res.status(404).json({ error: "Counsellor not found" });
-    }
-
-    // Assuming you have user information in req.user (replace with your actual user data)
-    const { user_id } = req.body;
-
-    // Check if the user is already following the counsellor
-    const isFollowing = counsellor.followers.includes(user_id);
-
-    if (!isFollowing) {
-      return res
-        .status(400)
-        .json({ error: "User is not following this counsellor" });
-    }
-
-    // Remove the user's ID from the followers array
-    counsellor.followers = counsellor.followers.filter(
-      (followerId) => followerId !== user_id
-    );
-
-    await counsellor.save();
-
-    res.status(200).json({ message: "User has unfollowed the counsellor" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 exports.postReviewCounsellor = async (req, res) => {
   try {
-    const { rating, comment, user_id } = req.body;
+    const { user_id } = req;
+    const { rating, comment } = req.body;
     const obj = {};
 
     if (rating) obj.rating = rating;
@@ -647,7 +563,7 @@ exports.postReviewCounsellor = async (req, res) => {
 
     const { counsellor_id } = req.params;
 
-    const counsellor = await Counsellor.findById(counsellor_id);
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     if (!counsellor)
       return res.status(404).send({ error: "Counsellor not found" });
 
