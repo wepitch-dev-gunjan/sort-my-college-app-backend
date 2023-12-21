@@ -16,7 +16,7 @@ const { BACKEND_URL } = process.env;
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { session_type, session_date } = req.query;
+    const { session_type, session_date, session_status, session_fee, session_duration } = req.query;
     const { counsellor_id } = req.params;
 
     const filter = { session_counsellor: counsellor_id };
@@ -79,6 +79,51 @@ exports.getSessions = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getSessionsForCounsellor = async (req, res) => {
+  try {
+    const { session_type, session_dates, session_status, session_fee, session_duration } = req.query;
+    const { counsellor_id } = req.params;
+
+    const filter = { session_counsellor: counsellor_id };
+    if (session_type && session_type !== 'All') {
+      filter.session_type = session_type;
+    }
+
+    if (session_dates && session_dates.length === 2) {
+      const [startDate, endDate] = session_dates;
+
+      filter.session_date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    if (session_status && session_status !== 'All') {
+      filter.session_status = session_status;
+    }
+
+    if (session_fee) {
+      filter.session_fee = {
+        $gte: session_fee[0],
+        $lte: session_fee[1],
+      };
+    }
+
+    if (session_duration) {
+      filter.session_duration = { $lte: session_duration };
+    }
+
+    let sessions = await Session.find(filter);
+
+    res.status(200).send(sessions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 
 exports.getSession = async (req, res) => {
   try {
@@ -202,7 +247,7 @@ exports.addSession = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send({
-      earror: "Internal server error",
+      error: "Internal server error",
     });
   }
 };

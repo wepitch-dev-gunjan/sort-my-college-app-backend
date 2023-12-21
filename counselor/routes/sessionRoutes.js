@@ -1,10 +1,11 @@
 const express = require('express');
-const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession, rescheduleSession, cancelSession } = require('../controllers/sessionController');
+const { updateSession, bookSession, getSessions, addSession, getSession, deleteSession, rescheduleSession, cancelSession, getSessionsForCounsellor } = require('../controllers/sessionController');
 const { counsellorAuth, userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // GET
 router.get('/:counsellor_id/sessions', getSessions);
+router.get('/:counsellor_id/sessionsforcounsellor', getSessionsForCounsellor);
 router.get('/sessions/:session_id', getSession);
 
 // POST
