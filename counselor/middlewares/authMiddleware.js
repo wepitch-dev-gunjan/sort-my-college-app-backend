@@ -51,7 +51,6 @@ exports.userAuth = async (req, res, next) => {
         }
       });
 
-    console.log(userResponse)
     const user = userResponse.data; // Access user data from the response
 
     if (!user) {
@@ -80,8 +79,10 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     let response = {};
+    let responseData = {};
     if (decoded.counsellor_id) {
       response = await Counsellor.findOne({ _id: decoded.counsellor_id })
+      responseData = response;
     } else if (decoded.user_id) {
       response = await axios.get(`${BACKEND_URL}/user/users`,
         null,
@@ -90,9 +91,9 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
             email: decoded.email
           }
         });
+      responseData = response.data;
     }
 
-    const responseData = response.data;
     if (!responseData) {
       return res.status(401).json({
         error: `${decoded.user_id ? "User" : "Counsellor"} not authorized`
@@ -101,7 +102,7 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
 
     req.email = decoded.email;
     req.phone_number = decoded.phone_number;
-    req.id = user._id;
+    req.id = response._id;
 
     next();
   } catch (error) {

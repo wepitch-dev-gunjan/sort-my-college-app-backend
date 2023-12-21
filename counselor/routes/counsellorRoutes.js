@@ -20,8 +20,8 @@ const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth } = require(".
 router.get("/", userAuth, getCounsellors);
 router.get("/:counsellor_id", counsellorOrUserAuth, getCounsellor);
 router.get("/:counsellor_id/profile-pic", getProfilePic);
-router.get("/:counsellor_id/review", getReviewsCounsellor);
-router.get("/:counsellor_id/total-rating", getTotalRatings);
+router.get("/:counsellor_id/review", counsellorOrUserAuth, getReviewsCounsellor);
+router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings);
 
 // PUT
 router.put("/:counsellor_id", counsellorAuth, editProfile);
