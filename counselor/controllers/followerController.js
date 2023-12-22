@@ -16,7 +16,7 @@ exports.getFollowers = async (req, res) => {
 exports.followCounsellor = async (req, res) => {
   try {
     const { user_id } = req;
-    const { counsellor_id } = req.params;
+    const { counsellor_id } = req.body;
 
     // Find the counsellor by ID
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
