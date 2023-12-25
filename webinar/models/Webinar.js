@@ -1,55 +1,71 @@
 const { Schema, model } = require("mongoose");
 
-const webinarSchema = new Schema({
-  webinar_host: {
-    type: String,
-    required: true,
+const webinarSchema = new Schema(
+  {
+    webinar_host: {
+      type: String,
+      required: true,
+    },
+    webinar_image: {
+      type: String,
+      default:
+        "https://www.softwaresuggest.com/blog/wp-content/uploads/2019/08/Webinar-FB.png",
+    },
+    webinar_title: {
+      type: String,
+      required: true,
+    },
+    webinar_details: {
+      type: [String],
+      default: "",
+    },
+    webinar_date: {
+      type: Date,
+    },
+    webinar_time: {
+      type: String,
+    },
+    webinar_duration: {
+      type: Number,
+      default: 60,
+    },
+    webinar_fee: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    webinar_status: {
+      type: String,
+      enum: [
+        "Cancelled",
+        "Attended",
+        "NotAttended",
+        "Rescheduled",
+        "Booked",
+        "Available",
+      ],
+      default: "Available",
+    },
+    webinar_slots: {
+      type: Number,
+      required: true,
+    },
+    webinar_available_slots: {
+      type: Number,
+      default: this.webinar_slots,
+    },
+    webinar_link: {
+      type: String,
+      required: true,
+      unique: true,
+    },
   },
-  webinar_title: {
-    type: String,
-    required: true,
+  {
+    timestamps: true,
   },
-  webinar_details: {
-    type: [String],
-    default: ""
-  },
-  webinar_date: {
-    type: Date,
-  },
-  webinar_time: {
-    type: String,
-  },
-  webinar_duration: {
-    type: Number,
-    default: 60
-  },
-  webinar_fee: {
-    type: Number,
-    required: true,
-    default: 0
-  },
-  webinar_status: {
-    type: String,
-    enum: ['Cancelled', 'Attended', 'NotAttended', 'Rescheduled', 'Booked', 'Available'],
-    default: 'Available',
-  },
-  webinar_slots: {
-    type: Number,
-    required: true
-  },
-  webinar_available_slots: {
-    type: Number,
-    default: this.webinar_slots
-  },
-  webinar_link: {
-    type: String,
-    required: true,
-    unique: true,
+  {
+    strict: false,
   }
-}, {
-  timestamps: true,
-}, {
-  strict: false
-});
+);
 
 module.exports = model("Webinar", webinarSchema);
