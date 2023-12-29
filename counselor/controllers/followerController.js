@@ -1,5 +1,9 @@
+const axios = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Follower = require("../models/Follower");
+require('dotenv').config();
+
+const { BACKEND_URL } = process.env
 
 exports.getFollowers = async (req, res) => {
   try {
@@ -45,10 +49,13 @@ exports.getFollowersCount = async (req, res) => {
 exports.followCounsellor = async (req, res) => {
   try {
     const { user_id } = req;
-    const { counsellor_id } = req.body;
+    const { counsellor_id } = req.params;
 
     // Find the counsellor by ID
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+    const user = await axios.get(`${BACKEND_URL}/users`, {
+      user_id
+    })
 
     if (!counsellor) {
       return res.status(404).json({ error: "Counsellor not found" });
@@ -65,7 +72,7 @@ exports.followCounsellor = async (req, res) => {
         followed_to: counsellor_id,
         followed_by: user_id,
         followed: true,
-        follower_profile_pic: '',
+        follower_profile_pic: follower_profile_pic,
         follower_name: user.name,
         follower_email: user.email
       })
