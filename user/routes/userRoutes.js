@@ -6,7 +6,7 @@ const router = express.Router();
 
 // user profile
 router.get('/', userAuth, getUser);
-router.get('/users', findOneUser);
+router.get('/users', userAuth, findOneUser);
 
 // save counsellors
 router.put('/:user_id', userAuth, editUser);
