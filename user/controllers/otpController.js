@@ -4,7 +4,7 @@ const authService = require('../services/authService');
 // Controller to send OTP to the user's phone number
 exports.sendOTPPhone = async (req, res) => {
   try {
-    const { phoneNumber } = req.body.phoneNumber;
+    const { phoneNumber } = req.body;
     const otp = await generateOTP();
 
     // Send the OTP via SMS (You will need to implement this)

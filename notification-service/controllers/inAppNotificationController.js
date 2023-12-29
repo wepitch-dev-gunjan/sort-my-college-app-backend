@@ -29,14 +29,26 @@ exports.createNotification = async (req, res) => {
 
 exports.getNotifications = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const { user_id, page, limit } = req.query;
 
-    // Fetch all notifications for the user from the database
-    const notifications = await Notification.find({ user_id });
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const notifications = await Notification.find({ user_id })
+      .sort({ read: 1, createdAt: -1 }) // Sort by read status and createdAt
+      .skip(skip)
+      .limit(limitNumber);
+
+    const totalCount = await Notification.countDocuments({ user_id });
 
     return res.status(200).json({
       message: 'Notifications retrieved successfully.',
       notifications,
+      total_count: totalCount,
+      current_page: pageNumber,
+      per_page: limitNumber,
     });
   } catch (error) {
     console.error(error);

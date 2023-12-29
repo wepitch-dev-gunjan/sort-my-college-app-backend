@@ -39,10 +39,10 @@ exports.generateOtpByPhone = async (req, res) => {
 
     await otpObj.save();
 
-    axios.post(`${BACKEND_URL}/user/notification/generateOtp`, {
+    await axios.post(`${BACKEND_URL}/notification/sms-notification/sendSMS`, {
       body: {
-        to: user.email,
-        otp
+        to: phone_number,
+        message: otp
       }
     })
     // Send the OTP to the client (avoid logging it)

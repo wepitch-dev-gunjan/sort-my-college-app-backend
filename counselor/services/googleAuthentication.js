@@ -56,7 +56,7 @@ router.get('/auth/google/callback', async (req, res) => {
       _id: counsellor._id,
       email: counsellor.email,
       name: counsellor.name,
-      profile_pic: counsellor.profile_pic
+      // profile_pic: counsellor.profile_pic
     }
 
     const redirectURL = `${FRONTEND_URL}/?token=${token}&&user=${JSON.stringify(user)}`;

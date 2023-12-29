@@ -16,7 +16,7 @@ const { BACKEND_URL } = process.env;
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { session_type, session_date, session_status, session_fee, session_duration } = req.query;
+    const { session_type, session_date} = req.query;
     const { counsellor_id } = req.params;
 
     const filter = { session_counsellor: counsellor_id };
@@ -122,8 +122,6 @@ exports.getSessionsForCounsellor = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 exports.getSession = async (req, res) => {
   try {

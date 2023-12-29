@@ -13,8 +13,10 @@ const {
   deleteProfilePic,
   getTotalRatings,
   deleteCounsellor,
+  uploadCoverImage,
 } = require("../controllers/counsellorController");
 const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth } = require("../middlewares/authMiddleware");
+const { upload } = require("../middlewares/uploadImage");
 
 // GET
 router.get("/", userAuth, getCounsellors);
@@ -30,7 +32,8 @@ router.put("/:counsellor_id", counsellorAuth, editProfile);
 router.post("/login", login);
 router.post("/register", register);
 router.post("/:counsellor_id/review", userAuth, postReviewCounsellor);
-router.post("/:counsellor_id/profile-pic", counsellorAuth, uploadProfilePic);
+router.post("/profile-pic", counsellorAuth, upload.single('image'), uploadProfilePic);
+router.post("/cover-image", counsellorAuth, upload.single('image'), uploadCoverImage);
 
 // DELETE
 router.delete("/:counsellor_id/profile-pic", counsellorAuth, deleteProfilePic);

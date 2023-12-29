@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const { readdirSync } = require("fs");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
+const { getObjectURL, putObject } = require("./services/s3config");
 
 require("dotenv").config();
 const PORT = process.env.PORT || 8001;

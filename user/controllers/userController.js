@@ -45,7 +45,6 @@ exports.editUser = async (req, res) => {
   }
 };
 
-
 exports.getUser = async (req, res) => {
   try {
     const { user_id } = req;

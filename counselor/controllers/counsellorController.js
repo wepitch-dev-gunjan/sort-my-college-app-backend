@@ -1,6 +1,9 @@
+const { default: axios } = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Course = require("../models/Course");
 const Feed = require("../models/Feed");
+const { putObject, getObjectURL } = require("../services/s3config");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 // SMCMA-86
 exports.register = async (req, res) => {
@@ -195,6 +198,9 @@ exports.getCounsellor = async (req, res) => {
       );
     }
 
+    const profile_pic = await getObjectURL(counsellor.profile_pic);
+    const cover_image = await getObjectURL(counsellor.cover_image);
+
     const messagedCounsellor = {
       ...counsellor._doc,
       followers_count,
@@ -202,6 +208,8 @@ exports.getCounsellor = async (req, res) => {
       age,
       group_session_price,
       personal_session_price,
+      profile_pic,
+      cover_image
     };
 
     res.status(200).send([messagedCounsellor]);
@@ -391,11 +399,12 @@ exports.getCounsellors = async (req, res) => {
       return res.status(404).send({ error: "No counselors found" });
     }
 
-    const massagedCounsellors = counsellors.map((counsellor) => {
+    const massagedCounsellors = counsellors.map(async (counsellor) => {
+      const profile_pic = await getSignedUrl(counsellor.profile_pic)
       return {
         _id: counsellor._id,
         name: counsellor.name,
-        profile_pic: counsellor.profile_pic,
+        profile_pic,
         designation: counsellor.designation,
         qualifications: counsellor.specializations,
         next_session: counsellor.next_session,
@@ -434,20 +443,74 @@ exports.getProfilePic = async (req, res) => {
 
 exports.uploadProfilePic = async (req, res) => {
   try {
-    // validate counsellor
-    const { counsellor_id } = req.params.counsellor_id;
+    const { file, counsellor_id } = req;
+
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty"
+      });
+    }
 
     const counsellor = await Counsellor.findById(counsellor_id);
-    if (!counsellor)
+
+    if (!counsellor) {
       return res.status(404).send({ error: "Counsellor not found" });
+    }
 
-    // fetch profile_pic from the request form data
+    const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`
+    const foldername = 'counsellor-profile-pics';
+    const profilePicUpload = await putObject(foldername, fileName, file.buffer, file.mimetype);
 
-    // validate profile_pic
+    if (!profilePicUpload) {
+      return res.status(400).send({
+        error: "Profile pic is not uploaded"
+      });
+    }
 
-    // update profile_pic of the counsellor with provided counsellor_id
+    counsellor.profile_pic = `${foldername}/${fileName}`;
+    await counsellor.save();
 
-    // send response
+    res.status(200).send({
+      message: "Profile pic uploaded successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.uploadCoverImage = async (req, res) => {
+  try {
+    const { file, counsellor_id } = req;
+
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty"
+      });
+    }
+
+    const counsellor = await Counsellor.findById(counsellor_id);
+
+    if (!counsellor) {
+      return res.status(404).send({ error: "Counsellor not found" });
+    }
+
+    const fileName = `counsellor-cover-image-${Date.now()}.jpeg`
+    const folderName = 'counsellor-cover-images';
+    const coverImageUpload = await putObject(folderName, fileName, file.buffer, file.mimetype);
+
+    if (!coverImageUpload) {
+      return res.status(400).send({
+        error: "Cover Image is not uploaded"
+      });
+    }
+
+    counsellor.cover_image = `${folderName}/${fileName}`;
+    await counsellor.save();
+
+    res.status(200).send({
+      message: "Cover Image uploaded successfully"
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });

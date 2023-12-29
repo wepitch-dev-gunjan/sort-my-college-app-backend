@@ -13,6 +13,35 @@ exports.getFollowers = async (req, res) => {
   }
 };
 
+exports.getFollowersCount = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    console.log(counsellor_id)
+    const followersCount = await Follower.aggregate([
+      {
+        $match: {
+          followed_to: counsellor_id // Match documents with the specific counselorId
+        }
+      },
+      {
+        $group: {
+          _id: '$followed_to',
+          totalFollowers: { $sum: 1 } // Count the number of matching documents
+        }
+      }
+    ]);
+
+    // Extract the total followers count
+    const totalFollowers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+
+    res.status(200).json({ totalFollowers });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 exports.followCounsellor = async (req, res) => {
   try {
     const { user_id } = req;

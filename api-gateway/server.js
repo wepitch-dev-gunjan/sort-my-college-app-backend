@@ -16,7 +16,8 @@ const {
   VOCATIONAL_COURSES_PORT,
   WEBINARS_PORT,
   NOTIFICATION_SERVICES_PORT,
-  FRONTEND_URL
+  FRONTEND_URL,
+  ADMIN_PORT,
 } = process.env;
 
 const app = express();
@@ -28,7 +29,8 @@ const proxyConfig = {
   '/ep': ENTRANCE_PREPARATIONS_PORT,
   '/vc': VOCATIONAL_COURSES_PORT,
   '/webinars': WEBINARS_PORT,
-  '/notification': NOTIFICATION_SERVICES_PORT
+  '/notification': NOTIFICATION_SERVICES_PORT,
+  '/admin': ADMIN_PORT
 };
 
 Object.keys(proxyConfig).forEach(context => {
