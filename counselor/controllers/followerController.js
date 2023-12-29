@@ -54,7 +54,9 @@ exports.followCounsellor = async (req, res) => {
     // Find the counsellor by ID
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     const user = await axios.get(`${BACKEND_URL}/user/users`, {
-      user_id
+      params: {
+        user_id
+      }
     })
 
     if (!counsellor) {
