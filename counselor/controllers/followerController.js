@@ -67,6 +67,7 @@ exports.followCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Follower not found" });
     }
 
+    console.log(user)
     let follower = await Follower.findOne({ followed_by: id, followed_to: counsellor_id });
     if (follower) {
       if (follower.followed === true) return res.status(404).send({
