@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/follower/:counsellor_id', userAuth, followCounsellor);
 router.put('/follower/:counsellor_id', userAuth, unfollowCounsellor);
-router.get('/follower', counsellorAuth, getFollowers);
+router.get('/follower/followers', counsellorAuth, getFollowers);
 router.get('/follower/followers-count', counsellorAuth, getFollowersCount);
 
 module.exports = router;

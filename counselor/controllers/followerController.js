@@ -9,6 +9,7 @@ exports.getFollowers = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const followers = await Follower.find({ followed_to: counsellor_id });
+    console.log(followers)
 
     res.status(200).send(followers);
   } catch (error) {
@@ -48,22 +49,26 @@ exports.getFollowersCount = async (req, res) => {
 
 exports.followCounsellor = async (req, res) => {
   try {
-    const { user_id } = req;
+    const { id } = req;
     const { counsellor_id } = req.params;
 
     // Find the counsellor by ID
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     const user = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
-        user_id
+        id
       }
     })
 
     if (!counsellor) {
       return res.status(404).json({ error: "Counsellor not found" });
     }
+    if (!user) {
+      return res.status(404).json({ error: "Follower not found" });
+    }
 
-    let follower = await Follower.findOne({ followed_by: user_id, followed_to: counsellor_id });
+    console.log(user)
+    let follower = await Follower.findOne({ followed_by: id, followed_to: counsellor_id });
     if (follower) {
       if (follower.followed === true) return res.status(404).send({
         error: 'Counsellor is already followed by the user'
@@ -72,11 +77,11 @@ exports.followCounsellor = async (req, res) => {
     } else {
       follower = new Follower({
         followed_to: counsellor_id,
-        followed_by: user_id,
+        followed_by: id,
         followed: true,
-        follower_profile_pic: user.profile_pic,
-        follower_name: user.name,
-        follower_email: user.email
+        follower_profile_pic: user.data.profile_pic,
+        follower_name: user.data.name,
+        follower_email: user.data.email
       })
     }
 
