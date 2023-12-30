@@ -53,6 +53,7 @@ exports.userAuth = async (req, res, next) => {
 
     const user = userResponse.data; // Access user data from the response
 
+    console.log(user)
     if (!user) {
       return res.status(401).json({ error: 'User not authorized' });
     }
