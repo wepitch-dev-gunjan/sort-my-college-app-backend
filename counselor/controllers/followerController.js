@@ -49,15 +49,14 @@ exports.getFollowersCount = async (req, res) => {
 
 exports.followCounsellor = async (req, res) => {
   try {
-    const { user_id } = req;
-    console.log(user_id);
+    const { id } = req;
     const { counsellor_id } = req.params;
 
     // Find the counsellor by ID
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     const user = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
-        user_id
+        id
       }
     })
 
@@ -68,7 +67,7 @@ exports.followCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Follower not found" });
     }
 
-    let follower = await Follower.findOne({ followed_by: user_id, followed_to: counsellor_id });
+    let follower = await Follower.findOne({ followed_by: id, followed_to: counsellor_id });
     if (follower) {
       if (follower.followed === true) return res.status(404).send({
         error: 'Counsellor is already followed by the user'
