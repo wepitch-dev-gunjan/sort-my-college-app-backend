@@ -9,6 +9,7 @@ exports.createAdmin = async (req, res) => {
       email,
       profile_pic,
     });
+
     const data = await newAdmin.save();
 
     res.status(200).send({
