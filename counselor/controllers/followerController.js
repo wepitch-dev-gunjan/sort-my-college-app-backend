@@ -79,9 +79,9 @@ exports.followCounsellor = async (req, res) => {
         followed_to: counsellor_id,
         followed_by: id,
         followed: true,
-        follower_profile_pic: user.profile_pic,
-        follower_name: user.name,
-        follower_email: user.email
+        follower_profile_pic: user.data.profile_pic,
+        follower_name: user.data.name,
+        follower_email: user.data.email
       })
     }
 
