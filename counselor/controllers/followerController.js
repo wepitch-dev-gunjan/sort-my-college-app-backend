@@ -9,6 +9,7 @@ exports.getFollowers = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const followers = await Follower.find({ followed_to: counsellor_id });
+    console.log(followers)
 
     res.status(200).send(followers);
   } catch (error) {
@@ -49,6 +50,7 @@ exports.getFollowersCount = async (req, res) => {
 exports.followCounsellor = async (req, res) => {
   try {
     const { user_id } = req;
+    console.log(user_id);
     const { counsellor_id } = req.params;
 
     // Find the counsellor by ID
@@ -61,6 +63,9 @@ exports.followCounsellor = async (req, res) => {
 
     if (!counsellor) {
       return res.status(404).json({ error: "Counsellor not found" });
+    }
+    if (!user) {
+      return res.status(404).json({ error: "Follower not found" });
     }
 
     let follower = await Follower.findOne({ followed_by: user_id, followed_to: counsellor_id });
