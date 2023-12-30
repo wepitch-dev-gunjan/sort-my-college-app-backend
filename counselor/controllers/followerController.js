@@ -76,7 +76,7 @@ exports.followCounsellor = async (req, res) => {
     } else {
       follower = new Follower({
         followed_to: counsellor_id,
-        followed_by: user_id,
+        followed_by: id,
         followed: true,
         follower_profile_pic: user.profile_pic,
         follower_name: user.name,
