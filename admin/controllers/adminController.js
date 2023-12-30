@@ -23,7 +23,7 @@ exports.createAdmin = async (req, res) => {
 
 exports.deleteAdmin = async (req, res) => {
   try {
-    const { admin_id } = req.params;
+    const { admin_id } = req;
 
     const admin = await Admin.findByIdAndDelete(admin_id);
 
