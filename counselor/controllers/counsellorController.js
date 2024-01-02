@@ -650,3 +650,28 @@ exports.postReviewCounsellor = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.verifyCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+    if (!counsellor) return res.status(404).send({
+      error: 'Counsellor not found'
+    });
+
+    if (counsellor.verified) res.status(400).send({
+      error: "Counsellor already verified"
+    })
+
+    counsellor.verified = true;
+    await counsellor.save();
+
+    res.status(200).send({
+      message: "Counsellor successfully verified"
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

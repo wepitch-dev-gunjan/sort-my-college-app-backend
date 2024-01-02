@@ -53,7 +53,6 @@ exports.userAuth = async (req, res, next) => {
 
     const user = userResponse.data; // Access user data from the response
 
-    console.log(user)
     if (!user) {
       return res.status(401).json({ error: 'User not authorized' });
     }
@@ -122,29 +121,23 @@ exports.adminAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    let response = {};
-    if (decoded.counsellor_id) {
-      response = await Counsellor.findOne({ _id: decoded.counsellor_id })
-    } else if (decoded.user_id) {
-      response = await axios.get(`${BACKEND_URL}/user/users`,
-        null,
-        {
-          params: {
-            email: decoded.email
-          }
-        });
-    }
-
-    const responseData = response.data;
-    if (!responseData) {
-      return res.status(401).json({
-        error: `${decoded.user_id ? "User" : "Counsellor"} not authorized`
+    const adminResponse = await axios.get(`${BACKEND_URL}/admin/admins`,
+      null,
+      {
+        params: {
+          email: decoded.email
+        }
       });
+
+    const admin = adminResponse.data; // Access user data from the response
+
+    if (!admin) {
+      return res.status(401).json({ error: 'Admin not authorized' });
     }
 
-    req.email = decoded.email;
+    req.email = admin.email;
     req.phone_number = decoded.phone_number;
-    req.id = user._id;
+    req.id = admin._id;
 
     next();
   } catch (error) {

@@ -14,6 +14,7 @@ const {
   getTotalRatings,
   deleteCounsellor,
   uploadCoverImage,
+  verifyCounsellor,
 } = require("../controllers/counsellorController");
 const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadImage");
@@ -27,6 +28,7 @@ router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings
 
 // PUT
 router.put("/:counsellor_id", counsellorAuth, editProfile);
+router.put("/:counsellor_id/verify", adminAuth, verifyCounsellor);
 
 // POST
 router.post("/login", login);
