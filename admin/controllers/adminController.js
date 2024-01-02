@@ -74,3 +74,46 @@ exports.findOneAdmin = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 }
+
+exports.editProfile = async (req, res) => {
+  try {
+    const { admin_id } = req;
+    const updateFields = {};
+
+    if (req.body.name) {
+      updateFields.name = req.body.name;
+    }
+
+    if (req.body.email) {
+      updateFields.email = req.body.email;
+    }
+
+    if (req.body.profile_pic) {
+      updateFields.profile_pic = req.body.profile_pic;
+    }
+
+    if (req.body.gender) {
+      updateFields.gender = req.body.gender;
+    }
+
+    if (req.body.date_of_birth) {
+      updateFields.date_of_birth = req.body.date_of_birth;
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      admin_id,
+      updateFields,
+      { new: true }
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    console.log(updatedAdmin)
+    res.status(200).json(updatedAdmin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

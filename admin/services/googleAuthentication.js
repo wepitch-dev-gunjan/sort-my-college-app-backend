@@ -56,7 +56,7 @@ router.get('/auth/google/callback', async (req, res) => {
       _id: admin._id,
       email: admin.email,
       name: admin.name,
-      // profile_pic: admin.profile_pic
+      profile_pic: admin.profile_pic
     }
 
     const redirectURL = `${FRONTEND_URL}/?token=${token}&&admin=${JSON.stringify(user)}`;
@@ -64,7 +64,7 @@ router.get('/auth/google/callback', async (req, res) => {
     res.redirect(redirectURL);
   } catch (error) {
     console.error(error);
-    res.redirect(`${FRONTEND_URL}/loginx`);
+    res.redirect(`${FRONTEND_URL}/login`);
   }
 });
 
