@@ -48,8 +48,6 @@ exports.getAdmin = async (req, res) => {
     if (!admin)
       return res.status(400).send({ message: "No admin found by this id" });
 
-    console.log(admin)
-
     res.status(200).send(admin);
   } catch (error) {
     console.log(error);
