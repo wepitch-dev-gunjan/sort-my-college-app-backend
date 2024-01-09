@@ -1,10 +1,9 @@
+const { default: axios } = require('axios');
 const jwt = require('jsonwebtoken');
-const Counsellor = require('../models/Counsellor');
-const { generateToken } = require('../helpers/counsellorHelpers');
 require('dotenv').config();
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, BACKEND_URL } = process.env;
 
-exports.counsellorAuth = async (req, res, next) => {
+exports.adminOrUserAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
     if (!token) {
@@ -14,15 +13,37 @@ exports.counsellorAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const counsellor = await Counsellor.findOne({ email: decoded.email });
+    let response = {};
+    let responseData = {};
+    if (decoded.admin_id) {
+      response = await axios.get(`${BACKEND_URL}/admin/admins`,
+        null,
+        {
+          params: {
+            email: decoded.email
+          }
+        })
+      responseData = response;
+    } else if (decoded.user_id) {
+      response = await axios.get(`${BACKEND_URL}/user/users`,
+        null,
+        {
+          params: {
+            email: decoded.email
+          }
+        });
+      responseData = response.data;
+    }
 
-    if (!counsellor) {
-      return res.status(401).json({ error: 'User not authorized' });
+    if (!responseData) {
+      return res.status(401).json({
+        error: `${decoded.user_id ? "User" : "Admin"} not authorized`
+      });
     }
 
     req.email = decoded.email;
-    req.phoneNo = decoded.phoneNo;
-    req.id = counsellor._id;
+    req.phone_number = decoded.phone_number;
+    req.id = response._id;
 
     next();
   } catch (error) {
@@ -31,7 +52,7 @@ exports.counsellorAuth = async (req, res, next) => {
   }
 };
 
-exports.userAuth = async (req, res, next) => {
+exports.adminAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
     if (!token) {
@@ -41,15 +62,24 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await User.findOne({ email: decoded.email });
+    const { data } = await axios.get(`${BACKEND_URL}/admin/admins`,
+      null,
+      {
+        params: {
+          email: decoded.email
+        }
+      })
 
-    if (!user) {
-      return res.status(401).json({ error: 'User not authorized' });
+    if (!data) {
+      return res.status(401).json({
+        error: `Admin not authorized`
+      });
     }
 
     req.email = decoded.email;
-    req.phoneNo = decoded.phoneNo;
-    req.id = user._id;
+    req.phone_number = decoded.phone_number;
+    req.id = data._id;
+    console.log(req.id)
 
     next();
   } catch (error) {

@@ -5,9 +5,18 @@ const webinarSchema = new Schema({
     type: String,
     required: true,
   },
+  webinar_attendees: [{
+    type: String,
+  }],
+  webinar_registrations: [{
+    type: String,
+  }],
   webinar_title: {
     type: String,
     required: true,
+  },
+  webinar_thumbnail: {
+    type: String,
   },
   webinar_details: {
     type: [String],
@@ -19,23 +28,13 @@ const webinarSchema = new Schema({
   webinar_time: {
     type: String,
   },
-  webinar_duration: {
-    type: Number,
-    default: 60
-  },
   webinar_fee: {
     type: Number,
     required: true,
     default: 0
   },
-  webinar_status: {
-    type: String,
-    enum: ['Cancelled', 'Attended', 'NotAttended', 'Rescheduled', 'Booked', 'Available'],
-    default: 'Available',
-  },
   webinar_slots: {
     type: Number,
-    required: true
   },
   webinar_available_slots: {
     type: Number,
@@ -43,8 +42,6 @@ const webinarSchema = new Schema({
   },
   webinar_link: {
     type: String,
-    required: true,
-    unique: true,
   }
 }, {
   timestamps: true,

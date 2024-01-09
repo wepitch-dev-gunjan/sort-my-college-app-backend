@@ -117,3 +117,16 @@ exports.editProfile = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getOneAdmin = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+    const admin = await Admin.findOne({ _id: admin_id });
+    if (!admin) return res.status(404).json({ error: "Admin not found" });
+
+    res.status(200).json(admin)
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

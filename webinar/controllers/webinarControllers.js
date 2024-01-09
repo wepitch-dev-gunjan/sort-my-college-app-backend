@@ -2,25 +2,28 @@ const Webinar = require("../models/Webinar");
 
 exports.createWebinar = async (req, res) => {
   try {
-    const { course_name, course_degree, online, offline } = req.body;
-
-    if (!course_name || !course_degree || !online || !offline)
+    const { webinar_title, webinar_thumbnail, webinar_details, webinar_date, webinar_time, webinar_fee } = req.body;
+    const { id } = req;
+    if (!webinar_title || !webinar_details || !webinar_date || !webinar_time)
       return res.status(400).send({
         error: " All fields are required",
       });
 
-    course = new Webinar({
-      course_name,
-      course_degree,
-      online,
-      offline,
+    let webinar = new Webinar({
+      webinar_host: id,
+      webinar_title,
+      webinar_thumbnail: webinar_thumbnail ? webinar_thumbnail : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.freepik.com%2Fpremium-psd%2Fonline-live-webinar-youtube-thumbnail-banner-template_13485363.htm&psig=AOvVaw1mGtnGXdsAc0g5ljh95LaG&ust=1704800949482000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPDkgMzczYMDFQAAAAAdAAAAABAD',
+      webinar_details,
+      webinar_date,
+      webinar_time,
+      webinar_fee: webinar_fee ? webinar_fee : 0,
     });
 
-    course = await course.save();
+    webinar = await webinar.save();
 
     res.status(200).send({
-      message: "Vocational Course successfully created",
-      course,
+      message: "Webinar successfully created",
+      webinar,
     });
   } catch (error) {
     res.status(500).send({ error: error.message });
@@ -29,22 +32,64 @@ exports.createWebinar = async (req, res) => {
 
 exports.getWebinars = async (req, res) => {
   try {
-    const { course_degree, online, offline } = req.query;
-    const filters = {};
-
-    if (course_degree)
-      filters.course_degree = Array.isArray(course_degree)
-        ? { $in: course_degree }
-        : [course_degree];
-    if (online) filters.online = online;
-    if (offline) filters.offline = offline;
-
-    const courses = await Webinar.find(filters);
-
-    res.status(200).send(courses);
+    const {
+      webinar_type,
+      webinar_dates,
+      webinar_duration,
+      webinar_status,
+      webinar_fee,
+    } = req.query;
+    console.log(webinar_type)
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getWebinarsForAdmin = async (req, res) => {
+  try {
+    const {
+      search,
+      webinar_dates,
+      webinar_duration,
+      webinar_fee, } = req.query;
+    const { id } = req;
+
+    const filter = { webinar_host: id };
+
+    if (search) {
+      filter.$or = [
+        { webinar_title: { $regex: search, $options: 'i' } }, // Case-insensitive search for webinar title
+        { webinar_details: { $regex: search, $options: 'i' } }, // Case-insensitive search for webinar title
+      ];
+    }
+
+    if (webinar_dates && webinar_dates.length === 2) {
+      const [startDate, endDate] = webinar_dates;
+
+      filter.webinar_date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    if (webinar_fee) {
+      filter.webinar_fee = {
+        $gte: webinar_fee[0],
+        $lte: webinar_fee[1],
+      };
+    }
+
+    if (webinar_duration) {
+      filter.webinar_duration = { $lte: webinar_duration };
+    }
+
+    let webinars = await Webinar.find(filter);
+
+    res.status(200).send(webinars);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
