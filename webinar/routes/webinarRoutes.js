@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/", adminAuth, createWebinar);
 router.get("/", getWebinars);
 router.get("/:webinar_id", adminOrUserAuth, getWebinar);
-router.get("/:webinar_id/get-webinars-for-admin", adminAuth, getWebinarsForAdmin);
+router.get("/get-webinars-for-admin", adminAuth, getWebinarsForAdmin);
 router.delete("/:webinar_id", deleteWebinar);
 router.put("/:webinar_id", editWebinar);
 

@@ -19,7 +19,7 @@ const webinarSchema = new Schema({
     type: String,
   },
   webinar_details: {
-    type: [String],
+    type: String,
     default: ""
   },
   webinar_date: {
