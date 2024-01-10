@@ -15,13 +15,17 @@ const {
   deleteCounsellor,
   uploadCoverImage,
   verifyCounsellor,
+  getCounsellorForAdmin,
+  getCounsellorsForAdmin
 } = require("../controllers/counsellorController");
-const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth } = require("../middlewares/authMiddleware");
+const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth, adminOrUserAuth } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadImage");
 
 // GET
 router.get("/", userAuth, getCounsellors);
+router.get("/counsellor-for-admin", adminAuth, getCounsellorsForAdmin);
 router.get("/:counsellor_id", counsellorOrUserAuth, getCounsellor);
+router.get("/:counsellor_id/counsellor-for-admin", adminAuth, getCounsellorForAdmin);
 router.get("/:counsellor_id/profile-pic", getProfilePic);
 router.get("/:counsellor_id/review", counsellorOrUserAuth, getReviewsCounsellor);
 router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings);

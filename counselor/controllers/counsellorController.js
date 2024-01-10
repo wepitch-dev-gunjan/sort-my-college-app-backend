@@ -219,6 +219,71 @@ exports.getCounsellor = async (req, res) => {
   }
 };
 
+exports.getCounsellorForAdmin = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+
+    if (!counsellor) {
+      return res.status(404).send({
+        error: "No counsellor found with the provided id",
+      });
+    }
+
+    // Calculate followers count
+    const followers_count = counsellor.followers.length;
+
+    // Calculate total sessions attended
+    let total_sessions_attended = 0;
+    if (counsellor.sessions) {
+      total_sessions_attended = counsellor.sessions.length;
+    }
+
+    // Calculate age from date of birth
+    let age = null;
+    if (counsellor.date_of_birth) {
+      const birthDate = new Date(counsellor.date_of_birth);
+      const ageDiff = Date.now() - birthDate.getTime();
+      age = new Date(ageDiff).getUTCFullYear() - 1970;
+    }
+
+    // Calculate minimum price of group session
+    let group_session_price = null;
+    if (counsellor.group_sessions) {
+      group_session_price = Math.min(
+        ...counsellor.group_sessions.map((session) => session.price)
+      );
+    }
+
+    // Calculate minimum price of personal session
+    let personal_session_price = null;
+    if (counsellor.personal_sessions) {
+      personal_session_price = Math.min(
+        ...counsellor.personal_sessions.map((session) => session.price)
+      );
+    }
+
+    const profile_pic = await getObjectURL(counsellor.profile_pic);
+    const cover_image = await getObjectURL(counsellor.cover_image);
+
+    const messagedCounsellor = {
+      ...counsellor._doc,
+      followers_count,
+      total_sessions_attended,
+      age,
+      group_session_price,
+      personal_session_price,
+      profile_pic,
+      cover_image
+    };
+
+    res.status(200).send(messagedCounsellor);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 exports.editProfile = async (req, res) => {
   try {
     const { counsellor_id } = req;
@@ -399,8 +464,8 @@ exports.getCounsellors = async (req, res) => {
       return res.status(404).send({ error: "No counselors found" });
     }
 
-    const massagedCounsellors = counsellors.map(async (counsellor) => {
-      const profile_pic = await getSignedUrl(counsellor.profile_pic)
+    const massagedCounsellors = await Promise.all(counsellors.map(async (counsellor) => {
+      const profile_pic = await getObjectURL(counsellor.profile_pic);
       return {
         _id: counsellor._id,
         name: counsellor.name,
@@ -414,7 +479,57 @@ exports.getCounsellors = async (req, res) => {
         reward_points: counsellor.reward_points,
         reviews: counsellor.client_testimonials.length,
       };
-    });
+    }));
+
+    res.status(200).send(massagedCounsellors);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getCounsellorsForAdmin = async (req, res) => {
+  try {
+    const { locations_focused, degree_focused, courses_focused } = req.query;
+
+    const queryObject = {};
+
+    if (degree_focused) {
+      queryObject.degree_focused = degree_focused;
+    }
+
+    if (locations_focused) {
+      queryObject.locations_focused = locations_focused;
+    }
+
+    if (courses_focused) {
+      queryObject.courses_focused = courses_focused;
+    }
+
+
+    // If no query parameters are provided, remove the queryObject to fetch all counselors
+    const counsellors = await Counsellor.find(Object.keys(queryObject).length === 0 ? {} : queryObject);
+
+    if (counsellors.length === 0) {
+      return res.status(404).send({ error: "No counselors found" });
+    }
+
+    const massagedCounsellors = await Promise.all(counsellors.map(async (counsellor) => {
+      const profile_pic = await getObjectURL(counsellor.profile_pic);
+      return {
+        _id: counsellor._id,
+        name: counsellor.name,
+        profile_pic,
+        designation: counsellor.designation,
+        qualifications: counsellor.specializations,
+        next_session: counsellor.next_session,
+        average_rating: counsellor.average_rating,
+        experience_in_years: counsellor.experience_in_years,
+        total_sessions: counsellor.sessions.length,
+        reward_points: counsellor.reward_points,
+        reviews: counsellor.client_testimonials.length,
+      };
+    }));
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {

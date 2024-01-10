@@ -85,6 +85,7 @@ exports.getWebinarsForAdmin = async (req, res) => {
     }
 
     let webinars = await Webinar.find(filter);
+    console.log(webinars)
 
     res.status(200).send(webinars);
   } catch (error) {
