@@ -286,7 +286,7 @@ exports.getCounsellorForAdmin = async (req, res) => {
 
 exports.editProfile = async (req, res) => {
   try {
-    const { counsellor_id } = req;
+    const { counsellor_id } = req.params;
     const updateFields = {};
 
     if (req.body.name) {
@@ -528,6 +528,7 @@ exports.getCounsellorsForAdmin = async (req, res) => {
         total_sessions: counsellor.sessions.length,
         reward_points: counsellor.reward_points,
         reviews: counsellor.client_testimonials.length,
+        verified: counsellor.verified
       };
     }));
 
@@ -775,7 +776,7 @@ exports.verifyCounsellor = async (req, res) => {
       error: 'Counsellor not found'
     });
 
-    if (counsellor.verified) res.status(400).send({
+    if (counsellor.verified) return res.status(400).send({
       error: "Counsellor already verified"
     })
 

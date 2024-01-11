@@ -12,7 +12,6 @@ const router = express.Router();
 
 router.post("/", adminAuth, createAdmin);
 router.get("/", adminAuth, getAdmin);
-router.get("/getOneAdmin/:admin_id", getOneAdmin);
 router.get('/admins', findOneAdmin);
 router.delete("/:admin_id", deleteAdmin);
 router.put("/:admin_id", adminAuth, editProfile);

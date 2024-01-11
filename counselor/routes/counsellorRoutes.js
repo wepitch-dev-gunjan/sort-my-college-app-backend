@@ -18,7 +18,7 @@ const {
   getCounsellorForAdmin,
   getCounsellorsForAdmin
 } = require("../controllers/counsellorController");
-const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth, adminOrUserAuth } = require("../middlewares/authMiddleware");
+const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth, adminOrUserAuth, adminOrCounsellorAuth } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadImage");
 
 // GET
@@ -31,7 +31,7 @@ router.get("/:counsellor_id/review", counsellorOrUserAuth, getReviewsCounsellor)
 router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings);
 
 // PUT
-router.put("/:counsellor_id", counsellorAuth, editProfile);
+router.put("/:counsellor_id", adminOrCounsellorAuth, editProfile);
 router.put("/:counsellor_id/verify", adminAuth, verifyCounsellor);
 
 // POST

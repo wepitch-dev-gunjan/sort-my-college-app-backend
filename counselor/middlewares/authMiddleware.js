@@ -160,6 +160,49 @@ exports.adminOrUserAuth = async (req, res, next) => {
   }
 };
 
+exports.adminOrCounsellorAuth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization');
+    if (!token) {
+      return res.status(401).json({ error: 'No token found, authorization denied' });
+    }
+
+    // Verify the token using your secret key
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    let response = {};
+    let responseData = {};
+    if (decoded.admin_id) {
+      response = await axios.get(`${BACKEND_URL}/admin/admins`,
+        null,
+        {
+          params: {
+            email: decoded.email
+          }
+        });
+      responseData = response.data;
+    } else if (decoded.counsellor_id) {
+      response = await Counsellor.findOne({ _id: decoded.counsellor_id })
+      responseData = response.data;
+    }
+
+    if (!responseData) {
+      return res.status(401).json({
+        error: `${decoded.counsellor_id ? "Counsellor" : "Admin"} not authorized`
+      });
+    }
+
+    req.email = decoded.email;
+    req.phone_number = decoded.phone_number;
+    req.id = response._id;
+
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 exports.adminAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization');
