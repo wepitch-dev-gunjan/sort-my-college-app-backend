@@ -6,6 +6,7 @@ const path = require('path');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const socketIo = require('socket.io');
+const { datacatalog_v1 } = require('googleapis');
 require('dotenv').config();
 
 const {
@@ -32,7 +33,7 @@ const server = NODE_ENV === 'production'
 
 const io = socketIo(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
