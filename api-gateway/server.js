@@ -76,9 +76,17 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected');
 
+  socket.on('join', (userId) => {
+    // Create a private room for the user
+    console.log(userId)
+    socket.join(userId);
+  });
+
   // Example: Broadcast a message to all connected clients
-  socket.on('send-message', (msg) => {
-    io.emit('chat-message', msg);
+  socket.on('send-message', (data) => {
+    const { room_id, message } = data;
+    console.log(data)
+    io.to(room_id).emit('chat-message', message);
   });
 
   socket.on('disconnect', () => {
