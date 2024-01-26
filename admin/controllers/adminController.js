@@ -130,3 +130,59 @@ exports.getOneAdmin = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+exports.getProfilePic = async (req, res) => {
+  try {
+    const { admin_id } = req.params;
+
+    const admin = await Counsellor.findById(admin_id);
+    if (!admin)
+      return res.status(404).send({ error: "Counsellor not found" });
+
+    if (!admin.profile_pic)
+      return res.status(404).send({ error: "ProfilePic not found" });
+
+    res.status(200).send(admin.profile_pic);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.uploadProfilePic = async (req, res) => {
+  try {
+    const { file, admin_id } = req;
+
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty"
+      });
+    }
+
+    const admin = await Admin.findById(admin_id);
+
+    if (!admin) {
+      return res.status(404).send({ error: "Admin not found" });
+    }
+
+    const fileName = `admin-profile-pic-${Date.now()}.jpeg`
+    const foldername = 'admin-profile-pics';
+    const profilePicUpload = await putObject(foldername, fileName, file.buffer, file.mimetype);
+
+    if (!profilePicUpload) {
+      return res.status(400).send({
+        error: "Profile pic is not uploaded"
+      });
+    }
+
+    admin.profile_pic = `${foldername}/${fileName}`;
+    await admin.save();
+
+    res.status(200).send({
+      message: "Profile pic uploaded successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};

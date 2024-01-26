@@ -5,10 +5,11 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const socketIo = require('socket.io');
 require('dotenv').config();
 
 const {
-  NODE_ENV, // Access environment variable for determining environment
+  NODE_ENV,
   PORT,
   USER_PORT,
   COUNSELLOR_PORT,
@@ -21,6 +22,20 @@ const {
 } = process.env;
 
 const app = express();
+const server = NODE_ENV === 'production'
+  ? https.createServer({
+    key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
+    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
+    ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
+  }, app)
+  : http.createServer(app);
+
+const io = socketIo(server, {
+  cors: {
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST"]
+  }
+});
 
 // Configure proxy for each service
 const proxyConfig = {
@@ -50,29 +65,26 @@ app.use(cors({
 }));
 
 // Google Authentication
-// Ensure you have a service file that handles this
 app.use("/", require("./services/googleAuthentication"));
 
-// Default route
+// REST API routes
 app.get('/', (req, res) => {
-  res.send('Welcome');
+  res.send('Welcome to the REST API');
 });
 
-let server;
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('A user connected');
 
-if (NODE_ENV === 'production') {
-  // Production mode: HTTPS server with SSL certificate
-  const serverOptions = {
-    key: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'private.key')),
-    cert: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'certificate.crt')),
-    ca: fs.readFileSync(path.join(__dirname, '..', 'ssl_certificates', 'ca_bundle.crt'))
-  };
+  // Example: Broadcast a message to all connected clients
+  socket.on('send-message', (msg) => {
+    io.emit('chat-message', msg);
+  });
 
-  server = https.createServer(serverOptions, app);
-} else {
-  // Development mode: HTTP server
-  server = http.createServer(app);
-}
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
 
 server.on('error', (err) => {
   console.error('Server encountered an error:', err);
