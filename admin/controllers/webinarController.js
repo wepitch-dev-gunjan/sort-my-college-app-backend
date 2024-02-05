@@ -54,25 +54,27 @@ exports.deleteWebinar = async (req, res) => {
 
 exports.zoomGenerateSignature = (req, res) => {
   try {
-    const { meeting_number, role } = req.body;
+    const { meeting_number, role, user_name } = req.body;
     const iat = Math.round(new Date().getTime() / 1000) - 30;
     const exp = iat + 60 * 60 * 2
+
+    const { ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET } = process.env;
 
     const oHeader = { alg: 'HS256', typ: 'JWT' }
 
     const oPayload = {
-      sdkKey: process.env.ZOOM_CLIENT_ID,
+      sdkKey: ZOOM_CLIENT_ID,
       mn: meeting_number,
       role,
       iat: iat,
       exp: exp,
-      appKey: process.env.ZOOM_CLIENT_ID,
+      appKey: ZOOM_CLIENT_ID,
       tokenExp: iat + 60 * 60 * 2
     }
 
     const sHeader = JSON.stringify(oHeader)
     const sPayload = JSON.stringify(oPayload)
-    const signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, process.env.ZOOM_CLIENT_SECRET)
+    const signature = KJUR.jws.JWS.sign('HS256', sHeader, sPayload, ZOOM_CLIENT_SECRET)
     res.status(200).send({
       signature
     })
