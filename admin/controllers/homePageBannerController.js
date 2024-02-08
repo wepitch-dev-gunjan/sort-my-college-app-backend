@@ -21,7 +21,6 @@ exports.createBanner = async (req, res) => {
 
     let result;
     if (files.length === 1) {
-      console.log(files[0])
       result = await uploadImage(files[0].buffer);
     } else {
       result = await uploadMultipleImages(files);
@@ -41,15 +40,20 @@ exports.getBanners = async (req, res) => {
     const { page, limit } = req.query;
     const query = {};
 
-    const banners = await homePageBanner.find();
-    if (!banners) return res.status(404).send([])
+    // Fetch banners sorted by date in descending order
+    const banners = await homePageBanner.find().sort({ createdAt: -1 });
+
+    if (!banners || banners.length === 0) {
+      return res.status(404).send([]);
+    }
 
     res.status(200).send(banners);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
 
 exports.deleteBanner = async (req, res) => {
   try {
