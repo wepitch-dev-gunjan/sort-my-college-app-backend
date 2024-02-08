@@ -3,6 +3,7 @@ const HomePageBanner = require("../models/homePageBanner");
 const uploadBanner = require("../middlewares/uploadBanner");
 const { uploadMultipleImages } = require("../services/cloudinary");
 const uploadImage = require("../services/cloudinary");
+const homePageBanner = require("../models/homePageBanner");
 // import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -32,6 +33,21 @@ exports.createBanner = async (req, res) => {
   } catch (error) {
     console.error("Error creating banner:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getBanners = async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    const query = {};
+
+    const banners = await homePageBanner.find();
+    if (!banners) return res.status(404).send([])
+
+    res.status(200).send(banners);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 

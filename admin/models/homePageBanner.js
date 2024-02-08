@@ -1,9 +1,6 @@
 const { Schema, model } = require('mongoose');
 
 const homePageBanner = new Schema({
-  title: {
-    type: String,
-  },
   url: {
     type: String,
     required: true,
