@@ -1,15 +1,15 @@
 const axios = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Follower = require("../models/Follower");
-require('dotenv').config();
+require("dotenv").config();
 
-const { BACKEND_URL } = process.env
+const { BACKEND_URL } = process.env;
 
 exports.getFollowers = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const followers = await Follower.find({ followed_to: counsellor_id });
-    console.log(followers)
+    console.log(followers);
 
     res.status(200).send(followers);
   } catch (error) {
@@ -21,29 +21,29 @@ exports.getFollowers = async (req, res) => {
 exports.getFollowersCount = async (req, res) => {
   try {
     const { counsellor_id } = req;
-    console.log(counsellor_id)
+    console.log(counsellor_id);
     const followersCount = await Follower.aggregate([
       {
         $match: {
-          followed_to: counsellor_id // Match documents with the specific counselorId
-        }
+          followed_to: counsellor_id, // Match documents with the specific counselorId
+        },
       },
       {
         $group: {
-          _id: '$followed_to',
-          totalFollowers: { $sum: 1 } // Count the number of matching documents
-        }
-      }
+          _id: "$followed_to",
+          totalFollowers: { $sum: 1 }, // Count the number of matching documents
+        },
+      },
     ]);
 
     // Extract the total followers count
-    const totalFollowers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    const totalFollowers =
+      followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
 
     res.status(200).json({ totalFollowers });
-
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -56,23 +56,27 @@ exports.followCounsellor = async (req, res) => {
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     const user = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
-        id
-      }
-    })
+        id,
+      },
+    });
 
     if (!counsellor) {
       return res.status(404).json({ error: "Counsellor not found" });
     }
     if (!user) {
-      return res.status(404).json({ error: "Follower not found" });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    console.log(user)
-    let follower = await Follower.findOne({ followed_by: id, followed_to: counsellor_id });
+    console.log(user);
+    let follower = await Follower.findOne({
+      followed_by: id,
+      followed_to: counsellor_id,
+    });
     if (follower) {
-      if (follower.followed === true) return res.status(404).send({
-        error: 'Counsellor is already followed by the user'
-      });
+      if (follower.followed === true)
+        return res.status(404).send({
+          error: "Counsellor is already followed by the user",
+        });
       follower.followed = true;
     } else {
       follower = new Follower({
@@ -81,15 +85,15 @@ exports.followCounsellor = async (req, res) => {
         followed: true,
         follower_profile_pic: user.data.profile_pic,
         follower_name: user.data.name,
-        follower_email: user.data.email
-      })
+        follower_email: user.data.email,
+      });
     }
 
     const response = await follower.save();
 
     res.status(200).json({
       message: "User is now following the counsellor",
-      data: response
+      data: response,
     });
   } catch (error) {
     console.error(error);
@@ -109,13 +113,17 @@ exports.unfollowCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Counsellor not found" });
     }
 
-    const follower = await Follower.findOne({ followed_by: user_id, followed_to: counsellor_id });
+    const follower = await Follower.findOne({
+      followed_by: user_id,
+      followed_to: counsellor_id,
+    });
 
     if (!follower) return res.status(404).send({ error: "Follower not found" });
 
-    if (follower.followed === false) return res.status(404).send({
-      error: 'Counsellor is already unfollowed by the user'
-    });
+    if (follower.followed === false)
+      return res.status(404).send({
+        error: "Counsellor is already unfollowed by the user",
+      });
 
     follower.followed = false;
 
@@ -123,11 +131,10 @@ exports.unfollowCounsellor = async (req, res) => {
 
     res.status(200).json({
       message: "User is now following the counsellor",
-      data: response
+      data: response,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
