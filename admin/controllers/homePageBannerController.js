@@ -54,7 +54,6 @@ exports.getBanners = async (req, res) => {
   }
 };
 
-
 exports.deleteBanner = async (req, res) => {
   try {
     const { _id } = req.params;
