@@ -16,7 +16,8 @@ const {
   uploadCoverImage,
   verifyCounsellor,
   getCounsellorForAdmin,
-  getCounsellorsForAdmin
+  getCounsellorsForAdmin,
+  rejectCounsellor
 } = require("../controllers/counsellorController");
 const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth, adminOrUserAuth, adminOrCounsellorAuth } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadImage");
@@ -33,6 +34,7 @@ router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings
 // PUT
 router.put("/:counsellor_id", adminOrCounsellorAuth, editProfile);
 router.put("/:counsellor_id/verify", adminAuth, verifyCounsellor);
+router.put("/:counsellor_id/reject", adminAuth, rejectCounsellor);
 
 // POST
 router.post("/login", login);

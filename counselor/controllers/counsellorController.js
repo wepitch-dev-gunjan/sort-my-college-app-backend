@@ -4,6 +4,8 @@ const Course = require("../models/Course");
 const Feed = require("../models/Feed");
 const { putObject, getObjectURL } = require("../services/s3config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+require('dotenv').config();
+const { BACKEND_URL } = process.env;
 
 // SMCMA-86
 exports.register = async (req, res) => {
@@ -786,6 +788,41 @@ exports.verifyCounsellor = async (req, res) => {
     res.status(200).send({
       message: "Counsellor successfully verified"
     })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.rejectCounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const { reason } = req.body;
+
+    const counsellor = await Counsellor.findOne({ _id: counsellor_id });
+    if (!counsellor) return res.status(404).send({
+      error: 'Counsellor not found'
+    });
+
+    if (!counsellor.verified) return res.status(400).send({
+      error: "Counsellor is not verified or already rejected"
+    })
+
+    counsellor.verified = false;
+    await counsellor.save();
+
+    const { data } = await axios.post(`${BACKEND_URL}/notification/counsellor/reject`, {
+      to: counsellor.email,
+      username: counsellor.name,
+      reason
+    });
+    console.log(data);
+
+    res.status(200).send({
+      message: "Counsellor successfully rejected"
+    })
+
+
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
