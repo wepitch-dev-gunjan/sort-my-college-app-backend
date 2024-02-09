@@ -41,9 +41,10 @@ exports.register = async (req, res) => {
     }
 
     const counsellor = await Counsellor.findOne({ email });
-    if (counsellor) return res.status(400).send({
-      error: "Email already exists"
-    })
+    if (counsellor)
+      return res.status(400).send({
+        error: "Email already exists",
+      });
 
     const messagedCounsellor = {};
 
@@ -115,9 +116,10 @@ exports.login = async (req, res) => {
     }
 
     const counsellor = await Counsellor.findOne({ email });
-    if (counsellor) return res.status(400).send({
-      error: "Email already exists"
-    })
+    if (counsellor)
+      return res.status(400).send({
+        error: "Email already exists",
+      });
 
     const messagedCounsellor = {};
 
@@ -209,7 +211,7 @@ exports.getCounsellor = async (req, res) => {
       group_session_price,
       personal_session_price,
       profile_pic,
-      cover_image
+      cover_image,
     };
 
     res.status(200).send([messagedCounsellor]);
@@ -274,7 +276,7 @@ exports.getCounsellorForAdmin = async (req, res) => {
       group_session_price,
       personal_session_price,
       profile_pic,
-      cover_image
+      cover_image,
     };
 
     res.status(200).send(messagedCounsellor);
@@ -411,7 +413,7 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ error: "Counselor not found" });
     }
 
-    console.log(updatedCounselor)
+    console.log(updatedCounselor);
     res.status(200).json(updatedCounselor);
   } catch (error) {
     console.error(error);
@@ -458,28 +460,32 @@ exports.getCounsellors = async (req, res) => {
     queryObject.verified = true;
 
     // If no query parameters are provided, remove the queryObject to fetch all counselors
-    const counsellors = await Counsellor.find(Object.keys(queryObject).length === 0 ? {} : queryObject);
+    const counsellors = await Counsellor.find(
+      Object.keys(queryObject).length === 0 ? {} : queryObject
+    );
 
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });
     }
 
-    const massagedCounsellors = await Promise.all(counsellors.map(async (counsellor) => {
-      const profile_pic = await getObjectURL(counsellor.profile_pic);
-      return {
-        _id: counsellor._id,
-        name: counsellor.name,
-        profile_pic,
-        designation: counsellor.designation,
-        qualifications: counsellor.specializations,
-        next_session: counsellor.next_session,
-        average_rating: counsellor.average_rating,
-        experience_in_years: counsellor.experience_in_years,
-        total_sessions: counsellor.sessions.length,
-        reward_points: counsellor.reward_points,
-        reviews: counsellor.client_testimonials.length,
-      };
-    }));
+    const massagedCounsellors = await Promise.all(
+      counsellors.map(async (counsellor) => {
+        const profile_pic = await getObjectURL(counsellor.profile_pic);
+        return {
+          _id: counsellor._id,
+          name: counsellor.name,
+          profile_pic,
+          designation: counsellor.designation,
+          qualifications: counsellor.specializations,
+          next_session: counsellor.next_session,
+          average_rating: counsellor.average_rating,
+          experience_in_years: counsellor.experience_in_years,
+          total_sessions: counsellor.sessions.length,
+          reward_points: counsellor.reward_points,
+          reviews: counsellor.client_testimonials.length,
+        };
+      })
+    );
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
@@ -506,31 +512,34 @@ exports.getCounsellorsForAdmin = async (req, res) => {
       queryObject.courses_focused = courses_focused;
     }
 
-
     // If no query parameters are provided, remove the queryObject to fetch all counselors
-    const counsellors = await Counsellor.find(Object.keys(queryObject).length === 0 ? {} : queryObject);
+    const counsellors = await Counsellor.find(
+      Object.keys(queryObject).length === 0 ? {} : queryObject
+    );
 
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });
     }
 
-    const massagedCounsellors = await Promise.all(counsellors.map(async (counsellor) => {
-      const profile_pic = await getObjectURL(counsellor.profile_pic);
-      return {
-        _id: counsellor._id,
-        name: counsellor.name,
-        profile_pic,
-        designation: counsellor.designation,
-        qualifications: counsellor.specializations,
-        next_session: counsellor.next_session,
-        average_rating: counsellor.average_rating,
-        experience_in_years: counsellor.experience_in_years,
-        total_sessions: counsellor.sessions.length,
-        reward_points: counsellor.reward_points,
-        reviews: counsellor.client_testimonials.length,
-        verified: counsellor.verified
-      };
-    }));
+    const massagedCounsellors = await Promise.all(
+      counsellors.map(async (counsellor) => {
+        const profile_pic = await getObjectURL(counsellor.profile_pic);
+        return {
+          _id: counsellor._id,
+          name: counsellor.name,
+          profile_pic,
+          designation: counsellor.designation,
+          qualifications: counsellor.specializations,
+          next_session: counsellor.next_session,
+          average_rating: counsellor.average_rating,
+          experience_in_years: counsellor.experience_in_years,
+          total_sessions: counsellor.sessions.length,
+          reward_points: counsellor.reward_points,
+          reviews: counsellor.client_testimonials.length,
+          verified: counsellor.verified,
+        };
+      })
+    );
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
@@ -563,7 +572,7 @@ exports.uploadProfilePic = async (req, res) => {
 
     if (!file) {
       return res.status(400).send({
-        error: "File can't be empty"
+        error: "File can't be empty",
       });
     }
 
@@ -573,13 +582,18 @@ exports.uploadProfilePic = async (req, res) => {
       return res.status(404).send({ error: "Counsellor not found" });
     }
 
-    const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`
-    const foldername = 'counsellor-profile-pics';
-    const profilePicUpload = await putObject(foldername, fileName, file.buffer, file.mimetype);
+    const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`;
+    const foldername = "counsellor-profile-pics";
+    const profilePicUpload = await putObject(
+      foldername,
+      fileName,
+      file.buffer,
+      file.mimetype
+    );
 
     if (!profilePicUpload) {
       return res.status(400).send({
-        error: "Profile pic is not uploaded"
+        error: "Profile pic is not uploaded",
       });
     }
 
@@ -587,7 +601,7 @@ exports.uploadProfilePic = async (req, res) => {
     await counsellor.save();
 
     res.status(200).send({
-      message: "Profile pic uploaded successfully"
+      message: "Profile pic uploaded successfully",
     });
   } catch (error) {
     console.log(error);
@@ -601,7 +615,7 @@ exports.uploadCoverImage = async (req, res) => {
 
     if (!file) {
       return res.status(400).send({
-        error: "File can't be empty"
+        error: "File can't be empty",
       });
     }
 
@@ -611,13 +625,18 @@ exports.uploadCoverImage = async (req, res) => {
       return res.status(404).send({ error: "Counsellor not found" });
     }
 
-    const fileName = `counsellor-cover-image-${Date.now()}.jpeg`
-    const folderName = 'counsellor-cover-images';
-    const coverImageUpload = await putObject(folderName, fileName, file.buffer, file.mimetype);
+    const fileName = `counsellor-cover-image-${Date.now()}.jpeg`;
+    const folderName = "counsellor-cover-images";
+    const coverImageUpload = await putObject(
+      folderName,
+      fileName,
+      file.buffer,
+      file.mimetype
+    );
 
     if (!coverImageUpload) {
       return res.status(400).send({
-        error: "Cover Image is not uploaded"
+        error: "Cover Image is not uploaded",
       });
     }
 
@@ -625,7 +644,7 @@ exports.uploadCoverImage = async (req, res) => {
     await counsellor.save();
 
     res.status(200).send({
-      message: "Cover Image uploaded successfully"
+      message: "Cover Image uploaded successfully",
     });
   } catch (error) {
     console.log(error);
@@ -668,9 +687,9 @@ exports.getReviewsCounsellor = async (req, res) => {
     res.status(200).send(reviews);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: "Internal Server Error" })
+    res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.createFeed = async (req, res) => {
   try {
@@ -678,7 +697,8 @@ exports.createFeed = async (req, res) => {
     const { counsellor_id } = req.params;
 
     const counsellor = await Counsellor.findById(counsellor_id);
-    if (!counsellor) return res.status(404).send({ error: 'Counsellor not found' });
+    if (!counsellor)
+      return res.status(404).send({ error: "Counsellor not found" });
 
     const newFeed = new Feed({
       feed_owner: counsellor_id,
@@ -688,10 +708,10 @@ exports.createFeed = async (req, res) => {
 
     await newFeed.save();
 
-    res.status(200).send({ message: 'Feed created successfully' });
+    res.status(200).send({ message: "Feed created successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -746,6 +766,7 @@ exports.postReviewCounsellor = async (req, res) => {
     if (!counsellor)
       return res.status(404).send({ error: "Counsellor not found" });
 
+    console.log(counsellor.client_testimonials);
     if (
       counsellor.client_testimonials.some(
         (testimonial) => testimonial.user_id === user_id
@@ -772,22 +793,24 @@ exports.verifyCounsellor = async (req, res) => {
     const { counsellor_id } = req.params;
 
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-    if (!counsellor) return res.status(404).send({
-      error: 'Counsellor not found'
-    });
+    if (!counsellor)
+      return res.status(404).send({
+        error: "Counsellor not found",
+      });
 
-    if (counsellor.verified) return res.status(400).send({
-      error: "Counsellor already verified"
-    })
+    if (counsellor.verified)
+      return res.status(400).send({
+        error: "Counsellor already verified",
+      });
 
     counsellor.verified = true;
     await counsellor.save();
 
     res.status(200).send({
-      message: "Counsellor successfully verified"
-    })
+      message: "Counsellor successfully verified",
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };

@@ -1,8 +1,21 @@
 const Webinar = require("../models/Webinar");
 
+exports.createWebinar = (userId, payload) => {};
+exports.scheduleWebinar = async (req, res) => {
+  const webinar = (userId) => `${apiBaseUri}users/{userId}/meetings`;
+};
+
 exports.createWebinar = async (req, res) => {
   try {
-    const { webinar_title, webinar_thumbnail, webinar_details, webinar_date, webinar_time, webinar_fee } = req.body;
+    const {
+      webinar_title,
+      webinar_thumbnail,
+      webinar_details,
+      webinar_date,
+      webinar_time,
+      webinar_fee,
+    } = req.body;
+
     const { id } = req;
     if (!webinar_title || !webinar_details || !webinar_date || !webinar_time)
       return res.status(400).send({
@@ -12,7 +25,9 @@ exports.createWebinar = async (req, res) => {
     let webinar = new Webinar({
       webinar_host: id,
       webinar_title,
-      webinar_thumbnail: webinar_thumbnail ? webinar_thumbnail : 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.freepik.com%2Fpremium-psd%2Fonline-live-webinar-youtube-thumbnail-banner-template_13485363.htm&psig=AOvVaw1mGtnGXdsAc0g5ljh95LaG&ust=1704800949482000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPDkgMzczYMDFQAAAAAdAAAAABAD',
+      webinar_thumbnail: webinar_thumbnail
+        ? webinar_thumbnail
+        : "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.freepik.com%2Fpremium-psd%2Fonline-live-webinar-youtube-thumbnail-banner-template_13485363.htm&psig=AOvVaw1mGtnGXdsAc0g5ljh95LaG&ust=1704800949482000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPDkgMzczYMDFQAAAAAdAAAAABAD",
       webinar_details,
       webinar_date,
       webinar_time,
@@ -39,7 +54,7 @@ exports.getWebinars = async (req, res) => {
       webinar_status,
       webinar_fee,
     } = req.query;
-    console.log(webinar_type)
+    console.log(webinar_type);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -48,19 +63,15 @@ exports.getWebinars = async (req, res) => {
 
 exports.getWebinarsForAdmin = async (req, res) => {
   try {
-    const {
-      search,
-      webinar_dates,
-      webinar_duration,
-      webinar_fee, } = req.query;
+    const { search, webinar_dates, webinar_duration, webinar_fee } = req.query;
     const { id } = req;
 
     const filter = { webinar_host: id };
 
     if (search) {
       filter.$or = [
-        { webinar_title: { $regex: search, $options: 'i' } }, // Case-insensitive search for webinar title
-        { webinar_details: { $regex: search, $options: 'i' } }, // Case-insensitive search for webinar title
+        { webinar_title: { $regex: search, $options: "i" } }, // Case-insensitive search for webinar title
+        { webinar_details: { $regex: search, $options: "i" } }, // Case-insensitive search for webinar title
       ];
     }
 
@@ -85,7 +96,7 @@ exports.getWebinarsForAdmin = async (req, res) => {
     }
 
     let webinars = await Webinar.find(filter);
-    console.log(webinars)
+    console.log(webinars);
 
     res.status(200).send(webinars);
   } catch (error) {
