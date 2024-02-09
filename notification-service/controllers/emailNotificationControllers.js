@@ -203,7 +203,6 @@ exports.verifiedOtpNotification = (req, res) => {
   }
 };
 
-
 exports.welcomeUserEmailNotification = (req, res) => {
   try {
     const { to, subject, username } = req.body;
@@ -1297,9 +1296,83 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
         res.send("Email sent successfully");
       }
     });
-    console.log("running");
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Internal Server Error" });
+  }
+};
+
+exports.verifyCounsellorEmailNotification = async (req, res) => {
+  try {
+    res.status(200).send({
+      message: "email sent sucessfully"
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.rejectCounsellorEmailNotification = async (req, res) => {
+  try {
+    const { to, reason, username } = req.body;
+    console.log(to, reason, username)
+    const mailOptions = {
+      to,
+      subject: 'Counsellor Verification Rejected',
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          Hello ${username} <br><br>
+                          Your verification is rejected.<br><br> 
+                          <b>Reason </b>: ${reason}               
+                          <br><br>                          
+                          You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          portal.<br><br>
+                          Best regards, <br />
+                          The
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
