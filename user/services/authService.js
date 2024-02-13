@@ -135,7 +135,6 @@ exports.generateOtpByEmail = async (req, res) => {
 
     // Set the expiration time (e.g., 2 minutes from now).
     const expirationTime = new Date();
-    console.log('hi')
     expirationTime.setMinutes(expirationTime.getMinutes() + 2);
 
     // Find or create an OTP object for the email.
