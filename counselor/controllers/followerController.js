@@ -67,7 +67,6 @@ exports.followCounsellor = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log(user);
     let follower = await Follower.findOne({
       followed_by: id,
       followed_to: counsellor_id,
@@ -103,7 +102,7 @@ exports.followCounsellor = async (req, res) => {
 
 exports.unfollowCounsellor = async (req, res) => {
   try {
-    const { user_id } = req;
+    const { id } = req;
     const { counsellor_id } = req.params;
 
     // Find the counsellor by ID
@@ -114,7 +113,7 @@ exports.unfollowCounsellor = async (req, res) => {
     }
 
     const follower = await Follower.findOne({
-      followed_by: user_id,
+      followed_by: id,
       followed_to: counsellor_id,
     });
 

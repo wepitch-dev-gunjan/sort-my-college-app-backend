@@ -23,7 +23,6 @@ const uploadImage = (imageBuffer) => {
     cloudinary.uploader.upload_stream(opts, async (error, result) => {
       try {
         if (result && result.secure_url) {
-          console.log(result.secure_url);
           const newBanner = new homePageBanner({
             url: result.secure_url
           })

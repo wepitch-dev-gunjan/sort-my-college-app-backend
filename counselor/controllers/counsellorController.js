@@ -4,6 +4,7 @@ const Course = require("../models/Course");
 const Feed = require("../models/Feed");
 const { putObject, getObjectURL } = require("../services/s3config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const Feedback = require("../models/Feedback");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -205,6 +206,16 @@ exports.getCounsellor = async (req, res) => {
     const profile_pic = await getObjectURL(counsellor.profile_pic);
     const cover_image = await getObjectURL(counsellor.cover_image);
 
+    // client testimonials
+    const client_testimonials = await Feedback.find({ feedback_to: counsellor._id });
+
+    // rating
+    const allRatingsCount = client_testimonials.reduce((accumulator, testimonial) => accumulator + testimonial.rating, 0);
+    const avg_rating = allRatingsCount / client_testimonials.length;
+
+    // reviews
+    const reviews = client_testimonials.length;
+
     const messagedCounsellor = {
       ...counsellor._doc,
       followers_count,
@@ -214,6 +225,9 @@ exports.getCounsellor = async (req, res) => {
       personal_session_price,
       profile_pic,
       cover_image,
+      reviews,
+      avg_rating,
+      client_testimonials,
     };
 
     res.status(200).send([messagedCounsellor]);

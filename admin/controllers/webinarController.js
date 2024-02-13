@@ -26,8 +26,21 @@ exports.addWebinar = async (req, res) => {
     // if(!webinar_date ) return res.status(400).send({
     //   error: 'Date is required'
     // })
+    const { topic } = req.body;
 
-    res.status(200).send(req.locals.signature);
+    // Make a POST request to Zoom API to create a meeting
+    const { data } = await axios.post('https://api.zoom.us/v2/users/me/meetings', {
+      topic,
+      type: 2 // Scheduled meeting
+    }, {
+      headers: {
+        'Authorization': `Bearer YOUR_ZOOM_API_TOKEN`
+      }
+    });
+
+    res.json(response.data);
+
+    res.status(200).send(data);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
