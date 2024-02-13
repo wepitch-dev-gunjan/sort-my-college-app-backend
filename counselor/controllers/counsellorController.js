@@ -868,3 +868,23 @@ exports.rejectCounsellor = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.findOneCounsellor = async (req, res) => {
+  try {
+    const { email, counsellor_id } = req.query;
+    const query = {};
+    if (email) query.email = email;
+    if (counsellor_id) query._id = counsellor_id;
+
+    const counsellor = await Counsellor.findOne(query);
+
+    if (!counsellor) {
+      return res.status(400).send({ error: "Counsellor not found" });
+    }
+
+    res.status(200).send(counsellor);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};

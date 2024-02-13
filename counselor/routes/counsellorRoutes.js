@@ -17,7 +17,8 @@ const {
   verifyCounsellor,
   getCounsellorForAdmin,
   getCounsellorsForAdmin,
-  rejectCounsellor
+  rejectCounsellor,
+  findOneCounsellor
 } = require("../controllers/counsellorController");
 const { counsellorAuth, userAuth, counsellorOrUserAuth, adminAuth, adminOrUserAuth, adminOrCounsellorAuth } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadImage");
@@ -30,6 +31,7 @@ router.get("/:counsellor_id/counsellor-for-admin", adminAuth, getCounsellorForAd
 router.get("/:counsellor_id/profile-pic", getProfilePic);
 router.get("/:counsellor_id/review", counsellorOrUserAuth, getReviewsCounsellor);
 router.get("/:counsellor_id/total-rating", counsellorOrUserAuth, getTotalRatings);
+router.get('/counsellors/find-one', findOneCounsellor);
 
 // PUT
 router.put("/:counsellor_id", adminOrCounsellorAuth, editProfile);
