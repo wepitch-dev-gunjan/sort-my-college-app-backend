@@ -49,12 +49,11 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     let response = {};
     let responseData = {};
     if (decoded.counsellor_id) {
-      response = await axios.get(`${process.env.BACKEND_URL}/counselor/counsellors/find-one`, { // Update BACKEND_URL to use process.env
+      response = await axios.get(`${process.env.BACKEND_URL}/counsellor/counsellors/find-one`, { // Update BACKEND_URL to use process.env
         params: {
           email: decoded.email
         }
       });
-      console.log(response.data);
       responseData = response.data;
     } else if (decoded.user_id) {
       response = await axios.get(`${process.env.BACKEND_URL}/user/users`, { // Update BACKEND_URL to use process.env
