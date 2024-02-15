@@ -73,7 +73,7 @@ exports.followCounsellor = async (req, res) => {
     });
     if (follower) {
       if (follower.followed === true)
-        return res.status(404).send({
+        return res.status(400).send({
           error: "Counsellor is already followed by the user",
         });
       follower.followed = true;
@@ -87,9 +87,26 @@ exports.followCounsellor = async (req, res) => {
         follower_email: user.data.email,
       });
     }
-
+    
     const response = await follower.save();
-
+    
+    // Aggregation to count the total followers
+    const followersCount = await Follower.aggregate([
+      {
+        $match: {
+          followed_to: counsellor_id,
+        },
+      },
+      {
+        $group: {
+          _id: "$followed_to",
+          totalFollowers: { $sum: 1 },
+        },
+      },
+    ]);
+    counsellor.followers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    await counsellor.save();
+    
     res.status(200).json({
       message: "User is now following the counsellor",
       data: response,
@@ -129,7 +146,7 @@ exports.unfollowCounsellor = async (req, res) => {
     const response = await follower.save();
 
     res.status(200).json({
-      message: "User is now following the counsellor",
+      message: "User is now unfollowing the counsellor",
       data: response,
     });
   } catch (error) {

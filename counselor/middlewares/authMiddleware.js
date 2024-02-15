@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const Counsellor = require("../models/Counsellor");
-const { generateToken } = require("../helpers/counsellorHelpers");
+const { generateToken, objectIdToString } = require("../helpers/counsellorHelpers");
 const { default: axios } = require("axios");
 require("dotenv").config();
 const { JWT_SECRET } = process.env;
@@ -82,20 +82,22 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    let response = {};
-    let responseData = {};
+    let responseData = null;
     if (decoded.counsellor_id) {
-      response = await Counsellor.findOne({ _id: decoded.counsellor_id });
-      responseData = response;
+      responseData = await Counsellor.findOne({ _id: decoded.counsellor_id });
+      
     } else if (decoded.user_id) {
-      response = await axios.get(`${BACKEND_URL}/user/users`, null, {
+      const { data } = await axios.get(`${BACKEND_URL}/user/users`, null, {
         params: {
           email: decoded.email,
         },
       });
-      responseData = response.data;
+      const stringId = objectIdToString(data._id);
+      responseData = data;
+      responseData._id = stringId;
     }
-
+    
+    console.log(decoded);
     if (!responseData) {
       return res.status(401).json({
         error: `${decoded.user_id ? "User" : "Counsellor"} not authorized`,
@@ -104,7 +106,7 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
 
     req.email = decoded.email;
     req.phone_number = decoded.phone_number;
-    req.id = response._id;
+    req.id = responseData._id;
 
     next();
   } catch (error) {
@@ -183,9 +185,9 @@ exports.adminOrCounsellorAuth = async (req, res, next) => {
       responseData = response.data;
     } else if (decoded.counsellor_id) {
       response = await Counsellor.findOne({ _id: decoded.counsellor_id });
-      responseData = response.data;
+      responseData = response;
     }
-
+    
     if (!responseData) {
       return res.status(401).json({
         error: `${
