@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const Counsellor = require("../models/Counsellor");
-const { generateToken, objectIdToString } = require("../helpers/counsellorHelpers");
+const {
+  generateToken,
+  objectIdToString,
+} = require("../helpers/counsellorHelpers");
 const { default: axios } = require("axios");
 require("dotenv").config();
 const { JWT_SECRET } = process.env;
@@ -85,19 +88,19 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     let responseData = null;
     if (decoded.counsellor_id) {
       responseData = await Counsellor.findOne({ _id: decoded.counsellor_id });
-      
+      req.id = decoded.counsellor_id;
     } else if (decoded.user_id) {
       const { data } = await axios.get(`${BACKEND_URL}/user/users`, null, {
         params: {
           email: decoded.email,
         },
       });
-      const stringId = objectIdToString(data._id);
+      // const stringId = objectIdToString(data._id);
       responseData = data;
-      responseData._id = stringId;
+      req.id = decoded.user_id;
+      // responseData._id = stringId;
     }
-    
-    console.log(decoded);
+
     if (!responseData) {
       return res.status(401).json({
         error: `${decoded.user_id ? "User" : "Counsellor"} not authorized`,
@@ -106,7 +109,6 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
 
     req.email = decoded.email;
     req.phone_number = decoded.phone_number;
-    req.id = responseData._id;
 
     next();
   } catch (error) {
@@ -187,7 +189,7 @@ exports.adminOrCounsellorAuth = async (req, res, next) => {
       response = await Counsellor.findOne({ _id: decoded.counsellor_id });
       responseData = response;
     }
-    
+
     if (!responseData) {
       return res.status(401).json({
         error: `${

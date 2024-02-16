@@ -56,7 +56,7 @@ exports.followCounsellor = async (req, res) => {
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
     const user = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
-        id,
+        user_id: id,
       },
     });
 
@@ -105,6 +105,7 @@ exports.followCounsellor = async (req, res) => {
       },
     ]);
     counsellor.followers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    console.log(counsellor.followers)
     await counsellor.save();
     
     res.status(200).json({
@@ -129,25 +130,33 @@ exports.unfollowCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Counsellor not found" });
     }
 
-    const follower = await Follower.findOne({
+    const follower = await Follower.findOneAndDelete({
       followed_by: id,
       followed_to: counsellor_id,
     });
 
     if (!follower) return res.status(404).send({ error: "Follower not found" });
 
-    if (follower.followed === false)
-      return res.status(404).send({
-        error: "Counsellor is already unfollowed by the user",
-      });
-
-    follower.followed = false;
-
-    const response = await follower.save();
-
+     // Aggregation to count the total followers
+     const followersCount = await Follower.aggregate([
+      {
+        $match: {
+          followed_to: counsellor_id,
+        },
+      },
+      {
+        $group: {
+          _id: "$followed_to",
+          totalFollowers: { $sum: 1 },
+        },
+      },
+    ]);
+    counsellor.followers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    console.log(counsellor.followers)
+    await counsellor.save();
     res.status(200).json({
       message: "User is now unfollowing the counsellor",
-      data: response,
+      data: follower,
     });
   } catch (error) {
     console.error(error);

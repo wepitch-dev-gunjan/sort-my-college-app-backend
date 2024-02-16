@@ -165,20 +165,19 @@ exports.getCounsellor = async (req, res) => {
     const { counsellor_id } = req.params;
     const { id } = req;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-    
+
     if (!counsellor) {
       return res.status(404).send({
         error: "No counsellor found with the provided id",
       });
     }
-    
-    
+
     // Calculate total sessions attended
     let total_sessions_attended = 0;
     if (counsellor.sessions) {
       total_sessions_attended = counsellor.sessions.length;
     }
-    
+
     // Calculate age from date of birth
     let age = null;
     if (counsellor.date_of_birth) {
@@ -186,55 +185,61 @@ exports.getCounsellor = async (req, res) => {
       const ageDiff = Date.now() - birthDate.getTime();
       age = new Date(ageDiff).getUTCFullYear() - 1970;
     }
-    
+
     // Calculate minimum price of group session
     let group_session_price = null;
     if (counsellor.group_sessions) {
       group_session_price = Math.min(
         ...counsellor.group_sessions.map((session) => session.price)
-        );
-      }
-      
-      // Calculate minimum price of personal session
-      let personal_session_price = null;
-      if (counsellor.personal_sessions) {
-        personal_session_price = Math.min(
-          ...counsellor.personal_sessions.map((session) => session.price)
-          );
-        }
-        
-        const profile_pic = await getObjectURL(counsellor.profile_pic);
-        const cover_image = await getObjectURL(counsellor.cover_image);
-        
-        // client testimonials
-        const client_testimonials = await Feedback.find({ feedback_to: counsellor._id });
-        
-        // rating
-        const allRatingsCount = client_testimonials.reduce((accumulator, testimonial) => accumulator + testimonial.rating, 0);
-        const avg_rating = allRatingsCount / client_testimonials.length;
-        
-        // reviews
-        const reviews = client_testimonials.length;
-        
-        // if followed by the user or not
-        const follower = await Follower.findOne({
-          followed_by: id,
-          followed_to: counsellor_id,
-        });
-        const following = follower ? true : false;
-        
-        const messagedCounsellor = {
-          ...counsellor._doc,
-          total_sessions_attended,
-          age,
-          group_session_price,
-          personal_session_price,
-          profile_pic,
-          cover_image,
+      );
+    }
+
+    // Calculate minimum price of personal session
+    let personal_session_price = null;
+    if (counsellor.personal_sessions) {
+      personal_session_price = Math.min(
+        ...counsellor.personal_sessions.map((session) => session.price)
+      );
+    }
+
+    const profile_pic = await getObjectURL(counsellor.profile_pic);
+    const cover_image = await getObjectURL(counsellor.cover_image);
+
+    // client testimonials
+    const client_testimonials = await Feedback.find({
+      feedback_to: counsellor._id,
+    });
+
+    // rating
+    const allRatingsCount = client_testimonials.reduce(
+      (accumulator, testimonial) => accumulator + testimonial.rating,
+      0
+    );
+    const avg_rating = allRatingsCount / client_testimonials.length;
+
+    // reviews
+    const reviews = client_testimonials.length;
+
+    // if followed by the user or not
+    const follower = await Follower.findOne({
+      followed_by: id,
+      followed_to: counsellor_id,
+    });
+
+    const following = follower ? true : false;
+
+    const messagedCounsellor = {
+      ...counsellor._doc,
+      total_sessions_attended,
+      age,
+      group_session_price,
+      personal_session_price,
+      profile_pic,
+      cover_image,
       reviews,
       avg_rating,
       client_testimonials,
-      following
+      following,
     };
 
     res.status(200).send([messagedCounsellor]);
