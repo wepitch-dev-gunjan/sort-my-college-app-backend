@@ -66,6 +66,7 @@ exports.followCounsellor = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    console.log(user.data);
 
     let follower = await Follower.findOne({
       followed_by: id,
@@ -87,9 +88,9 @@ exports.followCounsellor = async (req, res) => {
         follower_email: user.data.email,
       });
     }
-    
+
     const response = await follower.save();
-    
+
     // Aggregation to count the total followers
     const followersCount = await Follower.aggregate([
       {
@@ -104,10 +105,11 @@ exports.followCounsellor = async (req, res) => {
         },
       },
     ]);
-    counsellor.followers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
-    console.log(counsellor.followers)
+    counsellor.followers =
+      followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    console.log(counsellor.followers);
     await counsellor.save();
-    
+
     res.status(200).json({
       message: "User is now following the counsellor",
       data: response,
@@ -137,8 +139,8 @@ exports.unfollowCounsellor = async (req, res) => {
 
     if (!follower) return res.status(404).send({ error: "Follower not found" });
 
-     // Aggregation to count the total followers
-     const followersCount = await Follower.aggregate([
+    // Aggregation to count the total followers
+    const followersCount = await Follower.aggregate([
       {
         $match: {
           followed_to: counsellor_id,
@@ -151,8 +153,9 @@ exports.unfollowCounsellor = async (req, res) => {
         },
       },
     ]);
-    counsellor.followers = followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
-    console.log(counsellor.followers)
+    counsellor.followers =
+      followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
+    console.log(counsellor.followers);
     await counsellor.save();
     res.status(200).json({
       message: "User is now unfollowing the counsellor",

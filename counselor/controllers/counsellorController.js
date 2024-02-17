@@ -490,7 +490,7 @@ exports.getCounsellors = async (req, res) => {
     // If no query parameters are provided, remove the queryObject to fetch all counselors
     const counsellors = await Counsellor.find(
       Object.keys(queryObject).length === 0 ? {} : queryObject
-    );
+    ).sort({ reward_points: -1 });
 
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });

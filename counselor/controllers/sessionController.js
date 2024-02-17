@@ -6,7 +6,7 @@ const {
   getSessionDateTime,
   isCounsellingSessionAvailable,
 } = require("../helpers/sessionHelpers");
-require('dotenv').config();
+require("dotenv").config();
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
@@ -16,7 +16,7 @@ const { BACKEND_URL } = process.env;
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { session_type, session_date} = req.query;
+    const { session_type, session_date } = req.query;
     const { counsellor_id } = req.params;
 
     const filter = { session_counsellor: counsellor_id };
@@ -30,15 +30,23 @@ exports.getSessions = async (req, res) => {
     }
 
     let sessions = await Session.find(filter);
-    let total_available_slots = 0
+    let total_available_slots = 0;
 
     if (sessions.length > 0) {
-      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
 
-      const massagedSessions = sessions.map(session => {
+      const massagedSessions = sessions.map((session) => {
         total_available_slots += session.session_available_slots;
         const sessionDate = new Date(session.session_date);
-        let session_massaged_date = ''
+        let session_massaged_date = "";
 
         const today = new Date();
         const tomorrow = new Date(today);
@@ -49,10 +57,12 @@ exports.getSessions = async (req, res) => {
         } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
           session_massaged_date = "tomorrow";
         } else {
-          const dayDiff = Math.ceil((sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+          const dayDiff = Math.ceil(
+            (sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
+          );
 
           if (dayDiff <= 7 && dayDiff > 0) {
-            session_massaged_date = daysOfWeek[sessionDate.getDay()]
+            session_massaged_date = daysOfWeek[sessionDate.getDay()];
             // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
           } else {
             // Keep the original date if not within the next 7 days
@@ -66,12 +76,12 @@ exports.getSessions = async (req, res) => {
       });
       res.status(200).json({
         total_available_slots,
-        sessions: massagedSessions
+        sessions: massagedSessions,
       });
     } else {
       res.status(200).json({
         total_available_slots: 0,
-        sessions: []
+        sessions: [],
       });
     }
   } catch (error) {
@@ -82,11 +92,17 @@ exports.getSessions = async (req, res) => {
 
 exports.getSessionsForCounsellor = async (req, res) => {
   try {
-    const { session_type, session_dates, session_status, session_fee, session_duration } = req.query;
+    const {
+      session_type,
+      session_dates,
+      session_status,
+      session_fee,
+      session_duration,
+    } = req.query;
     const { counsellor_id } = req.params;
 
     const filter = { session_counsellor: counsellor_id };
-    if (session_type && session_type !== 'All') {
+    if (session_type && session_type !== "All") {
       filter.session_type = session_type;
     }
 
@@ -99,7 +115,7 @@ exports.getSessionsForCounsellor = async (req, res) => {
       };
     }
 
-    if (session_status && session_status !== 'All') {
+    if (session_status && session_status !== "All") {
       filter.session_status = session_status;
     }
 
@@ -154,11 +170,8 @@ exports.addSession = async (req, res) => {
       session_type,
       session_fee,
     } = req.body;
-    if (!isSessionBefore24Hours(session_date, session_time)) {
-      return res
-        .status(404)
-        .json({ error: "Can't add session before 24 hours" });
-    }
+
+    console.log(session_time);
 
     // Check if any of the required fields are missing
     if (
@@ -185,20 +198,21 @@ exports.addSession = async (req, res) => {
       parsedSessionDuration <= 0
     ) {
       return res.status(400).send({
-        error: "Invalid session_date",
+        error: "Invalid session_date or session_duration",
       });
     }
 
-    const lowerTimeLimit = parsedSessionTime - 30;
+    // Check if a session is already there at the mentioned time
+    const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
-
+    console.log(lowerTimeLimit, upperTimeLimit);
 
     const existingSession = await Session.findOne({
       session_counsellor: counsellor_id,
       session_date: parsedSessionDate,
       session_time: {
-        $gte: lowerTimeLimit, // Replace with the lower limit of session_time
-        $lt: upperTimeLimit, // Replace with the upper limit of session_time
+        $gte: lowerTimeLimit,
+        $lt: upperTimeLimit,
       },
     });
 
@@ -280,7 +294,6 @@ exports.bookSession = async (req, res) => {
       session.session_status = "Booked";
     }
 
-
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
@@ -302,18 +315,20 @@ exports.bookSession = async (req, res) => {
 
     // Save the updated session and counselor data
     await session.save();
+
+    counsellor.reward_points += 5;
     await counsellor.save();
     await axios.post(`${BACKEND_URL}/user/booking`, {
       booked_entity: counsellor,
-      booking_type: 'Counsellor',
-      booking_data: session
-    })
-    console.log(session)
+      booking_type: "Counsellor",
+      booking_data: session,
+    });
+    console.log(session);
     await axios.post(`${BACKEND_URL}/notification`, {
       user_id: counsellor._id,
-      title: 'New Booking',
-      message: `${email} booked a ${session.session_type} session`
-    })
+      title: "New Booking",
+      message: `${email} booked a ${session.session_type} session`,
+    });
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
@@ -612,5 +627,18 @@ exports.rescheduleSession = async (req, res) => {
     res.status(500).send({
       error: "Internal server error",
     });
+  }
+};
+
+exports.getTotalSessionsCount = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const totalSessions = await Session.find({
+      session_counsellor: counsellor_id,
+    }).countDocuments();
+    res.status(200).json({ totalSessions });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

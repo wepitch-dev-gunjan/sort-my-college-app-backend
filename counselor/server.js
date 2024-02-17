@@ -3,12 +3,13 @@ const app = express();
 const mongoose = require("mongoose");
 const { readdirSync } = require("fs");
 const cors = require("cors");
-const cookieParser = require('cookie-parser');
+const cookieParser = require("cookie-parser");
 const { getObjectURL, putObject } = require("./services/s3config");
 
 require("dotenv").config();
 const PORT = process.env.PORT || 8001;
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/sort-my-college";
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/sort-my-college";
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: false }));
@@ -18,8 +19,8 @@ app.use(cookieParser());
 // CORS configuration
 app.use(
   cors({
-    origin: ['https://counsellor.sortmycollege.com', 'http://localhost:3000'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: ["https://counsellor.sortmycollege.com", "http://localhost:3000"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
 );
@@ -43,5 +44,5 @@ readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 app.use("/", require("./services/googleAuthentication"));
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Counsellor Server is running on port ${PORT}`);
 });
