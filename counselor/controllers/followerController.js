@@ -1,6 +1,7 @@
 const axios = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Follower = require("../models/Follower");
+const Session = require("../models/Session");
 require("dotenv").config();
 
 const { BACKEND_URL } = process.env;
@@ -9,38 +10,8 @@ exports.getFollowers = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const followers = await Follower.find({ followed_to: counsellor_id });
-    console.log(followers);
 
     res.status(200).send(followers);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-exports.getFollowersCount = async (req, res) => {
-  try {
-    const { counsellor_id } = req;
-    console.log(counsellor_id);
-    const followersCount = await Follower.aggregate([
-      {
-        $match: {
-          followed_to: counsellor_id, // Match documents with the specific counselorId
-        },
-      },
-      {
-        $group: {
-          _id: "$followed_to",
-          totalFollowers: { $sum: 1 }, // Count the number of matching documents
-        },
-      },
-    ]);
-
-    // Extract the total followers count
-    const totalFollowers =
-      followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
-
-    res.status(200).json({ totalFollowers });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -66,7 +37,6 @@ exports.followCounsellor = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    console.log(user.data);
 
     let follower = await Follower.findOne({
       followed_by: id,
@@ -107,7 +77,6 @@ exports.followCounsellor = async (req, res) => {
     ]);
     counsellor.followers =
       followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
-    console.log(counsellor.followers);
     await counsellor.save();
 
     res.status(200).json({

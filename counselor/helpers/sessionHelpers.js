@@ -27,6 +27,15 @@ exports.sessionTimeIntoMinutes = (time) => {
   return hours * 60 + minutes;
 };
 
+exports.sessionTimeIntoString = (time) => {
+  // Split the session time into hours and minutes
+  const hours = Math.floor(time / 60);
+  const minutes = time % 60;
+
+  // Calculate the total minutes from the start of the day (midnight)
+  return `${hours}:${minutes}`;
+};
+
 exports.isCounsellingSessionAvailable = async (sessionId) => {
   const session = await Session.findOne({
     _id: sessionId,

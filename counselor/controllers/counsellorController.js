@@ -6,6 +6,7 @@ const { putObject, getObjectURL } = require("../services/s3config");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
+const Session = require("../models/Session");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -895,6 +896,26 @@ exports.findOneCounsellor = async (req, res) => {
     }
 
     res.status(200).send(counsellor);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const followersCount = await Follower.countDocuments({
+      followed_to: counsellor_id,
+    });
+
+    const sessionsCount = await Session.countDocuments({
+      session_counsellor: counsellor_id,
+    });
+
+    res
+      .status(200)
+      .json({ totalFollowers: followersCount, totalSessions: sessionsCount });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });

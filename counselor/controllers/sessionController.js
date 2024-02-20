@@ -5,6 +5,7 @@ const {
   createMeeting,
   getSessionDateTime,
   isCounsellingSessionAvailable,
+  sessionTimeIntoString,
 } = require("../helpers/sessionHelpers");
 require("dotenv").config();
 const Counsellor = require("../models/Counsellor");
@@ -67,6 +68,8 @@ exports.getSessions = async (req, res) => {
           } else {
             // Keep the original date if not within the next 7 days
             session_massaged_date = sessionDate.toDateString().slice(3);
+            session.session_time = sessionTimeIntoString(session.session_time);
+            console.log(session.session_time);
           }
         }
         return {
@@ -132,7 +135,12 @@ exports.getSessionsForCounsellor = async (req, res) => {
 
     let sessions = await Session.find(filter);
 
-    res.status(200).send(sessions);
+    const massagedSessions = sessions.map((session) => {
+      const session_time = sessionTimeIntoString(session.session_time);
+      return { ...session._doc, session_time };
+    });
+
+    res.status(200).send(massagedSessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -151,7 +159,12 @@ exports.getSession = async (req, res) => {
     if (!counselingSession)
       res.status(200).json({ message: "Session not found" });
 
-    res.status(200).json(counselingSession);
+    const session_time = sessionTimeIntoString(counselingSession.session_time);
+    const response = {
+      ...counselingSession,
+      session_time,
+    };
+    res.status(200).json(response);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -171,8 +184,6 @@ exports.addSession = async (req, res) => {
       session_fee,
     } = req.body;
 
-    console.log(session_time);
-
     // Check if any of the required fields are missing
     if (
       !session_date ||
@@ -191,6 +202,7 @@ exports.addSession = async (req, res) => {
     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
     const parsedSessionDuration = parseInt(session_duration, 10);
 
+    console.log(parsedSessionTime);
     // Check if session_date is a valid date and session_duration is a positive number
     if (
       isNaN(parsedSessionDate) ||
@@ -205,7 +217,6 @@ exports.addSession = async (req, res) => {
     // Check if a session is already there at the mentioned time
     const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
-    console.log(lowerTimeLimit, upperTimeLimit);
 
     const existingSession = await Session.findOne({
       session_counsellor: counsellor_id,
@@ -241,7 +252,7 @@ exports.addSession = async (req, res) => {
 
     const newSession = new Session({
       session_counsellor: counsellor_id,
-      session_time,
+      session_time: parsedSessionTime,
       session_date: parsedSessionDate,
       session_duration: parsedSessionDuration,
       session_type,
