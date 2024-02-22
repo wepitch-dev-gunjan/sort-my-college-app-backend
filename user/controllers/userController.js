@@ -1,25 +1,67 @@
 const User = require("../models/User");
 
-exports.createUser = async (req, res) => {
+exports.editUser = async (req, res) => {
   try {
-    const userData = req.body;
-    const newUser = new User(userData);
-    const savedUser = await newUser.save();
+    const { user_id } = req;
+    const {
+      email,
+      phone_number,
+      name,
+      gender,
+      date_of_birth,
+      location,
+      profile_pic,
+    } = req.body;
 
-    res.status(201).json(savedUser); // Respond with the saved user object
+    if (!email && !phone_number) {
+      return res.status(400).json({
+        error: "Provide either email or phone_number to identify the user.",
+      });
+    }
+
+    const query = {};
+    query._id = user_id;
+
+    // Find the user based on email or phone_number
+    if (email) query.email = email;
+    if (phone_number) query.phone_number = phone_number;
+
+    let user = await User.findOne(query);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Update user information
+    if (name) user.name = name;
+    if (gender) user.gender = gender;
+    if (date_of_birth) user.date_of_birth = date_of_birth;
+    if (location && location.city) {
+      if (!user.location) user.location = {};
+      user.location.city = location.city;
+    }
+    if (profile_pic) user.profile_pic = profile_pic;
+
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({
+      message: "User information updated successfully.",
+      user,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
 
-exports.getProfile = async (req, res) => {
+exports.getUser = async (req, res) => {
   try {
     const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(400).send({ error: 'User not found' });
+      return res.status(400).send({ error: "User not found" });
     }
 
     res.status(200).send(user);
@@ -27,55 +69,41 @@ exports.getProfile = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
-exports.editProfile = async (req, res) => {
+exports.findOneUser = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { email, user_id } = req.query;
+    const query = {};
+    if (email) query.email = email;
+    if (user_id) query._id = user_id;
 
-    const user = await User.findById(user_id);
+    const user = await User.findOne(query);
 
     if (!user) {
-      return res.status(404).send({ error: 'User not found' });
+      return res.status(400).send({ error: "User not found" });
     }
 
-    const updatedProfileData = {
-      personal_info: {
-        name: req.body.personal_info.name,
-        contact_number: req.body.personal_info.contact_number,
-        gender: req.body.personal_info.gender,
-        date_of_birth: req.body.personal_info.date_of_birth,
-        location: {
-          city: req.body.personal_info.location.city
-        }
-      }
-    };
-    user.set(updatedProfileData);
-
-    await user.save();
-
-    res.status(200).send({ message: 'Profile updated successfully' });
+    res.status(200).send(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.rescheduleRequest = (req, res) => {
   try {
-
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.cancelRequest = (req, res) => {
   try {
-
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -85,21 +113,22 @@ exports.saveCounsellor = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { counsellor_id } = req.body;
-    if (user.saved_counsellors.includes(counsellor_id)) return res.status(400).json({ error: "Counsellor is already saved" });
+    if (user.saved_counsellors.includes(counsellor_id))
+      return res.status(400).json({ error: "Counsellor is already saved" });
 
     user.saved_counsellors.push(counsellor_id);
 
     await user.save();
-    res.status(200).send({ messeage: "Counsellor successfully saved" })
+    res.status(200).send({ messeage: "Counsellor successfully saved" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.unsaveCounsellor = async (req, res) => {
   try {
@@ -107,18 +136,21 @@ exports.unsaveCounsellor = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { counsellor_id } = req.body;
-    if (!user.saved_counsellors.includes(counsellor_id)) return res.status(404).json({ error: "Counsellor is already unsaved" });
+    if (!user.saved_counsellors.includes(counsellor_id))
+      return res.status(404).json({ error: "Counsellor is already unsaved" });
 
-    user.saved_counsellors.filter(counsellorId => counsellorId !== counsellor_id);
+    user.saved_counsellors.filter(
+      (counsellorId) => counsellorId !== counsellor_id
+    );
 
     await user.save();
-    res.status(200).send({ message: "Counsellor unsaved successfully" })
+    res.status(200).send({ message: "Counsellor unsaved successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };

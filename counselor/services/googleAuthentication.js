@@ -27,13 +27,11 @@ router.get('/auth/google', (req, res) => {
 router.get('/auth/google/callback', async (req, res) => {
   const { code } = req.query;
   try {
-    // Assuming you have previously set up oauth2Client
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log(tokens);
 
     const counsellorInfo = await google.oauth2('v2').userinfo.get({ auth: oauth2Client });
-    const { email, name, picture } = counsellorInfo.data;
+    let { email, name, picture } = counsellorInfo.data;
 
     // Save user information to the database if not already exists
     let counsellor = await Counsellor.findOne({ email });
@@ -46,13 +44,24 @@ router.get('/auth/google/callback', async (req, res) => {
       await counsellor.save();
     }
 
-    const _id = counsellor._id;
+    const token = generateToken({
+      counsellor_id: counsellor._id,
+      email: counsellor.email,
+      name: counsellor.name,
+      picture: counsellor.profile_pic,
+      tokens
+    }, '7d');
 
-    const token = generateToken({ email, name, picture, tokens }, '7d');
-    // Redirect to homepage or dashboard
-    res.cookie('token', token, { maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.cookie('user', { _id, email, name, profile_pic: counsellor.profile_pic }, { maxAge: 7 * 24 * 60 * 60 * 1000 })
-    res.redirect(`${FRONTEND_URL}/`);
+    const user = {
+      _id: counsellor._id,
+      email: counsellor.email,
+      name: counsellor.name,
+      // profile_pic: counsellor.profile_pic
+    }
+
+    const redirectURL = `${FRONTEND_URL}/?token=${token}&&user=${JSON.stringify(user)}`;
+
+    res.redirect(redirectURL);
   } catch (error) {
     console.error(error);
     res.redirect(`${FRONTEND_URL}/login`);

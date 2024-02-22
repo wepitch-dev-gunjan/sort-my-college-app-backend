@@ -37,3 +37,9 @@ async function getLocationInfo(geonamesID) {
     return null; // Return null in case of an error
   }
 }
+
+exports.objectIdToString = (objectId) => {
+  // Remove the first 10 characters ("ObjectId(") and the last character (")")
+  return objectId.toString().slice(10, -1);
+}
+

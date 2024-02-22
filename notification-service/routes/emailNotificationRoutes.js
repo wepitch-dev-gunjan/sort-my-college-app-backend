@@ -15,6 +15,8 @@ const {
   notattendedSessionCounsellorEmailNotification,
   cancelledSessionCounsellorEmailNotification,
   gotreviewSessionCounsellorEmailNotification,
+  verifyCounsellorEmailNotification,
+  rejectCounsellorEmailNotification,
 } = require("../controllers/emailNotificationControllers");
 const router = express.Router();
 
@@ -48,5 +50,7 @@ router.post(
   "/counsellor/gotreview/",
   gotreviewSessionCounsellorEmailNotification
 );
+router.post('/counsellor/verify', verifyCounsellorEmailNotification);
+router.post('/counsellor/reject', rejectCounsellorEmailNotification);
 
 module.exports = router;

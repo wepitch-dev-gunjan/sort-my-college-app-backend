@@ -21,19 +21,3 @@ exports.sendWhatsappMessage = async (req, res) => {
   }
 };
 
-exports.sendSMSMessage = async (req, res) => {
-  try {
-    const { to, message } = req.body;
-    const response = await client.messages
-      .create({
-        body: message,
-        from: TWILIO_SMS_SENDER,
-        to
-      });
-    if (!response) return res.status(400).send({ error: "Message not sent" });
-    res.status(200).send({ message: "Message sent successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
-  }
-};

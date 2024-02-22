@@ -1,27 +1,146 @@
+const { default: axios } = require("axios");
 const {
   sessionTimeIntoMinutes,
   isSessionBefore24Hours,
   createMeeting,
   getSessionDateTime,
+  isCounsellingSessionAvailable,
+  sessionTimeIntoString,
 } = require("../helpers/sessionHelpers");
+require("dotenv").config();
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
 const session_slots = 10;
+
+const { BACKEND_URL } = process.env;
 // GET
 exports.getSessions = async (req, res) => {
   try {
-    const { session_type, session_date, session } = req.query;
+    const { session_type, session_date } = req.query;
     const { counsellor_id } = req.params;
 
-    // Check if a status query is requested
-    const sessions = await Session.find({
-      session_counselor: counsellor_id,
+    const filter = { session_counsellor: counsellor_id };
+
+    if (session_type) {
+      filter.session_type = session_type;
+    }
+
+    if (session_date) {
+      filter.session_date = new Date(session_date);
+    }
+
+    let sessions = await Session.find(filter);
+    let total_available_slots = 0;
+
+    if (sessions.length > 0) {
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      const massagedSessions = sessions.map((session) => {
+        total_available_slots += session.session_available_slots;
+        const sessionDate = new Date(session.session_date);
+        let session_massaged_date = "";
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (sessionDate.toDateString() == today.toDateString()) {
+          session_massaged_date = "today";
+        } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
+          session_massaged_date = "tomorrow";
+        } else {
+          const dayDiff = Math.ceil(
+            (sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
+          );
+
+          if (dayDiff <= 7 && dayDiff > 0) {
+            session_massaged_date = daysOfWeek[sessionDate.getDay()];
+            // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
+          } else {
+            // Keep the original date if not within the next 7 days
+            session_massaged_date = sessionDate.toDateString().slice(3);
+            session.session_time = sessionTimeIntoString(session.session_time);
+            console.log(session.session_time);
+          }
+        }
+        return {
+          ...session._doc,
+          session_massaged_date,
+        };
+      });
+      res.status(200).json({
+        total_available_slots,
+        sessions: massagedSessions,
+      });
+    } else {
+      res.status(200).json({
+        total_available_slots: 0,
+        sessions: [],
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSessionsForCounsellor = async (req, res) => {
+  try {
+    const {
+      session_type,
+      session_dates,
+      session_status,
+      session_fee,
+      session_duration,
+    } = req.query;
+    const { counsellor_id } = req.params;
+
+    const filter = { session_counsellor: counsellor_id };
+    if (session_type && session_type !== "All") {
+      filter.session_type = session_type;
+    }
+
+    if (session_dates && session_dates.length === 2) {
+      const [startDate, endDate] = session_dates;
+
+      filter.session_date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    if (session_status && session_status !== "All") {
+      filter.session_status = session_status;
+    }
+
+    if (session_fee) {
+      filter.session_fee = {
+        $gte: session_fee[0],
+        $lte: session_fee[1],
+      };
+    }
+
+    if (session_duration) {
+      filter.session_duration = { $lte: session_duration };
+    }
+
+    let sessions = await Session.find(filter);
+
+    const massagedSessions = sessions.map((session) => {
+      const session_time = sessionTimeIntoString(session.session_time);
+      return { ...session._doc, session_time };
     });
 
-    if (!sessions) res.status(200).json({ message: "Sessions not found" });
-
-    res.status(200).json(sessions);
+    res.status(200).send(massagedSessions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -40,7 +159,12 @@ exports.getSession = async (req, res) => {
     if (!counselingSession)
       res.status(200).json({ message: "Session not found" });
 
-    res.status(200).json(counselingSession);
+    const session_time = sessionTimeIntoString(counselingSession.session_time);
+    const response = {
+      ...counselingSession,
+      session_time,
+    };
+    res.status(200).json(response);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -52,13 +176,13 @@ exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
-    const { session_date, session_time, session_duration, session_type, session_fee } = req.body;
-
-    if (!isSessionBefore24Hours(session_date, session_time)) {
-      return res
-        .status(404)
-        .json({ error: "Can't add session before 24 hours" });
-    }
+    const {
+      session_date,
+      session_time,
+      session_duration,
+      session_type,
+      session_fee,
+    } = req.body;
 
     // Check if any of the required fields are missing
     if (
@@ -78,6 +202,7 @@ exports.addSession = async (req, res) => {
     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
     const parsedSessionDuration = parseInt(session_duration, 10);
 
+    console.log(parsedSessionTime);
     // Check if session_date is a valid date and session_duration is a positive number
     if (
       isNaN(parsedSessionDate) ||
@@ -85,22 +210,22 @@ exports.addSession = async (req, res) => {
       parsedSessionDuration <= 0
     ) {
       return res.status(400).send({
-        error: "Invalid session_date",
+        error: "Invalid session_date or session_duration",
       });
     }
 
-    const lowerTimeLimit = parsedSessionTime - 30;
+    // Check if a session is already there at the mentioned time
+    const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
     const existingSession = await Session.findOne({
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
       session_date: parsedSessionDate,
       session_time: {
-        $gte: lowerTimeLimit, // Replace with the lower limit of session_time
-        $lt: upperTimeLimit, // Replace with the upper limit of session_time
+        $gte: lowerTimeLimit,
+        $lt: upperTimeLimit,
       },
     });
-    console.log(existingSession)
 
     if (existingSession) {
       return res.status(400).send({
@@ -124,9 +249,9 @@ exports.addSession = async (req, res) => {
       endDateTime,
       refresh_token
     );
-    // Create a new session object with Zoom meeting details
+
     const newSession = new Session({
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
       session_time: parsedSessionTime,
       session_date: parsedSessionDate,
       session_duration: parsedSessionDuration,
@@ -145,13 +270,15 @@ exports.addSession = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send({
-      earror: "Internal server error",
+      error: "Internal server error",
     });
   }
 };
 
 exports.bookSession = async (req, res) => {
   try {
+    const { email } = req;
+
     const { session_id } = req.params;
 
     let session = await Session.findOne({ _id: session_id });
@@ -199,7 +326,20 @@ exports.bookSession = async (req, res) => {
 
     // Save the updated session and counselor data
     await session.save();
+
+    counsellor.reward_points += 5;
     await counsellor.save();
+    await axios.post(`${BACKEND_URL}/user/booking`, {
+      booked_entity: counsellor,
+      booking_type: "Counsellor",
+      booking_data: session,
+    });
+    console.log(session);
+    await axios.post(`${BACKEND_URL}/notification`, {
+      user_id: counsellor._id,
+      title: "New Booking",
+      message: `${email} booked a ${session.session_type} session`,
+    });
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
@@ -306,12 +446,10 @@ exports.updateSession = async (req, res) => {
       return res.status(500).json({ error: "Failed to update the session" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Session updated successfully",
-        session: updatedSession,
-      });
+    res.status(200).json({
+      message: "Session updated successfully",
+      session: updatedSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -323,12 +461,11 @@ exports.deleteSession = async (req, res) => {
   try {
     const { counsellor_id } = req;
     const { session_id } = req.params;
-    console.log(counsellor_id);
 
     // Find the session to be deleted
     const counselingSession = await Session.findOne({
       _id: session_id,
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
     });
 
     if (!counselingSession) {
@@ -346,7 +483,7 @@ exports.deleteSession = async (req, res) => {
     // Delete the session
     await Session.deleteOne({
       _id: session_id,
-      session_counselor: counsellor_id,
+      session_counsellor: counsellor_id,
     });
 
     res.status(200).json({ message: "Session deleted successfully" });
@@ -378,12 +515,10 @@ exports.cancelSession = async (req, res) => {
         .json({ message: "Session not found or already cancelled" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Session cancelled successfully",
-        session: counselingSession,
-      });
+    res.status(200).json({
+      message: "Session cancelled successfully",
+      session: counselingSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -494,16 +629,27 @@ exports.rescheduleSession = async (req, res) => {
     // Save the updated session to the database
     const updatedSession = await existingSession.save();
 
-    res
-      .status(200)
-      .send({
-        message: "Session successfully rescheduled",
-        session: updatedSession,
-      });
+    res.status(200).send({
+      message: "Session successfully rescheduled",
+      session: updatedSession,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send({
       error: "Internal server error",
     });
+  }
+};
+
+exports.getTotalSessionsCount = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const totalSessions = await Session.find({
+      session_counsellor: counsellor_id,
+    }).countDocuments();
+    res.status(200).json({ totalSessions });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

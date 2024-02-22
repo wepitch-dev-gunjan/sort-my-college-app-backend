@@ -1,60 +1,72 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
-const userSchema = new Schema({
-  email: {
-    type: String,
-    unique: true,
-  },
-  phoneNumber: {
-    type: Number,
-    unique: true,
-  },
-  personal_info: {
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    phone_number: {
+      type: Number,
+      unique: true,
+      sparse: true,
+    },
     name: {
       type: String,
     },
-    contact_number: String,
     gender: {
       type: String,
-      enum: ['Male', 'Female', 'Other'],
+      enum: ["Male", "Female", "Other"],
     },
     date_of_birth: {
-      type: String
+      type: String,
     },
     location: {
-      city: String
+      city: String,
     },
     profile_pic: {
       type: String,
-    }
+    },
+    education_level: {
+      type: String,
+      enum: ["Student", "College", "Graduated"],
+      default: "Student",
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
   },
-  saved_counsellors: [
-    {
-      type: String
-    },
-  ],
-  saved_vocational_courses: [
-    {
-      type: String
-    },
-  ],
-  saved_entrance_preparations: [
-    {
-      type: String
-    },
-  ],
-  saved_feeds: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Feed'
-    }
-  ],
-  verified: {
-    type: Boolean,
-    default: false
+  {
+    timestamps: true,
+  },
+  {
+    strict: false,
   }
-}, {
-  timestamps: true
-});
+);
 
-module.exports = model('User', userSchema);
+// Custom validation to check uniqueness for non-null values
+userSchema.path("phone_number").validate(async function (value) {
+  if (value !== null) {
+    const count = await this.model("User").countDocuments({
+      phone_number: value,
+      _id: { $ne: this._id },
+    });
+    return !count;
+  }
+  return true;
+}, "Phone number must be unique except for null values.");
+
+userSchema.path("email").validate(async function (value) {
+  if (value !== null) {
+    const count = await this.model("User").countDocuments({
+      email: value,
+      _id: { $ne: this._id },
+    });
+    return !count;
+  }
+  return true;
+}, "Email must be unique except for null values.");
+
+module.exports = model("User", userSchema);

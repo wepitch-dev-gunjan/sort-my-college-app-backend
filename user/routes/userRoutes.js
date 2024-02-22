@@ -1,18 +1,19 @@
 const express = require('express');
-const { getProfile, editProfile, createUser, rescheduleRequest, cancelRequest, saveCounsellor, unsaveCounsellor } = require('../controllers/userController');
+const { rescheduleRequest, cancelRequest, saveCounsellor, unsaveCounsellor, editUser, getUser, findOneUser } = require('../controllers/userController');
+const { userAuth } = require('../middlewares/authMiddleware');
 // const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// GET
-router.get('/', getProfile);
+// user profile
+router.get('/', userAuth, getUser);
+router.get('/users', findOneUser);
 
-// PUT
-router.put('/:user_id', editProfile);
+// save counsellors
+router.put('/:user_id', userAuth, editUser);
 router.put('/:user_id/counsellor/save', saveCounsellor);
 router.put('/:user_id/counsellor/unsave', unsaveCounsellor);
 
-// POST
-router.post('/', createUser);
+// counselling sessions
 router.post('/seesion/reschedule-request', rescheduleRequest);
 router.post('/session/cancel-request', cancelRequest);
 
