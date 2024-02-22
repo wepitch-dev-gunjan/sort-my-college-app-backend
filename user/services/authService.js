@@ -14,17 +14,18 @@ exports.generateOtpByPhone = async (req, res) => {
     if (!phone_number) return res.status(400).send({ error: "Phone number is required" });
 
     const user = await User.findOne({ phone_number });
-    if (user && user.verified === true) return res.status(400).send({ error: "User is already verified" })
+
     // Generate a random 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Hash the OTP using SHA-256 for storage
     const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-    const expirationTime = new Date(); // Set the expiration time (e.g., 5 minutes from now)
-    expirationTime.setMinutes(expirationTime.getMinutes() + 5);
+    const expirationTime = new Date();
+    expirationTime.setMinutes(expirationTime.getMinutes() + 2);
 
     let otpObj = await Otp.findOne({ phone_number });
+
     if (otpObj) {
       otpObj.expiresAt = expirationTime;
       otpObj.hashedOtp = hashedOtp;
@@ -39,16 +40,13 @@ exports.generateOtpByPhone = async (req, res) => {
 
     await otpObj.save();
 
-    await axios.post(`${BACKEND_URL}/notification/sms-notification/sendSMS`, {
-      body: {
-        to: phone_number,
-        message: otp
-      }
+    const { data } = await axios.post(`${BACKEND_URL}/notification/sms-notification/sendSMS`, {
+      to: phone_number,
+      message: `OTP for login is : ${otp}`
     })
     // Send the OTP to the client (avoid logging it)
     res.status(200).send({
-      message: "OTP sent to the client",
-      otp
+      message: data.message,
     });
   } catch (error) {
     console.log(error);
@@ -59,11 +57,6 @@ exports.generateOtpByPhone = async (req, res) => {
 exports.verifyOtpByPhone = async (req, res) => {
   try {
     const { phone_number, otp } = req.body;
-
-    // const isPhoneNumber = await User.findOne({ phone_number });
-    // if (isPhoneNumber && isPhoneNumber.verified === true) return res.status(401).send({
-    //   error: "Phone number is already verified"
-    // });
 
     let otpObj = await Otp.findOne({ phone_number });
 
@@ -92,19 +85,20 @@ exports.verifyOtpByPhone = async (req, res) => {
         phone_number,
         verified: true,
       });
+      console.log(user)
 
       await user.save();
     }
 
-    const token = jwt.sign(user, JWT_SECRET)
 
-    await axios.post(`${BACKEND_URL}/user/notification/verifiedOtp`, {
-      body: {
-        to: user.email,
-      }
-    })
+    const { _id } = user;
+    const token = jwt.sign({ user_id: _id, phone_number }, JWT_SECRET)
+
+    // await axios.post(`${BACKEND_URL}/user/notification/verifiedOtp`, {
+    //   to: phone_number,
+    // })
     res.status(200).send({
-      message: "User has verified OTP",
+      message: "OTP verified successfully",
       token
     });
   } catch (error) {
@@ -117,15 +111,10 @@ exports.generateOtpByEmail = async (req, res) => {
   try {
     const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).send({ error: "Email is required" });
-    }
+    if (!email) return res.status(400).send({ error: "Email is required" });
 
     // Check if the user exists and is already verified.
     const user = await User.findOne({ email });
-    // if (user && user.verified === true) {
-    //   return res.status(400).send({ error: "User is already verified" });
-    // }
 
     // Generate a random 4-digit OTP.
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -141,12 +130,10 @@ exports.generateOtpByEmail = async (req, res) => {
     let otpObj = await Otp.findOne({ email });
 
     if (otpObj) {
-      // Update the existing OTP object.
       otpObj.expiresAt = expirationTime;
       otpObj.hashedOtp = hashedOtp;
       otpObj.attempts = 0;
     } else {
-      // Create a new OTP object.
       otpObj = new Otp({
         email,
         hashedOtp,
@@ -177,11 +164,6 @@ exports.generateOtpByEmail = async (req, res) => {
 exports.verifyOtpByEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
-
-    // const isemail = await User.findOne({ email });
-    // if (isemail && isemail.verified === true) return res.status(401).send({
-    //   error: "Email is already verified"
-    // });
 
     let otpObj = await Otp.findOne({ email });
 

@@ -20,6 +20,7 @@ const {
   rejectCounsellor,
   findOneCounsellor,
   getDashboardData,
+  incrementActivityPoints,
 } = require("../controllers/counsellorController");
 const {
   counsellorAuth,
@@ -58,6 +59,7 @@ router.get("/dashboard/dashboard-data", counsellorAuth, getDashboardData);
 router.put("/:counsellor_id", adminOrCounsellorAuth, editProfile);
 router.put("/:counsellor_id/verify", adminAuth, verifyCounsellor);
 router.put("/:counsellor_id/reject", adminAuth, rejectCounsellor);
+router.put("/activity/increment-activity-points", counsellorAuth, incrementActivityPoints)
 
 // POST
 router.post("/login", login);

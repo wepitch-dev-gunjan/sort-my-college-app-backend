@@ -921,3 +921,39 @@ exports.getDashboardData = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.incrementActivityPoints = async (req, res) => {
+  try {
+    const { counsellor_id } = req;
+    const counsellor = await Counsellor.findById(counsellor_id); // Corrected to use findById
+
+    if (!counsellor) {
+      return res.status(404).send({
+        error: "Counsellor not found"
+      });
+    }
+
+    const lastCheckinDate = new Date(counsellor.last_checkin_date).toISOString().slice(0, 10);
+    const currentDate = new Date().toISOString().slice(0, 10); // Corrected to get current date properly
+
+    console.log(lastCheckinDate, currentDate);
+
+    if (lastCheckinDate !== currentDate) {
+      counsellor.activity_points++;
+      counsellor.last_checkin_date = new Date(); // Corrected to set current date
+      await counsellor.save();
+      return res.status(200).send({
+        message: "Activity points updated successfully"
+      });
+    } else {
+      return res.status(200).send({
+        message: "Activity points not updated"
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error"
+    });
+  }
+};

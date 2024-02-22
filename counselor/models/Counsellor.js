@@ -104,6 +104,11 @@ const counsellorSchema = new Schema({
     default: 0
   },
 
+  activity_points: {
+    type: Number,
+    default: 0
+  },
+
   client_testimonials: [
     {
       rating: Number,
@@ -133,8 +138,8 @@ const counsellorSchema = new Schema({
   ],
 
   followers: {
-      type: Number,
-      default: 0
+    type: Number,
+    default: 0
   },
 
   degree_focused: [{
@@ -172,6 +177,11 @@ const counsellorSchema = new Schema({
   verified: {
     type: Boolean,
     default: false
+  },
+
+  last_checkin_date: {
+    type: Date,
+    default: new Date()
   }
 
 }, {
@@ -181,7 +191,7 @@ const counsellorSchema = new Schema({
 });
 
 
-counsellorSchema.pre('save', function(next) {
+counsellorSchema.pre('save', function (next) {
   const requiredFields = ['name', 'email', 'phone_no', 'profile_pic', 'cover_image', 'gender', 'location', 'nationality', 'designation', 'qualifications', 'date_of_birth', 'languages_spoken', 'experience_in_years', 'sessions', 'how_will_i_help', 'degree_focused', 'locations_focused', 'courses_focused', 'approach_of_counselling', 'verified'];
   console.log('hello')
   const allFieldsFilled = requiredFields.every(field => this[field]);

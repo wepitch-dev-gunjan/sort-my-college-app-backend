@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 
 const otpSchema = new Schema({
   phone_number: {
-    type: Number,
+    type: String,
     unique: true,
     sparse: true, // Allow multiple documents that have the same null or undefined value
   },
