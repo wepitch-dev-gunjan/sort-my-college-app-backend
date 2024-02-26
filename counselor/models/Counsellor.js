@@ -193,7 +193,6 @@ const counsellorSchema = new Schema({
 
 counsellorSchema.pre('save', function (next) {
   const requiredFields = ['name', 'email', 'phone_no', 'profile_pic', 'cover_image', 'gender', 'location', 'nationality', 'designation', 'qualifications', 'date_of_birth', 'languages_spoken', 'experience_in_years', 'sessions', 'how_will_i_help', 'degree_focused', 'locations_focused', 'courses_focused', 'approach_of_counselling', 'verified'];
-  console.log('hello')
   const allFieldsFilled = requiredFields.every(field => this[field]);
 
   if (this.isNew && this.reward_points === 0 && allFieldsFilled) {

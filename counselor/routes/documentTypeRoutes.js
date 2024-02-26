@@ -3,10 +3,10 @@ const { createDocumentType, getDocumentTypes, getDocumentType, editDocumentType,
 const router = express.Router();
 
 //post
-router.post("/documentType", createDocumentType);
+router.post("/documentType/create-document", createDocumentType);
 
 //get
-router.get("/documentType/:documentType_id/documentTypes", getDocumentTypes);
+router.get("/documentType/documentTypes", getDocumentTypes);
 router.get("/documentType/:documentType_id/documentType", getDocumentType);
 
 // PUT

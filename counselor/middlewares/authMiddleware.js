@@ -192,9 +192,8 @@ exports.adminOrCounsellorAuth = async (req, res, next) => {
 
     if (!responseData) {
       return res.status(401).json({
-        error: `${
-          decoded.counsellor_id ? "Counsellor" : "Admin"
-        } not authorized`,
+        error: `${decoded.counsellor_id ? "Counsellor" : "Admin"
+          } not authorized`,
       });
     }
 

@@ -6,10 +6,12 @@ const {
   getDocuments,
   getDocument,
 } = require("../controllers/documentController");
+const { upload } = require("../middlewares/uploadImage");
+const { adminOrCounsellorAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 //post
-router.post("/document", postDocument);
+router.post("/document/upload-document", adminOrCounsellorAuth, upload.single('file'), postDocument);
 
 //get
 router.get("/document", getDocuments);
