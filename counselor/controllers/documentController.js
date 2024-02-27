@@ -1,11 +1,11 @@
 const Document = require("../models/Document");
 const DocumentType = require("../models/DocumentType");
-const uploadImage = require("../services/cloudinary");
-const { formatObjectId } = require("../utils");
+const { uploadImage, cloudinary } = require("../services/cloudinary");
 
 exports.getDocuments = async (req, res) => {
   try {
-    const documents = await Document.find({});
+    const { counsellor_id } = req;
+    const documents = await Document.find({ user: JSON.stringify(counsellor_id) });
     if (!documents)
       return res.status(404).send({
         error: "Documents not found",
@@ -22,7 +22,7 @@ exports.getDocument = async (req, res) => {
     const { document_id } = req.params;
     const document = await Document.findOne({ _id: document_id });
     if (!document) return res.status(404).send({ error: "Document not found" });
-    res.status(200).send(documents);
+    res.status(200).send(document);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
@@ -51,7 +51,9 @@ exports.postDocument = async (req, res) => {
   try {
     const { file, id } = req;
     const formattedId = JSON.stringify(id)
+    console.log(file)
     const { document_type } = req.query;
+    console.log(document_type)
     if (!document_type) return res.status(404).send({
       error: "DocumentType is required"
     })
@@ -60,8 +62,8 @@ exports.postDocument = async (req, res) => {
       return res.status(400).json({ error: "No files uploaded" });
     }
 
-    const documentType = await DocumentType.findOne({ name: document_type })
-    if (!documentType) return reject({ message: "Document type does not exist" });
+    const documentType = await DocumentType.findOne({ _id: document_type })
+    if (!documentType) return res.status(400).send({ error: "Document type does not exist" });
 
     const existingDocument = await Document.findOne({ document_type: documentType._id, user: formattedId });
     if (existingDocument) {
@@ -98,6 +100,8 @@ exports.deleteDocument = async (req, res) => {
   const document = await Document.findOneAndDelete({ _id: document_id });
   if (!document) return res.status(404).send({ error: "Document not found" });
   res.status(200).send({ message: "Deleted " });
+
+  cloudinary.uploader.destroy(document.file)
 
   try {
   } catch (error) {

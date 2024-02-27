@@ -57,4 +57,4 @@ module.exports.uploadMultipleImages = (images) => {
   });
 };
 
-module.exports = uploadImage;
+module.exports = { uploadImage, cloudinary };
