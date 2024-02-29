@@ -21,11 +21,11 @@ exports.postPayment = async (req, res) => {
         return res.status(501).send(err.message);
       }
       console.log(order);
+      res.status(200).send({
+        message: "Payment successfully created",
+        data: order
+      })
     });
-
-    res.status(200).send({
-      message: "Payment successfully created"
-    })
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });

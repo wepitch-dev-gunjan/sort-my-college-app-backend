@@ -51,9 +51,7 @@ exports.postDocument = async (req, res) => {
   try {
     const { file, id } = req;
     const formattedId = JSON.stringify(id)
-    console.log(file)
     const { document_type } = req.query;
-    console.log(document_type)
     if (!document_type) return res.status(404).send({
       error: "DocumentType is required"
     })
