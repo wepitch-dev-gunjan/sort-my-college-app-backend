@@ -85,10 +85,7 @@ exports.postDocument = async (req, res) => {
 
     await newDocument.save();
 
-    res.status(200).send({
-      message: "Document created successfully",
-      data: result
-    });
+    res.status(200).send(newDocument);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
