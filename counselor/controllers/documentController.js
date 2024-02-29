@@ -93,14 +93,17 @@ exports.postDocument = async (req, res) => {
 };
 
 exports.deleteDocument = async (req, res) => {
-  const { document_id } = req.params;
-  const document = await Document.findOneAndDelete({ _id: document_id });
-  if (!document) return res.status(404).send({ error: "Document not found" });
-  res.status(200).send({ message: "Deleted " });
-
-  cloudinary.uploader.destroy(document.file)
-
   try {
+    const { document_id } = req.params;
+    const document = await Document.findOneAndDelete({ _id: document_id });
+    if (!document) return res.status(404).send({ error: "Document not found" });
+
+    cloudinary.uploader.destroy(document.file, (err, result) => {
+      if (err) return res.status(501).send({ error: err.message });
+      if (result) res.status(200).send({
+        message: "Document deleted successfully"
+      })
+    })
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
