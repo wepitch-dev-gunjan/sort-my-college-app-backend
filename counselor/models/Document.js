@@ -13,6 +13,9 @@ const documentSchema = new Schema({
   file: {
     type: String,
   },
+}, {
+  strict: false,
+  timestamps: true
 });
 
 module.exports = model("Document", documentSchema);
