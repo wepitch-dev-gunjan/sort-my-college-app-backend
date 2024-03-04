@@ -20,7 +20,6 @@ exports.counsellorAuth = async (req, res, next) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
-
     const counsellor = await Counsellor.findOne({ email: decoded.email });
 
     if (!counsellor) {
