@@ -20,5 +20,7 @@ router.get("/document/:document_id", getDocument);
 // PUT
 router.put("/document/:document_id", editDocument);
 
+router.get("/document/:document_id");
 router.delete("/document/:document_id", deleteDocument);
+
 module.exports = router;

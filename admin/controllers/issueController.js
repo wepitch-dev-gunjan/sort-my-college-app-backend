@@ -5,6 +5,7 @@ const Question = require("../models/Question");
 exports.getIssues = async (req, res) => {
   try {
     const { status } = req.query;
+    console.log(status);
     const query = {};
     if (status) query.status = status;
     const issues = await Issue.find(query);
@@ -37,7 +38,7 @@ exports.postIssue = async (req, res) => {
   try {
     const { id } = req;
     const { category, content } = req.body;
-
+    
     let categoryObj = await IssueCategory.findOne({ name: category });
     let newCategory = categoryObj;
     if (!categoryObj) {
@@ -45,7 +46,6 @@ exports.postIssue = async (req, res) => {
         name: category
       })
       newCategory = await categoryObj.save();
-      console.log(categoryObj);
     }
     let issue = new Issue({
       category: newCategory._id

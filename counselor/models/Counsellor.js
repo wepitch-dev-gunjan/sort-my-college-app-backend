@@ -154,8 +154,8 @@ const counsellorSchema = new Schema(
     locations_focused: [
       {
         type: String,
-        enum: ["INDIA", "ABROAD"],
-        default: "INDIA",
+        enum: ["India", "Abraod"],
+        default: "India",
       },
     ],
 
@@ -189,6 +189,22 @@ const counsellorSchema = new Schema(
     last_checkin_date: {
       type: Date,
       default: new Date(),
+    },
+     // bank details
+     bank_name: {
+      type: String,
+    },
+    branch: {
+      type: String
+    },
+    account_type: {
+      type: String
+    },
+    account_number: {
+      type: String
+    },
+    ifsc_code: {
+      type: String
     },
   },
   {

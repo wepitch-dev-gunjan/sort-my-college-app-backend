@@ -432,6 +432,26 @@ exports.editProfile = async (req, res) => {
       updateFields.date_of_birth = req.body.date_of_birth;
     }
 
+    if (req.body.bank_name) {
+      updateFields.bank_name = req.body.bank_name;
+    }
+
+    if (req.body.branch) {
+      updateFields.branch = req.body.branch;
+    }
+
+    if (req.body.account_type) {
+      updateFields.account_type = req.body.account_type;
+    }
+
+    if (req.body.account_number) {
+      updateFields.account_number = req.body.account_number;
+    }
+
+    if (req.body.ifsc_code) {
+      updateFields.ifsc_code = req.body.ifsc_code;
+    }
+
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
       counsellor_id,
       updateFields,
