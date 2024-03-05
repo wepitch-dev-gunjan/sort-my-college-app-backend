@@ -75,7 +75,8 @@ Object.keys(proxyConfig).forEach((context) => {
 // Middleware to set CORS headers and allow credentials
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: "*",
+    // origin: FRONTEND_URL,
     credentials: true,
   })
 );
