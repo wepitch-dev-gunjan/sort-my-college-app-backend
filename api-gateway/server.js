@@ -19,7 +19,6 @@ const {
   WEBINARS_PORT,
   NOTIFICATION_SERVICES_PORT,
   FRONTEND_URL,
-  PRIVATE_KEY,
   ADMIN_PORT,
 } = process.env;
 
@@ -28,11 +27,9 @@ const server =
   NODE_ENV === "production"
     ? https.createServer(
       {
-        key: PRIVATE_KEY
-        // fs.readFileSync(
-        //   path.join(__dirname, "..", "ssl_certificates", "private.key")
-        // ),
-        ,
+        key: fs.readFileSync(
+          path.join(__dirname, "..", "ssl_certificates", "private.key")
+        ),
         cert: fs.readFileSync(
           path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
         ),
