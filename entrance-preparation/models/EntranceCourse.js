@@ -1,22 +1,27 @@
 const { Schema, model } = require("mongoose");
 
 const entranceCourseSchema = new Schema({
-  course_name: {
+  name: {
     type: String,
-    unique: true,
+    required: true
   },
-  course_degree: {
+  category: {
     type: String,
-    enum: ["UG", "PG"],
+    enum: ['UG', 'PG'],
+    required: true
   },
-  online: {
-    type: Boolean,
-    default: false,
+  price: {
+    type: Number,
+    required: true
   },
-  offline: {
-    type: Boolean,
-    default: true,
+  duration: {
+    type: Number,
+    required: true
   },
+  mode: {
+    type: String,
+    enum: ['Online', 'Offline', 'Hybrid']
+  }
 });
 
 module.exports = model("EntranceCourse", entranceCourseSchema);

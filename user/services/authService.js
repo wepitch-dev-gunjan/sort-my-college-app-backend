@@ -7,6 +7,7 @@ const { JWT_SECRET } = process.env;
 require('dotenv').config();
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:9000'
+// const BACKEND_URL = process.env.BACKEND_URL || 'http://192.168.0.36:9000'
 
 exports.generateOtpByPhone = async (req, res) => {
   try {
