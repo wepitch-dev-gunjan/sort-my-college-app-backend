@@ -1,4 +1,5 @@
 node_modules
 .env
 configs
-ssl_certifaces/private.key
+ssl_certificates
+pair1.pem

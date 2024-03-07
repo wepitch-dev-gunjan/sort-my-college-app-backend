@@ -19,7 +19,7 @@ app.use(cookieParser());
 // CORS configuration
 app.use(
   cors({
-    origin: ["https://counsellor.sortmycollege.com", "http://localhost:3000"],
+    origin: ["https://counsellor.sortmycollegeapp.com", "http://localhost:3000"],
     // origin: ["https://counsellor.sortmycollege.com", "http://192.168.0.36:3000"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,

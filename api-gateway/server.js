@@ -102,7 +102,6 @@ io.on("connection", (socket) => {
   // Example: Broadcast a message to all connected clients
   socket.on("send-message", (data) => {
     const { room_id, message } = data;
-    console.log(data);
     io.to(room_id).emit("chat-message", message);
   });
 
