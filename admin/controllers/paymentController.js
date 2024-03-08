@@ -83,3 +83,42 @@ exports.createPayment = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+exports.getPayments = async (req, res) => {
+  try {
+    const { id } = req;
+    const { search } = req.query;
+    let payments;
+
+    if (search) {
+      // If there's a search query, filter payments based on it
+      payments = await Payment.find({
+        $or: [
+          { payment_to: { $regex: search, $options: 'i' } },
+          { payment_from: { $regex: search, $options: 'i' } },
+          { order_id: { $regex: search, $options: 'i' } },
+          { payment_id: { $regex: search, $options: 'i' } },
+          { amount: { $regex: search, $options: 'i' } },
+          { amount_due: { $regex: search, $options: 'i' } },
+          { amount_paid: { $regex: search, $options: 'i' } },
+          { currency: { $regex: search, $options: 'i' } },
+          { created_at: { $regex: search, $options: 'i' } },
+          { entity: { $regex: search, $options: 'i' } },
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { phone_no: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { status: { $regex: search, $options: 'i' } }
+        ]
+      });
+    } else {
+      // If no search query, fetch all payments
+      payments = await Payment.find();
+    }
+
+    res.status(200).json(payments);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

@@ -1,6 +1,8 @@
 const { Schema, model } = require('mongoose');
 
 const paymentSchema = new Schema({
+  payment_to: { type: 'string' },
+  payment_from: { type: 'string' },
   order_id: { type: String, required: true },
   payment_id: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -14,6 +16,8 @@ const paymentSchema = new Schema({
   phone_no: { type: String, required: true },
   description: { type: String, required: true },
   status: { type: String, required: true }
+}, {
+  strict: false
 });
 
 module.exports = model('Payment', paymentSchema);
