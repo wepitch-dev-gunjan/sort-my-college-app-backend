@@ -24,41 +24,41 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm i -g forever
+    - run: npm install -g pm2
     - run: |
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name api-gateway
         cd ../admin
         touch .env
         echo "${{ secrets.ADMIN_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name admin
         cd ../counselor
         touch .env
         echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name api-counselor
         cd ../notification-service
         touch .env
         echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name notification-service
         cd ../user
         touch .env
         echo "${{ secrets.USER_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name user
         cd ../webinar
         touch .env
         echo "${{ secrets.WEBINAR_SECRETS }}" > .env
         npm ci
-        forever stop server.js
-        forever start server.js
+        pm2 stop server.js || true
+        pm2 start server.js --name webinar
