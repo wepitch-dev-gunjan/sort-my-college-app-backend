@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.post('/payments/create-order', counsellorOrUserAuth, createOrder);
 router.post('/payments/create-payment', counsellorOrUserAuth, createPayment);
-router.post('/payments/create-payment', counsellorOrUserAuth, getPayments);
+router.get('/payments/create-payment', counsellorOrUserAuth, getPayments);
 
 module.exports = router;
