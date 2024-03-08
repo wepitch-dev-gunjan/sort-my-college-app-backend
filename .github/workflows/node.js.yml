@@ -26,6 +26,8 @@ jobs:
         cache: 'npm'
     - run: npm install -g pm2
     - run: |
+        sudo su
+        cd sort-my-college-app-backend
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
