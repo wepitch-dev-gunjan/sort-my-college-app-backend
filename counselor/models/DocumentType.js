@@ -5,10 +5,10 @@ const documentTypeSchema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: true,
     },
   },
   {
+    timestamps: true,
     strict: false,
   }
 );

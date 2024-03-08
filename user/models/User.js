@@ -8,7 +8,7 @@ const userSchema = new Schema(
       sparse: true,
     },
     phone_number: {
-      type: Number,
+      type: String,
       unique: true,
       sparse: true,
     },

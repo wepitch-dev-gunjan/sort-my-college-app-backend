@@ -96,3 +96,15 @@ exports.zoomGenerateSignature = (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+// exports.scheduleMeeting = async (req, res) => {
+//   try {
+//     const { admin_id } = req;
+//     const { }
+//   } catch (error) {
+//     console.log(error)
+//     res.status(500).send({
+//       error: "Internal server error"
+//     })
+//   }
+// }

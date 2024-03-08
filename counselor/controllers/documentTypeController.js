@@ -54,16 +54,17 @@ exports.createDocumentType = async (req, res) => {
       return res.status(400).send({ error: "Document Type already exists" });
     }
 
-    const doc = {};
-    if (name) doc.name = name;
-
     const newDocumentType = new DocumentType({
       name,
     });
 
     await newDocumentType.save();
 
-    res.status(200).send({ message: "Feed created successfully" });
+    res.status(200).send({
+      message: "document type created successfully",
+      data: newDocumentType
+
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });

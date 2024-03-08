@@ -18,6 +18,7 @@
     "mongoose": "^7.5.3",
     "node-notifier": "^10.0.1",
     "nodemailer": "^6.9.5",
+    "telesignsdk": "^2.2.3",
     "twilio": "^4.20.0",
     "web-push": "^3.6.6"
   }

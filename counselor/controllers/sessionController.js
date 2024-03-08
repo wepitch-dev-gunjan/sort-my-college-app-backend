@@ -202,7 +202,6 @@ exports.addSession = async (req, res) => {
     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
     const parsedSessionDuration = parseInt(session_duration, 10);
 
-    console.log(parsedSessionTime);
     // Check if session_date is a valid date and session_duration is a positive number
     if (
       isNaN(parsedSessionDate) ||

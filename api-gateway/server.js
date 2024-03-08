@@ -26,19 +26,19 @@ const app = express();
 const server =
   NODE_ENV === "production"
     ? https.createServer(
-        {
-          key: fs.readFileSync(
-            path.join(__dirname, "..", "ssl_certificates", "private.key")
-          ),
-          cert: fs.readFileSync(
-            path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
-          ),
-          ca: fs.readFileSync(
-            path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
-          ),
-        },
-        app
-      )
+      {
+        key: fs.readFileSync(
+          path.join(__dirname, "..", "ssl_certificates", "private.key")
+        ),
+        cert: fs.readFileSync(
+          path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
+        ),
+        ca: fs.readFileSync(
+          path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
+        ),
+      },
+      app
+    )
     : http.createServer(app);
 
 const io = socketIo(server, {
@@ -75,7 +75,8 @@ Object.keys(proxyConfig).forEach((context) => {
 // Middleware to set CORS headers and allow credentials
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: "*",
+    // origin: FRONTEND_URL,
     credentials: true,
   })
 );
@@ -101,7 +102,6 @@ io.on("connection", (socket) => {
   // Example: Broadcast a message to all connected clients
   socket.on("send-message", (data) => {
     const { room_id, message } = data;
-    console.log(data);
     io.to(room_id).emit("chat-message", message);
   });
 
