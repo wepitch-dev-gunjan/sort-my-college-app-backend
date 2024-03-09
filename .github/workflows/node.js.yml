@@ -75,5 +75,5 @@ jobs:
         /root/.nvm/versions/node/v20.8.0/bin/pm2 restart webinar
         /root/.nvm/versions/node/v20.8.0/bin/pm2 restart api-gateway
         # /root/.nvm/versions/node/v20.8.0/bin/pm2 restart ep
-        
+      
       
