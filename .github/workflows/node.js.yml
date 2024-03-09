@@ -28,18 +28,7 @@ jobs:
     - run: npm install -g forever
     - name: Stop previous server processes
       run: |
-        cd api-gateway
-        forever stop server.js || echo "No running server process found"
-        cd ../admin
-        forever stop server.js || echo "No running server process found"
-        cd ../counselor
-        forever stop server.js || echo "No running server process found"
-        cd ../notification-service
-        forever stop server.js || echo "No running server process found"
-        cd ../user
-        forever stop server.js || echo "No running server process found"
-        cd ../webinar
-        forever stop server.js || echo "No running server process found"
+        forever stopall || echo "No running server process found"
     - run: |
         cd api-gateway
         touch .env
