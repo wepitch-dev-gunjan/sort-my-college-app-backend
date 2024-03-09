@@ -129,22 +129,22 @@ jobs:
       - name: Start Node.js applications
         run: |
           cd counselor
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="counsellor"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor"
 
           cd ../admin
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="admin"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin"
 
           cd ../notification-service
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="notification-service"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service"
 
           cd ../user
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="user"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user"
 
           cd ../webinar
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="webinar"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="webinar"
 
           cd ../api-gateway
-          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="api-gateway"
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway"
 
       - name: Restart all Node.js applications
-        run: /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 restart all
+        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
