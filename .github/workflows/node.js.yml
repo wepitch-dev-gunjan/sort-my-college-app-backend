@@ -26,6 +26,18 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: |
+        cd ssl_certificates
+        touch ca_bundle.crt
+        echo "${{ secrets.CA_BUNDLE }}" > ca_bundle.crt
+    - run: |
+        cd ssl_certificates
+        touch certificate.crt
+        echo "${{ secrets.CERTIFICATE }}" > certificate.crt
+    - run: |
+        cd ssl_certificates
+        touch private.key
+        echo "${{ secrets.PRIVATE }}" > private.key
+    - run: |
         cd counselor
         touch .env
         echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
@@ -36,27 +48,31 @@ jobs:
         echo "${{ secrets.ADMIN_SECRETS }}" > .env
         npm ci
     - run: |
+        cd notification-service
+        touch .env
+        echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
+        npm ci
+    - run: |
+        cd user
+        touch .env
+        echo "${{ secrets.USER_SECRETS }}" > .env
+        npm ci
+    - run: |
+        cd webinar
+        touch .env
+        echo "${{ secrets.WEBINAR_SECRETS }}" > .env
+        npm ci
+    - run: |
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
         npm ci
-    # - run: |
-    #     cd notification-service
-    #     touch .env
-    #     echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
-    #     npm i
-    # - run: |
-    #     cd user
-    #     touch .env
-    #     echo "${{ secrets.USER_SECRETS }}" > .env
-    #     npm i
-    # - run: |
-    #     cd webinar
-    #     touch .env
-    #     echo "${{ secrets.WEBINAR_SECRETS }}" > .env
-    #     npm i
     - run: |
         /root/.nvm/versions/node/v20.8.0/bin/pm2 restart admin
         /root/.nvm/versions/node/v20.8.0/bin/pm2 restart counsellor
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart user
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart notification-service
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart webinar
         /root/.nvm/versions/node/v20.8.0/bin/pm2 restart api-gateway
+        # /root/.nvm/versions/node/v20.8.0/bin/pm2 restart ep
       
