@@ -128,7 +128,7 @@ jobs:
 
       - name: Start Node.js applications
         run: |
-          cd ../counselor
+          cd counselor
           /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="counsellor"
 
           cd ../admin
