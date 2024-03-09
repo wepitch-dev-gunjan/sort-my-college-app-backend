@@ -33,35 +33,35 @@ jobs:
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
     - run: |
         cd admin
         touch .env
         echo "${{ secrets.ADMIN_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
     - run: |
         cd counselor
         touch .env
         echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
     - run: |
         cd notification-service
         touch .env
         echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
     - run: |
         cd user
         touch .env
         echo "${{ secrets.USER_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
     - run: |
         cd webinar
         touch .env
         echo "${{ secrets.WEBINAR_SECRETS }}" > .env
-        npm ci
+        npm c
         forever start server.js
