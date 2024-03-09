@@ -56,7 +56,7 @@ jobs:
     #     echo "${{ secrets.WEBINAR_SECRETS }}" > .env
     #     npm i
     - run: |
-        pm2 restart admin
-        pm2 restart counsellor
-        pm2 restart api-gateway
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart admin
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart counsellor
+        /root/.nvm/versions/node/v20.8.0/bin/pm2 restart api-gateway
       
