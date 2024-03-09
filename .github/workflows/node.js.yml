@@ -98,9 +98,6 @@ jobs:
           cache: "npm"
       - name: Install dependencies
         run: |
-          cd ssl_certificates
-          npm ci
-
           cd ../counselor
           npm ci
 
