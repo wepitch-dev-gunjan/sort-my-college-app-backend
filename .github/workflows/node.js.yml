@@ -36,13 +36,13 @@ jobs:
         npm i
         npm i axios
         forever start server.js
-    - run: |
-        cd admin
-        touch .env
-        echo "${{ secrets.ADMIN_SECRETS }}" > .env
-        npm i
-        npm i axios
-        forever start server.js
+    # - run: |
+    #     cd admin
+    #     touch .env
+    #     echo "${{ secrets.ADMIN_SECRETS }}" > .env
+    #     npm i
+    #     npm i axios
+    #     forever start server.js
     # - run: |
     #     cd counselor
     #     touch .env
