@@ -26,32 +26,51 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm install -g forever
+    - name: Stop previous server processes
+      run: |
+        cd api-gateway
+        forever stop server.js || echo "No running server process found"
+        cd ../admin
+        forever stop server.js || echo "No running server process found"
+        cd ../counselor
+        forever stop server.js || echo "No running server process found"
+        cd ../notification-service
+        forever stop server.js || echo "No running server process found"
+        cd ../user
+        forever stop server.js || echo "No running server process found"
+        cd ../webinar
+        forever stop server.js || echo "No running server process found"
     - run: |
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
         npm ci
         forever start server.js
+    - run: |
         cd ../admin
         touch .env
         echo "${{ secrets.ADMIN_SECRETS }}" > .env
         npm ci
         forever start server.js
+    - run: |
         cd ../counselor
         touch .env
         echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
         npm ci
         forever start server.js
+    - run: |
         cd ../notification-service
         touch .env
         echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
         npm ci
         forever start server.js
+    - run: |
         cd ../user
         touch .env
         echo "${{ secrets.USER_SECRETS }}" > .env
         npm ci
         forever start server.js
+    - run: |
         cd ../webinar
         touch .env
         echo "${{ secrets.WEBINAR_SECRETS }}" > .env
