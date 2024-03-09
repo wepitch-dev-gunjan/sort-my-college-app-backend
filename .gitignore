@@ -1,5 +1,5 @@
 node_modules
+ssl_certificates
 .env
 configs
-ssl_certificates
 pair1.pem
