@@ -126,6 +126,27 @@ jobs:
           touch private.key
           echo "${{ secrets.PRIVATE_KEY }}" > private.key
 
+      - name: Create environment variables
+        run: |
+          cd counselor
+          touch .env
+          echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
+          cd ../admin
+          touch .env
+          echo "${{ secrets.ADMIN_SECRETS }}" > .env
+          cd ../notification-service
+          touch .env
+          echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
+          cd ../user
+          touch .env
+          echo "${{ secrets.USER_SECRETS }}" > .env
+          cd ../webinar
+          touch .env
+          echo "${{ secrets.WEBINAR_SECRETS }}" > .env
+          cd ../api-gateway
+          touch .env
+          echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
+
       - name: Start Node.js applications
         run: |
           cd counselor
