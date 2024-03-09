@@ -78,8 +78,7 @@ name: Node.js CI
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 jobs:
   build:
@@ -87,21 +86,38 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
-        # Adjust the Node.js versions based on your application's compatibility
+        node-version: [20.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-
       - name: Install dependencies
-        run: npm ci
+        run: |
+          cd ssl_certificates
+          npm ci
+
+          cd ../counselor
+          npm ci
+
+          cd ../admin
+          npm ci
+
+          cd ../notification-service
+          npm ci
+
+          cd ../user
+          npm ci
+
+          cd ../webinar
+          npm ci
+
+          cd ../api-gateway
+          npm ci
 
       - name: Create SSL certificates
         run: |
@@ -115,23 +131,23 @@ jobs:
 
       - name: Start Node.js applications
         run: |
-          cd counselor admin notification-service user webinar api-gateway
-          for dir in */; do
-            cd "$dir"
-            touch .env
-            case "$dir" in
-              "counselor/") service="counsellor" ;;
-              "admin/") service="admin" ;;
-              "notification-service/") service="notification-service" ;;
-              "user/") service="user" ;;
-              "webinar/") service="webinar" ;;
-              "api-gateway/") service="api-gateway" ;;
-            esac
-            echo "${{ secrets.${service^^}_SECRETS }}" > .env
-            npm ci
-            pm2 start server.js --name="$service"
-            cd ..
-          done
+          cd ../counselor
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="counsellor"
+
+          cd ../admin
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="admin"
+
+          cd ../notification-service
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="notification-service"
+
+          cd ../user
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="user"
+
+          cd ../webinar
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="webinar"
+
+          cd ../api-gateway
+          /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 start server.js --name="api-gateway"
 
       - name: Restart all Node.js applications
-        run: pm2 restart all
+        run: /root/.nvm/versions/node/v${{ matrix.node-version }}/bin/pm2 restart all
