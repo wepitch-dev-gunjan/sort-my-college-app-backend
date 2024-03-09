@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
 
@@ -25,7 +25,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm install -g forever
+    # - run: npm install -g forever
     - name: Stop previous server processes
       run: |
         forever stopall || echo "No running server process found"
@@ -34,7 +34,7 @@ jobs:
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
         npm i
-        npm i axios
+        # npm i axios
         forever start server.js
     # - run: |
     #     cd admin
