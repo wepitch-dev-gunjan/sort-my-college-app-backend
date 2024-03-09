@@ -25,46 +25,40 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm install -g forever
-    - name: Stop previous server processes
-      run: |
-        forever stopall || echo "No running server process found"
     - run: |
         cd counselor
         touch .env
         echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
         npm i
-        npm i axios
-        forever start server.js
     - run: |
         cd admin
         touch .env
         echo "${{ secrets.ADMIN_SECRETS }}" > .env
         npm i
         npm i axios
-        forever start server.js
     - run: |
         cd api-gateway
         touch .env
         echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
         npm i
         npm i axios
-        forever start server.js
     # - run: |
     #     cd notification-service
     #     touch .env
     #     echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
     #     npm i
-    #     forever start server.js
     # - run: |
     #     cd user
     #     touch .env
     #     echo "${{ secrets.USER_SECRETS }}" > .env
     #     npm i
-    #     forever start server.js
     # - run: |
     #     cd webinar
     #     touch .env
     #     echo "${{ secrets.WEBINAR_SECRETS }}" > .env
     #     npm i
-    #     forever start server.js
+    - run: |
+        pm2 restart admin
+        pm2 restart counsellor
+        pm2 restart api-gateway
+      
