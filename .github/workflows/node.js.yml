@@ -36,7 +36,7 @@ jobs:
     - run: |
         cd ssl_certificates
         touch private.key
-        echo "${{ secrets.PRIVATE }}" > private.key
+        echo "${{ secrets.PRIVATE_KEY }}" > private.key
     - run: |
         cd counselor
         touch .env
