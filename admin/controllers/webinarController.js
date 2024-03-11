@@ -1,4 +1,7 @@
 const { KJUR } = require('jsrsasign');
+const { getZoomAccessToken } = require('../helpers/webinarHelpers');
+const { default: axios } = require('axios');
+const Webinar = require('../models/Webinar');
 
 require('dotenv').config();
 
@@ -22,30 +25,64 @@ exports.getWebinars = async (req, res) => {
 
 exports.addWebinar = async (req, res) => {
   try {
-    // const { webinar_date, webinar_time, webinar_fee, webinar_available_slots } = req.body;
-    // if(!webinar_date ) return res.status(400).send({
-    //   error: 'Date is required'
-    // })
-    const { topic } = req.body;
-
-    // Make a POST request to Zoom API to create a meeting
-    const { data } = await axios.post('https://api.zoom.us/v2/users/me/meetings', {
-      topic,
-      type: 2 // Scheduled meeting
-    }, {
-      headers: {
-        'Authorization': `Bearer YOUR_ZOOM_API_TOKEN`
-      }
+    const { webinar_title, webinar_image, webinar_by, webinar_details, what_will_you_learn, webinar_date, speaker_profile } = req.body;
+    if (!webinar_title) return res.status(400).send({
+      error: 'Title is required'
+    });
+    if (!webinar_date) return res.status(400).send({
+      error: 'Date is required'
+    });
+    if (!webinar_by) return res.status(400).send({
+      error: 'Webinar host is required'
     });
 
-    res.json(response.data);
+    // Assuming webinar_time is not provided in the request body
+    const webinar_time = new Date().toISOString(); // Set a default time for now
 
-    res.status(200).send(data);
+    // Make a POST request to Zoom API to create a meeting
+    const { data } = await axios.post(
+      `https://api.zoom.us/v2/users/me/meetings`,
+      {
+        topic: webinar_title, // Use webinar_title as the topic
+        type: 2, // Scheduled meeting
+        start_time: new Date(webinar_date).toISOString(), // Start time of the meeting
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${await getZoomAccessToken()}`, // Get Zoom access token
+        },
+      }
+    );
+
+    // Create a new instance of the Webinar model
+    const webinar = new Webinar({
+      webinar_title,
+      webinar_details,
+      what_will_you_learn,
+      webinar_date,
+      webinar_time,
+      speaker_profile,
+      webinar_by,
+      webinar_image,
+      webinar_start_url: data.start_url,
+      webinar_join_url: data.join_url,
+      webinar_password: data.webinar_password,
+      registered_participants: [],
+      attended_participants: [],
+    });
+
+    // Save the webinar to the database
+    await webinar.save();
+
+    // Respond with the created webinar data
+    res.status(200).send(webinar);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
 
 exports.editWebinar = async (req, res) => {
   try {
@@ -96,15 +133,3 @@ exports.zoomGenerateSignature = (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
-
-// exports.scheduleMeeting = async (req, res) => {
-//   try {
-//     const { admin_id } = req;
-//     const { }
-//   } catch (error) {
-//     console.log(error)
-//     res.status(500).send({
-//       error: "Internal server error"
-//     })
-//   }
-// }
