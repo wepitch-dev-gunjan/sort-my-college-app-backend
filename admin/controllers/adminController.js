@@ -1,13 +1,56 @@
 const Admin = require("../models/Admin");
+const bcrypt = require("bcrypt");
+const JWT = require("jsonwebtoken");
+require("dotenv").config();
+
+const { JWT_SECRET } = process.env;
+
+exports.adminLogin = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password)
+      return ses.status(400).send({
+        error: "Credentials are required",
+      });
+
+    const existingAdmin = await Admin.findOne({ username });
+
+    if (!existingAdmin)
+      return res.status(404).send({
+        error: "Admin not found",
+      });
+
+    const passwordMatch = bcrypt.compare(password, existingAdmin.password);
+
+    if (!passwordMatch)
+      return res.status(401).send({
+        error: "Invalid password",
+      });
+
+    const token = JWT.sign({ username, password }, JWT_SECRET);
+
+    res.status(200).send({
+      message: "Login succesful",
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 exports.createAdmin = async (req, res) => {
   try {
-    const { name, email, profile_pic } = req.body;
+    const {
+      password,
+      // email, profile_pic
+    } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = new Admin({
-      name,
-      email,
-      profile_pic,
+      password: hashedPassword,
     });
 
     const data = await newAdmin.save();
@@ -65,7 +108,7 @@ exports.findOneAdmin = async (req, res) => {
     const user = await Admin.findOne(query);
 
     if (!user) {
-      return res.status(400).send({ error: 'Admin not found' });
+      return res.status(400).send({ error: "Admin not found" });
     }
 
     res.status(200).send(user);
@@ -73,7 +116,7 @@ exports.findOneAdmin = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.editProfile = async (req, res) => {
   try {
@@ -100,17 +143,15 @@ exports.editProfile = async (req, res) => {
       updateFields.date_of_birth = req.body.date_of_birth;
     }
 
-    const updatedAdmin = await Admin.findByIdAndUpdate(
-      admin_id,
-      updateFields,
-      { new: true }
-    );
+    const updatedAdmin = await Admin.findByIdAndUpdate(admin_id, updateFields, {
+      new: true,
+    });
 
     if (!updatedAdmin) {
       return res.status(404).json({ error: "Admin not found" });
     }
 
-    console.log(updatedAdmin)
+    console.log(updatedAdmin);
     res.status(200).json(updatedAdmin);
   } catch (error) {
     console.error(error);
@@ -124,10 +165,10 @@ exports.getOneAdmin = async (req, res) => {
     const admin = await Admin.findOne({ _id: admin_id });
     if (!admin) return res.status(404).json({ error: "Admin not found" });
 
-    res.status(200).json(admin)
+    res.status(200).json(admin);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -136,8 +177,7 @@ exports.getProfilePic = async (req, res) => {
     const { admin_id } = req.params;
 
     const admin = await Counsellor.findById(admin_id);
-    if (!admin)
-      return res.status(404).send({ error: "Counsellor not found" });
+    if (!admin) return res.status(404).send({ error: "Counsellor not found" });
 
     if (!admin.profile_pic)
       return res.status(404).send({ error: "ProfilePic not found" });
@@ -155,7 +195,7 @@ exports.uploadProfilePic = async (req, res) => {
 
     if (!file) {
       return res.status(400).send({
-        error: "File can't be empty"
+        error: "File can't be empty",
       });
     }
 
@@ -165,13 +205,18 @@ exports.uploadProfilePic = async (req, res) => {
       return res.status(404).send({ error: "Admin not found" });
     }
 
-    const fileName = `admin-profile-pic-${Date.now()}.jpeg`
-    const foldername = 'admin-profile-pics';
-    const profilePicUpload = await putObject(foldername, fileName, file.buffer, file.mimetype);
+    const fileName = `admin-profile-pic-${Date.now()}.jpeg`;
+    const foldername = "admin-profile-pics";
+    const profilePicUpload = await putObject(
+      foldername,
+      fileName,
+      file.buffer,
+      file.mimetype
+    );
 
     if (!profilePicUpload) {
       return res.status(400).send({
-        error: "Profile pic is not uploaded"
+        error: "Profile pic is not uploaded",
       });
     }
 
@@ -179,7 +224,7 @@ exports.uploadProfilePic = async (req, res) => {
     await admin.save();
 
     res.status(200).send({
-      message: "Profile pic uploaded successfully"
+      message: "Profile pic uploaded successfully",
     });
   } catch (error) {
     console.log(error);

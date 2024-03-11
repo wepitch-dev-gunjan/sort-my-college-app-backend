@@ -1,28 +1,29 @@
 const { Schema, model } = require("mongoose");
 
-const Admin = new Schema({
-  name: {
-    type: String,
+const adminSchema = new Schema(
+  {
+    username: {
+      type: String,
+      default: "ADMIN",
+    },
+    password: {
+      type: String,
+    },
+    name: {
+      type: String,
+      default: "ADMIN",
+    },
+    email: {
+      type: String,
+    },
+    profile_pic: {
+      type: String,
+    },
   },
-  email: {
-    type: String,
-  },
-  profile_pic: {
-    type: String,
-  },
-  gender: {
-    type: String,
-    default: 'Male',
-    enum: ['Male', 'Female', 'Other']
-  },
-  date_of_birth: {
-    type: Date,
-    default: new Date()
+  {
+    timestamps: true,
+    strict: false,
   }
-}, {
-  timestamps: true
-}, {
-  strict: true
-});
+);
 
-module.exports = model("Admin", Admin);
+module.exports = model("Admin", adminSchema);
