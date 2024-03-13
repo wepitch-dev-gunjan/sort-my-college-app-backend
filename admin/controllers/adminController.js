@@ -7,14 +7,14 @@ const { JWT_SECRET } = process.env;
 
 exports.adminLogin = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password)
+    if (!email || !password)
       return ses.status(400).send({
         error: "Credentials are required",
       });
 
-    const existingAdmin = await Admin.findOne({ username });
+    const existingAdmin = await Admin.findOne({ email });
 
     if (!existingAdmin)
       return res.status(404).send({
@@ -28,7 +28,7 @@ exports.adminLogin = async (req, res) => {
         error: "Invalid password",
       });
 
-    const token = JWT.sign({ username, password }, JWT_SECRET);
+    const token = JWT.sign({ email, password }, JWT_SECRET);
 
     res.status(200).send({
       message: "Login succesful",
