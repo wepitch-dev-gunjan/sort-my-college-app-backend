@@ -16,6 +16,7 @@ const adminSchema = new Schema(
     email: {
       type: String,
     },
+
     profile_pic: {
       type: String,
     },

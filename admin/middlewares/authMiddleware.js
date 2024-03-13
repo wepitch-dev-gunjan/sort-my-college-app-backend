@@ -16,6 +16,7 @@ exports.adminAuth = async (req, res, next) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log(decoded);
 
     const admin = await Admin.findOne({ email: decoded.email });
 
@@ -25,12 +26,12 @@ exports.adminAuth = async (req, res, next) => {
 
     req.email = decoded.email;
     req.admin_id = decoded.admin_id;
-    req.refresh_token = decoded.tokens.refresh_token;
+    // req.refresh_token = decoded.tokens.refresh_token;
 
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: " auth Internal Server Error" });
   }
 };
 
@@ -48,14 +49,19 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     let response = {};
     let responseData = {};
     if (decoded.counsellor_id) {
-      response = await axios.get(`${process.env.BACKEND_URL}/counsellor/counsellors/find-one`, { // Update BACKEND_URL to use process.env
-        params: {
-          email: decoded.email
+      response = await axios.get(
+        `${process.env.BACKEND_URL}/counsellor/counsellors/find-one`,
+        {
+          // Update BACKEND_URL to use process.env
+          params: {
+            email: decoded.email,
+          },
         }
-      });
+      );
       responseData = response.data;
     } else if (decoded.user_id) {
-      response = await axios.get(`${process.env.BACKEND_URL}/user/users`, { // Update BACKEND_URL to use process.env
+      response = await axios.get(`${process.env.BACKEND_URL}/user/users`, {
+        // Update BACKEND_URL to use process.env
         params: {
           email: decoded.email,
         },
@@ -79,4 +85,3 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
