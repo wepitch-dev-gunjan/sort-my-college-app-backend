@@ -16,7 +16,6 @@ exports.adminAuth = async (req, res, next) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
-    console.log(decoded);
 
     const admin = await Admin.findOne({ email: decoded.email });
 

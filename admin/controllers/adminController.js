@@ -7,14 +7,14 @@ const { JWT_SECRET } = process.env;
 
 exports.adminLogin = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password)
+    if (!email || !password)
       return ses.status(400).send({
         error: "Credentials are required",
       });
 
-    const existingAdmin = await Admin.findOne({ username });
+    const existingAdmin = await Admin.findOne({ email });
 
     if (!existingAdmin)
       return res.status(404).send({
@@ -90,14 +90,16 @@ exports.getAdmin = async (req, res) => {
   try {
     const { admin_id } = req;
     const admin = await Admin.findOne({ _id: admin_id });
+    // console.log(admin);
 
     if (!admin)
       return res.status(400).send({ message: "No admin found by this id" });
 
     res.status(200).send(admin);
   } catch (error) {
+    console.log("error");
     console.log(error);
-    res.status(500).send({ error: "Internal server error" });
+    res.status(500).send({ error: " admin Internal server error" });
   }
 };
 
@@ -154,7 +156,7 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ error: "Admin not found" });
     }
 
-    console.log(updatedAdmin);
+    // console.log(updatedAdmin);
     res.status(200).json(updatedAdmin);
   } catch (error) {
     console.error(error);
