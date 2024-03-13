@@ -28,7 +28,10 @@ exports.adminLogin = async (req, res) => {
         error: "Invalid password",
       });
 
-    const token = JWT.sign({ username, password }, JWT_SECRET);
+    const token = JWT.sign(
+      { email, password, admin_id: existingAdmin._id },
+      JWT_SECRET
+    );
 
     res.status(200).send({
       message: "Login succesful",
