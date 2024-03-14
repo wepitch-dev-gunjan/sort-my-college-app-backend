@@ -8,6 +8,7 @@ const {
   getUser,
   findOneUser,
   getUsersForAdmin,
+  getSinglUser,
 } = require("../controllers/userController");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
@@ -18,6 +19,7 @@ const router = express.Router();
 router.get("/", userAuth, getUser);
 router.get("/users", findOneUser);
 router.get("/users-for-admin", getUsersForAdmin);
+router.get("/users-for-admin/:user_id", getSinglUser);
 
 // save counsellors
 router.put("/:user_id", userAuth, editUser);
