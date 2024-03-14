@@ -25,7 +25,9 @@ exports.getWebinars = async (req, res) => {
 
 exports.addWebinar = async (req, res) => {
   try {
-    const { webinar_title, webinar_image, webinar_by, webinar_details, what_will_you_learn, webinar_date, speaker_profile } = req.body;
+    const { webinar_title, webinar_image, webinar_by, webinar_details, what_will_you_learn, webinar_date, webinar_time, speaker_profile, webinar_total_slots, } = req.body;
+
+    console.log(req.body)
     if (!webinar_title) return res.status(400).send({
       error: 'Title is required'
     });
@@ -36,8 +38,10 @@ exports.addWebinar = async (req, res) => {
       error: 'Webinar host is required'
     });
 
-    // Assuming webinar_time is not provided in the request body
-    const webinar_time = new Date().toISOString(); // Set a default time for now
+    const [year, month, day] = webinar_date.split('-'); // Split webinar_date into year, month, and day
+    const [hours, minutes] = webinar_time.split(':'); // Split webinar_time into hours and minutes
+
+    const combinedDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
     // Make a POST request to Zoom API to create a meeting
     const { data } = await axios.post(
@@ -45,7 +49,7 @@ exports.addWebinar = async (req, res) => {
       {
         topic: webinar_title, // Use webinar_title as the topic
         type: 2, // Scheduled meeting
-        start_time: new Date(webinar_date).toISOString(), // Start time of the meeting
+        start_time: combinedDateTime.toISOString(), // Start time of the meeting
       },
       {
         headers: {
@@ -60,11 +64,11 @@ exports.addWebinar = async (req, res) => {
       webinar_title,
       webinar_details,
       what_will_you_learn,
-      webinar_date,
-      webinar_time,
+      webinar_date: combinedDateTime,
       speaker_profile,
       webinar_by,
       webinar_image,
+      webinar_total_slots,
       webinar_start_url: data.start_url,
       webinar_join_url: data.join_url,
       webinar_password: data.webinar_password,
