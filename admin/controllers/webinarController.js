@@ -16,7 +16,12 @@ exports.getWebinar = async (req, res) => {
 
 exports.getWebinars = async (req, res) => {
   try {
+    const webinars = await Webinar.find();
+    if (!webinars) return res.status(404).send({
+      error: "Webinars not found"
+    })
 
+    res.status(200).send(webinars)
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
@@ -71,7 +76,7 @@ exports.addWebinar = async (req, res) => {
       webinar_total_slots,
       webinar_start_url: data.start_url,
       webinar_join_url: data.join_url,
-      webinar_password: data.webinar_password,
+      webinar_password: data.password,
       registered_participants: [],
       attended_participants: [],
     });
