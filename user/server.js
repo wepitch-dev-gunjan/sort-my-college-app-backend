@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
 const { readdirSync } = require("fs");
 require("dotenv").config();
@@ -9,6 +10,8 @@ const MONGODB_URI =
 
 // Middleware to parse JSON data in the request body
 app.use(express.json());
+
+app.use(cors());
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {

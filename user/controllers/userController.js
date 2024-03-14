@@ -154,3 +154,18 @@ exports.unsaveCounsellor = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+exports.getUsersForAdmin = async (req, res) => {
+  try {
+    const users = await User.find();
+
+    if (!users) {
+      return res.status(404).send({ error: "No Users found" });
+    }
+
+    res.status(200).send(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};

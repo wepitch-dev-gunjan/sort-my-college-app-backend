@@ -26,19 +26,19 @@ const app = express();
 const server =
   NODE_ENV === "production"
     ? https.createServer(
-      {
-        key: fs.readFileSync(
-          path.join(__dirname, "..", "ssl_certificates", "private.key")
-        ),
-        cert: fs.readFileSync(
-          path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
-        ),
-        ca: fs.readFileSync(
-          path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
-        ),
-      },
-      app
-    )
+        {
+          key: fs.readFileSync(
+            path.join(__dirname, "..", "ssl_certificates", "private.key")
+          ),
+          cert: fs.readFileSync(
+            path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
+          ),
+          ca: fs.readFileSync(
+            path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
+          ),
+        },
+        app
+      )
     : http.createServer(app);
 
 const io = socketIo(server, {
