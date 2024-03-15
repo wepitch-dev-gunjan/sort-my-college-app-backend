@@ -27,5 +27,5 @@ mongoose.connection.on("error", (err) => {
 readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 
 app.listen(PORT, () => {
-  console.log("Listening on port " + PORT);
+  console.log("Notification service Listening on port " + PORT);
 });

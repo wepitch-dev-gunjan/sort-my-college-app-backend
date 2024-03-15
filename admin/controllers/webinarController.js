@@ -2,6 +2,7 @@ const { KJUR } = require('jsrsasign');
 const { getZoomAccessToken } = require('../helpers/webinarHelpers');
 const { default: axios } = require('axios');
 const Webinar = require('../models/Webinar');
+const uploadImage = require('../services/cloudinary');
 
 require('dotenv').config();
 
@@ -30,9 +31,9 @@ exports.getWebinars = async (req, res) => {
 
 exports.addWebinar = async (req, res) => {
   try {
-    const { webinar_title, webinar_image, webinar_by, webinar_details, what_will_you_learn, webinar_date, webinar_time, speaker_profile, webinar_total_slots, } = req.body;
+    const { webinar_title, webinar_by, webinar_details, what_will_you_learn, webinar_date, webinar_time, speaker_profile, webinar_total_slots, } = req.body;
+    const { file } = req;
 
-    console.log(req.body)
     if (!webinar_title) return res.status(400).send({
       error: 'Title is required'
     });
@@ -63,6 +64,10 @@ exports.addWebinar = async (req, res) => {
         },
       }
     );
+
+
+
+    const webinar_image = await uploadImage(file.buffer)
 
     // Create a new instance of the Webinar model
     const webinar = new Webinar({
