@@ -29,6 +29,7 @@ exports.counsellorAuth = async (req, res, next) => {
     req.email = decoded.email;
     req.counsellor_id = decoded.counsellor_id;
     req.refresh_token = decoded.tokens.refresh_token;
+    console.log(req)
 
     next();
   } catch (error) {
