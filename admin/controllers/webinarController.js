@@ -34,6 +34,10 @@ exports.addWebinar = async (req, res) => {
     const { webinar_title, webinar_by, webinar_details, what_will_you_learn, webinar_date, webinar_time, speaker_profile, webinar_total_slots, } = req.body;
     const { file } = req;
 
+    if (!file) return res.status(404).send({
+      error: "Image file is required"
+    })
+
     if (!webinar_title) return res.status(400).send({
       error: 'Title is required'
     });
