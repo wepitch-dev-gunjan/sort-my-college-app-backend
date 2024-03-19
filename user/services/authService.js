@@ -45,6 +45,7 @@ exports.generateOtpByPhone = async (req, res) => {
       to: phone_number,
       message: `OTP for login is : ${otp}`
     })
+    console.log(data)
     // Send the OTP to the client (avoid logging it)
     res.status(200).send({
       message: data.message,
