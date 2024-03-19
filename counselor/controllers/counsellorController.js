@@ -452,6 +452,8 @@ exports.editProfile = async (req, res) => {
       updateFields.ifsc_code = req.body.ifsc_code;
     }
 
+    updateFields.status = "PENDING";
+
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
       counsellor_id,
       updateFields,
@@ -545,7 +547,8 @@ exports.getCounsellors = async (req, res) => {
 
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
-    const { locations_focused, degree_focused, courses_focused } = req.query;
+    const { search, locations_focused, degree_focused, courses_focused } =
+      req.query;
 
     const queryObject = {};
 
@@ -587,6 +590,7 @@ exports.getCounsellorsForAdmin = async (req, res) => {
           reward_points: counsellor.reward_points,
           reviews: counsellor.client_testimonials.length,
           verified: counsellor.verified,
+          status: counsellor.status,
         };
       })
     );
@@ -853,6 +857,7 @@ exports.verifyCounsellor = async (req, res) => {
         error: "Counsellor already verified",
       });
 
+    counsellor.status = "APPROVED";
     counsellor.verified = true;
     await counsellor.save();
 
@@ -881,6 +886,7 @@ exports.rejectCounsellor = async (req, res) => {
         error: "Counsellor is not verified or already rejected",
       });
 
+    counsellor.status = "REJECTED";
     counsellor.verified = false;
     await counsellor.save();
 
