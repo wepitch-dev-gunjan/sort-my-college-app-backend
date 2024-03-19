@@ -7,6 +7,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
+const { uploadImage } = require('../services/cloudinary');
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -203,9 +204,6 @@ exports.getCounsellor = async (req, res) => {
       );
     }
 
-    const profile_pic = await getObjectURL(counsellor.profile_pic);
-    const cover_image = await getObjectURL(counsellor.cover_image);
-
     // client testimonials
     const client_testimonials = await Feedback.find({
       feedback_to: counsellor._id,
@@ -235,8 +233,6 @@ exports.getCounsellor = async (req, res) => {
       age,
       group_session_price,
       personal_session_price,
-      profile_pic,
-      cover_image,
       reviews,
       avg_rating,
       client_testimonials,
@@ -637,21 +633,21 @@ exports.uploadProfilePic = async (req, res) => {
     }
 
     const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`;
-    const foldername = "counsellor-profile-pics";
-    const profilePicUpload = await putObject(
-      foldername,
-      fileName,
-      file.buffer,
-      file.mimetype
-    );
+    const folderName = "counsellor-profile-pics";
+    // const profilePicUpload = await putObject(
+    //   foldername,
+    //   fileName,
+    //   file.buffer,
+    //   file.mimetype
+    // );
 
-    if (!profilePicUpload) {
-      return res.status(400).send({
-        error: "Profile pic is not uploaded",
-      });
-    }
+    // if (!profilePicUpload) {
+    //   return res.status(400).send({
+    //     error: "Profile pic is not uploaded",
+    //   });
+    // }
 
-    counsellor.profile_pic = `${foldername}/${fileName}`;
+    counsellor.profile_pic = await uploadImage(file.buffer, fileName, folderName);
     await counsellor.save();
 
     res.status(200).send({
@@ -681,20 +677,8 @@ exports.uploadCoverImage = async (req, res) => {
 
     const fileName = `counsellor-cover-image-${Date.now()}.jpeg`;
     const folderName = "counsellor-cover-images";
-    const coverImageUpload = await putObject(
-      folderName,
-      fileName,
-      file.buffer,
-      file.mimetype
-    );
 
-    if (!coverImageUpload) {
-      return res.status(400).send({
-        error: "Cover Image is not uploaded",
-      });
-    }
-
-    counsellor.cover_image = `${folderName}/${fileName}`;
+    counsellor.cover_image = await uploadImage(file.buffer, fileName, folderName);
     await counsellor.save();
 
     res.status(200).send({
