@@ -452,7 +452,7 @@ exports.editProfile = async (req, res) => {
       updateFields.ifsc_code = req.body.ifsc_code;
     }
 
-    updatedFields.status = "PENDING";
+    updateFields.status = "PENDING";
 
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
       counsellor_id,
