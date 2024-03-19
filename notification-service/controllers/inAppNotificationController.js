@@ -70,7 +70,7 @@ exports.getNotification = async (req, res) => {
 
     // Check if the notification exists
     if (!notification) {
-      return res.status(404).json({ error: "Notification not found." });
+      return res.status(404).json({ error: "Notification not found" });
     }
 
     return res.status(200).json({

@@ -185,26 +185,31 @@ const counsellorSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ["APPROVED", "PENDING", "REJECTED"],
+      default: "PENDING",
+    },
 
     last_checkin_date: {
       type: Date,
       default: new Date(),
     },
-     // bank details
-     bank_name: {
+    // bank details
+    bank_name: {
       type: String,
     },
     branch: {
-      type: String
+      type: String,
     },
     account_type: {
-      type: String
+      type: String,
     },
     account_number: {
-      type: String
+      type: String,
     },
     ifsc_code: {
-      type: String
+      type: String,
     },
   },
   {
@@ -215,9 +220,30 @@ const counsellorSchema = new Schema(
   }
 );
 
-counsellorSchema.pre('save', function (next) {
-  const requiredFields = ['name', 'email', 'phone_no', 'profile_pic', 'cover_image', 'gender', 'location', 'nationality', 'designation', 'qualifications', 'date_of_birth', 'languages_spoken', 'experience_in_years', 'sessions', 'how_will_i_help', 'degree_focused', 'locations_focused', 'courses_focused', 'approach_of_counselling', 'verified'];
-  const allFieldsFilled = requiredFields.every(field => this[field]);
+counsellorSchema.pre("save", function (next) {
+  const requiredFields = [
+    "name",
+    "email",
+    "phone_no",
+    "profile_pic",
+    "cover_image",
+    "gender",
+    "location",
+    "nationality",
+    "designation",
+    "qualifications",
+    "date_of_birth",
+    "languages_spoken",
+    "experience_in_years",
+    "sessions",
+    "how_will_i_help",
+    "degree_focused",
+    "locations_focused",
+    "courses_focused",
+    "approach_of_counselling",
+    "verified",
+  ];
+  const allFieldsFilled = requiredFields.every((field) => this[field]);
 
   if (this.isNew && this.reward_points === 0 && allFieldsFilled) {
     this.reward_points += 5;
