@@ -9,6 +9,7 @@ const {
   getOneAdmin,
   uploadProfilePic,
   adminLogin,
+  getDashboardData,
 } = require("../controllers/adminController");
 const { adminAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -19,6 +20,7 @@ router.get("/admins", findOneAdmin);
 router.delete("/:admin_id", deleteAdmin);
 router.put("/:admin_id", adminAuth, editProfile);
 router.post("/login", adminLogin);
+router.get("/dashboard/dashboard-data", adminAuth, getDashboardData);
 
 router.post(
   "/profile-pic",

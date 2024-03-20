@@ -1,8 +1,11 @@
 const Admin = require("../models/Admin");
+const User = require("../../user/models/User.js")
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
+const Counsellor = require("../../counselor/models/Counsellor.js");
+const { default: axios } = require("axios");
 require("dotenv").config();
-
+const { BACKEND_URL } = process.env;
 const { JWT_SECRET } = process.env;
 
 exports.adminLogin = async (req, res) => {
@@ -236,3 +239,20 @@ exports.uploadProfilePic = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+
+exports.getDashboardData = async (req,res)=> {
+ try{
+  const usersCount = await axios.get(`${BACKEND_URL}/user/users-for-admin`)
+
+
+  const counsellorCount = await axios.get(`${BACKEND_URL}/counsellor/counsellor-for-admin`)
+
+
+  res
+  .status(200)
+  .send({totalUser: usersCount.data.length, totalCounsellor: counsellorCount.data.length});
+ }catch(error){
+  console.log(error);
+ }
+}
