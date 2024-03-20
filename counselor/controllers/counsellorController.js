@@ -7,7 +7,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
-const { uploadImage } = require('../services/cloudinary');
+const { uploadImage } = require("../services/cloudinary");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -290,9 +290,6 @@ exports.getCounsellorForAdmin = async (req, res) => {
       );
     }
 
-    const profile_pic = await getObjectURL(counsellor.profile_pic);
-    const cover_image = await getObjectURL(counsellor.cover_image);
-
     const messagedCounsellor = {
       ...counsellor._doc,
       followers_count,
@@ -300,8 +297,6 @@ exports.getCounsellorForAdmin = async (req, res) => {
       age,
       group_session_price,
       personal_session_price,
-      profile_pic,
-      cover_image,
     };
 
     res.status(200).send(messagedCounsellor);
@@ -586,6 +581,7 @@ exports.getCounsellorsForAdmin = async (req, res) => {
           reward_points: counsellor.reward_points,
           reviews: counsellor.client_testimonials.length,
           verified: counsellor.verified,
+          outstanding_balance: counsellor.outstanding_balance,
           status: counsellor.status,
         };
       })
@@ -647,7 +643,11 @@ exports.uploadProfilePic = async (req, res) => {
     //   });
     // }
 
-    counsellor.profile_pic = await uploadImage(file.buffer, fileName, folderName);
+    counsellor.profile_pic = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
     await counsellor.save();
 
     res.status(200).send({
@@ -678,7 +678,11 @@ exports.uploadCoverImage = async (req, res) => {
     const fileName = `counsellor-cover-image-${Date.now()}.jpeg`;
     const folderName = "counsellor-cover-images";
 
-    counsellor.cover_image = await uploadImage(file.buffer, fileName, folderName);
+    counsellor.cover_image = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
     await counsellor.save();
 
     res.status(200).send({

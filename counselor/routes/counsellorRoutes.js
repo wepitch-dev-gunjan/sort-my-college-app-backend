@@ -36,11 +36,7 @@ const { upload } = require("../middlewares/uploadImage");
 router.get("/", userAuth, getCounsellors);
 router.get("/counsellor-for-admin", adminAuth, getCounsellorsForAdmin);
 router.get("/:counsellor_id", counsellorOrUserAuth, getCounsellor);
-router.get(
-  "/:counsellor_id/counsellor-for-admin",
-  adminAuth,
-  getCounsellorForAdmin
-);
+router.get("/:counsellor_id/counsellor-for-admin", getCounsellorForAdmin);
 router.get("/:counsellor_id/profile-pic", getProfilePic);
 router.get(
   "/:counsellor_id/review",
@@ -59,7 +55,11 @@ router.get("/dashboard/dashboard-data", counsellorAuth, getDashboardData);
 router.put("/:counsellor_id", adminOrCounsellorAuth, editProfile);
 router.put("/:counsellor_id/verify", adminAuth, verifyCounsellor);
 router.put("/:counsellor_id/reject", adminAuth, rejectCounsellor);
-router.put("/activity/increment-activity-points", counsellorAuth, incrementActivityPoints)
+router.put(
+  "/activity/increment-activity-points",
+  counsellorAuth,
+  incrementActivityPoints
+);
 
 // POST
 router.post("/login", login);
