@@ -135,7 +135,7 @@ exports.getPayments = async (req, res) => {
 exports.getPayment = async (req, res) => {
   const { payment_id } = req.params;
   try {
-    const id = await User.findOne({ _id: payment_id });
+    const id = await Payment.findOne({ _id: payment_id });
     if (!id) {
       return res.status(404).json({ error: "No payment found with this ID" });
     }
