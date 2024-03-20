@@ -17,11 +17,13 @@ const {
   gotreviewSessionCounsellorEmailNotification,
   verifyCounsellorEmailNotification,
   rejectCounsellorEmailNotification,
+  generatedHelpNotification,
 } = require("../controllers/emailNotificationControllers");
 const router = express.Router();
 
-router.post('/generateOtp', generatedOtpNotification);
-router.post('/verifiedOtp', verifiedOtpNotification);
+router.post("/generateOtp", generatedOtpNotification);
+router.post("/generateHelp", generatedHelpNotification);
+router.post("/verifiedOtp", verifiedOtpNotification);
 
 router.post("/user/welcome", welcomeUserEmailNotification);
 router.post("/user/sessionbooked", bookedSessionUserEmailNotification);
@@ -31,7 +33,9 @@ router.post("/user/notattended/", notattendedSessionUserEmailNotification);
 router.post("/user/cancelled/", cancelledSessionUserEmailNotification);
 
 router.post("/counsellor/welcome", welcomeCounsellorEmailNotification);
-router.post("/counsellor/sessionbooked", bookedSessionCounsellorEmailNotification
+router.post(
+  "/counsellor/sessionbooked",
+  bookedSessionCounsellorEmailNotification
 );
 router.post("/counsellor/reminder", reminderSessionCounsellorEmailNotification);
 router.post(
@@ -50,7 +54,7 @@ router.post(
   "/counsellor/gotreview/",
   gotreviewSessionCounsellorEmailNotification
 );
-router.post('/counsellor/verify', verifyCounsellorEmailNotification);
-router.post('/counsellor/reject', rejectCounsellorEmailNotification);
+router.post("/counsellor/verify", verifyCounsellorEmailNotification);
+router.post("/counsellor/reject", rejectCounsellorEmailNotification);
 
 module.exports = router;

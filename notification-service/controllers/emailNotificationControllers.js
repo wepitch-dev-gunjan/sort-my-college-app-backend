@@ -1,6 +1,6 @@
 const fs = require("fs");
 const { transporter } = require("../services/emailService");
-const { validationResult } = require('express-validator');
+const { validationResult } = require("express-validator");
 
 exports.generatedOtpNotification = (req, res) => {
   try {
@@ -105,10 +105,9 @@ exports.generatedOtpNotification = (req, res) => {
         res.json({ message: "Email sent successfully" });
       }
     });
-
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -121,7 +120,7 @@ exports.verifiedOtpNotification = (req, res) => {
     }
 
     const mailOptions = {
-      from: 'your@email.com', // Set your "from" email address
+      from: "your@email.com", // Set your "from" email address
       to,
       subject: "Account Verified",
       html: `
@@ -196,10 +195,9 @@ exports.verifiedOtpNotification = (req, res) => {
         res.json({ message: "Email sent successfully" });
       }
     });
-
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -1266,8 +1264,8 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
                           Hello ${username} <br><br>
                           We hope this message finds you well. We sent this mail to inform you that your
                            counseling session whiich is scheduled for ${date} and ${time} with ${client} has been 
-                           got a review. <br><br>                 
-                          <br><br>                          
+                           got a review. <br><br>
+                          <br><br>
                           You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           portal.<br><br>
                           Best regards, <br />
@@ -1305,21 +1303,21 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
 exports.verifyCounsellorEmailNotification = async (req, res) => {
   try {
     res.status(200).send({
-      message: "email sent sucessfully"
-    })
+      message: "email sent sucessfully",
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.rejectCounsellorEmailNotification = async (req, res) => {
   try {
     const { to, reason, username } = req.body;
-    console.log(to, reason, username)
+    console.log(to, reason, username);
     const mailOptions = {
       to,
-      subject: 'Counsellor Verification Rejected',
+      subject: "Counsellor Verification Rejected",
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -1373,6 +1371,112 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.generatedHelpNotification = (req, res) => {
+  try {
+    // Validate the request parameters
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { to } = req.body;
+
+    const mailOptions = {
+      to,
+      subject: "Raised a query",
+      html: `
+      <body>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td align="center" bgcolor="#ffffff">
+              <table border="0" cellpadding="0" cellspacing="0" width="600">
+                <!-- Header Section -->
+                <tr>
+                  <td align="center" valign="top">
+                    <a href="https://sortmycollege.com/">
+                      <img
+                        src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png"
+                        alt=""
+                        width="200"
+                        height="50"
+                      />
+                    </a>
+                  </td>
+                </tr>
+  
+                <!-- Content Section -->
+                <tr>
+                  <td align="center">
+                    <h1
+                      style="
+                        font-family: 'Arial', 'Helvetica', sans-serif;
+                        font-size: 24px;
+                        color: #1f0a68;
+                      "
+                    >
+                      Welcome to
+                      <a
+                        href="https://sortmycollege.com/"
+                        style="
+                          color: #1f0a68;
+                          font-weight: 700;
+                          text-decoration: none;
+                        "
+                      >
+                        SortMyCollege
+                      </a>
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-family: 'Arial', 'Helvetica', sans-serif;
+                        font-size: 16px;
+                        color: #333;
+                      "
+                    >
+                  ADMIN,<br /><br />
+                      <!-- You can insert the OTP dynamically here -->
+                      <b>${to}</b><br /><br />
+                      raised a query
+                      <a
+                        href="https://sortmycollege.com/"
+                        style="
+                          color: #1f0a68;
+                          font-weight: 700;
+                          text-decoration: none;
+                        "
+                      >
+                        SortMyCollege
+                      </a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Error sending email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.json({ message: "Email sent successfully" });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
