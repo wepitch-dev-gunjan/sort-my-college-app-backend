@@ -14,21 +14,22 @@ cloudinary.config({
 
 exports.createBanner = async (req, res) => {
   try {
-    const { files } = req;
-    if (!files || !files.length) {
-      return res.status(400).json({ error: "No files uploaded" });
+    const { file } = req;
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty",
+      });
     }
 
-    let result;
-    if (files.length === 1) {
-      result = await uploadImage(files[0].buffer);
-    } else {
-      result = await uploadMultipleImages(files);
-    }
+    const fileName = `banner-image-${Date.now()}.jpeg`;
+    const folderName = "banner-images";
 
-    res.json({
-      urls: Array.isArray(result) ? result : [result],
-    });
+    const banner_image = await uploadImage(file.buffer, fileName, folderName);
+
+    const banner = new homePageBanner({
+      url: banner_image
+    })
+    res.json(banner);
   } catch (error) {
     console.error("Error creating banner:", error);
     res.status(500).json({ error: "Internal server error" });

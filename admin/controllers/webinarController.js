@@ -68,10 +68,10 @@ exports.addWebinar = async (req, res) => {
         },
       }
     );
+    const fileName = `webinar-image-${Date.now()}.jpeg`;
+    const folderName = "webinar-images";
 
-
-
-    const webinar_image = await uploadImage(file.buffer)
+    const webinar_image = await uploadImage(file.buffer, fileName, folderName);
 
     // Create a new instance of the Webinar model
     const webinar = new Webinar({
