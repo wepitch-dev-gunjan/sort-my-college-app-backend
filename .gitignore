@@ -1,5 +1,6 @@
 node_modules
 ssl_certificates
 .env
+.env.prod
 configs
 pair1.pem

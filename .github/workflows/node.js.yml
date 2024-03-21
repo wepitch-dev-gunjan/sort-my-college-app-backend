@@ -112,9 +112,6 @@ jobs:
           cd ../user
           npm ci
 
-          cd ../webinar
-          npm ci
-
           cd ../api-gateway
           npm ci
 
@@ -142,9 +139,6 @@ jobs:
           cd ../user
           touch .env
           echo "${{ secrets.USER_SECRETS }}" > .env
-          cd ../webinar
-          touch .env
-          echo "${{ secrets.WEBINAR_SECRETS }}" > .env
           cd ../api-gateway
           touch .env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
@@ -162,9 +156,6 @@ jobs:
 
           cd ../user
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
-
-          cd ../webinar
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="webinar" -f
 
           cd ../api-gateway
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
