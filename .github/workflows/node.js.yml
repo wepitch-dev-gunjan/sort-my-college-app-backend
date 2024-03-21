@@ -1,79 +1,3 @@
-# # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-# name: Node.js CI
-
-# on:
-#   push:
-#     branches: ["main"]
-
-# jobs:
-#   build:
-#     runs-on: self-hosted
-
-#     strategy:
-#       matrix:
-#         node-version: [20.x]
-#         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-#     steps:
-#       - uses: actions/checkout@v3
-#       - name: Use Node.js ${{ matrix.node-version }}
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: ${{ matrix.node-version }}
-#           cache: "npm"
-#       - run: |
-#           cd ssl_certificates
-#           touch ca_bundle.crt
-#           echo "${{ secrets.CA_BUNDLE }}" > ca_bundle.crt
-#       - run: |
-#           cd ssl_certificates
-#           touch certificate.crt
-#           echo "${{ secrets.CERTIFICATE }}" > certificate.crt
-#       - run: |
-#           cd ssl_certificates
-#           touch private.key
-#           echo "${{ secrets.PRIVATE_KEY }}" > private.key
-#       - run: |
-#           cd counselor
-#           touch .env
-#           echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=counsellor
-#       - run: |
-#           cd admin
-#           touch .env
-#           echo "${{ secrets.ADMIN_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=admin
-#       - run: |
-#           cd notification-service
-#           touch .env
-#           echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=notification-service
-#       - run: |
-#           cd user
-#           touch .env
-#           echo "${{ secrets.USER_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=user
-#       - run: |
-#           cd webinar
-#           touch .env
-#           echo "${{ secrets.WEBINAR_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=webinar
-#       - run: |
-#           cd api-gateway
-#           touch .env
-#           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
-#           npm ci
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name=api-gateway
-#       - run: |
-#           /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
-#           # /root/.nvm/versions/node/v20.8.0/bin/pm2 restart ep
 name: Node.js CI
 
 on:
@@ -143,22 +67,22 @@ jobs:
           touch .env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
 
-      # - name: Start Node.js applications
-      #   run: |
-      #     cd counselor
-      #     /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
+      - name: Start Node.js applications
+        run: |
+          cd counselor
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
 
-      #     cd ../admin
-      #     /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
+          cd ../admin
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
 
-      #     cd ../notification-service
-      #     /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service" -f
+          cd ../notification-service
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service" -f
 
-      #     cd ../user
-      #     /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
+          cd ../user
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
 
-      #     cd ../api-gateway
-      #     /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
+          cd ../api-gateway
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
 
       - name: Restart all Node.js applications
         run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
