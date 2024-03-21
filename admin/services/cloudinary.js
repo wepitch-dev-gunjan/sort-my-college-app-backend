@@ -16,50 +16,6 @@ const options = {
   overwrite: false,
 };
 
-// const uploadImage = async (imageBuffer) => {
-//   return new Promise((resolve, reject) => {
-//     cloudinary.uploader.upload_stream(opts, async (error, result) => {
-//       try {
-//         if (result && result.secure_url) {
-//           // create a banner document and store the url
-//           return resolve(result.secure_url);
-//         }
-//       } catch (error) {
-//         console.log(error)
-//       }
-
-//       console.log(error.message);
-//       return reject({ message: error.message });
-//     }).end(imageBuffer);
-//   });
-// };
-
-// module.exports = (image) => {
-//   //imgage = > base64
-//   return new Promise((resolve, reject) => {
-//     cloudinary.uploader.upload(image, opts, (error, result) => {
-//       if (result && result.secure_url) {
-//         console.log(result.secure_url);
-//         return resolve(result.secure_url);
-//       }
-//       console.log(error.message);
-//       return reject({ message: error.message });
-//     });
-//   });
-// };
-
-// module.exports.uploadMultipleImages = (images) => {
-//   return new Promise((resolve, reject) => {
-//     const uploads = images.map((base) => uploadImage(base));
-//     Promise.all(uploads)
-//       .then((values) => resolve(values))
-//       .catch((err) => reject(err));
-//   });
-// };
-
-// module.exports = { uploadImage, cloudinary };
-
-
 exports.uploadImage = async (imageBuffer, filename, folderName) => {
   try {
     const options = {
@@ -71,10 +27,8 @@ exports.uploadImage = async (imageBuffer, filename, folderName) => {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(options, (error, result) => {
         if (error) {
-          console.error(error);
           reject(error);
         } else {
-          console.log(result);
           resolve(result.secure_url);
         }
       }).end(imageBuffer);
@@ -84,5 +38,11 @@ exports.uploadImage = async (imageBuffer, filename, folderName) => {
     throw error; // Re-throw the error to maintain consistent error handling
   }
 };
+
+exports.deleteImage = async (url) => {
+  cloudinary.uploader.destroy(url)
+    .then(() => console.log('image deleted successfully'))
+    .catch(() => console.log('error deleting image'))
+}
 
 
