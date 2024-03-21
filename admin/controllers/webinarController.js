@@ -6,13 +6,13 @@ const uploadImage = require("../services/cloudinary");
 
 require("dotenv").config();
 
-exports.getWebinar = async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
+// exports.getWebinar = async (req, res) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
 
 exports.getWebinars = async (req, res) => {
   try {
@@ -177,5 +177,20 @@ exports.zoomGenerateSignature = (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSingleWebinar = async (req, res) => {
+  const { webinar_id } = req.params;
+  try {
+    const id = await Webinar.findOne({ _id: webinar_id });
+    if (!id) {
+      return res.status(404).json({ error: "No webinar found with this ID" });
+    }
+
+    res.status(200).send(id);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
