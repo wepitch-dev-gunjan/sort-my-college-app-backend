@@ -176,6 +176,11 @@ const counsellorSchema = new Schema(
       default: 0,
     },
 
+    outstanding_balance: {
+      type: Number,
+      default: 0,
+    },
+
     personal_session_price: {
       type: Number,
       default: 0,

@@ -7,7 +7,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
-const { uploadImage } = require('../services/cloudinary');
+const { uploadImage } = require("../services/cloudinary");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -290,9 +290,6 @@ exports.getCounsellorForAdmin = async (req, res) => {
       );
     }
 
-    const profile_pic = await getObjectURL(counsellor.profile_pic);
-    const cover_image = await getObjectURL(counsellor.cover_image);
-
     const messagedCounsellor = {
       ...counsellor._doc,
       followers_count,
@@ -300,8 +297,6 @@ exports.getCounsellorForAdmin = async (req, res) => {
       age,
       group_session_price,
       personal_session_price,
-      profile_pic,
-      cover_image,
     };
 
     res.status(200).send(messagedCounsellor);
@@ -540,13 +535,28 @@ exports.getCounsellors = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
+// Update your backend route to accept a search query parameter
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
     const { search, locations_focused, degree_focused, courses_focused } =
       req.query;
 
     const queryObject = {};
+
+    if (search) {
+      // Use regular expression to perform case-insensitive search on multiple fields
+      queryObject.$or = [
+        { name: { $regex: new RegExp(search, "i") } },
+        { email: { $regex: new RegExp(search, "i") } },
+        { phone_no: { $regex: new RegExp(search, "i") } },
+        { gender: { $regex: new RegExp(search, "i") } },
+        { location: { $regex: new RegExp(search, "i") } },
+        { nationality: { $regex: new RegExp(search, "i") } },
+        { designation: { $regex: new RegExp(search, "i") } },
+        { qualifications: { $regex: new RegExp(search, "i") } },
+        { status: { $regex: new RegExp(search, "i") } },
+      ];
+    }
 
     if (degree_focused) {
       queryObject.degree_focused = degree_focused;
@@ -559,23 +569,23 @@ exports.getCounsellorsForAdmin = async (req, res) => {
     if (courses_focused) {
       queryObject.courses_focused = courses_focused;
     }
-    console.log(queryObject, "query");
 
-    // If no query parameters are provided, remove the queryObject to fetch all counselors
-    const counsellors = await Counsellor.find(
-      Object.keys(queryObject).length === 0 ? {} : queryObject
-    );
+    const counsellors = await Counsellor.find(queryObject);
 
-    if (counsellors.length === 0) {
-      return res.status(404).send({ error: "No counselors found" });
+    if (!counsellors.length) {
+      return res.status(200).send([]);
     }
 
+    // Massage the data as needed and send it back
     const massagedCounsellors = await Promise.all(
       counsellors.map(async (counsellor) => {
+        // Massage the data as needed
         const profile_pic = await getObjectURL(counsellor.profile_pic);
         return {
           _id: counsellor._id,
           name: counsellor.name,
+          email: counsellor.email,
+          nationality: counsellor.nationality,
           profile_pic,
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
@@ -586,6 +596,7 @@ exports.getCounsellorsForAdmin = async (req, res) => {
           reward_points: counsellor.reward_points,
           reviews: counsellor.client_testimonials.length,
           verified: counsellor.verified,
+          outstanding_balance: counsellor.outstanding_balance,
           status: counsellor.status,
         };
       })
@@ -597,6 +608,64 @@ exports.getCounsellorsForAdmin = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+// exports.getCounsellorsForAdmin = async (req, res) => {
+//   try {
+//     const { search, locations_focused, degree_focused, courses_focused } =
+//       req.query;
+
+//     const queryObject = {};
+
+//     if (degree_focused) {
+//       queryObject.degree_focused = degree_focused;
+//     }
+
+//     if (locations_focused) {
+//       queryObject.locations_focused = locations_focused;
+//     }
+
+//     if (courses_focused) {
+//       queryObject.courses_focused = courses_focused;
+//     }
+//     console.log(queryObject, "query");
+
+//     // If no query parameters are provided, remove the queryObject to fetch all counselors
+//     const counsellors = await Counsellor.find(
+//       Object.keys(queryObject).length === 0 ? {} : queryObject
+//     );
+
+//     if (counsellors.length === 0) {
+//       return res.status(404).send({ error: "No counselors found" });
+//     }
+
+//     const massagedCounsellors = await Promise.all(
+//       counsellors.map(async (counsellor) => {
+//         const profile_pic = await getObjectURL(counsellor.profile_pic);
+//         return {
+//           _id: counsellor._id,
+//           name: counsellor.name,
+//           profile_pic,
+//           designation: counsellor.designation,
+//           qualifications: counsellor.specializations,
+//           next_session: counsellor.next_session,
+//           average_rating: counsellor.average_rating,
+//           experience_in_years: counsellor.experience_in_years,
+//           total_sessions: counsellor.sessions.length,
+//           reward_points: counsellor.reward_points,
+//           reviews: counsellor.client_testimonials.length,
+//           verified: counsellor.verified,
+//           outstanding_balance: counsellor.outstanding_balance,
+//           status: counsellor.status,
+//         };
+//       })
+//     );
+
+//     res.status(200).send(massagedCounsellors);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
 
 exports.getProfilePic = async (req, res) => {
   try {
@@ -647,7 +716,11 @@ exports.uploadProfilePic = async (req, res) => {
     //   });
     // }
 
-    counsellor.profile_pic = await uploadImage(file.buffer, fileName, folderName);
+    counsellor.profile_pic = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
     await counsellor.save();
 
     res.status(200).send({
@@ -678,7 +751,11 @@ exports.uploadCoverImage = async (req, res) => {
     const fileName = `counsellor-cover-image-${Date.now()}.jpeg`;
     const folderName = "counsellor-cover-images";
 
-    counsellor.cover_image = await uploadImage(file.buffer, fileName, folderName);
+    counsellor.cover_image = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
     await counsellor.save();
 
     res.status(200).send({

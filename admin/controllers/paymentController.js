@@ -1,6 +1,7 @@
-const Payment = require('../models/Payment');
-const instance = require('../services/razorpayConfig');
-require('dotenv').config();
+const Payment = require("../models/Payment");
+const instance = require("../services/razorpayConfig");
+require("dotenv").config();
+const { BACKEND_URL } = process.env;
 
 exports.createOrder = async (req, res) => {
   try {
@@ -8,13 +9,12 @@ exports.createOrder = async (req, res) => {
     const { id } = req;
     const orderOptions = {
       amount: Number(amount * 100), // amount in paise (e.g., 1000 paise = ₹10)
-      currency: 'INR',
+      currency: "INR",
       payment_capture: 1, // auto-capture the payment
       notes: {
-        description
+        description,
       },
       receipt: email,
-
     };
 
     instance.orders.create(orderOptions, function (err, order) {
@@ -30,18 +30,20 @@ exports.createOrder = async (req, res) => {
       order.description = description;
       res.status(200).send({
         message: "Order successfully created",
-        data: order
-      })
+        data: order,
+      });
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.createPayment = async (req, res) => {
   try {
     const {
+      payment_to,
+      payment_from,
       order_id,
       payment_id,
       amount,
@@ -54,11 +56,19 @@ exports.createPayment = async (req, res) => {
       email,
       phone_no,
       description,
-      status
+      status,
     } = req.body;
-    const { id } = req;
 
+    console.log(payment_to);
+
+    // const counsellor_id = payment_to;
+    // const counsellor = await axios.get(
+    //   `${BACKEND_URL}/counsellor/${counsellor_id}/counsellor-for-admin`
+    // );
+    // return;
     let payment = new Payment({
+      payment_to,
+      payment_from,
       order_id,
       payment_id,
       amount,
@@ -71,16 +81,16 @@ exports.createPayment = async (req, res) => {
       email,
       phone_no,
       description,
-      status
-    })
+      status,
+    });
 
     payment = await payment.save();
     res.status(200).send({
-      message: "Payment successfully created"
-    })
+      message: "Payment successfully created",
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -94,22 +104,22 @@ exports.getPayments = async (req, res) => {
       // If there's a search query, filter payments based on it
       payments = await Payment.find({
         $or: [
-          { payment_to: { $regex: search, $options: 'i' } },
-          { payment_from: { $regex: search, $options: 'i' } },
-          { order_id: { $regex: search, $options: 'i' } },
-          { payment_id: { $regex: search, $options: 'i' } },
-          { amount: { $regex: search, $options: 'i' } },
-          { amount_due: { $regex: search, $options: 'i' } },
-          { amount_paid: { $regex: search, $options: 'i' } },
-          { currency: { $regex: search, $options: 'i' } },
-          { created_at: { $regex: search, $options: 'i' } },
-          { entity: { $regex: search, $options: 'i' } },
-          { name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { phone_no: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } },
-          { status: { $regex: search, $options: 'i' } }
-        ]
+          { payment_to: { $regex: search, $options: "i" } },
+          { payment_from: { $regex: search, $options: "i" } },
+          { order_id: { $regex: search, $options: "i" } },
+          { payment_id: { $regex: search, $options: "i" } },
+          { amount: { $regex: search, $options: "i" } },
+          { amount_due: { $regex: search, $options: "i" } },
+          { amount_paid: { $regex: search, $options: "i" } },
+          { currency: { $regex: search, $options: "i" } },
+          { created_at: { $regex: search, $options: "i" } },
+          { entity: { $regex: search, $options: "i" } },
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { phone_no: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { status: { $regex: search, $options: "i" } },
+        ],
       });
     } else {
       // If no search query, fetch all payments
@@ -119,6 +129,20 @@ exports.getPayments = async (req, res) => {
     res.status(200).json(payments);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+exports.getPayment = async (req, res) => {
+  const { payment_id } = req.params;
+  try {
+    const id = await Payment.findOne({ _id: payment_id });
+    if (!id) {
+      return res.status(404).json({ error: "No payment found with this ID" });
+    }
+
+    res.status(200).send(id);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
