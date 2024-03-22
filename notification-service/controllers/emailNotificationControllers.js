@@ -1,7 +1,9 @@
 const fs = require("fs");
+const axios = require("axios");
 const { transporter } = require("../services/emailService");
 const { validationResult } = require("express-validator");
-
+require("dotenv").config();
+const { BACKEND_URL } = process.env;
 exports.generatedOtpNotification = (req, res) => {
   try {
     // Validate the request parameters
@@ -416,7 +418,7 @@ exports.welcomeCounsellorEmailNotification = (req, res) => {
   }
 };
 
-exports.bookedSessionUserEmailNotification = (req, res) => {
+exports.bookedSessionUserEmailNotification = async (req, res) => {
   try {
     const {
       to,
@@ -431,6 +433,15 @@ exports.bookedSessionUserEmailNotification = (req, res) => {
       username,
     } = req.body;
     console.log(req.body);
+
+    const notificationData = {
+      to: req.body.to,
+      title: "Booking Confirmation",
+      message: `Your counseling session with ${counsellor} on ${date} at ${time} has been confirmed.`,
+    };
+
+    await axios.post(`${BACKEND_URL}/notification`, notificationData);
+
     const mailOptions = {
       date,
       time,
@@ -1257,7 +1268,7 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">

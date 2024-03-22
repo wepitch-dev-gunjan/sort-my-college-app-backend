@@ -2,7 +2,7 @@ const Notification = require("../models/Notification");
 
 exports.createNotification = async (req, res) => {
   try {
-    const { user_id, title, message } = req.body;
+    const { to, title, message } = req.body;
 
     if (!title || !message) {
       return res
@@ -11,7 +11,7 @@ exports.createNotification = async (req, res) => {
     }
 
     const newNotification = new Notification({
-      user_id,
+      to,
       title,
       message,
     });
