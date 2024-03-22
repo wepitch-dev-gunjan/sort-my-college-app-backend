@@ -16,7 +16,11 @@ const paymentSchema = new Schema(
     email: { type: String, required: true },
     phone_no: { type: String, required: true },
     description: { type: String, required: true },
-    status: { type: String, required: true },
+    status: {
+      type: String,
+      required: true,
+    },
+    paid: { type: Boolean, default: false, required: true },
     gst: { type: Number },
     convenience_charges: { type: Number },
   },
