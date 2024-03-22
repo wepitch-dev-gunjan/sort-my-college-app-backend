@@ -427,20 +427,12 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
       counsellor,
       sessiontype,
       duration,
-      location,
+      // location,
       payment,
-      subject,
+      // subject,
       username,
     } = req.body;
     console.log(req.body);
-
-    const notificationData = {
-      to: req.body.to,
-      title: "Booking Confirmation",
-      message: `Your counseling session with ${counsellor} on ${date} at ${time} has been confirmed.`,
-    };
-
-    await axios.post(`${BACKEND_URL}/notification`, notificationData);
 
     const mailOptions = {
       date,
@@ -448,10 +440,10 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
       counsellor,
       sessiontype,
       duration,
-      location,
+      // location,
       payment,
       to,
-      subject,
+      // subject,
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -496,10 +488,6 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
                             <tr>
                               <td><b>Duration:</b></td>
                               <td>${duration}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Location:</b></td>
-                              <td>${location}</td>
                             </tr>
                             <tr>
                               <td><b>Payment Total:</b></td>
