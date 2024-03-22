@@ -19,6 +19,6 @@ router.get("/webinar/:webinar_id", getSingleWebinar);
 
 router.post("/webinar", adminAuth, upload.single("webinar_image"), addWebinar);
 router.put("/webinar", adminAuth, editWebinar);
-router.delete("/webinar", adminAuth, deleteWebinar);
+router.delete("/webinar/:webinar_id", adminAuth, deleteWebinar);
 
 module.exports = router;
