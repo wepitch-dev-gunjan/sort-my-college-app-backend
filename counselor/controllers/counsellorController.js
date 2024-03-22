@@ -538,7 +538,7 @@ exports.getCounsellors = async (req, res) => {
 // Update your backend route to accept a search query parameter
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
-    const { search, locations_focused, degree_focused, courses_focused } =
+    const { search, locations_focused, degree_focused, courses_focused, status } =
       req.query;
 
     const queryObject = {};
@@ -558,8 +558,13 @@ exports.getCounsellorsForAdmin = async (req, res) => {
       ];
     }
 
+    
     if (degree_focused) {
       queryObject.degree_focused = degree_focused;
+    }
+
+    if (status) {
+      queryObject.status = status;
     }
 
     if (locations_focused) {
