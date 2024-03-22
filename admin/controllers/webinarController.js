@@ -2,7 +2,7 @@ const { KJUR } = require("jsrsasign");
 const { getZoomAccessToken } = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
-const uploadImage = require("../services/cloudinary");
+const {uploadImage, deleteImage} = require("../services/cloudinary");
 
 require("dotenv").config();
 
@@ -136,12 +136,36 @@ exports.editWebinar = async (req, res) => {
 };
 
 exports.deleteWebinar = async (req, res) => {
-  try {
+  try{
+    const {cloudinary_image_id} = req.body;
+    const { webinar_id} = req.params;
+    
+    if (!webinar_id){
+      return res.status(404).send({
+        error: "Webinar not found!!"
+      });
+    }
+    if(cloudinary_image_id){
+      await deleteImage(cloudinary_image_id);
+    }
+    await Webinar.findByIdAndDelete(webinar_id);
+
+    res.status(200).send({
+      message: "Webinar Deleted Successfully"
+    })
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+  console.log(error);
+  res.status(500).send({error: "Internal Serverr Error"});
   }
 };
+
+// exports.deleteWebinar = async (req, res) => {
+//   try {
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
 
 exports.zoomGenerateSignature = (req, res) => {
   try {
