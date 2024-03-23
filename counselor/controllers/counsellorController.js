@@ -716,18 +716,6 @@ exports.uploadProfilePic = async (req, res) => {
 
     const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`;
     const folderName = "counsellor-profile-pics";
-    // const profilePicUpload = await putObject(
-    //   foldername,
-    //   fileName,
-    //   file.buffer,
-    //   file.mimetype
-    // );
-
-    // if (!profilePicUpload) {
-    //   return res.status(400).send({
-    //     error: "Profile pic is not uploaded",
-    //   });
-    // }
 
     counsellor.profile_pic = await uploadImage(
       file.buffer,
