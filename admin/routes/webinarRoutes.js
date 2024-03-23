@@ -8,6 +8,7 @@ const {
   zoomGenerateSignature,
   getSingleWebinar,
   getWebinarsForUser,
+  registerParticipant,
 } = require("../controllers/webinarController");
 const { adminAuth, userAuth } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadBanner");
@@ -20,6 +21,7 @@ router.get("/webinar/:webinar_id", getSingleWebinar);
 
 router.post("/webinar", adminAuth, upload.single("webinar_image"), addWebinar);
 router.put("/webinar", adminAuth, editWebinar);
+router.put("/webinar/webinars-for-user/:webinar_id", userAuth, registerParticipant);
 router.delete("/webinar/:webinar_id", adminAuth, deleteWebinar);
 
 module.exports = router;

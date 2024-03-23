@@ -1,5 +1,5 @@
 const { KJUR } = require("jsrsasign");
-const { getZoomAccessToken, webinarDateModifier } = require("../helpers/webinarHelpers");
+const { getZoomAccessToken, webinarDateModifier, getDateDifference } = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
@@ -35,7 +35,6 @@ exports.getWebinarsForUser = async (req, res) => {
     endOfDay.setHours(23, 59, 59, 999);
 
     if (query === "Today") {
-      // Get the current date
       filter.webinar_date = {
         $gte: currentDate,
         $lte: endOfDay
@@ -253,6 +252,42 @@ exports.getSingleWebinar = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.registerParticipant = async (req, res) => {
+  try {
+    const { webinar_id } = req.params;
+    const { user_id } = req;
+
+    const webinar = await Webinar.findOne({ _id: webinar_id })
+    if (!webinar) return res.status(404).send({
+      error: "Webinar not found"
+    })
+    const webinarDate = webinar.webinar_date;
+    webinarDate.setUTCHours(0, 0, 0, 0);
+
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const dateDifference = getDateDifference(webinarDate, currentDate)
+
+
+    if (webinar.registered_participants.includes(user_id)) return res.status(400).send({
+      error: "Participant is already registered"
+    })
+
+    webinar.registered_participants.push(user_id);
+    await webinar.save();
+
+
+    res.status(200).send({
+      message: "Registration completed",
+      webinar_starting_in_days: dateDifference
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 

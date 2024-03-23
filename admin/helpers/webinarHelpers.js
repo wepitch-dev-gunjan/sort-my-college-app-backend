@@ -55,3 +55,17 @@ exports.webinarDateModifier = (dateString) => {
 
   return formattedDate;
 }
+
+exports.getDateDifference = (date1, date2) => {
+  // Convert the date strings to Date objects
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+
+  // Calculate the difference in milliseconds
+  const differenceMs = Math.abs(d1 - d2);
+
+  // Convert milliseconds to days
+  const differenceDays = differenceMs / (1000 * 60 * 60 * 24);
+
+  return differenceDays;
+}
