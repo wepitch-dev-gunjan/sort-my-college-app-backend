@@ -19,9 +19,26 @@ exports.getDocuments = async (req, res) => {
   }
 };
 
+exports.getDocumentsForAdmin = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+    const documents = await Document.find({
+      user: JSON.stringify(counsellor_id),
+    });
+    if (!documents)
+      return res.status(404).send({
+        error: "Documents not found",
+      });
+    res.status(200).send(documents);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
 exports.getDocument = async (req, res) => {
   try {
-    const { document_id } = req.params;
+    const { document_id } = req;
     const document = await Document.findOne({ _id: document_id });
     if (!document) return res.status(404).send({ error: "Document not found" });
     res.status(200).send(document);

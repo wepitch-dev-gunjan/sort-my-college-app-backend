@@ -227,8 +227,6 @@ exports.getCounsellor = async (req, res) => {
 
     const following = follower ? true : false;
 
-
-
     const messagedCounsellor = {
       ...counsellor._doc,
       total_sessions_attended,
@@ -547,6 +545,8 @@ exports.getCounsellorsForAdmin = async (req, res) => {
       degree_focused,
       courses_focused,
       status,
+      sortBy, // New parameter for sorting
+      sortOrder, // New parameter for sorting order
     } = req.query;
 
     const queryObject = {};
@@ -565,8 +565,6 @@ exports.getCounsellorsForAdmin = async (req, res) => {
         { status: { $regex: new RegExp(search, "i") } },
       ];
     }
-
-
 
     if (degree_focused) {
       queryObject.degree_focused = degree_focused;
@@ -590,30 +588,35 @@ exports.getCounsellorsForAdmin = async (req, res) => {
       return res.status(200).send([]);
     }
 
+    // Sorting logic based on sortBy and sortOrder parameters
+    let sortedCounsellors = [...counsellors];
+    if (sortBy) {
+      if (sortOrder === "asc") {
+        sortedCounsellors.sort((a, b) => a[sortBy] - b[sortBy]);
+      } else if (sortOrder === "desc") {
+        sortedCounsellors.sort((a, b) => b[sortBy] - a[sortBy]);
+      }
+    }
+
     // Massage the data as needed and send it back
-    const massagedCounsellors = await Promise.all(
-      counsellors.map(async (counsellor) => {
-        // Massage the data as needed
-        return {
-          _id: counsellor._id,
-          name: counsellor.name,
-          email: counsellor.email,
-          nationality: counsellor.nationality,
-          profile_pic: counsellor.profile_pic,
-          designation: counsellor.designation,
-          qualifications: counsellor.specializations,
-          next_session: counsellor.next_session,
-          average_rating: counsellor.average_rating,
-          experience_in_years: counsellor.experience_in_years,
-          total_sessions: counsellor.sessions.length,
-          reward_points: counsellor.reward_points,
-          reviews: counsellor.client_testimonials.length,
-          verified: counsellor.verified,
-          outstanding_balance: counsellor.outstanding_balance,
-          status: counsellor.status,
-        };
-      })
-    );
+    const massagedCounsellors = sortedCounsellors.map((counsellor) => ({
+      _id: counsellor._id,
+      name: counsellor.name,
+      email: counsellor.email,
+      nationality: counsellor.nationality,
+      profile_pic: counsellor.profile_pic,
+      designation: counsellor.designation,
+      qualifications: counsellor.specializations,
+      next_session: counsellor.next_session,
+      average_rating: counsellor.average_rating,
+      experience_in_years: counsellor.experience_in_years,
+      total_sessions: counsellor.sessions.length,
+      reward_points: counsellor.reward_points,
+      reviews: counsellor.client_testimonials.length,
+      verified: counsellor.verified,
+      outstanding_balance: counsellor.outstanding_balance,
+      status: counsellor.status,
+    }));
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
