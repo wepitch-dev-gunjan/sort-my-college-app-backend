@@ -1,18 +1,10 @@
 const { KJUR } = require("jsrsasign");
-const { getZoomAccessToken } = require("../helpers/webinarHelpers");
+const { getZoomAccessToken, webinarDateModifier } = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
-const {uploadImage, deleteImage} = require("../services/cloudinary");
+const { uploadImage, deleteImage } = require("../services/cloudinary");
 
 require("dotenv").config();
-
-// exports.getWebinar = async (req, res) => {
-//   try {
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
 
 exports.getWebinars = async (req, res) => {
   try {
@@ -26,6 +18,59 @@ exports.getWebinars = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getWebinarsForUser = async (req, res) => {
+  try {
+    const { user_id } = req;
+    const { query } = req.query;
+
+    const filter = {}
+
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    if (query === "Today") {
+      // Get the current date
+      filter.webinar_date = {
+        $gte: currentDate,
+        $lte: endOfDay
+      }
+    } else if (query === "Past") {
+      filter.webinar_date = {
+        $lt: currentDate
+      }
+    } else if (query === "Upcoming") {
+      filter.webinar_date = {
+        $gt: endOfDay
+      }
+    }
+
+    const webinars = await Webinar.find(filter);
+    if (!webinars) return res.status(200).send([]);
+
+    const massagedWebinars = webinars.map(webinar => {
+      const webinar_date = webinarDateModifier(webinar.webinar_date);
+      const registered = webinar.registered_participants.includes(user_id)
+      return {
+        webinar_image: webinar.webinar_image,
+        webinar_title: webinar.webinar_title,
+        webinar_date,
+        webinar_by: webinar.webinar_by,
+        speaker_profile: webinar.speaker_profile,
+        registered
+      }
+    })
+
+    res.status(200).send(massagedWebinars)
+    return
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 
@@ -136,16 +181,16 @@ exports.editWebinar = async (req, res) => {
 };
 
 exports.deleteWebinar = async (req, res) => {
-  try{
-    const {cloudinary_image_id} = req.body;
-    const { webinar_id} = req.params;
-    
-    if (!webinar_id){
+  try {
+    const { cloudinary_image_id } = req.body;
+    const { webinar_id } = req.params;
+
+    if (!webinar_id) {
       return res.status(404).send({
         error: "Webinar not found!!"
       });
     }
-    if(cloudinary_image_id){
+    if (cloudinary_image_id) {
       await deleteImage(cloudinary_image_id);
     }
     await Webinar.findByIdAndDelete(webinar_id);
@@ -154,18 +199,10 @@ exports.deleteWebinar = async (req, res) => {
       message: "Webinar Deleted Successfully"
     })
   } catch (error) {
-  console.log(error);
-  res.status(500).send({error: "Internal Serverr Error"});
+    console.log(error);
+    res.status(500).send({ error: "Internal Serverr Error" });
   }
 };
-
-// exports.deleteWebinar = async (req, res) => {
-//   try {
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
 
 exports.zoomGenerateSignature = (req, res) => {
   try {
@@ -218,3 +255,4 @@ exports.getSingleWebinar = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
