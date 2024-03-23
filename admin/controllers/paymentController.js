@@ -154,3 +154,60 @@ exports.getPayment = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getOutstandingBalance = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const outstandingBalanceAggregation = await Payment.aggregate([
+      {
+        '$match': {
+          'payment_to': `${counsellor_id}`,
+          'amount_due': { $gt: 0 }
+        }
+      },
+      {
+        '$group': {
+          '_id': null,
+          'outstanding_balance': {
+            '$sum': '$amount_due'
+          }
+        }
+      }
+    ]);
+
+    const outstandingBalance = outstandingBalanceAggregation.length > 0 ? outstandingBalanceAggregation[0].outstanding_balance : 0;
+    res.status(200).send({ outstandingBalance });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.clearOutstandingbalance = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const paymentsToUpdate = await Payment.find({
+      payment_to: counsellor_id,
+      amount_due: { $gt: 0 }
+    });
+
+    if (paymentsToUpdate.length <= 0) return res.status(400).send({
+      error: "There is no payment to update"
+    })
+
+    console.log(paymentsToUpdate)
+
+    for (const payment of paymentsToUpdate) {
+      payment.amount_paid = payment.amount_due;
+      payment.amount_due = 0;
+      await payment.save();
+    }
+
+    res.status(200).send({ message: 'Outstanding balance cleared successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

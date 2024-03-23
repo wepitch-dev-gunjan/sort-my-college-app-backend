@@ -227,6 +227,8 @@ exports.getCounsellor = async (req, res) => {
 
     const following = follower ? true : false;
 
+
+
     const messagedCounsellor = {
       ...counsellor._doc,
       total_sessions_attended,
@@ -563,6 +565,8 @@ exports.getCounsellorsForAdmin = async (req, res) => {
         { status: { $regex: new RegExp(search, "i") } },
       ];
     }
+
+
 
     if (degree_focused) {
       queryObject.degree_focused = degree_focused;
