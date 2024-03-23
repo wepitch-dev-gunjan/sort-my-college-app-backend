@@ -444,6 +444,7 @@ exports.editProfile = async (req, res) => {
     }
 
     updateFields.status = "PENDING";
+    updateFields.verified = false;
 
     const updatedCounselor = await Counsellor.findByIdAndUpdate(
       counsellor_id,
@@ -538,8 +539,13 @@ exports.getCounsellors = async (req, res) => {
 // Update your backend route to accept a search query parameter
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
-    const { search, locations_focused, degree_focused, courses_focused, status } =
-      req.query;
+    const {
+      search,
+      locations_focused,
+      degree_focused,
+      courses_focused,
+      status,
+    } = req.query;
 
     const queryObject = {};
 
@@ -558,7 +564,6 @@ exports.getCounsellorsForAdmin = async (req, res) => {
       ];
     }
 
-    
     if (degree_focused) {
       queryObject.degree_focused = degree_focused;
     }
@@ -1056,28 +1061,30 @@ exports.clearOutstandingBalance = async (req, res) => {
     const { counsellor_id } = req.params;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
-    if (!counsellor) return res.status(404).send({
-      error: "Counsellor not found",
-    })
+    if (!counsellor)
+      return res.status(404).send({
+        error: "Counsellor not found",
+      });
 
-    if (counsellor.outstanding_balance === 0) return res.status(404).send({
-      error: "Outstanding balance is zero"
-    })
+    if (counsellor.outstanding_balance === 0)
+      return res.status(404).send({
+        error: "Outstanding balance is zero",
+      });
 
     counsellor.outstanding_balance = 0;
 
     await counsellor.save();
 
     res.status(200).send({
-      message: "Balanced clear succesfully"
-    })
+      message: "Balanced clear succesfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      error: "Internal server error"
-    })
+      error: "Internal server error",
+    });
   }
-}
+};
 
 exports.incrementOutstandingBalance = async (req, res) => {
   try {
@@ -1085,23 +1092,22 @@ exports.incrementOutstandingBalance = async (req, res) => {
     const { amount } = req.body;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
-    if (!counsellor) return res.status(404).send({
-      error: "Counsellor not found",
-    })
+    if (!counsellor)
+      return res.status(404).send({
+        error: "Counsellor not found",
+      });
 
     counsellor.outstanding_balance += amount;
 
     await counsellor.save();
 
     res.status(200).send({
-      message: "Balanced clear succesfully"
-    })
+      message: "Balanced clear succesfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      error: "Internal server error"
-    })
+      error: "Internal server error",
+    });
   }
-}
-
-
+};
