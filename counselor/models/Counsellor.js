@@ -154,7 +154,7 @@ const counsellorSchema = new Schema(
     locations_focused: [
       {
         type: String,
-        enum: ["India", "Abraod"],
+        enum: ["India", "Abroad"],
         default: "India",
       },
     ],
