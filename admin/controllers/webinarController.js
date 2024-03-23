@@ -2,7 +2,7 @@ const { KJUR } = require("jsrsasign");
 const { getZoomAccessToken } = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
-const uploadImage = require("../services/cloudinary");
+const { uploadImage } = require("../services/cloudinary");
 
 require("dotenv").config();
 
