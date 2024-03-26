@@ -1,7 +1,9 @@
 const fs = require("fs");
+const axios = require("axios");
 const { transporter } = require("../services/emailService");
 const { validationResult } = require("express-validator");
-
+require("dotenv").config();
+const { BACKEND_URL } = process.env;
 exports.generatedOtpNotification = (req, res) => {
   try {
     // Validate the request parameters
@@ -416,7 +418,7 @@ exports.welcomeCounsellorEmailNotification = (req, res) => {
   }
 };
 
-exports.bookedSessionUserEmailNotification = (req, res) => {
+exports.bookedSessionUserEmailNotification = async (req, res) => {
   try {
     const {
       to,
@@ -425,22 +427,23 @@ exports.bookedSessionUserEmailNotification = (req, res) => {
       counsellor,
       sessiontype,
       duration,
-      location,
+      // location,
       payment,
-      subject,
+      // subject,
       username,
     } = req.body;
     console.log(req.body);
+
     const mailOptions = {
       date,
       time,
       counsellor,
       sessiontype,
       duration,
-      location,
+      // location,
       payment,
       to,
-      subject,
+      // subject,
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -485,10 +488,6 @@ exports.bookedSessionUserEmailNotification = (req, res) => {
                             <tr>
                               <td><b>Duration:</b></td>
                               <td>${duration}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Location:</b></td>
-                              <td>${location}</td>
                             </tr>
                             <tr>
                               <td><b>Payment Total:</b></td>
@@ -1257,7 +1256,7 @@ exports.gotreviewSessionCounsellorEmailNotification = (req, res) => {
                         </a>
                       </td>
                     </tr>
-                    
+
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">

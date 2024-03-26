@@ -8,10 +8,10 @@ const {
 } = require("../controllers/inAppNotificationController");
 const router = express.Router();
 
-router.post("/", createNotification);
-router.get("/", getNotifications);
-router.get("/:notification_id", getNotification);
-router.put("/:notification_id", readNotification);
-router.delete("/", deleteNotifications);
+router.post("/in-app", createNotification);
+router.get("/in-app", getNotifications);
+router.get("/in-app/:notification_id", getNotification);
+router.put("/in-app/:notification_id", readNotification);
+router.delete("/in-app", deleteNotifications);
 
 module.exports = router;

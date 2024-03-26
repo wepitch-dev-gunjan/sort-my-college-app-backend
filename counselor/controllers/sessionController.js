@@ -276,7 +276,7 @@ exports.addSession = async (req, res) => {
 
 exports.bookSession = async (req, res) => {
   try {
-    const { email } = req;
+    const { email, id } = req;
 
     const { session_id } = req.params;
 
@@ -333,8 +333,37 @@ exports.bookSession = async (req, res) => {
       booking_type: "Counsellor",
       booking_data: session,
     });
-    console.log(session);
-    await axios.post(`${BACKEND_URL}/notification`, {
+
+    // send email notification to user
+    await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
+      to: email,
+      date: session.session_date,
+      time: session.session_time,
+      counsellor: counsellor.name,
+      sessiontype: session.session_type,
+      duration: session.session_duration,
+      // location,
+      payment: session.session_fee,
+      // subject,
+      // username,
+    });
+    // send email notification to counsellor
+
+    await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
+      to: counsellor.email,
+      date: session.session_date,
+      time: session.session_time,
+      client: email,
+      sessiontype: session.session_type,
+      duration: session.session_duration,
+      // location,
+      payment: session.session_fee,
+      // subject,
+      username: counsellor.name,
+    });
+
+    // send in app notification to counsellor
+    await axios.post(`${BACKEND_URL}/notification/in-app`, {
       user_id: counsellor._id,
       title: "New Booking",
       message: `${email} booked a ${session.session_type} session`,

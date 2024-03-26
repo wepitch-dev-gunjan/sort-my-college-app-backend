@@ -1,3 +1,4 @@
+const { default: axios } = require("axios");
 const Payment = require("../models/Payment");
 const instance = require("../services/razorpayConfig");
 require("dotenv").config();
@@ -22,7 +23,6 @@ exports.createOrder = async (req, res) => {
         console.error(err);
         return res.status(501).send(err.message);
       }
-      console.log(order);
       order.key = process.env.RAZORPAY_KEY_ID;
       order.name = name;
       order.email = email;
@@ -56,16 +56,9 @@ exports.createPayment = async (req, res) => {
       email,
       phone_no,
       description,
-      status,
+      status
     } = req.body;
 
-    console.log(payment_to);
-
-    // const counsellor_id = payment_to;
-    // const counsellor = await axios.get(
-    //   `${BACKEND_URL}/counsellor/${counsellor_id}/counsellor-for-admin`
-    // );
-    // return;
     let payment = new Payment({
       payment_to,
       payment_from,
@@ -84,7 +77,22 @@ exports.createPayment = async (req, res) => {
       status,
     });
 
+    const counsellor = await axios.get(`${BACKEND_URL}/counsellor/counsellors/find-one`, {
+      params: {
+        counsellor_id: payment_to
+      }
+    })
+
+    if (!counsellor) return res.status(404).send({
+      error: 'Counsellor not found'
+    })
+
+
     payment = await payment.save();
+    const imcrementOutstandingBalance = await axios.put(`${BACKEND_URL}/counsellor/${payment_to}/increment-outstanding-balance`, {
+      amount
+    })
+
     res.status(200).send({
       message: "Payment successfully created",
     });
@@ -96,7 +104,6 @@ exports.createPayment = async (req, res) => {
 
 exports.getPayments = async (req, res) => {
   try {
-    const { id } = req;
     const { search } = req.query;
     let payments;
 
@@ -132,6 +139,7 @@ exports.getPayments = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
 exports.getPayment = async (req, res) => {
   const { payment_id } = req.params;
   try {
@@ -144,5 +152,62 @@ exports.getPayment = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getOutstandingBalance = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const outstandingBalanceAggregation = await Payment.aggregate([
+      {
+        '$match': {
+          'payment_to': `${counsellor_id}`,
+          'amount_due': { $gt: 0 }
+        }
+      },
+      {
+        '$group': {
+          '_id': null,
+          'outstanding_balance': {
+            '$sum': '$amount_due'
+          }
+        }
+      }
+    ]);
+
+    const outstandingBalance = outstandingBalanceAggregation.length > 0 ? outstandingBalanceAggregation[0].outstanding_balance : 0;
+    res.status(200).send({ outstandingBalance });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.clearOutstandingbalance = async (req, res) => {
+  try {
+    const { counsellor_id } = req.params;
+
+    const paymentsToUpdate = await Payment.find({
+      payment_to: counsellor_id,
+      amount_due: { $gt: 0 }
+    });
+
+    if (paymentsToUpdate.length <= 0) return res.status(400).send({
+      error: "There is no payment to update"
+    })
+
+    console.log(paymentsToUpdate)
+
+    for (const payment of paymentsToUpdate) {
+      payment.amount_paid = payment.amount_due;
+      payment.amount_due = 0;
+      await payment.save();
+    }
+
+    res.status(200).send({ message: 'Outstanding balance cleared successfully' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
