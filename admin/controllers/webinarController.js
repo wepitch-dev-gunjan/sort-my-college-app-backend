@@ -6,7 +6,7 @@ const { uploadImage, deleteImage } = require("../services/cloudinary");
 
 require("dotenv").config();
 
-exports.getWebinars = async (req, res) => {
+exports.getWebinarsForAdmin = async (req, res) => {
   try {
     const webinars = await Webinar.find();
     if (!webinars)
@@ -66,7 +66,6 @@ exports.getWebinarsForUser = async (req, res) => {
     })
 
     res.status(200).send(massagedWebinars)
-    return
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
@@ -240,15 +239,48 @@ exports.zoomGenerateSignature = (req, res) => {
   }
 };
 
-exports.getSingleWebinar = async (req, res) => {
+exports.getSingleWebinarForAdmin = async (req, res) => {
   const { webinar_id } = req.params;
   try {
-    const id = await Webinar.findOne({ _id: webinar_id });
-    if (!id) {
+    const webinar = await Webinar.findOne({ _id: webinar_id });
+    if (!webinar) {
       return res.status(404).json({ error: "No webinar found with this ID" });
     }
 
-    res.status(200).send(id);
+    res.status(200).send(webinar);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSingleWebinarForUser = async (req, res) => {
+  const { webinar_id } = req.params;
+  try {
+    const webinar = await Webinar.findOne({ _id: webinar_id });
+    if (!webinar) {
+      return res.status(404).json({ error: "No webinar found with this ID" });
+    }
+
+    console.log(webinar)
+
+    const massagedWebinar = {
+      _id: webinar._id,
+      webinar_title: webinar.webinar_title,
+      webinar_details: webinar.webinar_details,
+      what_will_you_learn: webinar.what_will_you_learn,
+      webinar_date: webinar.webinar_date,
+      speaker_profile: webinar.speaker_profile,
+      webinar_by: webinar.webinar_by,
+      webinar_image: webinar.webinar_image,
+      webinar_join_url: webinar.webinar_join_url,
+      webinar_password: webinar.webinar_password,
+      webinar_total_slots: webinar.webinar_total_slots,
+      registered_participants: webinar.registered_participants,
+      attended_participants: webinar.attended_participants,
+    };
+
+    res.status(200).send(massagedWebinar);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -272,7 +304,6 @@ exports.registerParticipant = async (req, res) => {
 
     const dateDifference = getDateDifference(webinarDate, currentDate)
 
-
     if (webinar.registered_participants.includes(user_id)) return res.status(400).send({
       error: "Participant is already registered"
     })
@@ -290,4 +321,30 @@ exports.registerParticipant = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+exports.removeParticipant = async (req, res) => {
+  try {
+    const { webinar_id } = req.params;
+    const { user_id } = req;
+
+    const webinar = await Webinar.findOne({ _id: webinar_id });
+    if (!webinar) return res.status(404).send({ error: "Webinar not found" });
+
+    // Check if the user is registered as a participant
+    const participantIndex = webinar.registered_participants.indexOf(user_id);
+    if (participantIndex === -1) {
+      return res.status(400).send({ error: "Participant is not registered" });
+    }
+
+    // Remove the participant from the registered_participants array
+    webinar.registered_participants.splice(participantIndex, 1);
+    await webinar.save();
+
+    res.status(200).send({ message: "Participant removed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 
