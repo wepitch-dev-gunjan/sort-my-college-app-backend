@@ -92,7 +92,6 @@ exports.postDocument = async (req, res) => {
       return res.status(400).send({ error: "Document already exists" });
     }
 
-    const result = await uploadImage(file.buffer);
 
     let newDocument = await Document.findOne({
       document_type: documentType,
@@ -103,6 +102,10 @@ exports.postDocument = async (req, res) => {
         error: "Document already exists, Can't re-upload same document",
       });
 
+    const fileName = `document-image-${Date.now()}.jpeg`;
+    const folderName = "document-images";
+
+    const result = await uploadImage(file.buffer, fileName, folderName);
     newDocument = new Document({
       user: formattedId,
       document_type: documentType._id,
