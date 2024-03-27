@@ -56,9 +56,11 @@ exports.getWebinarsForUser = async (req, res) => {
       const webinar_date = webinarDateModifier(webinar.webinar_date);
       const registered = webinar.registered_participants.includes(user_id)
       return {
+        id: webinar._id,
         webinar_image: webinar.webinar_image,
         webinar_title: webinar.webinar_title,
         webinar_date,
+        registered_date: webinar.webinar_date,
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
         registered
