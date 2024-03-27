@@ -267,6 +267,7 @@ exports.getSingleWebinarForAdmin = async (req, res) => {
 
 exports.getSingleWebinarForUser = async (req, res) => {
   const { webinar_id } = req.params;
+  const { user_id } = req;
   try {
     const webinar = await Webinar.findOne({ _id: webinar_id });
     if (!webinar) {
@@ -279,6 +280,8 @@ exports.getSingleWebinarForUser = async (req, res) => {
     currentDate.setUTCHours(0, 0, 0, 0);
 
     const dateDifference = getDateDifference(webinarDate, currentDate)
+
+    const registered = webinar.registered_participants.includes(user_id)
 
     const massagedWebinar = {
       _id: webinar._id,
@@ -294,7 +297,8 @@ exports.getSingleWebinarForUser = async (req, res) => {
       webinar_total_slots: webinar.webinar_total_slots,
       registered_participants: webinar.registered_participants,
       attended_participants: webinar.attended_participants,
-      webinar_starting_in_day: dateDifference
+      webinar_starting_in_day: dateDifference,
+      registered
     };
 
     res.status(200).send(massagedWebinar);
@@ -327,7 +331,6 @@ exports.registerParticipant = async (req, res) => {
 
     webinar.registered_participants.push(user_id);
     await webinar.save();
-
 
     res.status(200).send({
       message: "Registration completed",
