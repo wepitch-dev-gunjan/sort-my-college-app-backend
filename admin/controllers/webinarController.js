@@ -53,6 +53,13 @@ exports.getWebinarsForUser = async (req, res) => {
     if (!webinars) return res.status(200).send([]);
 
     const massagedWebinars = webinars.map(webinar => {
+      const webinarDate = webinar.webinar_date;
+      webinarDate.setUTCHours(0, 0, 0, 0);
+
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      const dateDifference = getDateDifference(webinarDate, currentDate)
       const webinar_date = webinarDateModifier(webinar.webinar_date);
       const registered = webinar.registered_participants.includes(user_id)
       return {
@@ -61,8 +68,10 @@ exports.getWebinarsForUser = async (req, res) => {
         webinar_title: webinar.webinar_title,
         webinar_date,
         registered_date: webinar.webinar_date,
+        webinar_join_url: webinar.webinar_join_url,
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
+        webinar_starting_in_days: dateDifference,
         registered
       }
     })
@@ -263,8 +272,13 @@ exports.getSingleWebinarForUser = async (req, res) => {
     if (!webinar) {
       return res.status(404).json({ error: "No webinar found with this ID" });
     }
+    const webinarDate = webinar.webinar_date;
+    webinarDate.setUTCHours(0, 0, 0, 0);
 
-    console.log(webinar)
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const dateDifference = getDateDifference(webinarDate, currentDate)
 
     const massagedWebinar = {
       _id: webinar._id,
@@ -280,6 +294,7 @@ exports.getSingleWebinarForUser = async (req, res) => {
       webinar_total_slots: webinar.webinar_total_slots,
       registered_participants: webinar.registered_participants,
       attended_participants: webinar.attended_participants,
+      webinar_starting_in_day: dateDifference
     };
 
     res.status(200).send(massagedWebinar);
