@@ -39,6 +39,9 @@ jobs:
           cd ../api-gateway
           npm ci
 
+          cd ../entrance-preparation
+          npm ci
+
       - name: Create SSL certificates
         run: |
           cd ssl_certificates
@@ -63,6 +66,9 @@ jobs:
           cd ../user
           touch .env
           echo "${{ secrets.USER_SECRETS }}" > .env
+          cd ../entrance-preparation
+          touch .env
+          echo "${{ secrets.EP_SECRETS }}" > .env
           cd ../api-gateway
           touch .env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
@@ -80,6 +86,9 @@ jobs:
 
           cd ../user
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
+
+          cd ../entrance-preparation
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="entrance-preparation" -f
 
           cd ../api-gateway
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
