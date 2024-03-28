@@ -13,12 +13,16 @@ const facultySchema = new Schema ({
     qualifications:{
         type: String,
     },
-    graduated_from: [String]
-},
-{
-    strict: false,
-    timestamps: true
-  }
+    graduated_from: [String],
+    institute: {
+        type: Schema.Types.ObjectId,
+        ref: "EntranceInstitute"
+      }
+    },
+    {
+        strict: false,
+        timestamps: true
+    }
 );
 
 module.exports = model('Faculties',facultySchema)

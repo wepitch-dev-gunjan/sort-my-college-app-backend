@@ -4,6 +4,10 @@ const announcementSchema = new Schema ({
     update : {
         type: String
     },
+    institute: {
+        type: Schema.Types.ObjectId,
+        ref: "EntranceInstitute"
+      }
 },
 {
     timestamps: true,

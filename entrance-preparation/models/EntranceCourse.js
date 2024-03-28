@@ -19,6 +19,10 @@ const entranceCourseSchema = new Schema({
   course_duration_in_days: {
     type: Number
   },
+  institute: {
+    type: Schema.Types.ObjectId,
+    ref: "EntranceInstitute"
+  }
 },
 {
   strict: false,
