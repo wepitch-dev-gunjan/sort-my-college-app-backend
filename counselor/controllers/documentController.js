@@ -4,7 +4,10 @@ const { uploadImage, cloudinary } = require("../services/cloudinary");
 
 exports.getDocuments = async (req, res) => {
   try {
+    console.log("try");
     const { counsellor_id } = req;
+    console.log(counsellor_id);
+
     const documents = await Document.find({
       user: JSON.stringify(counsellor_id),
     });
@@ -91,7 +94,6 @@ exports.postDocument = async (req, res) => {
     if (existingDocument) {
       return res.status(400).send({ error: "Document already exists" });
     }
-
 
     let newDocument = await Document.findOne({
       document_type: documentType,

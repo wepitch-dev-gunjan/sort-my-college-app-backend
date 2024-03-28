@@ -26,7 +26,7 @@ router.post(
 //get
 router.get("/document/get-documents", counsellorAuth, getDocuments);
 router.get(
-  "/document/get-documents-for-admin",
+  "/document/get-documents-for-admin/:counsellor_id",
   adminAuth,
   getDocumentsForAdmin
 );

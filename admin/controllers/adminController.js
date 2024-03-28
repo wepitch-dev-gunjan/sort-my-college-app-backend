@@ -1,5 +1,5 @@
 const Admin = require("../models/Admin");
-const User = require("../../user/models/User.js")
+const User = require("../../user/models/User.js");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const Counsellor = require("../../counselor/models/Counsellor.js");
@@ -159,7 +159,7 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ error: "Admin not found" });
     }
 
-    // console.log(updatedAdmin);
+    console.log(updatedAdmin);
     res.status(200).json(updatedAdmin);
   } catch (error) {
     console.error(error);
@@ -240,19 +240,21 @@ exports.uploadProfilePic = async (req, res) => {
   }
 };
 
+exports.getDashboardData = async (req, res) => {
+  try {
+    const usersCount = await axios.get(`${BACKEND_URL}/user/users-for-admin`);
 
-exports.getDashboardData = async (req,res)=> {
- try{
-  const usersCount = await axios.get(`${BACKEND_URL}/user/users-for-admin`)
+    const counsellorCount = await axios.get(
+      `${BACKEND_URL}/counsellor/counsellor-for-admin`
+    );
 
-
-  const counsellorCount = await axios.get(`${BACKEND_URL}/counsellor/counsellor-for-admin`)
-
-
-  res
-  .status(200)
-  .send({totalUser: usersCount.data.length, totalCounsellor: counsellorCount.data.length});
- }catch(error){
-  console.log(error);
- }
-}
+    res
+      .status(200)
+      .send({
+        totalUser: usersCount.data.length,
+        totalCounsellor: counsellorCount.data.length,
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
