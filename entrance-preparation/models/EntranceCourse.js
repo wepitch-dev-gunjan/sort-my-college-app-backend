@@ -5,23 +5,25 @@ const entranceCourseSchema = new Schema({
     type: String,
     required: true
   },
-  category: {
+  type: {
     type: String,
     enum: ['UG', 'PG'],
-    required: true
   },
-  price: {
-    type: Number,
-    required: true
+  academic_session: {
+    start_year: Date,
+    end_year: Date
   },
-  duration: {
-    type: Number,
-    required: true
+  course_fee: {
+    type: Number
   },
-  mode: {
-    type: String,
-    enum: ['Online', 'Offline', 'Hybrid']
-  }
-});
+  course_duration_in_days: {
+    type: Number
+  },
+},
+{
+  strict: false,
+  timestamps: true
+}
+);
 
 module.exports = model("EntranceCourse", entranceCourseSchema);
