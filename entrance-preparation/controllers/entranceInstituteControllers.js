@@ -5,18 +5,24 @@ const fs = require("fs");
 exports.createInstitute = async (req, res) => {
   try {
     const {
-      name,
-      email,
+      registrant_full_name,
+      registrant_contact_number,
+      registrant_email,
+      registrant_designation,
       profile_pic,
-      degree_focused,
-      country,
-      state,
-      city,
-      area,
-      working_time,
-      working_experience,
-      client_testimonials,
-      emergency_contact,
+      cover_image,
+      name,
+      about,
+      address, // NEED TO CHECK THE ADDRESS
+      direction_url,
+      year_established_in,
+      affiliations,
+      email,
+      contact_number,
+      gstin,
+      institute_timings,
+      mode_of_study,
+      medium_of_study,
     } = req.body;
 
     if (!name || !email)
@@ -26,26 +32,37 @@ exports.createInstitute = async (req, res) => {
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(registrant_email)) {
+      return res.status(400).send({
+        error: "Invalid email format for registrant's email",
+      });
+    }
     if (!emailRegex.test(email)) {
       return res.status(400).send({
-        error: "Invalid email format",
+        error: "Invalid email format for institute's email",
       });
     }
 
     const profile = {};
 
-    profile.email = email;
-    profile.name = name;
+    profile.registrant_email = registrant_email;
+    profile.registrant__full_name = registrant_full_name;
+    if (registrant_contact_number) profile.registrant_contact_number = registrant_contact_number ;
+    if (registrant_designation) profile.registrant_designation = registrant_designation ;
     if (profile_pic) profile.profile_pic = profile_pic;
-    if (degree_focused) profile.degree_focused = degree_focused;
-    if (country) profile.country = country;
-    if (state) profile.state = state;
-    if (city) profile.city = city;
-    if (area) profile.area = area;
-    if (working_time) profile.working_time = working_time;
-    if (working_experience) profile.working_experience = working_experience;
-    if (client_testimonials) profile.client_testimonials = client_testimonials;
-    if (emergency_contact) profile.emergency_contact = emergency_contact;
+    if (cover_image) profile.cover_image = cover_image ;
+    if (name) profile.name = name;
+    if (about) profile.about = about;
+    if (address) profile.address = address; // NEED TO CHECK THE ADDRESS
+    if (direction_url) profile.direction_url = direction_url ;
+    if (year_established_in) profile.year_established_in = year_established_in;
+    if (affiliations) profile.affiliations = affiliations;
+    if (email) profile.email = email;
+    if (contact_number) profile.contact_number = contact_number;
+    if (gstin) profile.gstin = gstin;
+    if (institute_timings) profile.institute_timings = institute_timings;
+    if (mode_of_study) profile.mode_of_study = mode_of_study;
+    if (medium_of_study) profile.medium_of_study = medium_of_study;
 
     let institute = new EntranceInstitute({
       ...profile,
