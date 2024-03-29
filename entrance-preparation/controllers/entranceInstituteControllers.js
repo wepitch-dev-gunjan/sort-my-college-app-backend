@@ -126,3 +126,32 @@ exports.deleteInstituteForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getInstitutesForUser = async (req, res) => {
+ try {
+ 
+
+   // Assuming you have some logic to authenticate the admin user and retrieve necessary information
+   // You can customize this query according to your needs
+   const institute = await EntranceInstitute.find({});
+
+   if (!institute) {
+     return res.status(404).json({ message: "Institute not found" });
+   }
+   const massagedInstitutes = institutes.map(institute => ({
+    _id: institute._id,
+    name: institute.name,
+    profile_pic: institute.profile_pic,
+    address: institute.address,
+    year_established_in: institute.year_established_in,
+    institute_timings: institute. institute_timings
+  }))
+
+  // You can customize the response data structure as per your requirements
+  res.status(200).json(massagedInstitutes);
+  
+ } catch (error) {
+   console.error("Error fetching institute:", error);
+   res.status(500).json({ message: "Internal server error" });
+ }
+}
