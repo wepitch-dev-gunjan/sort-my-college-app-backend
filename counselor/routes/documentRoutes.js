@@ -37,6 +37,8 @@ router.get("/document/:document_id", getDocument);
 router.put("/document/:document_id", editDocument);
 
 router.get("/document/:document_id");
+
+// delete
 router.delete("/document/:document_id", deleteDocument);
 
 module.exports = router;

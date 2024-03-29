@@ -11,7 +11,6 @@ const { JWT_SECRET } = process.env;
 
 exports.getDocuments = async (req, res) => {
   try {
-    console.log("try");
     const { counsellor_id } = req.params;
 
     const documents = await Document.find({

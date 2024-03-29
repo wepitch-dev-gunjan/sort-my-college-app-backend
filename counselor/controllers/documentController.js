@@ -1,6 +1,10 @@
 const Document = require("../models/Document");
 const DocumentType = require("../models/DocumentType");
-const { uploadImage, cloudinary } = require("../services/cloudinary");
+const {
+  uploadImage,
+  cloudinary,
+  deleteImage,
+} = require("../services/cloudinary");
 
 exports.getDocuments = async (req, res) => {
   try {
@@ -129,12 +133,12 @@ exports.deleteDocument = async (req, res) => {
     const document = await Document.findOneAndDelete({ _id: document_id });
     if (!document) return res.status(404).send({ error: "Document not found" });
 
-    cloudinary.uploader.destroy(document.file, (err, result) => {
-      if (err) return res.status(501).send({ error: err.message });
-      if (result)
-        res.status(200).send({
-          message: "Document deleted successfully",
-        });
+    const imageDeleted = await deleteImage(document.file);
+    if (!imageDeleted) {
+      res.status(500).send({ error: "Image not deleted" });
+    }
+    res.status(200).send({
+      message: "document succesfully deletes",
     });
   } catch (error) {
     console.log(error);
