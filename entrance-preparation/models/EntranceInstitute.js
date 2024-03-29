@@ -8,10 +8,10 @@ const entranceInstituteSchema = new Schema({
   registrant_contact_number: {
     type: String
   },
-  registrant_email : {
+  registrant_email: {
     type: String
   },
-  registrant_designation: { 
+  registrant_designation: {
     type: String
   },
   profile_pic: {
@@ -26,18 +26,18 @@ const entranceInstituteSchema = new Schema({
   about: [{
     type: String
   }],
-  address : {
+  address: {
     building_number: String,
     area: String,
     city: String,
-    state : String,
+    state: String,
     pin_code: String
   },
-  direction_url : {
-    type : String
+  direction_url: {
+    type: String
   },
-  year_established_in : {
-    type : Date
+  year_established_in: {
+    type: Date
   },
   affilations: {
     type: String
@@ -45,15 +45,15 @@ const entranceInstituteSchema = new Schema({
   email: {
     type: String,
   },
-  contact_number : {
+  contact_number: {
     type: String,
   },
   gstin: {
     type: String,
   },
-  institute_timings:{
+  institute_timings: {
     day: {
-      type: [String], 
+      type: [String],
       enum: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
     },
     time: {
@@ -62,16 +62,22 @@ const entranceInstituteSchema = new Schema({
     }
   },
   mode_of_study: {
-    type: [String], 
-    enum: ['ONLINE', 'OFFLINE'] 
+    type: [String],
+    enum: ['ONLINE', 'OFFLINE']
   },
-  medium_of_study : [String],
-}, 
-{
-  timestamps: true
+  medium_of_study: [String],
+  followers: [String],
+  status: {
+    type: String,
+    enum: ["APPROVED", "REJECTED", "PENDING"],
+    default: "PENDING"
+  }
 },
-{
-  strict: false
-});
+  {
+    timestamps: true
+  },
+  {
+    strict: false
+  });
 
 module.exports = model('EntranceInstitute', entranceInstituteSchema)

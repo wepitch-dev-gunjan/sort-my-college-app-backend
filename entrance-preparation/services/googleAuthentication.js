@@ -45,7 +45,7 @@ router.get('/auth/google/callback', async (req, res) => {
     }
 
     const token = generateToken({
-      counsellor_id: institute._id,
+      institute_id: institute._id,
       email: institute.email,
       name: institute.name,
       picture: institute.profile_pic,
