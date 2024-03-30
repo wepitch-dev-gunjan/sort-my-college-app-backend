@@ -5,6 +5,9 @@ const entranceCourseSchema = new Schema({
     type: String,
     required: true
   },
+  image: {
+   type : String
+  },
   type: {
     type: String,
     enum: ['UG', 'PG'],

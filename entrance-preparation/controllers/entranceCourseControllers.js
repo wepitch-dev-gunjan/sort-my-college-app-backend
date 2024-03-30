@@ -11,6 +11,7 @@ exports.getCoursesForEp = async (req , res) =>{
    return res.status(404).json({message : "No Courses Found"});
   }
   const massagedCourses = courses.map((course) =>({
+  image : course.image,
 _id: course._id,
 name: course.name,
 type: course.type,
@@ -36,6 +37,7 @@ exports.addCourse = async(req ,res) =>{
 //   }
 const addCourse =  new EntranceCourse({
  name: req.body.name,
+ image : req.body.image,
  type : req.body.type,
  academic_session : req.body.academic_session,
  course_fee : req.body.course_fee,
