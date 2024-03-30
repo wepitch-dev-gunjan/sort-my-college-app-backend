@@ -7,7 +7,7 @@ const KeyFeatures = require("../models/KeyFeatures");
 // can be used for the same
 
 
-// ADMIN Panel Routes 
+// ADMIN Panel Controllers 
 exports.getKeyFeaturesForAdmin = async (req, res) => {
     try {
 
@@ -97,6 +97,16 @@ exports.deleteKeyFeatureForAdmin = async (req, res) => {
     }
 }
 
+
+// Controllers for USER 
+// exports.getKeyFeaturesForUser = async (req, res) => {
+//     try {
+        
+//     } catch (error) {
+//         console.error("Error getting key features for User")
+//         res.status(500).json({ message: "Internal Server Error" });
+//     }
+// }
 
 // ██╗░░██╗███████╗██╗░░░██╗  ███████╗███████╗░█████╗░████████╗██╗░░░██╗██████╗░███████╗░██████╗
 // ██║░██╔╝██╔════╝╚██╗░██╔╝  ██╔════╝██╔════╝██╔══██╗╚══██╔══╝██║░░░██║██╔══██╗██╔════╝██╔════╝
