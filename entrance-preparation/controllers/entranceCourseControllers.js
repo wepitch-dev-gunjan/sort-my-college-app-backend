@@ -1,3 +1,68 @@
 // const EntranceCourse = require("../models/EntranceCourse");
 
+const EntranceCourse = require("../models/EntranceCourse");
+
 // EP Panel Controllers 
+// courses for Ep Panel
+exports.getCoursesForEp = async (req , res) =>{
+ try{
+  const courses = await EntranceCourse.find({});
+  if(!courses || courses.length === 0){
+   return res.status(404).json({message : "No Courses Found"});
+  }
+  const massagedCourses = courses.map((course) =>({
+_id: course._id,
+name: course.name,
+type: course.type,
+acedemic_session: course.acedemic_session,
+course_fee: course.course_fee,
+course_duration_in_days: course.course_duration_in_days,
+  }));
+  res.status(200).json(massagedCourses);
+ } catch (error){
+  console.log("Error Fetching Course" , error);
+  res.status(500).json({message: "Internal sever error"});
+ }
+};
+// add course 
+exports.addCourse = async(req ,res) =>{
+ // const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
+
+ try{
+  // const existingCourse = await EntranceCourse.findOne({name: req.body.name});
+//   if(existingCourse)
+//   {
+// return res.status(400).send({error : "course already exist"});
+//   }
+const addCourse =  new EntranceCourse({
+ name: req.body.name,
+ type : req.body.type,
+ academic_session : req.body.academic_session,
+ course_fee : req.body.course_fee,
+ course_duration_in_days: req.body.course_duration_in_days
+});
+await addCourse.save();
+res.status(201).json({ success: true, message : "course Added Succesfully" , data : addCourse});
+ }catch(error){
+  console.log(error);
+  res.status(500).json({success : false, messge : "error adding course", error : error.message});
+ }
+};
+exports.editCourse = async(req ,res) =>{
+ try {
+  const { course_id} = req.params;
+  const updateCourse =req.body;
+  const updatedData = await EntranceCourse.findByIdAndUpdate(
+   course_id,
+   updateCourse,
+   {new : true}
+  );
+  if(!updatedData){
+   return res.status(404).json({message : " Course not found"})
+  }
+  res.status(200).json(updatedData);
+ } catch (error) {
+  console.log("Error editing Course")
+  res.status(500).json({messge:"Internal Server Error"});
+ }
+}

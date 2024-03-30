@@ -1,14 +1,15 @@
 const express = require("express");
+const { getCoursesForEp, addCourse, editCourse } = require("../controllers/entranceCourseControllers");
 const { epAuth, adminAuth, userAuth } = require("../middlewares/authMiddleware");
-// const { 
+// const { c
 
 //  } = require("../controllers/entranceCourseControllers");
  const router = express.Router();
 
  // EP Panel Routes
-//  router.get("/courses", epAuth, getCourses);
-//  router.post("/courses", epAuth, addCourse);
-//  router.put("/courses/:course_id", epAuth, editCourse);
+ router.get("/courses", getCoursesForEp);
+ router.post("/courses",  addCourse);
+ router.put("/courses/:course_id",editCourse);
 //  router.delete("/courses/:course_id", epAuth, deleteCourse);
 
 //  ADMIN Panel Routes 
