@@ -1,26 +1,31 @@
+const { findOneAndDelete } = require("../models/EntranceInstitute");
 const KeyFeatures = require("../models/KeyFeatures");
 
 // EP Panel Controllers 
-exports.getKeyFeatures = async (req, res) => {
+// Institutes will have an array of institute's id in the model itself, 
+// so we dont need to make separate AudioProcessingEvent, institute's apis
+// can be used for the same
+
+
+// ADMIN Panel Routes 
+exports.getKeyFeaturesForAdmin = async (req, res) => {
     try {
-        const instituteId = req.params.institute_id;
 
         // Find key features associated with the institute
-        const keyFeatures = await KeyFeatures.find({ institute: instituteId });
+        const keyFeatures = await KeyFeatures.find();
 
         if (!keyFeatures) {
             return res.status(404).json({ message: "Key features not found for the specified institute" });
         }
 
         // If key features are found, return them
-        res.status(200).json(keyFeatures );
+        res.status(200).json(keyFeatures);
     } catch (error) {
         console.error("Error fetching Key Features: ", error);
         res.status(500).json({ message: "Internal Server Error!!" });
     }
 };
 
-// ADMIN Panel Routes 
 exports.addKeyFeatureForAdmin = async (req, res) => {
     try {
         const { name, icon } = req.body;
@@ -42,7 +47,55 @@ exports.addKeyFeatureForAdmin = async (req, res) => {
     }
 };
 
+exports.editKeyFeaturesForAdmin = async (req, res) => {
+    try {
+        const { key_feature_id } = req.params;
+        const { name, icon } = req.body;
+        console.log(key_feature_id)
+        if (!key_feature_id) {
+            return res.status(400).json({ message: "Key feature ID is required" });
+        }
 
+        let keyFeature = await KeyFeatures.findById(key_feature_id);
+
+        if (!keyFeature) {
+            return res.status(404).json({ message: "Key feature not found" });
+        }
+
+        if (name) {
+            keyFeature.name = name;
+        }
+        if (icon) {
+            keyFeature.icon = icon;
+        }
+
+        keyFeature = await keyFeature.save();
+
+        res.status(200).json({ message: "Key feature updated successfully", keyFeature });
+    } catch (error) {
+        console.error("Key feature editing failed: ", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+exports.deleteKeyFeatureForAdmin = async (req, res) => {
+    try {
+        const { key_feature_id } = req.params;
+
+        const deletedKeyFeature = await KeyFeatures.findByIdAndDelete({_id : key_feature_id});
+        console.log(key_feature_id)
+
+        if(!deletedKeyFeature) {
+            return res.status(404).json({ message: "Key Feature not found" });
+        }
+
+        res.status(200).json({ message: "Key Feature deleted Successfully" });
+
+    } catch (error) {
+        console.error("Error deleting Key Feature: ", error)
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 
 
 // ██╗░░██╗███████╗██╗░░░██╗  ███████╗███████╗░█████╗░████████╗██╗░░░██╗██████╗░███████╗░██████╗

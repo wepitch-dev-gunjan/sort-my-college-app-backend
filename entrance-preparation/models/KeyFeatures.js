@@ -7,10 +7,6 @@ const keyFeatureSchema = new Schema ({
     icon: {
         type: String
     },
-    // institute: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "EntranceInstitute"
-    //   }
 },
 {
     strict: false,
