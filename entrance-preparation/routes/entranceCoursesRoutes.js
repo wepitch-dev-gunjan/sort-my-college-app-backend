@@ -1,5 +1,5 @@
 const express = require("express");
-const { getCoursesForEp, addCourse, editCourse } = require("../controllers/entranceCourseControllers");
+const { getCoursesForEp, addCourse, editCourse, deleteCourse } = require("../controllers/entranceCourseControllers");
 const { epAuth, adminAuth, userAuth } = require("../middlewares/authMiddleware");
 // const { c
 
@@ -10,7 +10,7 @@ const { epAuth, adminAuth, userAuth } = require("../middlewares/authMiddleware")
  router.get("/courses", getCoursesForEp);
  router.post("/courses",  addCourse);
  router.put("/courses/:course_id",editCourse);
-//  router.delete("/courses/:course_id", epAuth, deleteCourse);
+ router.delete("/courses/:course_id",deleteCourse);
 
 //  ADMIN Panel Routes 
 // router.get("/courses/admin", adminAuth, getCoursesForAdmin);

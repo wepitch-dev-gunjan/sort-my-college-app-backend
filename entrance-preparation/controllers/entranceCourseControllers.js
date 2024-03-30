@@ -66,3 +66,18 @@ exports.editCourse = async(req ,res) =>{
   res.status(500).json({messge:"Internal Server Error"});
  }
 }
+exports.deleteCourse =async(req , res)=> {
+ try {
+  const { course_id} = req.params;
+  const deletedCourse = await EntranceCourse.findByIdAndDelete(
+course_id
+  );
+  if(!deletedCourse){
+   return res.status(400).json({ message : "Course Not Found"});
+  }
+  res.status(200).json({message : "Course Deleted Succesfully"})
+ } catch (error) {
+  console.log("Error Deleting Course")
+  res.status(500).json({message :"Internal Server Error"});
+ }
+}
