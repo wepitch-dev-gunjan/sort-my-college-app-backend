@@ -137,6 +137,8 @@ exports.deleteInstituteForAdmin = async (req, res) => {
   }
 };
 
+
+// for Users
 exports.getInstitutesForUser = async (req, res) => {
   try {
     // Assuming you have some logic to authenticate the admin user and retrieve necessary information
@@ -162,3 +164,21 @@ exports.getInstitutesForUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getInstituteForUser = async(req, res) => {
+  try {
+    const { institute_id } = req.params;
+
+    const institute = await EntranceInstitute.findOne({_id : institute_id});
+
+    if (!institute){
+      return res.status(404).json({message: "Institute not found !"});
+    }
+    
+    res.status(200).json(institute);
+  } catch(error){
+    console.error("Error fetching institute for user: ", error);
+    res.status(500).json({message: "Internal Server Error"});
+  }
+};
+
