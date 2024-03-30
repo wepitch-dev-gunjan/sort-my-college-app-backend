@@ -71,7 +71,8 @@ const entranceInstituteSchema = new Schema({
     type: String,
     enum: ["APPROVED", "REJECTED", "PENDING"],
     default: "PENDING"
-  }
+  },
+  institute_key_features: [String],
 },
   {
     timestamps: true

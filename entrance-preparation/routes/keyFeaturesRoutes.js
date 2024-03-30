@@ -12,7 +12,7 @@ const router = express.Router();
 
 
 // EP Panel Routes 
-router.get("/key-features/:institute_id", epAuth, getKeyFeatures);
+router.get("/key-features", epAuth, getKeyFeatures);
 // router.post("/:institute_id/key-features", epAUth, addKeyFeature);
 // router.put("/key-feature/:key_feature_id", epAUth, editKeyFeature);
 // router.delete("/key-feature/:key_feature_id", epAuth, deleteKeyFeature);

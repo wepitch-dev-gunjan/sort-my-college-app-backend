@@ -23,15 +23,14 @@ exports.getKeyFeatures = async (req, res) => {
 // ADMIN Panel Routes 
 exports.addKeyFeatureForAdmin = async (req, res) => {
     try {
-        const { name, icon, institute_id } = req.body;
-        if ( !name || !icon || !institute_id) {
-            return res.status(400).json({message: "Name, icon or institute not found"})
+        const { name, icon } = req.body;
+        if ( !name || !icon ) {
+            return res.status(400).json({message: "Name or icon not found"})
         }
 
         const newKeyFeature = new KeyFeatures({
             name,
-            icon,
-            institute: institute_id
+            icon
         });
 
         await newKeyFeature.save();
