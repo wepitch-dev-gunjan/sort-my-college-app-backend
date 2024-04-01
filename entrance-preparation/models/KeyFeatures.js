@@ -1,12 +1,16 @@
 const {Schema, model} = require('mongoose')
 
 const keyFeatureSchema = new Schema ({
+    institute: {
+        type: Schema.Types.ObjectId,
+        ref: "EntranceInstitute"
+    },
     name: {
         type: String
     },
-    icon: {
+    key_features_icon: {
         type: String
-    },
+    }
 },
 {
     strict: false,
