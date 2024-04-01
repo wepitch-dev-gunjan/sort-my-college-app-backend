@@ -1,3 +1,4 @@
+const { json } = require("express");
 const Faculties = require("../models/Faculties");
 
 exports.getFaculties = async (req, res) => {
@@ -14,7 +15,8 @@ exports.getFaculties = async (req, res) => {
       qualifications: faculties.qualifications,
       graduated_from: faculties.graduated_from,
     }));
-    res.status(200).json(massagedFaculties);
+
+    res.status(200).send(massagedFaculties);
   } catch (error) {
     console.log("error featching faculties", error);
     res.status(500).json({ message: "Tnternal server error" });
