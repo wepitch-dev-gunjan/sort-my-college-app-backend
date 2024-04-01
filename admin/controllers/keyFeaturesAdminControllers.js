@@ -86,29 +86,25 @@ exports.editKeyFeaturesForAdmin = async (req, res) => {
 exports.deleteKeyFeatureForAdmin = async (req, res) => {
     try {
         const { key_feature_id } = req.params;
-        const { cloudinary_image_id } = req.body;
 
         if (!key_feature_id) {
         return res.status(404).send({
             error: "Webinar not found!!"
         });
         }
-        if (!cloudinary_image_id){
-            console.log("Image id not found: ")
-            return
-        }
-        if (cloudinary_image_id) {
-            const cloudinary_deleted = await deleteImage(cloudinary_image_id);
-        }
 
         const deletedKeyFeatureAdmin = await KeyFeaturesAdmin.findByIdAndDelete({_id : key_feature_id});
-
+        
         if(!deletedKeyFeatureAdmin) {
             return res.status(404).json({ message: "Key Feature not found" });
         }
+        const deletedImage = await deleteImage(deletedKeyFeatureAdmin?.key_features_icon);
 
-        res.status(200).json({ message: "Key Feature deleted Successfully" });
+        if(!deletedImage) return res.status(500).send({
+            error: "Error deleting image"
+        })
 
+        res.status(200).json({ message: deletedImage.message });
     } catch (error) {
         console.error("Error deleting Key Feature: ", error)
         res.status(500).json({ message: "Internal Server Error" });

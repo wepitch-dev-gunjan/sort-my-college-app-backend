@@ -40,9 +40,16 @@ exports.uploadImage = async (imageBuffer, filename, folderName) => {
 };
 
 exports.deleteImage = async (url) => {
-  cloudinary.uploader.destroy(url)
-    .then(() => console.log('image deleted successfully'))
-    .catch(() => console.log('error deleting image'))
+  try {
+    const cloudinaryImage = await cloudinary.uploader.destroy(url)
+    if(cloudinaryImage) return {
+      message: 'image deleted successfully'
+    } 
+  } catch (error) {
+    return {
+      message: 'image not deleted'
+    }
+  }
 }
 
 
