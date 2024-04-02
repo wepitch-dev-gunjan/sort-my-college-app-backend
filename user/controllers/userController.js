@@ -1,9 +1,28 @@
 const User = require("../models/User");
+require('dotenv');
 
-exports.register = (req, res) => {
+const { BACKEND_URL } = process.env;
+
+exports.register = async (req, res) => {
   try {
     const { user_id } = req;
+    const { name, date_of_birth, gender, education_level } = req.body;
 
+    if (!name || !date_of_birth || !gender || !education_level) return res.status(400).send({
+      error: "Required fields not provided"
+    })
+
+    const user = await User.findOne({ _id: user_id });
+    user.name = name;
+    user.date_of_birth = date_of_birth;
+    user.gender = gender;
+    user.education_level = education_level;
+
+    await user.save()
+
+    res.status(200).send({
+      message: "User registered successfully"
+    })
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
@@ -65,7 +84,7 @@ exports.editUser = async (req, res) => {
   }
 };
 
-exports.getUser = async (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
     const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
@@ -119,7 +138,7 @@ exports.cancelRequest = (req, res) => {
 
 exports.saveCounsellor = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
@@ -142,7 +161,7 @@ exports.saveCounsellor = async (req, res) => {
 
 exports.unsaveCounsellor = async (req, res) => {
   try {
-    const { user_id } = req.params;
+    const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
 
     if (!user) {
@@ -180,7 +199,7 @@ exports.getUsersForAdmin = async (req, res) => {
   }
 };
 
-exports.getSinglUser = async (req, res) => {
+exports.getSingleUser = async (req, res) => {
   const { user_id } = req.params;
   try {
     const id = await User.findOne({ _id: user_id });

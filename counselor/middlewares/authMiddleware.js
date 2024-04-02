@@ -29,7 +29,6 @@ exports.counsellorAuth = async (req, res, next) => {
     req.email = decoded.email;
     req.counsellor_id = decoded.counsellor_id;
     req.refresh_token = decoded.tokens.refresh_token;
-    console.log(decoded)
 
     next();
   } catch (error) {
@@ -192,9 +191,8 @@ exports.adminOrCounsellorAuth = async (req, res, next) => {
 
     if (!responseData) {
       return res.status(401).json({
-        error: `${
-          decoded.counsellor_id ? "Counsellor" : "Admin"
-        } not authorized`,
+        error: `${decoded.counsellor_id ? "Counsellor" : "Admin"
+          } not authorized`,
       });
     }
 

@@ -11,7 +11,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:9000'
 
 exports.generateOtpByPhone = async (req, res) => {
   try {
-    const { phone_number } = req.body;
+    const { phone_number, name } = req.body;
     if (!phone_number) return res.status(400).send({ error: "Phone number is required" });
 
     const user = await User.findOne({ phone_number });

@@ -5,29 +5,33 @@ const {
   saveCounsellor,
   unsaveCounsellor,
   editUser,
-  getUser,
+  getProfile,
   findOneUser,
   getUsersForAdmin,
-  getSinglUser,
+  getSingleUser,
 } = require("../controllers/userController");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
+const { register } = require("../controllers/userController");
 // const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-// user profile
-router.get("/", userAuth, getUser);
+// user routes
+router.get("/", userAuth, getProfile);
+router.put("/", userAuth, editUser);
+router.put("/register", userAuth, register)
+
+// admin routes
 router.get("/users", findOneUser);
 router.get("/users-for-admin", getUsersForAdmin);
-router.get("/users-for-admin/:user_id", getSinglUser);
+router.get("/users-for-admin/:user_id", getSingleUser);
 
-// save counsellors
-router.put("/:user_id", userAuth, editUser);
-router.put("/:user_id/counsellor/save", saveCounsellor);
-router.put("/:user_id/counsellor/unsave", unsaveCounsellor);
+// counsellor routes
+router.put("/counsellor/save", userAuth, saveCounsellor);
+router.put("/counsellor/unsave", userAuth, unsaveCounsellor);
 
 // counselling sessions
-router.post("/seesion/reschedule-request", rescheduleRequest);
-router.post("/session/cancel-request", cancelRequest);
+router.post("/seesion/reschedule-request", userAuth, rescheduleRequest);
+router.post("/session/cancel-request", userAuth, cancelRequest);
 
 module.exports = router;

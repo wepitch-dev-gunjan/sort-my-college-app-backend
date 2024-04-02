@@ -513,11 +513,10 @@ exports.getCounsellors = async (req, res) => {
 
     const massagedCounsellors = await Promise.all(
       counsellors.map(async (counsellor) => {
-        const profile_pic = await getObjectURL(counsellor.profile_pic);
         return {
           _id: counsellor._id,
           name: counsellor.name,
-          profile_pic,
+          profile_pic: counsellor.profile_pic,
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
           next_session: counsellor.next_session,
@@ -536,7 +535,7 @@ exports.getCounsellors = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-// Update your backend route to accept a search query parameter
+
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
     const {
@@ -624,64 +623,6 @@ exports.getCounsellorsForAdmin = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
-// exports.getCounsellorsForAdmin = async (req, res) => {
-//   try {
-//     const { search, locations_focused, degree_focused, courses_focused } =
-//       req.query;
-
-//     const queryObject = {};
-
-//     if (degree_focused) {
-//       queryObject.degree_focused = degree_focused;
-//     }
-
-//     if (locations_focused) {
-//       queryObject.locations_focused = locations_focused;
-//     }
-
-//     if (courses_focused) {
-//       queryObject.courses_focused = courses_focused;
-//     }
-//     console.log(queryObject, "query");
-
-//     // If no query parameters are provided, remove the queryObject to fetch all counselors
-//     const counsellors = await Counsellor.find(
-//       Object.keys(queryObject).length === 0 ? {} : queryObject
-//     );
-
-//     if (counsellors.length === 0) {
-//       return res.status(404).send({ error: "No counselors found" });
-//     }
-
-//     const massagedCounsellors = await Promise.all(
-//       counsellors.map(async (counsellor) => {
-//         const profile_pic = await getObjectURL(counsellor.profile_pic);
-//         return {
-//           _id: counsellor._id,
-//           name: counsellor.name,
-//           profile_pic,
-//           designation: counsellor.designation,
-//           qualifications: counsellor.specializations,
-//           next_session: counsellor.next_session,
-//           average_rating: counsellor.average_rating,
-//           experience_in_years: counsellor.experience_in_years,
-//           total_sessions: counsellor.sessions.length,
-//           reward_points: counsellor.reward_points,
-//           reviews: counsellor.client_testimonials.length,
-//           verified: counsellor.verified,
-//           outstanding_balance: counsellor.outstanding_balance,
-//           status: counsellor.status,
-//         };
-//       })
-//     );
-
-//     res.status(200).send(massagedCounsellors);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
 
 exports.getProfilePic = async (req, res) => {
   try {
