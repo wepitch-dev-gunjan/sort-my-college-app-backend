@@ -55,3 +55,16 @@ exports.addFaculties = async (req, res) => {
     res.status(400).send(error);
   }
 };
+
+exports.deleteFaculty = async (req, res) => {
+  const { faculty_id } = req.params;
+  try {
+    const faculty = await Faculties.findByIdAndDelete({ _id: faculty_id });
+    if (!faculty)
+      return res.status(404).send({ error: "no faculty found with this id" });
+
+    return res.status(200).send({ message: "Faculty deleted" });
+  } catch (error) {
+    console.log(error);
+  }
+};
