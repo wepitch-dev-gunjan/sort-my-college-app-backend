@@ -1,5 +1,15 @@
 const User = require("../models/User");
 
+exports.register = (req, res) => {
+  try {
+    const { user_id } = req;
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 exports.editUser = async (req, res) => {
   try {
     const { user_id } = req;

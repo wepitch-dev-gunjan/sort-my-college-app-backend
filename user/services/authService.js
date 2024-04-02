@@ -82,12 +82,13 @@ exports.verifyOtpByPhone = async (req, res) => {
 
     // If OTP is valid, you can proceed with user verification
     let user = await User.findOne({ phone_number });
+    const already_registered = !!user;
+
     if (!user) {
       user = new User({
         phone_number,
         verified: true,
       });
-      console.log(user)
 
       await user.save();
     }
@@ -101,6 +102,7 @@ exports.verifyOtpByPhone = async (req, res) => {
     // })
     res.status(200).send({
       message: "OTP verified successfully",
+      already_registered,
       token
     });
   } catch (error) {
