@@ -1,25 +1,29 @@
 // const EntranceCourse = require("../models/EntranceCourse");
-
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = process.env;
 const EntranceCourse = require("../models/EntranceCourse");
 
 // EP Panel Controllers 
 // courses for Ep Panel
 exports.getCoursesForEp = async (req , res) =>{
  try{
-  const courses = await EntranceCourse.find({});
+  const {institute_id} = req;
+  console.log(institute_id)
+  const courses = await EntranceCourse.find({institute : institute_id});
+
   if(!courses || courses.length === 0){
    return res.status(404).json({message : "No Courses Found"});
   }
-  const massagedCourses = courses.map((course) =>({
-  image : course.image,
-_id: course._id,
-name: course.name,
-type: course.type,
-acedemic_session: course.acedemic_session,
-course_fee: course.course_fee,
-course_duration_in_days: course.course_duration_in_days,
-  }));
-  res.status(200).json(massagedCourses);
+//   const massagedCourses = courses.map((course) =>({
+//   image : course.image,
+// _id: course._id,
+// name: course.name,
+// type: course.type,
+// acedemic_session: course.acedemic_session,
+// course_fee: course.course_fee,
+// course_duration_in_days: course.course_duration_in_days,
+//   }));
+  res.status(200).json(courses);
  } catch (error){
   console.log("Error Fetching Course" , error);
   res.status(500).json({message: "Internal sever error"});
@@ -35,13 +39,15 @@ exports.addCourse = async(req ,res) =>{
 //   {
 // return res.status(400).send({error : "course already exist"});
 //   }
+const {institute_id} = req
 const addCourse =  new EntranceCourse({
  name: req.body.name,
  image : req.body.image,
  type : req.body.type,
  academic_session : req.body.academic_session,
  course_fee : req.body.course_fee,
- course_duration_in_days: req.body.course_duration_in_days
+ course_duration_in_days: req.body.course_duration_in_days,
+ institute : institute_id
 });
 await addCourse.save();
 res.status(201).json({ success: true, message : "course Added Succesfully" , data : addCourse});
