@@ -50,6 +50,52 @@ exports.getKeyFeatures = async (req, res) => {
     }
 }
 
+exports.getKeyFeaturesForAdmin = async (req, res) => {
+    try {
+        const { institute_id } = req.params;
+        const allKeyFeatures = await KeyFeatures.find({institute : institute_id})
+
+        if (!allKeyFeatures) {
+            return res.status(404).json({ message: "Key features not found for the specified institute" });
+        }
+
+        res.status(200).json(allKeyFeatures);
+
+    } catch (error) {
+        console.error("Error getting Key Feature: ", error)
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+
+exports.deleteKeyFeatures = async (req, res) => {
+    try {
+        const { key_feature_id } = req.params;
+        const { institute_id } = req;
+
+        if (!key_feature_id) {
+            return res.status(400).json({ error: "Missing Key Feature ID" })
+        }
+        if (!institute_id) {
+            return res.status(400).json({ error: "Missing Institute ID" })
+        }
+
+        const deletedKeyFeature = await KeyFeatures.findOneAndDelete({
+            institute: institute_id,
+            _id : key_feature_id
+        })
+
+
+        if(!deletedKeyFeature) {
+            return res.status(404).json({ message: "Key Feature not found" });
+        }
+        res.status(200).json({ message: "Key feature deleted successfully", deletedKeyFeature });
+    } catch (error) {
+        console.error("Error deleting Key Feature")
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
 // ADMIN Panel Controllers 
 // exports.getKeyFeaturesForAdmin = async (req, res) => {
 //     try {

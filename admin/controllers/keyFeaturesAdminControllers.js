@@ -1,7 +1,10 @@
 const KeyFeaturesAdmin = require("../models/keyFeaturesAdmin");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
+const axios = require('axios');
+require('dotenv').config()
+const {BACKEND_URL} = process.env
 
-exports.getKeyFeaturesForAdmin = async (req, res) => {
+exports.getKeyFeaturesAdmin = async (req, res) => {
     try {
 
         // Find key features associated with the institute
@@ -19,7 +22,25 @@ exports.getKeyFeaturesForAdmin = async (req, res) => {
     }
 };
 
-exports.addKeyFeatureForAdmin = async (req, res) => {
+exports.getRemainingKeyFeaturesForInstitute = async (req, res) => {
+    try {
+        const { institute_id } = req; // Assuming you're storing institute_id in req.user from authentication middleware
+        
+        const response = await axios.get(`${BACKEND_URL}/admin/key-features/${institute_id}`, {
+            headers: {
+                Authorization: req.headers.authorization // Forward the Authorization header from the original request
+            }
+        });
+
+        // If successful, return the data received from the API
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching Key Features From Institute: ", error);
+        res.status(500).json({ message: "Internal Server Error!!" });
+    }
+};
+
+exports.addKeyFeatureAdmin = async (req, res) => {
     try {
         const { name } = req.body;
         const { file } = req;
@@ -52,7 +73,7 @@ exports.addKeyFeatureForAdmin = async (req, res) => {
     }
 };
 
-exports.editKeyFeaturesForAdmin = async (req, res) => {
+exports.editKeyFeaturesAdmin = async (req, res) => {
     try {
         const { key_feature_id } = req.params;
         const { name, icon } = req.body;
@@ -83,7 +104,7 @@ exports.editKeyFeaturesForAdmin = async (req, res) => {
     }
 };
 
-exports.deleteKeyFeatureForAdmin = async (req, res) => {
+exports.deleteKeyFeatureAdmin = async (req, res) => {
     try {
         const { key_feature_id } = req.params;
 
