@@ -10,6 +10,7 @@ const {
   cancelSession,
   getSessionsForCounsellor,
   getTotalSessionsCount,
+  getCheckoutDetails
 } = require("../controllers/sessionController");
 const { counsellorAuth, userAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -33,5 +34,8 @@ router.put("/counsellor/sessions/:session_id/cancel", cancelSession);
 
 // DELETE
 router.delete("/sessions/:session_id", counsellorAuth, deleteSession);
+
+// user routes
+router.get(`/sessions/:session_id/payment/user/checkout`, userAuth, getCheckoutDetails)
 
 module.exports = router;

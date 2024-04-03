@@ -681,3 +681,12 @@ exports.getTotalSessionsCount = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getCheckoutDetails = async (req, res) => {
+  try {
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

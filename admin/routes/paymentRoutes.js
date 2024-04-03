@@ -11,6 +11,7 @@ const {
 const {
   counsellorOrUserAuth,
   counsellorAuth,
+  userAuth,
 } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
@@ -31,5 +32,8 @@ router.get(
   counsellorAuth,
   paymentForCounsellor
 );
+
+// user routes
+
 
 module.exports = router;
