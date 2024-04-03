@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run All SMC services",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "start"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": [
+        "npm: start - notification-service",
+        "npm: start - counselor",
+        "npm: start - entrance-preparation",
+        "npm: start - user",
+        "npm: start - api-gateway"
+      ]
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "notification-service",
+      "problemMatcher": [],
+      "label": "npm: start - notification-service",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "counselor",
+      "problemMatcher": [],
+      "label": "npm: start - counselor",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "entrance-preparation",
+      "problemMatcher": [],
+      "label": "npm: start - entrance-preparation",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "user",
+      "problemMatcher": [],
+      "label": "npm: start - user",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "api-gateway",
+      "problemMatcher": [],
+      "label": "npm: start - api-gateway",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
