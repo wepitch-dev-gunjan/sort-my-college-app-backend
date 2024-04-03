@@ -28,7 +28,7 @@ router.delete("/key-features/:key_feature_id", epAuth, deleteKeyFeatures);
 // router.delete("/key-feature/admin/:key_feature_id", adminAuth, deleteKeyFeatureForAdmin);
 
 // Routes FOR ADMIN 
-router.get("/admin/key-features/:institute_id", adminAuth, getKeyFeaturesForAdmin);
+router.get("/admin/key-features/:institute_id", getKeyFeaturesForAdmin);
 
 
 // Router for USER 

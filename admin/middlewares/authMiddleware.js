@@ -156,7 +156,7 @@ exports.counsellorAuth = async (req, res, next) => {
   }
 };
 
-exports.epAuth = async (req, res) => {
+exports.epAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
 
@@ -168,29 +168,29 @@ exports.epAuth = async (req, res) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
-
+    
     const { data } = await axios.get(
-      `${process.env.BACKEND_URL}/counsellor/counsellors/find-one`,
+      `${process.env.BACKEND_URL}/ep/institute/find-one`,
       {
-        // Update BACKEND_URL to use process.env
         params: {
-          email: decoded.email,
+          institute_id: decoded.institute_id,
         },
       }
-    );
-
+      );
+      
     if (!data) {
       return res.status(401).json({ error: "User not authorized" });
     }
 
     req.email = decoded.email;
     req.phoneNo = decoded.phoneNo;
-    req.counsellor_id = data._id;
+    req.institute_id = decoded.institute_id;
 
+    next()
   } catch (error) {
     console.log(error)
     res.status(500).send({
-      error: "Internal serverb error"
+      error: "Internal server error!!!!!"
     })
   }
 }

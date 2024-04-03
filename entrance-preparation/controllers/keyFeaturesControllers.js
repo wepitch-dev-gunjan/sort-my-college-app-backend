@@ -53,19 +53,20 @@ exports.getKeyFeatures = async (req, res) => {
 exports.getKeyFeaturesForAdmin = async (req, res) => {
     try {
         const { institute_id } = req.params;
-        const allKeyFeatures = await KeyFeatures.find({institute : institute_id})
+        const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
 
-        if (!allKeyFeatures) {
+        if (!allKeyFeatures || allKeyFeatures.length === 0) {
             return res.status(404).json({ message: "Key features not found for the specified institute" });
         }
 
         res.status(200).json(allKeyFeatures);
 
     } catch (error) {
-        console.error("Error getting Key Feature: ", error)
+        console.error("Error getting Key Feature: ", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+
 
 
 exports.deleteKeyFeatures = async (req, res) => {
