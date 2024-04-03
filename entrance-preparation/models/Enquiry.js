@@ -2,23 +2,25 @@ const { Schema, model } = require('mongoose');
 
 const enquirySchema = new Schema(
   {
-    message: {
-      type: String,
-      required: true,
-    },
+
     enquirer: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     enquired_to: {
       type: Schema.Types.ObjectId,
       ref: 'EntranceInstitute',
-      required: true,
+    },
+    courses: [String],
+    mode: [String],
+    preferred_time: [String],
+    message: {
+      type: String,
     },
   },
   {
     timestamps: true,
+    strict: false
   }
 );
 
