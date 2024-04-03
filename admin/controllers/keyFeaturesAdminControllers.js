@@ -25,20 +25,27 @@ exports.getKeyFeaturesAdmin = async (req, res) => {
 exports.getRemainingKeyFeaturesForInstitute = async (req, res) => {
     try {
         const { institute_id } = req; // Assuming you're storing institute_id in req.user from authentication middleware
-        
-        const response = await axios.get(`${BACKEND_URL}/admin/key-features/${institute_id}`, {
-            headers: {
-                Authorization: req.headers.authorization // Forward the Authorization header from the original request
-            }
-        });
 
-        // If successful, return the data received from the API
-        res.status(200).json(response.data);
+        if (!institute_id) {
+            return res.status(400).json({ message: "Missing institute_id in request." });
+        }
+
+        const response = await axios.get(`${BACKEND_URL}/ep/admin/key-features/${institute_id}`);
+        const existing_key_features = response.data.map(feature => feature.name);
+        const all_key_features = await KeyFeaturesAdmin.find();
+        const remaining_key_features = all_key_features.filter(keyFeature => !existing_key_features.includes(keyFeature.name));
+
+        // Assuming the response contains data property
+        res.status(200).json(remaining_key_features);
     } catch (error) {
         console.error("Error fetching Key Features From Institute: ", error);
+        if (error.response && error.response.data) {
+            return res.status(error.response.status || 500).json(error.response.data);
+        }
         res.status(500).json({ message: "Internal Server Error!!" });
     }
 };
+
 
 exports.addKeyFeatureAdmin = async (req, res) => {
     try {

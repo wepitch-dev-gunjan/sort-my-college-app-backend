@@ -17,7 +17,7 @@ router.put("/key-features-admin/:key_feature_id", adminAuth, editKeyFeaturesAdmi
 router.delete("/key-features-admin/:key_feature_id", adminAuth, deleteKeyFeatureAdmin);
 
 // Routes for Institute 
-router.get("/remaining-key-features-for-institute/:institute_id", epAuth, getRemainingKeyFeaturesForInstitute)
+router.get("/key-features-institute/remaining-key-features-for-institute", epAuth, getRemainingKeyFeaturesForInstitute)
 
 
 module.exports = router;
