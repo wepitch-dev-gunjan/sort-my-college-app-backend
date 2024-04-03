@@ -684,9 +684,43 @@ exports.getTotalSessionsCount = async (req, res) => {
 
 exports.getCheckoutDetails = async (req, res) => {
   try {
+    const { session_id } = req.params;
+    const session = await Session.findById(session_id);
 
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    const counsellor_id = session.session_counsellor;
+    const counsellorDetails = await Counsellor.findById(counsellor_id);
+    if (!counsellorDetails) {
+      return res.status(404).json({ error: "Counsellor not found" });
+    }
+
+    const sessionFee = session.session_fee;
+    const gstAmount = 0.18 * sessionFee;
+    const feeWithGST = sessionFee + gstAmount;
+
+    const gatewayCharge = 0.05 * feeWithGST;
+
+    const totalAmount = feeWithGST + gatewayCharge;
+
+    const responseData = {
+      session_id: session._id,
+      sessionDate: session.session_date,
+      sessionType: session.session_type,
+      sessionFee: sessionFee,
+      gstAmount: gstAmount,
+      feeWithGST: feeWithGST,
+      gatewayCharge: gatewayCharge,
+      totalAmount: totalAmount,
+      counsellor_id: counsellorDetails._id,
+      counsellor_name: counsellorDetails.name,
+      counsellor_profile_pic: counsellorDetails.profile_pic,
+    };
+
+    return res.json([responseData]);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

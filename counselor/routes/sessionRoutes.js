@@ -10,7 +10,7 @@ const {
   cancelSession,
   getSessionsForCounsellor,
   getTotalSessionsCount,
-  getCheckoutDetails
+  getCheckoutDetails,
 } = require("../controllers/sessionController");
 const { counsellorAuth, userAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -20,6 +20,7 @@ router.get("/:counsellor_id/sessions", getSessions);
 router.get("/:counsellor_id/sessionsforcounsellor", getSessionsForCounsellor);
 router.get("/sessions/:session_id", getSession);
 router.get("/session/sessions/count", counsellorAuth, getTotalSessionsCount);
+router.get("/sessioncheckout/:session_id", getCheckoutDetails);
 
 // POST
 router.post("/sessions", counsellorAuth, addSession);
@@ -36,6 +37,10 @@ router.put("/counsellor/sessions/:session_id/cancel", cancelSession);
 router.delete("/sessions/:session_id", counsellorAuth, deleteSession);
 
 // user routes
-router.get(`/sessions/:session_id/payment/user/checkout`, userAuth, getCheckoutDetails)
+router.get(
+  `/sessions/:session_id/payment/user/checkout`,
+  userAuth,
+  getCheckoutDetails
+);
 
 module.exports = router;
