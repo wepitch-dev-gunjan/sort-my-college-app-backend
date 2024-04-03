@@ -36,11 +36,12 @@ exports.addFaculties = async (req, res) => {
     }
 
     const fileName = `display_pic-${Date.now()}.png`;
-    const folderName = "Faculty_display_pic";
-    // const display_pic = await uploadImage(file.buffer, fileName, folderName);
+    const folderName = `Faculty_display_pic`;
+    const display_pic = await uploadImage(file.buffer, fileName, folderName);
+
     const faculty = new Faculties({
       name: req.body.name,
-      // display_pic,
+      display_pic,
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,
