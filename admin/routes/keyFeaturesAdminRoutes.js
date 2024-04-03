@@ -13,7 +13,7 @@ const router = express.Router();
 // Routes for Admin
 router.get("/key-features-admin", adminAuth, getKeyFeaturesAdmin);
 router.post("/key-features-admin", adminAuth, upload.single("key_features_icon"), addKeyFeatureAdmin);
-router.put("/key-features-admin/:key_feature_id", adminAuth, editKeyFeaturesAdmin);
+router.put("/key-features-admin/:key_feature_id", upload.single("key_features_icon"),adminAuth, editKeyFeaturesAdmin);
 router.delete("/key-features-admin/:key_feature_id", adminAuth, deleteKeyFeatureAdmin);
 
 // Routes for Institute 

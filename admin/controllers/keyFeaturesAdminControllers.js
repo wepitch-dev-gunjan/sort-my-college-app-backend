@@ -60,7 +60,7 @@ exports.addKeyFeatureAdmin = async (req, res) => {
         }
 
 
-        const fileName = `key-features-icon-${Date.now()}.png`;
+        const fileName = `key-features-icon-${Date.now()}.svg`;
         const folderName = `key-features-icon`;
 
         const key_features_icon = await uploadImage(file.buffer, fileName, folderName)
@@ -83,8 +83,11 @@ exports.addKeyFeatureAdmin = async (req, res) => {
 exports.editKeyFeaturesAdmin = async (req, res) => {
     try {
         const { key_feature_id } = req.params;
-        const { name, icon } = req.body;
+        const { name } = req.body;
+        const { file } = req;
+
         console.log(key_feature_id)
+
         if (!key_feature_id) {
             return res.status(400).json({ message: "Key feature ID is required" });
         }
@@ -98,9 +101,20 @@ exports.editKeyFeaturesAdmin = async (req, res) => {
         if (name) {
             keyFeaturesAdmin.name = name;
         }
-        if (icon) {
-            keyFeaturesAdmin.icon = icon;
+
+        if (file) {
+            const fileName = `key-features-icon-${Date.now()}.svg`;
+            const folderName = `key-features-icon`;
+            const key_features_icon = await uploadImage(file.buffer, fileName, folderName);
+            
+            // Delete the previous image from Cloudinary
+            if (keyFeaturesAdmin.key_features_icon) {
+                await deleteImage(keyFeaturesAdmin.key_features_icon);
+            }
+
+            keyFeaturesAdmin.key_features_icon = key_features_icon;
         }
+
 
         keyFeaturesAdmin = await keyFeaturesAdmin.save();
 
