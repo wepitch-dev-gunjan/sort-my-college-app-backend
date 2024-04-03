@@ -13,6 +13,6 @@ router.get("/faculties", getFaculties);
 router.post("/addFaculties", upload.single("display_pic"), addFaculties);
 
 //Dlt APIs
-router.delete("/faculty/:faculty_id", deleteFaculty);
+router.delete("/faculties/:faculty_id", deleteFaculty);
 
 module.exports = router;

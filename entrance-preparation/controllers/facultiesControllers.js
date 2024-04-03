@@ -6,7 +6,7 @@ exports.getFaculties = async (req, res) => {
   try {
     const faculties = await Faculties.find({});
     if (!faculties || faculties.length === 0) {
-      return res.status(404).send({ error: "faculties not found" });
+      return res.status(200).send([]);
     }
     const massagedFaculties = faculties.map((faculties) => ({
       _id: faculties._id,
@@ -37,10 +37,10 @@ exports.addFaculties = async (req, res) => {
 
     const fileName = `display_pic-${Date.now()}.png`;
     const folderName = "Faculty_display_pic";
-    const display_pic = await uploadImage(file.buffer, fileName, folderName);
+    // const display_pic = await uploadImage(file.buffer, fileName, folderName);
     const faculty = new Faculties({
       name: req.body.name,
-      display_pic,
+      // display_pic,
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,
@@ -59,7 +59,7 @@ exports.addFaculties = async (req, res) => {
 exports.deleteFaculty = async (req, res) => {
   const { faculty_id } = req.params;
   try {
-    const faculty = await Faculties.findByIdAndDelete({ _id: faculty_id });
+    const faculty = await Faculties.findByIdAndDelete(faculty_id);
     if (!faculty)
       return res.status(404).send({ error: "no faculty found with this id" });
 
