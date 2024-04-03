@@ -14,11 +14,12 @@
         "isDefault": true
       },
       "dependsOn": [
+        "npm: start - admin",
         "npm: start - notification-service",
         "npm: start - counselor",
         "npm: start - entrance-preparation",
         "npm: start - user",
-        "npm: start - api-gateway"
+        "npm: start - api-gateway",
       ]
     },
     {
@@ -75,6 +76,18 @@
       "path": "api-gateway",
       "problemMatcher": [],
       "label": "npm: start - api-gateway",
+      "detail": "nodemon server.js",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "start",
+      "path": "admin",
+      "problemMatcher": [],
+      "label": "npm: start - admin",
       "detail": "nodemon server.js",
       "group": {
         "kind": "build",
