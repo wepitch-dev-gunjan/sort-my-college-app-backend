@@ -20,7 +20,6 @@ router.get("/:counsellor_id/sessions", getSessions);
 router.get("/:counsellor_id/sessionsforcounsellor", getSessionsForCounsellor);
 router.get("/sessions/:session_id", getSession);
 router.get("/session/sessions/count", counsellorAuth, getTotalSessionsCount);
-router.get("/sessioncheckout/:session_id", getCheckoutDetails);
 
 // POST
 router.post("/sessions", counsellorAuth, addSession);

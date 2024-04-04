@@ -86,7 +86,9 @@ exports.epOrUserAuth = async (req, res, next) => {
 
     let responseData = null;
     if (decoded.institute_id) {
-      responseData = await EntranceInstitute.findOne({ _id: decoded.institute_id });
+      responseData = await EntranceInstitute.findOne({
+        _id: decoded.institute_id,
+      });
       req.id = decoded.institute_id;
     } else if (decoded.user_id) {
       const { data } = await axios.get(`${BACKEND_URL}/user/users`, null, {
@@ -191,8 +193,9 @@ exports.adminOrEpAuth = async (req, res, next) => {
 
     if (!responseData) {
       return res.status(401).json({
-        error: `${decoded.institute_id ? "Entrance Institute" : "Admin"
-          } not authorized`,
+        error: `${
+          decoded.institute_id ? "Entrance Institute" : "Admin"
+        } not authorized`,
       });
     }
 

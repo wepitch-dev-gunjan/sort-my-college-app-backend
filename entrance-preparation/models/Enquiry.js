@@ -1,15 +1,14 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
 const enquirySchema = new Schema(
   {
-
     enquirer: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     enquired_to: {
       type: Schema.Types.ObjectId,
-      ref: 'EntranceInstitute',
+      ref: "EntranceInstitute",
     },
     courses: [String],
     mode: [String],
@@ -20,8 +19,8 @@ const enquirySchema = new Schema(
   },
   {
     timestamps: true,
-    strict: false
+    strict: false,
   }
 );
 
-module.exports = model('Enquiry', enquirySchema);
+module.exports = model("Enquiry", enquirySchema);

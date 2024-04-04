@@ -25,23 +25,15 @@ exports.getFaculties = async (req, res) => {
 };
 
 exports.addFaculties = async (req, res) => {
-  const { file } = req;
+  // const { file } = req;
   try {
-    const existingFaculty = await Faculties.findOne({ name: req.body.name });
-
-    if (existingFaculty) {
-      return res
-        .status(400)
-        .send({ error: "Faculty with the same name already exists" });
-    }
-
-    const fileName = `display_pic-${Date.now()}.png`;
-    const folderName = `Faculty_display_pic`;
-    const display_pic = await uploadImage(file.buffer, fileName, folderName);
+    // const fileName = `display_pic-${Date.now()}.png`;
+    // const folderName = `Faculty_display_pic`;
+    // const display_pic = await uploadImage(file.buffer, fileName, folderName);
 
     const faculty = new Faculties({
       name: req.body.name,
-      display_pic,
+      // display_pic,
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,

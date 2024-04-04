@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/faculties", getFaculties);
 
 // post APIs
-router.post("/addFaculties", upload.single("display_pic"), addFaculties);
+router.post("/addfaculties", upload.single("display_pic"), addFaculties);
 
 //Dlt APIs
 router.delete("/faculties/:faculty_id", deleteFaculty);
