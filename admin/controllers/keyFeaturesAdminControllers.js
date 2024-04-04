@@ -1,4 +1,4 @@
-const keyFeaturesAdmin = require("../models/keyFeaturesAdmin");
+const { default: mongoose } = require("mongoose");
 const KeyFeaturesAdmin = require("../models/keyFeaturesAdmin");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
 const axios = require("axios");
@@ -191,3 +191,30 @@ exports.findOneKeyFeatureAdmin = async (req, res) => {
     })
   }
 }
+
+exports.getKeyFeaturesByIds = async (req, res) => {
+  try {
+    let { key_feature_ids } = req.query;
+    key_feature_ids = JSON.parse(key_feature_ids);
+    console.log(key_feature_ids)
+
+    const all_ids = await KeyFeaturesAdmin.find({}, '_id');
+    const all_ids_strings = all_ids.map(item => item._id.toString());
+    const ids_in_key_features = all_ids_strings.filter(id => key_feature_ids.includes(id));
+
+    const keyFeatures = await KeyFeaturesAdmin.find({ _id: { $in: ids_in_key_features } });
+    
+
+    if (keyFeatures.length === 0) {
+      return res.status(200).send([]);
+    }
+
+
+    res.status(200).send(keyFeatures);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error"
+    });
+  }
+};

@@ -6,7 +6,8 @@ const {
     editKeyFeaturesAdmin,
     deleteKeyFeatureAdmin,
     getRemainingKeyFeaturesForInstitute,
-    findOneKeyFeatureAdmin
+    findOneKeyFeatureAdmin,
+    getKeyFeaturesByIds
 } = require("../controllers/keyFeaturesAdminControllers");
 const upload = require("../middlewares/uploadBanner");
 const router = express.Router();
@@ -20,6 +21,8 @@ router.delete("/key-features-admin/:key_feature_id", adminAuth, deleteKeyFeature
 // Routes for Institute 
 router.get("/key-features-institute/remaining-key-features-for-institute", epAuth, getRemainingKeyFeaturesForInstitute)
 router.get("/key-features-institute/find-one-key-feature", findOneKeyFeatureAdmin)
+router.get("/key-features-institute/key-features", getKeyFeaturesByIds)
+
 
 
 module.exports = router;
