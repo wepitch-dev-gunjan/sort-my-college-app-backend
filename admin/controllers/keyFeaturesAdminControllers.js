@@ -1,3 +1,4 @@
+const keyFeaturesAdmin = require("../models/keyFeaturesAdmin");
 const KeyFeaturesAdmin = require("../models/keyFeaturesAdmin");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
 const axios = require("axios");
@@ -168,3 +169,25 @@ exports.deleteKeyFeatureAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.findOneKeyFeatureAdmin = async (req, res) => {
+  try {
+    const { key_feature_id } = req.params;
+    
+    const keyFeatureAdmin = await keyFeaturesAdmin.findOne({ _id: key_feature_id});
+
+    if (!keyFeatureAdmin) {
+      return res.status(404).send({
+        error: "Key feature not found"
+      });
+    }
+
+    // If key feature is found, send it in the response
+    res.status(200).send(keyFeatureAdmin);
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      error: "Internal server error"
+    })
+  }
+}

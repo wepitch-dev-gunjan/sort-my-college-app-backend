@@ -5,16 +5,13 @@ const KeyFeatures = require("../models/KeyFeatures");
 exports.addKeyFeature = async (req, res) => {
     try{
         const { institute_id } = req;
-        const { name, key_features_icon } = req.body;
+        const { key_feature } = req.body;
 
         if (!institute_id) {
             return res.status(404).json({ message: "Specified institute not found" });
         }
-        if (!name) {
-            return res.status(404).json({ message: "Key Feature Name not found" });
-        }
-        if (!key_features_icon) {
-            return res.status(404).json({ message: "Key Feature Icon not found" });
+        if (!key_feature) {
+            return res.status(404).json({ message: "Key Feature not found" });
         }
 
         const newKeyFeature = new KeyFeatures({
@@ -60,14 +57,11 @@ exports.getKeyFeaturesForAdmin = async (req, res) => {
         }
 
         res.status(200).json(allKeyFeatures);
-
     } catch (error) {
         console.error("Error getting Key Feature: ", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
-
 
 exports.deleteKeyFeatures = async (req, res) => {
     try {
@@ -85,7 +79,6 @@ exports.deleteKeyFeatures = async (req, res) => {
             institute: institute_id,
             _id : key_feature_id
         })
-
 
         if(!deletedKeyFeature) {
             return res.status(404).json({ message: "Key Feature not found" });

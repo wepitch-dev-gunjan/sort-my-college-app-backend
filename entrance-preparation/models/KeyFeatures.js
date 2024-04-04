@@ -5,12 +5,7 @@ const keyFeatureSchema = new Schema ({
         type: Schema.Types.ObjectId,
         ref: "EntranceInstitute"
     },
-    name: {
-        type: String
-    },
-    key_features_icon: {
-        type: String
-    }
+    key_feature : String
 },
 {
     strict: false,
