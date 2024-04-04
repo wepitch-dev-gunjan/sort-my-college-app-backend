@@ -1,5 +1,5 @@
 const User = require("../models/User");
-require('dotenv');
+require("dotenv");
 
 const { BACKEND_URL } = process.env;
 
@@ -8,9 +8,10 @@ exports.register = async (req, res) => {
     const { user_id } = req;
     const { name, date_of_birth, gender, education_level } = req.body;
 
-    if (!name || !date_of_birth || !gender || !education_level) return res.status(400).send({
-      error: "Required fields not provided"
-    })
+    if (!name || !date_of_birth || !gender || !education_level)
+      return res.status(400).send({
+        error: "Required fields not provided",
+      });
 
     const user = await User.findOne({ _id: user_id });
     user.name = name;
@@ -18,14 +19,14 @@ exports.register = async (req, res) => {
     user.gender = gender;
     user.education_level = education_level;
 
-    await user.save()
+    await user.save();
 
     res.status(200).send({
-      message: "User registered successfully"
-    })
+      message: "User registered successfully",
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -108,7 +109,6 @@ exports.findOneUser = async (req, res) => {
     if (user_id) query._id = user_id;
 
     const user = await User.findOne(query);
-
     if (!user) {
       return res.status(400).send({ error: "User not found" });
     }
@@ -201,13 +201,16 @@ exports.getUsersForAdmin = async (req, res) => {
 
 exports.getSingleUser = async (req, res) => {
   const { user_id } = req.params;
+  console.log(user_id);
+
   try {
-    const id = await User.findOne({ _id: user_id });
-    if (!id) {
+    const user = await User.findOne({ _id: user_id });
+    if (!user) {
       return res.status(404).json({ error: "No user found with this ID" });
     }
+    console.log(user);
 
-    res.status(200).send(id);
+    res.status(200).send(user);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });

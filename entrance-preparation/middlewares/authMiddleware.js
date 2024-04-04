@@ -51,7 +51,7 @@ exports.userAuth = async (req, res, next) => {
 
     const userResponse = await axios.get(`${BACKEND_URL}/user/users`, {
       params: {
-        email: decoded.email,
+        user_id: decoded.user_id,
       },
     });
 

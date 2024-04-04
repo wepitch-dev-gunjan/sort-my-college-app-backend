@@ -5,11 +5,17 @@ const {
   userAuth,
 } = require("../middlewares/authMiddleware");
 
-const { addEnquiry } = require("../controllers/enquiryControllers");
+const {
+  addEnquiry,
+  getEnquiries,
+} = require("../controllers/enquiryControllers");
 
 const router = express.Router();
 
 // EP Panel Routes
-router.post("/enquiry", epAuth, addEnquiry);
+router.post("/enquiry", userAuth, addEnquiry);
+
+//Get
+router.get("/enquiries", epAuth, getEnquiries);
 
 module.exports = router;

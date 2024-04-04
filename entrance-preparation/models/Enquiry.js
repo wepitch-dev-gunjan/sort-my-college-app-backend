@@ -16,6 +16,10 @@ const enquirySchema = new Schema(
     message: {
       type: String,
     },
+    status: {
+      type: ["pending", "solved"],
+      default: "pending",
+    },
   },
   {
     timestamps: true,
