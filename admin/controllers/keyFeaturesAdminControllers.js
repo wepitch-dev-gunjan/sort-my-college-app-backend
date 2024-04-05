@@ -40,7 +40,10 @@ exports.getRemainingKeyFeaturesForInstitute = async (req, res) => {
     const remaining_key_features = all_key_features.filter(keyFeature => {
       return !existing_key_features_ids.includes(keyFeature.id); // Assuming each key feature object has an 'id' property
     });
-
+    
+    if (remaining_key_features.length === 0) {
+      return res.status(200).json(all_key_features);
+    }
     res.status(200).json(remaining_key_features);
   } catch (error) {
     console.error("Error fetching Key Features From Institute: ", error);

@@ -8,7 +8,8 @@ const {
     addKeyFeature,
     getKeyFeatures,
     deleteKeyFeatures,
-    getKeyFeaturesForAdmin
+    getKeyFeaturesForAdmin,
+    editKeyFeatures
 } = require("../controllers/keyFeaturesControllers");
 const router = express.Router();
 
@@ -17,8 +18,8 @@ const router = express.Router();
 
 router.get("/key-features", epAuth, getKeyFeatures);
 router.post("/key-features", epAuth, addKeyFeature);
-// router.put("/key-feature/:key_feature_id", epAUth, editKeyFeature);
 router.delete("/key-features/:key_feature_id", epAuth, deleteKeyFeatures);
+router.put("/key-features/edit/", epAuth, editKeyFeatures );
 
 
 // ADMIN Panel Routes 
