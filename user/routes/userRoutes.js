@@ -19,7 +19,7 @@ const router = express.Router();
 // user routes
 router.get("/", userAuth, getProfile);
 router.put("/", userAuth, editUser);
-router.put("/register", userAuth, register)
+router.put("/register", userAuth, register);
 
 // admin routes
 router.get("/users", findOneUser);

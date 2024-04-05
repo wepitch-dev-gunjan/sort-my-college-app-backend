@@ -8,7 +8,7 @@ const EntranceCourse = require("../models/EntranceCourse");
 exports.getCoursesForEp = async (req, res) => {
   try {
     const { institute_id } = req;
-    console.log(institute_id);
+    // console.log(institute_id);
     const courses = await EntranceCourse.find({ institute: institute_id });
 
     if (!courses || courses.length === 0) {

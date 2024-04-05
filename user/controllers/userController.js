@@ -201,18 +201,17 @@ exports.getUsersForAdmin = async (req, res) => {
 
 exports.getSingleUser = async (req, res) => {
   const { user_id } = req.params;
-  console.log(user_id);
 
   try {
     const user = await User.findOne({ _id: user_id });
+    console.log(user);
     if (!user) {
       return res.status(404).json({ error: "No user found with this ID" });
     }
-    console.log(user);
 
     res.status(200).send(user);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal user Server Error" });
   }
 };
