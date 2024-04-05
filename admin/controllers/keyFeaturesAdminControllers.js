@@ -35,13 +35,12 @@ exports.getRemainingKeyFeaturesForInstitute = async (req, res) => {
     const response = await axios.get(
       `${BACKEND_URL}/ep/admin/key-features/${institute_id}`
     );
-    const existing_key_features = response.data.map((feature) => feature.name);
+    const existing_key_features_ids = response.data;
     const all_key_features = await KeyFeaturesAdmin.find();
-    const remaining_key_features = all_key_features.filter(
-      (keyFeature) => !existing_key_features.includes(keyFeature.name)
-    );
+    const remaining_key_features = all_key_features.filter(keyFeature => {
+      return !existing_key_features_ids.includes(keyFeature.id); // Assuming each key feature object has an 'id' property
+    });
 
-    // Assuming the response contains data property
     res.status(200).json(remaining_key_features);
   } catch (error) {
     console.error("Error fetching Key Features From Institute: ", error);

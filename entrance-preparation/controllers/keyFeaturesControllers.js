@@ -64,8 +64,9 @@ exports.getKeyFeaturesForAdmin = async (req, res) => {
         if (!allKeyFeatures || allKeyFeatures.length === 0) {
             return res.status(404).json({ message: "Key features not found for the specified institute" });
         }
+        const all_key_feature_ids = allKeyFeatures.map(item => item.key_feature)
 
-        res.status(200).json(allKeyFeatures);
+        res.status(200).json(all_key_feature_ids);
     } catch (error) {
         console.error("Error getting Key Feature: ", error);
         res.status(500).json({ message: "Internal Server Error" });
