@@ -14,4 +14,4 @@ const announcementSchema = new Schema ({
     strict: false
 })
 
-exports.module = model('Announcements', announcementSchema)
+module.exports = model('Announcement', announcementSchema)
