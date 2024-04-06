@@ -32,6 +32,7 @@ router.put("/counsellor/sessions/:session_id/cancel", cancelSession);
 // router.put('/session/:counseling_id/reschedule', rescheduleSession);
 // router.put('/session/:counseling_id/cancel', cancelSession);
 
+
 // DELETE
 router.delete("/sessions/:session_id", counsellorAuth, deleteSession);
 
