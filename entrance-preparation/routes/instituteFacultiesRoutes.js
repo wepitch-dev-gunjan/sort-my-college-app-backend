@@ -16,6 +16,7 @@ router.post("/addfaculties", upload.single("display_pic"), addFaculties);
 
 //Dlt APIs
 router.delete("/faculties/:faculty_id", deleteFaculty);
+
 // put Api
-router.put("/editfaculties/:faculty_id" , editFaculties)
+router.put("/editfaculties/:faculty_id", editFaculties);
 module.exports = router;
