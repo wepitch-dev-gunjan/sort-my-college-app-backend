@@ -61,3 +61,22 @@ exports.deleteFaculty = async (req, res) => {
     console.log(error);
   }
 };
+exports.editFaculties = async (req,res) => {
+ try {
+  const { faculty_id } = req.params;
+  const updateFaculty = req.body;
+  console.log(updateFaculty)
+  const updatedData = await Faculties.findByIdAndUpdate(
+   faculty_id,
+   updateFaculty,
+{new: true}
+  );
+  if(!updatedData) {
+   return res.status(404).json({message : "Faculty Not Found"})
+  }
+  res.status(200).json(updatedData);
+ } catch (error) {
+  console.log("Error Editing Faculty");
+  res.status(500).json({message : "Internal Server Error"})
+ }
+};

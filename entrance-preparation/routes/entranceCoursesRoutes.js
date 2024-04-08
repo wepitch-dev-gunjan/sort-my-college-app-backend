@@ -13,11 +13,12 @@ const {
 // const { c
 
 //  } = require("../controllers/entranceCourseControllers");
+const upload = require("../middlewares/uploadImage");
 const router = express.Router();
 
 // EP Panel Routes
 router.get("/courses", epAuth, getCoursesForEp);
-router.post("/courses", epAuth, addCourse);
+router.post("/courses",upload.single("image"), epAuth, addCourse);
 router.put("/courses/:course_id", epAuth,editCourse);
 router.delete("/courses/:course_id", epAuth,deleteCourse);
 
