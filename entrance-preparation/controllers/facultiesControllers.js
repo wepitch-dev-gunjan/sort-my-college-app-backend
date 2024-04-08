@@ -3,8 +3,9 @@ const Faculties = require("../models/Faculties");
 const { uploadImage } = require("../services/cloudinary");
 
 exports.getFaculties = async (req, res) => {
+  const { institute_id } = req;
   try {
-    const faculties = await Faculties.find({});
+    const faculties = await Faculties.find({ institute: institute_id });
     if (!faculties || faculties.length === 0) {
       return res.status(200).send([]);
     }
@@ -26,11 +27,16 @@ exports.getFaculties = async (req, res) => {
 
 exports.addFaculties = async (req, res) => {
   const { file } = req;
-  try {
-    const fileName = `display_pic-${Date.now()}.png`;
-    const folderName = `Faculty_display_pic`;
-    const display_pic = await uploadImage(file.buffer, fileName, folderName);
+  console.log(file);
 
+  try {
+    if (file) {
+      const fileName = `display_pic-${Date.now()}.png`;
+      const folderName = `Faculty_display_pic`;
+      display_pic = await uploadImage(req.file.buffer, fileName, folderName);
+    } else {
+      display_pic = "https://www.shutterstock.com/search/default";
+    }
     const faculty = new Faculties({
       name: req.body.name,
       display_pic,
