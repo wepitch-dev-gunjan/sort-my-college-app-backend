@@ -9,6 +9,7 @@ const {
   addEnquiry,
   getEnquiries,
   getSingleEnquiry,
+  EnquiryStatusChange,
 } = require("../controllers/enquiryControllers");
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.post("/enquiry", userAuth, addEnquiry);
 //Get
 router.get("/enquiries", epAuth, getEnquiries);
 router.get("/singleEnqury/:enquiry_id", epAuth, getSingleEnquiry);
+router.put("/singleEnqury/:enquiry_id", epAuth, EnquiryStatusChange);
 
 module.exports = router;

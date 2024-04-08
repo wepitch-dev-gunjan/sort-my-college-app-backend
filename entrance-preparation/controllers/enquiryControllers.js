@@ -81,7 +81,6 @@ exports.getEnquiries = async (req, res) => {
 exports.getSingleEnquiry = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
-    console.log("yhi h bhai", enquiry_id);
 
     const enquiryData = await Enquiry.findById(enquiry_id.toString());
 
@@ -115,6 +114,32 @@ exports.getSingleEnquiry = async (req, res) => {
     ];
 
     res.status(200).send(responseData);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
+exports.EnquiryStatusChange = async (req, res) => {
+  try {
+    const { enquiry_id } = req.params;
+    console.log(enquiry_id);
+
+    const enquiryData = await Enquiry.findById(enquiry_id);
+    console.log(enquiryData);
+
+    if (!enquiryData)
+      return res.status(404).send({ message: "No enquiry found with this ID" });
+
+    if (enquiryData.status == "Solved") {
+      enquiryData.status = "Pending";
+    } else if (enquiryData.status == "Pending") {
+      enquiryData.status = "Solved";
+    }
+
+    await enquiryData.save();
+
+    res.status(200).send(enquiryData);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({ message: "Internal server error" });
