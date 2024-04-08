@@ -31,13 +31,14 @@ exports.addAnnouncements = async (req, res) => {
             return res.status(404).json({message: "Update not found!"})     
         }
 
-        const newAnnouncement = new Announcement({
+        const announcement = new Announcement({
             institute : institute_id,
             update
         })
 
-        await newAnnouncement.save();
-        res.status(201).json({ message: "Announcement added successfully", announcement: newAnnouncement});
+        const newAnnouncement = await announcement.save();
+        console.log(newAnnouncement)
+        res.status(201).json({ message: "Announcement added successfully", data: newAnnouncement});
 
     } catch (error) {
         console.error("Error adding Key Announcements: ", error);
