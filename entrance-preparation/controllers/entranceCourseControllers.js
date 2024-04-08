@@ -1,8 +1,10 @@
 // const EntranceCourse = require("../models/EntranceCourse");
 const jwt = require("jsonwebtoken");
+const { json } = require("express");
+
 const { JWT_SECRET } = process.env;
 const EntranceCourse = require("../models/EntranceCourse");
-
+const { uploadImage} = require("../services/cloudinary")
 // EP Panel Controllers
 // courses for Ep Panel
 exports.getCoursesForEp = async (req, res) => {
@@ -32,9 +34,13 @@ exports.getCoursesForEp = async (req, res) => {
 // add course
 exports.addCourse = async (req, res) => {
   // const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
-
   try {
-    // const existingCourse = await EntranceCourse.findOne({name: req.body.name});
+   const { file } = req;
+   console.log(file);
+   const fileName = `image-${Date.now()}.png`;
+   const folderName = `Course_images`;
+   const image = await uploadImage(file.buffer, fileName,folderName);
+    const existingCourse = await EntranceCourse.findOne({name: req.body.name});
     //   if(existingCourse)
     //   {
     // return res.status(400).send({error : "course already exist"});
@@ -42,7 +48,7 @@ exports.addCourse = async (req, res) => {
     const { institute_id } = req;
     const addCourse = new EntranceCourse({
       name: req.body.name,
-      image: req.body.image,
+      image,
       type: req.body.type,
       academic_session: req.body.academic_session,
       course_fee: req.body.course_fee,
@@ -51,16 +57,12 @@ exports.addCourse = async (req, res) => {
     });
     await addCourse.save();
     res.status(201).json({
-      success: true,
       message: "course Added Succesfully",
-      data: addCourse,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      success: false,
       messge: "error adding course",
-      error: error.message,
     });
   }
 };
