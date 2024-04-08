@@ -71,7 +71,7 @@ exports.editFaculties = async (req, res) => {
   try {
     const { faculty_id } = req.params;
     const updateFaculty = req.body;
-    console.log(updateFaculty);
+    // console.log(updateFaculty);
     const updatedData = await Faculties.findByIdAndUpdate(
       faculty_id,
       updateFaculty,

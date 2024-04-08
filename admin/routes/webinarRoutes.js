@@ -10,7 +10,8 @@ const {
   registerParticipant,
   getSingleWebinarForUser,
   removeParticipant,
-  getTrendingWebinars
+  getTrendingWebinars,
+  getMyWebinars
 } = require("../controllers/webinarController");
 const { adminAuth, userAuth } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/uploadBanner");
@@ -19,6 +20,7 @@ const router = express.Router();
 router.get("/webinar/webinar-for-admin", getWebinarsForAdmin);
 router.get("/webinar/webinar-for-admin/:webinar_id", getSingleWebinarForAdmin);
 router.get("/webinar/webinar-for-user", userAuth, getWebinarsForUser);
+router.get("/webinar/webinar-for-user/my-webinars", userAuth, getMyWebinars);
 router.get("/webinar/webinar-for-user/trending-webinars", userAuth, getTrendingWebinars);
 router.get("/webinar/webinar-for-user/:webinar_id", userAuth, getSingleWebinarForUser);
 router.post("/webinar/generate-signature", zoomGenerateSignature);
