@@ -83,6 +83,51 @@ exports.getWebinarsForUser = async (req, res) => {
   }
 };
 
+exports.getTrendingWebinars = async (req, res) => {
+  try {
+    const { user_id } = req;
+    const { query } = req.query;
+
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const webinars = await Webinar.find({ registered_participants: { $in: user_id } });
+    if (!webinars) return res.status(200).send([]);
+
+    const massagedWebinars = webinars.map(webinar => {
+      const webinarDate = webinar.webinar_date;
+      webinarDate.setUTCHours(0, 0, 0, 0);
+
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const webinar_date = webinarDateModifier(webinar.webinar_date);
+      const registered = webinar.registered_participants.includes(user_id)
+      return {
+        id: webinar._id,
+        webinar_image: webinar.webinar_image,
+        webinar_title: webinar.webinar_title,
+        webinar_date,
+        registered_date: webinar.webinar_date,
+        webinar_join_url: webinar.webinar_join_url,
+        webinar_by: webinar.webinar_by,
+        speaker_profile: webinar.speaker_profile,
+        webinar_starting_in_days: dateDifference,
+        registered
+      }
+    })
+
+    res.status(200).send(massagedWebinars)
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 exports.addWebinar = async (req, res) => {
   try {
     const {

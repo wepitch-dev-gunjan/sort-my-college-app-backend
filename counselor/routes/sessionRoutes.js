@@ -11,6 +11,7 @@ const {
   getSessionsForCounsellor,
   getTotalSessionsCount,
   getCheckoutDetails,
+  getPopularWorkshops
 } = require("../controllers/sessionController");
 const { counsellorAuth, userAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get("/:counsellor_id/sessions", getSessions);
 router.get("/:counsellor_id/sessionsforcounsellor", getSessionsForCounsellor);
 router.get("/sessions/:session_id", getSession);
 router.get("/session/sessions/count", counsellorAuth, getTotalSessionsCount);
+router.get("/session/sessions/popular-workshops", userAuth, getPopularWorkshops);
 
 // POST
 router.post("/sessions", counsellorAuth, addSession);
