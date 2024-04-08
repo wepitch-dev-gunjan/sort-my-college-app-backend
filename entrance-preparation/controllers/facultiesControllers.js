@@ -25,15 +25,15 @@ exports.getFaculties = async (req, res) => {
 };
 
 exports.addFaculties = async (req, res) => {
-  // const { file } = req;
+  const { file } = req;
   try {
-    // const fileName = `display_pic-${Date.now()}.png`;
-    // const folderName = `Faculty_display_pic`;
-    // const display_pic = await uploadImage(file.buffer, fileName, folderName);
+    const fileName = `display_pic-${Date.now()}.png`;
+    const folderName = `Faculty_display_pic`;
+    const display_pic = await uploadImage(file.buffer, fileName, folderName);
 
     const faculty = new Faculties({
       name: req.body.name,
-      // display_pic,
+      display_pic,
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,
@@ -61,22 +61,22 @@ exports.deleteFaculty = async (req, res) => {
     console.log(error);
   }
 };
-exports.editFaculties = async (req,res) => {
- try {
-  const { faculty_id } = req.params;
-  const updateFaculty = req.body;
-  console.log(updateFaculty)
-  const updatedData = await Faculties.findByIdAndUpdate(
-   faculty_id,
-   updateFaculty,
-{new: true}
-  );
-  if(!updatedData) {
-   return res.status(404).json({message : "Faculty Not Found"})
+exports.editFaculties = async (req, res) => {
+  try {
+    const { faculty_id } = req.params;
+    const updateFaculty = req.body;
+    console.log(updateFaculty);
+    const updatedData = await Faculties.findByIdAndUpdate(
+      faculty_id,
+      updateFaculty,
+      { new: true }
+    );
+    if (!updatedData) {
+      return res.status(404).json({ message: "Faculty Not Found" });
+    }
+    res.status(200).json(updatedData);
+  } catch (error) {
+    console.log("Error Editing Faculty");
+    res.status(500).json({ message: "Internal Server Error" });
   }
-  res.status(200).json(updatedData);
- } catch (error) {
-  console.log("Error Editing Faculty");
-  res.status(500).json({message : "Internal Server Error"})
- }
 };
