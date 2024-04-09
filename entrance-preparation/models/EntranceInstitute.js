@@ -27,11 +27,27 @@ const entranceInstituteSchema = new Schema({
     type: String
   }],
   address: {
-    building_number: String,
-    area: String,
-    city: String,
-    state: String,
-    pin_code: String
+    building_number:{
+     type: String,
+     default: "BULDING NUMBER",
+    } ,
+    area: {
+     type: String,
+     default: "AREA",
+    } ,
+
+    city:{
+     type: String,
+     default: "CITY",
+    } ,
+    state: {
+     type: String,
+     default: "STATE",
+    },
+    pin_code: {
+     type: String,
+     default: "PIN CODE",
+    }
   },
   direction_url: {
     type: String

@@ -5,18 +5,20 @@ const { uploadImage } = require("../services/cloudinary");
 exports.getFaculties = async (req, res) => {
   const { institute_id } = req;
   try {
-    const faculties = await Faculties.find({ institute: institute_id });
+    const faculties = await Faculties.find({ institute: institute_id })
     if (!faculties || faculties.length === 0) {
       return res.status(200).send([]);
     }
-    const massagedFaculties = faculties.map((faculties) => ({
-      _id: faculties._id,
-      name: faculties.name,
-      display_pic: faculties.display_pic,
-      experience_in_years: faculties.experience_in_years,
-      qualifications: faculties.qualifications,
-      graduated_from: faculties.graduated_from,
+    const massagedFaculties = faculties.map((faculty) => ({
+      _id: faculty._id,
+      institute_id : institute_id,
+      name: faculty.name,
+      display_pic: faculty.display_pic,
+      experience_in_years: faculty.experience_in_years,
+      qualifications: faculty.qualifications,
+      graduated_from: faculty.graduated_from,
     }));
+    
 
     res.status(200).send(massagedFaculties);
   } catch (error) {
@@ -25,10 +27,10 @@ exports.getFaculties = async (req, res) => {
   }
 };
 
-exports.addFaculties = async (req, res) => {
+exports.addFaculty = async (req, res) => {
   const { file } = req;
   console.log(file);
-
+const {institute_id} = req;
   try {
     if (file) {
       const fileName = `display_pic-${Date.now()}.png`;
@@ -43,7 +45,7 @@ exports.addFaculties = async (req, res) => {
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,
-      institute: req.body.institute,
+      institute: institute_id
     });
 
     await faculty.save();
