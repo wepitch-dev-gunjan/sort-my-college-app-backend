@@ -4,147 +4,170 @@ const axios = require("axios");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
-// EP Panel Controllers 
+// EP Panel Controllers
 exports.addKeyFeature = async (req, res) => {
-    try{
-        const { institute_id } = req;
-        const { key_feature } = req.body;
+  try {
+    const { institute_id } = req;
+    const { key_feature } = req.body;
 
-        if (!institute_id) {
-            return res.status(404).json({ message: "Specified institute not found" });
-        }
-        if (!key_feature) {
-            return res.status(404).json({ message: "Key Feature not found" });
-        }
-
-        const newKeyFeature = new KeyFeatures({
-            institute:institute_id,
-            key_feature
-        })
-
-        await newKeyFeature.save();
-        res.status(201).json({ message: "Key feature added successfully", keyFeature: newKeyFeature});
-    } catch (error) {
-        console.error("Error adding Key Features for Institutes")
-        res.status(500).json({message: "Internal Server Error"})
+    if (!institute_id) {
+      return res.status(404).json({ message: "Specified institute not found" });
     }
-}
+    if (!key_feature) {
+      return res.status(404).json({ message: "Key Feature not found" });
+    }
+
+    const newKeyFeature = new KeyFeatures({
+      institute: institute_id,
+      key_feature,
+    });
+
+    await newKeyFeature.save();
+    res
+      .status(201)
+      .json({
+        message: "Key feature added successfully",
+        keyFeature: newKeyFeature,
+      });
+  } catch (error) {
+    console.error("Error adding Key Features for Institutes");
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 exports.getKeyFeatures = async (req, res) => {
-    try {
-        const { institute_id } = req;
-        const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
+  try {
+    const { institute_id } = req;
+    const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
 
-        if (!allKeyFeatures || allKeyFeatures.length === 0) {
-            return res.status(404).json({ message: "Key features not found for the specified institute" });
-        }
-
-        let key_feature_ids = allKeyFeatures.map(keyFeature => keyFeature.key_feature);
-        
-        // console.log(key_feature_ids)
-        
-        const { data } = await axios.get(`${BACKEND_URL}/admin/key-features-institute/key-features`, {
-            params: {
-                key_feature_ids: JSON.stringify(key_feature_ids)
-            }
+    if (!allKeyFeatures || allKeyFeatures.length === 0) {
+      return res
+        .status(404)
+        .json({
+          message: "Key features not found for the specified institute",
         });
-
-        res.status(200).json(data);
-    } catch (error) {
-        console.error("Error getting Key Feature: ", error);
-        res.status(500).json({ message: "Internal Server Error!!" });
     }
+
+    let key_feature_ids = allKeyFeatures.map(
+      (keyFeature) => keyFeature.key_feature
+    );
+
+    // console.log(key_feature_ids)
+
+    const { data } = await axios.get(
+      `${BACKEND_URL}/admin/key-features-institute/key-features`,
+      {
+        params: {
+          key_feature_ids: JSON.stringify(key_feature_ids),
+        },
+      }
+    );
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error getting Key Feature: ", error);
+    res.status(500).json({ message: "Internal Server Error!!" });
+  }
 };
 
 exports.getKeyFeaturesForAdmin = async (req, res) => {
-    try {
-        const { institute_id } = req.params;
-        const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
+  try {
+    const { institute_id } = req.params;
+    const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
 
-        if (!allKeyFeatures || allKeyFeatures.length === 0) {
-            return res.status(200).json([]);
-        }
-        const all_key_feature_ids = allKeyFeatures.map(item => item.key_feature)
-      
-
-        res.status(200).json(all_key_feature_ids);
-    } catch (error) {
-        console.error("Error getting Key Feature: ", error);
-        res.status(500).json({ message: "Internal Server Error" });
+    if (!allKeyFeatures || allKeyFeatures.length === 0) {
+      return res.status(200).json([]);
     }
+    const all_key_feature_ids = allKeyFeatures.map((item) => item.key_feature);
+
+    res.status(200).json(all_key_feature_ids);
+  } catch (error) {
+    console.error("Error getting Key Feature: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 exports.deleteKeyFeatures = async (req, res) => {
-    try {
-        const { key_feature_id } = req.params;
-        const { institute_id } = req;
+  try {
+    const { key_feature_id } = req.params;
+    const { institute_id } = req;
 
-        if (!key_feature_id) {
-            return res.status(400).json({ error: "Missing Key Feature ID" })
-        }
-        if (!institute_id) {
-            return res.status(400).json({ error: "Missing Institute ID" })
-        }
-
-        const deletedKeyFeature = await KeyFeatures.findOneAndDelete({
-            institute: institute_id,
-            _id : key_feature_id
-        })
-
-        if(!deletedKeyFeature) {
-            return res.status(404).json({ message: "Key Feature not found" });
-        }
-        res.status(200).json({ message: "Key feature deleted successfully", deletedKeyFeature });
-    } catch (error) {
-        console.error("Error deleting Key Feature")
-        res.status(500).json({ message: "Internal Server Error" })
+    if (!key_feature_id) {
+      return res.status(400).json({ error: "Missing Key Feature ID" });
     }
-}
+    if (!institute_id) {
+      return res.status(400).json({ error: "Missing Institute ID" });
+    }
+
+    const deletedKeyFeature = await KeyFeatures.findOneAndDelete({
+      institute: institute_id,
+      _id: key_feature_id,
+    });
+
+    if (!deletedKeyFeature) {
+      return res.status(404).json({ message: "Key Feature not found" });
+    }
+    res
+      .status(200)
+      .json({ message: "Key feature deleted successfully", deletedKeyFeature });
+  } catch (error) {
+    console.error("Error deleting Key Feature");
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 exports.editKeyFeatures = async (req, res) => {
-    try {
-        const { institute_id } = req;
-        const { new_key_features } = req.body;
-        const existing_key_features = await KeyFeatures.find({ institute: institute_id });
+  try {
+    const { institute_id } = req;
+    const { new_key_features } = req.body;
+    const existing_key_features = await KeyFeatures.find({
+      institute: institute_id,
+    });
 
-        const updated_key_features = [];
+    const updated_key_features = [];
 
-        // Ensure new_key_features is defined and is an array
-        if (!Array.isArray(new_key_features)) {
-            return res.status(400).json({ message: "Invalid or missing new_key_features array" });
-        }
-
-        // Delete key features not present in new_key_features
-        for (const existingFeature of existing_key_features) {
-            const found = new_key_features.find(newFeature => newFeature._id.toString() === existingFeature.key_feature.toString());
-            if (!found) {
-                await KeyFeatures.findByIdAndDelete(existingFeature._id);
-            }
-        }
-
-        // Add new key features
-        for (const newFeature of new_key_features) {
-            const found = existing_key_features.find(existingFeature => existingFeature.key_feature.toString() === newFeature._id.toString());
-            if (!found) {
-                const newKeyFeature = new KeyFeatures({
-                    institute: institute_id,
-                    key_feature: newFeature._id
-                });
-                await newKeyFeature.save();
-                updated_key_features.push(newKeyFeature);
-            }
-        }
-
-        res.status(200).json(updated_key_features);
-    } catch (error) {
-        console.error("Error editing Key Feature", error);
-        res.status(500).json({ message: "Internal Server Error" });
+    // Ensure new_key_features is defined and is an array
+    if (!Array.isArray(new_key_features)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid or missing new_key_features array" });
     }
-}
 
+    // Delete key features not present in new_key_features
+    for (const existingFeature of existing_key_features) {
+      const found = new_key_features.find(
+        (newFeature) =>
+          newFeature._id.toString() === existingFeature.key_feature.toString()
+      );
+      if (!found) {
+        await KeyFeatures.findByIdAndDelete(existingFeature._id);
+      }
+    }
 
+    // Add new key features
+    for (const newFeature of new_key_features) {
+      const found = existing_key_features.find(
+        (existingFeature) =>
+          existingFeature.key_feature.toString() === newFeature._id.toString()
+      );
+      if (!found) {
+        const newKeyFeature = new KeyFeatures({
+          institute: institute_id,
+          key_feature: newFeature._id,
+        });
+        await newKeyFeature.save();
+        updated_key_features.push(newKeyFeature);
+      }
+    }
 
-// ADMIN Panel Controllers 
+    res.status(200).json(updated_key_features);
+  } catch (error) {
+    console.error("Error editing Key Feature", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// ADMIN Panel Controllers
 // exports.getKeyFeaturesForAdmin = async (req, res) => {
 //     try {
 
@@ -234,11 +257,10 @@ exports.editKeyFeatures = async (req, res) => {
 //     }
 // }
 
-
-// Controllers for USER 
+// Controllers for USER
 // exports.getKeyFeaturesForUser = async (req, res) => {
 //     try {
-        
+
 //     } catch (error) {
 //         console.error("Error getting key features for User")
 //         res.status(500).json({ message: "Internal Server Error" });

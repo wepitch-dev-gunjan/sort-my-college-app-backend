@@ -4,7 +4,7 @@ const EntranceInstitute = require("../models/EntranceInstitute");
 exports.getProfile = async (req, res) => {
   try {
     const { institute_id } = req;
-    console.log(institute_id);
+
     // Assuming you have some logic to identify the user's profile, for example, using req.user
     // You can customize this query according to your needs
     const profile = await EntranceInstitute.findOne({ _id: institute_id });
@@ -137,7 +137,6 @@ exports.deleteInstituteForAdmin = async (req, res) => {
   }
 };
 
-
 // for Users
 exports.getInstitutesForUser = async (req, res) => {
   try {
@@ -165,37 +164,36 @@ exports.getInstitutesForUser = async (req, res) => {
   }
 };
 
-exports.getInstituteForUser = async(req, res) => {
+exports.getInstituteForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
 
-    const institute = await EntranceInstitute.findOne({_id : institute_id});
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
-    if (!institute){
-      return res.status(404).json({message: "Institute not found !"});
+    if (!institute) {
+      return res.status(404).json({ message: "Institute not found !" });
     }
-    
+
     res.status(200).json(institute);
-  } catch(error){
+  } catch (error) {
     console.error("Error fetching institute for user: ", error);
-    res.status(500).json({message: "Internal Server Error"});
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-exports.findOneInstitute = async(req, res) => {
+exports.findOneInstitute = async (req, res) => {
   try {
     const { institute_id } = req.query;
 
-    const institute = await EntranceInstitute.findOne({_id : institute_id});
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
-    if (!institute){
-      return res.status(404).json({message: "Institute not found !"});
+    if (!institute) {
+      return res.status(404).json({ message: "Institute not found !" });
     }
-    
+
     res.status(200).json(institute);
-  } catch(error){
+  } catch (error) {
     console.error("Error fetching institute for user: ", error);
-    res.status(500).json({message: "Internal Server Error"});
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-

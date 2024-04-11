@@ -83,6 +83,8 @@ exports.getSingleEnquiry = async (req, res) => {
     const { enquiry_id } = req.params;
 
     const enquiryData = await Enquiry.findById(enquiry_id.toString());
+    enquiryData.status = "Seen";
+    await enquiryData.save();
 
     if (!enquiryData)
       return res.status(404).send({ message: "No enquiry found with this ID" });
@@ -123,10 +125,8 @@ exports.getSingleEnquiry = async (req, res) => {
 exports.EnquiryStatusChange = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
-    console.log(enquiry_id);
 
     const enquiryData = await Enquiry.findById(enquiry_id);
-    console.log(enquiryData);
 
     if (!enquiryData)
       return res.status(404).send({ message: "No enquiry found with this ID" });

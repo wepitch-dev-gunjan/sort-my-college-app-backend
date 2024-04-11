@@ -17,8 +17,8 @@ const enquirySchema = new Schema(
       type: String,
     },
     status: {
-      type: ["Pending", "Solved"],
-      default: "Pending",
+      type: ["Seen", "Unseen", "Solved"],
+      default: "Unseen",
     },
   },
   {
