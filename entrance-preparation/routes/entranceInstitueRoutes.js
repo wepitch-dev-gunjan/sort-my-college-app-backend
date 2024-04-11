@@ -13,7 +13,7 @@ const {
   deleteInstituteForAdmin,
   getInstitutesForUser,
   getInstituteForUser,
-  findOneInstitute
+  findOneInstitute,
 } = require("../controllers/entranceInstituteControllers");
 const router = express.Router();
 
@@ -34,7 +34,7 @@ router.get("/institute/find-one", findOneInstitute);
 
 // // user routes
 router.get("/institute/user", userAuth, getInstitutesForUser);
-router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
+router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
 // router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
 
 // router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);

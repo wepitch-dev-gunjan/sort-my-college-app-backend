@@ -213,6 +213,7 @@ exports.adminOrEpAuth = async (req, res, next) => {
 exports.adminAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
+    console.log(token);
     if (!token) {
       return res
         .status(401)
