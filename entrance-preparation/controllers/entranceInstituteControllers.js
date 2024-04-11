@@ -23,24 +23,30 @@ exports.getProfile = async (req, res) => {
 
 exports.editProfile = async (req, res) => {
   try {
-    const { institute_id } = req;
-    const { body } = req;
+    const { institute_id } = req; // Assuming institute_id is passed as a parameter
+    const { about, ...body } = req.body; // Extract about field from the request body
+    console.log(about)
+    // Find the profile by institute_id
+    const profile = await EntranceInstitute.findById(institute_id);
 
-    // Assuming you have some logic to validate and sanitize the request body before updating the profile
-    // You can customize this validation according to your needs
-
-    // Find the profile by institute_id and update it with the new data
-    const updatedProfile = await EntranceInstitute.findByIdAndUpdate(
-      institute_id,
-      body,
-      { new: true }
-    );
-
-    if (!updatedProfile) {
+    if (!profile) {
       return res.status(404).json({ message: "Profile not found" });
     }
 
-    res.status(200).json(updatedProfile);
+    // Update the about field if it's included in the request body
+    if (about !== undefined) {
+      profile.about = about;
+    }
+
+    // Update other fields in the profile
+    Object.keys(body).forEach((key) => {
+      profile[key] = body[key];
+    });
+
+    // Save the updated profile
+    await profile.save();
+
+    res.status(200).json(profile);
   } catch (error) {
     console.error("Error editing profile:", error);
     res.status(500).json({ message: "Internal server error" });
