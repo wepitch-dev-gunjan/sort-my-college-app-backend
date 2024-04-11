@@ -17,7 +17,8 @@ const enquirySchema = new Schema(
       type: String,
     },
     status: {
-      type: ["Seen", "Unseen", "Solved"],
+      type: String,
+      enum: ["Seen", "Unseen", "Replied"],
       default: "Unseen",
     },
   },

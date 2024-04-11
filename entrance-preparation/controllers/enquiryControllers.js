@@ -83,11 +83,11 @@ exports.getSingleEnquiry = async (req, res) => {
     const { enquiry_id } = req.params;
 
     const enquiryData = await Enquiry.findById(enquiry_id.toString());
-    enquiryData.status = "Seen";
-    await enquiryData.save();
-
     if (!enquiryData)
       return res.status(404).send({ message: "No enquiry found with this ID" });
+
+    if (enquiryData.status === "Unseen") enquiryData.status = "Seen";
+    await enquiryData.save();
 
     const userDataResponse = await axios.get(
       `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
@@ -96,24 +96,22 @@ exports.getSingleEnquiry = async (req, res) => {
 
     const courseData = await EntranceCourse.findById(enquiryData.courses);
 
-    const responseData = [
-      {
-        _id: enquiryData._id,
-        enquirer: {
-          _id: userData._id,
-          name: userData.name,
-          phone_number: userData.phone_number,
-        },
-        course: {
-          _id: courseData._id,
-          name: courseData.name,
-          type: courseData.type,
-        },
-        message: enquiryData.message,
-        status: enquiryData.status,
-        date: enquiryData.date,
+    const responseData = {
+      _id: enquiryData._id,
+      enquirer: {
+        _id: userData._id,
+        name: userData.name,
+        phone_number: userData.phone_number,
       },
-    ];
+      course: {
+        _id: courseData._id,
+        name: courseData.name,
+        type: courseData.type,
+      },
+      message: enquiryData.message,
+      status: enquiryData.status,
+      date: enquiryData.date,
+    };
 
     res.status(200).send(responseData);
   } catch (error) {
@@ -122,24 +120,47 @@ exports.getSingleEnquiry = async (req, res) => {
   }
 };
 
-exports.EnquiryStatusChange = async (req, res) => {
+exports.EnquiryStatusChangeToReplies = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
 
-    const enquiryData = await Enquiry.findById(enquiry_id);
-
+    const enquiryData = await Enquiry.findById(enquiry_id.toString());
     if (!enquiryData)
       return res.status(404).send({ message: "No enquiry found with this ID" });
 
-    if (enquiryData.status == "Solved") {
-      enquiryData.status = "Pending";
-    } else if (enquiryData.status == "Pending") {
-      enquiryData.status = "Solved";
-    }
+    if (enquiryData.status === "Unseen")
+      return res.status(400).send({
+        error: "Enquiry is not seen",
+      });
 
+    if (enquiryData.status === "Seen") enquiryData.status = "Replied";
     await enquiryData.save();
 
-    res.status(200).send(enquiryData);
+    const userDataResponse = await axios.get(
+      `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+    );
+    const userData = userDataResponse.data;
+
+    const courseData = await EntranceCourse.findById(enquiryData.courses);
+
+    const responseData = {
+      _id: enquiryData._id,
+      enquirer: {
+        _id: userData._id,
+        name: userData.name,
+        phone_number: userData.phone_number,
+      },
+      course: {
+        _id: courseData._id,
+        name: courseData.name,
+        type: courseData.type,
+      },
+      message: enquiryData.message,
+      status: enquiryData.status,
+      date: enquiryData.date,
+    };
+
+    res.status(200).send(responseData);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send({ message: "Internal server error" });
