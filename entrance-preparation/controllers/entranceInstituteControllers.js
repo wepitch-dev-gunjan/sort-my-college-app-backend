@@ -24,8 +24,9 @@ exports.getProfile = async (req, res) => {
 exports.editProfile = async (req, res) => {
   try {
     const { institute_id } = req; // Assuming institute_id is passed as a parameter
+    console.log(institute_id);
     const { about, ...body } = req.body; // Extract about field from the request body
-    console.log(about)
+    // console.log(about)
     // Find the profile by institute_id
     const profile = await EntranceInstitute.findById(institute_id);
 
@@ -49,7 +50,7 @@ exports.editProfile = async (req, res) => {
     res.status(200).json(profile);
   } catch (error) {
     console.error("Error editing profile:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal edit profile server error" });
   }
 };
 

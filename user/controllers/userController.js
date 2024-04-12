@@ -87,8 +87,8 @@ exports.editUser = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const { user_id } = req;
-    const user = await User.findOne({ _id: user_id });
+    const { phone_number } = req;
+    const user = await User.find({ phone_number });
 
     if (!user) {
       return res.status(400).send({ error: "User not found" });
