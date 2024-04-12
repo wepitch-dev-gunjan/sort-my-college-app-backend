@@ -29,7 +29,6 @@ mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
 
-
 // Routes
 readdirSync('./routes').map((r) => app.use('/', require('./routes/' + r)));
 app.use('/', require('./services/googleAuthentication'));
