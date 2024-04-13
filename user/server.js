@@ -11,7 +11,11 @@ const MONGODB_URI =
 // Middleware to parse JSON data in the request body
 app.use(express.json());
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  // origin: FRONTEND_URL,
+  credentials: true,
+}));
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, {
