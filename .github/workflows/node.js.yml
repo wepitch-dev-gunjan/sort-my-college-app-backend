@@ -76,7 +76,7 @@ jobs:
       - name: Start Node.js applications
         run: |
           cd counselor
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
+          pm2 start server.js --name="counsellor" -f
 
           cd ../admin
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
