@@ -56,7 +56,7 @@ exports.createPayment = async (req, res) => {
       email,
       phone_no,
       description,
-      status
+      status,
     } = req.body;
 
     let payment = new Payment({
@@ -77,21 +77,27 @@ exports.createPayment = async (req, res) => {
       status,
     });
 
-    const counsellor = await axios.get(`${BACKEND_URL}/counsellor/counsellors/find-one`, {
-      params: {
-        counsellor_id: payment_to
+    const counsellor = await axios.get(
+      `${BACKEND_URL}/counsellor/counsellors/find-one`,
+      {
+        params: {
+          counsellor_id: payment_to,
+        },
       }
-    })
+    );
 
-    if (!counsellor) return res.status(404).send({
-      error: 'Counsellor not found'
-    })
-
+    if (!counsellor)
+      return res.status(404).send({
+        error: "Counsellor not found",
+      });
 
     payment = await payment.save();
-    const imcrementOutstandingBalance = await axios.put(`${BACKEND_URL}/counsellor/${payment_to}/increment-outstanding-balance`, {
-      amount
-    })
+    const imcrementOutstandingBalance = await axios.put(
+      `${BACKEND_URL}/counsellor/${payment_to}/increment-outstanding-balance`,
+      {
+        amount,
+      }
+    );
 
     res.status(200).send({
       message: "Payment successfully created",
@@ -161,26 +167,29 @@ exports.getOutstandingBalance = async (req, res) => {
 
     const outstandingBalanceAggregation = await Payment.aggregate([
       {
-        '$match': {
-          'payment_to': `${counsellor_id}`,
-          'amount_due': { $gt: 0 }
-        }
+        $match: {
+          payment_to: `${counsellor_id}`,
+          amount_due: { $gt: 0 },
+        },
       },
       {
-        '$group': {
-          '_id': null,
-          'outstanding_balance': {
-            '$sum': '$amount_due'
-          }
-        }
-      }
+        $group: {
+          _id: null,
+          outstanding_balance: {
+            $sum: "$amount_due",
+          },
+        },
+      },
     ]);
 
-    const outstandingBalance = outstandingBalanceAggregation.length > 0 ? outstandingBalanceAggregation[0].outstanding_balance : 0;
+    const outstandingBalance =
+      outstandingBalanceAggregation.length > 0
+        ? outstandingBalanceAggregation[0].outstanding_balance
+        : 0;
     res.status(200).send({ outstandingBalance });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -190,14 +199,15 @@ exports.clearOutstandingbalance = async (req, res) => {
 
     const paymentsToUpdate = await Payment.find({
       payment_to: counsellor_id,
-      amount_due: { $gt: 0 }
+      amount_due: { $gt: 0 },
     });
 
-    if (paymentsToUpdate.length <= 0) return res.status(400).send({
-      error: "There is no payment to update"
-    })
+    if (paymentsToUpdate.length <= 0)
+      return res.status(400).send({
+        error: "There is no payment to update",
+      });
 
-    console.log(paymentsToUpdate)
+    console.log(paymentsToUpdate);
 
     for (const payment of paymentsToUpdate) {
       payment.amount_paid = payment.amount_due;
@@ -205,9 +215,43 @@ exports.clearOutstandingbalance = async (req, res) => {
       await payment.save();
     }
 
-    res.status(200).send({ message: 'Outstanding balance cleared successfully' });
+    res
+      .status(200)
+      .send({ message: "Outstanding balance cleared successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.paymentForCounsellor = async (req, res) => {
+  const { counsellor_id } = req;
+
+  try {
+    const payments = await Payment.find({ payment_to: counsellor_id });
+    console.log(payments);
+
+    if (payments.length === 0) return res.status(200).send([]);
+    const massagedData = payments.map((payment) => ({
+      _id: payment._id,
+      payment_to: payment.payment_to,
+      payment_from: payment.payment_from,
+      order_id: payment.order_id,
+      amount: payment.amount,
+      amount_due: payment.amount_due,
+      amount_paid: payment.amount_paid,
+      currency: payment.currency,
+      created_at: payment.created_at,
+      entity: payment.entity,
+      name: payment.name,
+      email: payment.email,
+      phone_no: payment.phone_no,
+      description: payment.description,
+      status: payment.status,
+    }));
+    res.status(200).send(massagedData);
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    throw error;
   }
 };

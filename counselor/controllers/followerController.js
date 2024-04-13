@@ -135,3 +135,43 @@ exports.unfollowCounsellor = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getFollowingCounsellorsForUser = async (req, res) => {
+  try {
+    const { id } = req;
+    const following = await Follower.aggregate([
+      {
+        $match: { 'followed_by': id }
+      },
+      {
+        $group: {
+          _id: null,
+          followed_to_ids: { $addToSet: '$followed_to' }
+        }
+      }
+    ]);
+
+    const followingCounsellorsIds = following[0].followed_to_ids;
+
+    const followingCounsellors = await Counsellor.find({ _id: { $in: followingCounsellorsIds } })
+
+    const massagedfollowingCounsellors = followingCounsellors.map(counsellor => ({
+      _id: counsellor._id,
+      name: counsellor.name,
+      profile_pic: counsellor.profile_pic,
+      designation: counsellor.designation,
+      qualifications: counsellor.specializations,
+      next_session: counsellor.next_session,
+      average_rating: counsellor.average_rating,
+      experience_in_years: counsellor.experience_in_years,
+      total_sessions: counsellor.sessions.length,
+      reward_points: counsellor.reward_points,
+      reviews: counsellor.client_testimonials.length,
+    }))
+
+    res.status(200).send(massagedfollowingCounsellors)
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};

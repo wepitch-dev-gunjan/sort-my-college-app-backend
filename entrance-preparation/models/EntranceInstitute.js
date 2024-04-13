@@ -2,94 +2,99 @@ const { Schema, model } = require('mongoose');
 
 
 const entranceInstituteSchema = new Schema({
-  name: {
+  registrant_full_name: {
     type: String
   },
-  email: {
-    type: String,
-    required: true,
-    sparsed: true
+  registrant_contact_number: {
+    type: String
+  },
+  registrant_email: {
+    type: String
+  },
+  registrant_designation: {
+    type: String
   },
   profile_pic: {
     type: String,
   },
-  banner_image: {
+  cover_image: {
     type: String
   },
-  about: {
+  name: {
     type: String
   },
-  degree_focused: {
+  about: [{
+    type: String
+  }],
+  address: {
+    building_number:{
+     type: String,
+     default: "BULDING NUMBER",
+    } ,
+    area: {
+     type: String,
+     default: "AREA",
+    } ,
+
+    city:{
+     type: String,
+     default: "CITY",
+    } ,
+    state: {
+     type: String,
+     default: "STATE",
+    },
+    pin_code: {
+     type: String,
+     default: "PIN CODE",
+    }
+  },
+  direction_url: {
+    type: String
+  },
+  year_established_in: {
+    type: Date
+  },
+  affilations: {
+    type: String
+  },
+  email: {
     type: String,
-    default: 'PG',
-    enum: ['UG', 'PG']
   },
-  courses_offered: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "EntranceCourse",
-      default: null
-    }
-  ],
-  country: {
-    type: String
+  contact_number: {
+    type: String,
   },
-  state: {
-    type: String
+  gstin: {
+    type: String,
   },
-  city: {
-    type: String
-  },
-  area: {
-    type: String
-  },
-  working_time: {
-    opening_time: {
-      type: String,
+  institute_timings: {
+    day: {
+      type: [String],
+      enum: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
     },
-    closing_time: {
-      type: String
+    time: {
+      start_time: Date,
+      end_time: Date
     }
   },
-  working_experience: {
-    type: Number
+  mode_of_study: {
+    type: [String],
+    enum: ['ONLINE', 'OFFLINE']
   },
-  user_feedbacks: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "UserFeedbacks",
-      default: null
-    },
-  ],
-  emergency_contact: {
-    type: Number,
+  medium_of_study: [String],
+  followers: [String],
+  status: {
+    type: String,
+    enum: ["APPROVED", "REJECTED", "PENDING"],
+    default: "PENDING"
   },
-  mode_of_education: {
-    type : String,
-    enum :['Online' , 'Offline' ,'Hybrid']
-  },
-  languages: {
-    type:String,
-    enum: ['Hindi' , 'English']
-  },
-  mode_of_payment :[
-    {
-      type: String,
-      required: true
-    }
-  ],
-  faculties: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Faculties",
-      default: null
-    }
-  ],
-}, {
-  timestamps: true
+  institute_key_features: [String],
 },
-{
-  strict: false
-});
+  {
+    timestamps: true
+  },
+  {
+    strict: false
+  });
 
 module.exports = model('EntranceInstitute', entranceInstituteSchema)

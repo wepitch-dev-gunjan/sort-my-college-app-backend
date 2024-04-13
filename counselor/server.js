@@ -20,12 +20,6 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: '*',
-    // [
-    //   "https://counsellor.sortmycollegeapp.com",
-    //   "https://admin.sortmycollegeapp.com",
-    //   "http://localhost:3000"
-    // ],
-    // origin: ["https://counsellor.sortmycollege.com", "http://192.168.0.36:3000"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })

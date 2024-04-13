@@ -21,17 +21,19 @@ exports.uploadImage = async (imageBuffer, filename, folderName) => {
     const options = {
       folder: folderName,
       public_id: filename.substring(0, filename.lastIndexOf(".")), // Set public_id to the filename without extension
-      unique_filename: false
+      unique_filename: false,
     };
 
     return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(options, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.secure_url);
-        }
-      }).end(imageBuffer);
+      cloudinary.uploader
+        .upload_stream(options, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.secure_url);
+          }
+        })
+        .end(imageBuffer);
     });
   } catch (error) {
     console.error(error);
@@ -41,15 +43,14 @@ exports.uploadImage = async (imageBuffer, filename, folderName) => {
 
 exports.deleteImage = async (url) => {
   try {
-    const cloudinaryImage = await cloudinary.uploader.destroy(url)
-    if(cloudinaryImage) return {
-      message: 'image deleted successfully'
-    } 
+    const cloudinaryImage = await cloudinary.uploader.destroy(url);
+    if (cloudinaryImage)
+      return {
+        message: "image deleted successfully",
+      };
   } catch (error) {
     return {
-      message: 'image not deleted'
-    }
+      message: "image not deleted",
+    };
   }
-}
-
-
+};

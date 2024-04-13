@@ -1,21 +1,43 @@
 const express = require("express");
 const {
-  createInstitute,
-  getInstitutes,
-  getInstitute,
-  deleteInstitute,
-  editInstitute,
-  sendEnquiry,
+  epAuth,
+  adminAuth,
+  userAuth,
+} = require("../middlewares/authMiddleware");
+const {
+  getProfile,
+  editProfile,
+  getInstitutesForAdmin,
+  getInstituteForAdmin,
+  editInstituteForAdmin,
+  deleteInstituteForAdmin,
+  getInstitutesForUser,
+  getInstituteForUser,
+  findOneInstitute,
 } = require("../controllers/entranceInstituteControllers");
 const router = express.Router();
 
-router.post("/institute", createInstitute);
-router.get("/institute", getInstitutes);
-router.get("/institute/:institute_id", getInstitute);
+// ep panel routes
+router.get("/institute", epAuth, getProfile);
+router.put("/institute", epAuth, editProfile);
 
-router.delete("/institute/:institute_id", deleteInstitute);
-router.put("/institute/:institute_id", editInstitute);
+// // admin panel routes
+router.get("/institute/admin", adminAuth, getInstitutesForAdmin);
+router.get("/institute/admin/:institute_id", adminAuth, getInstituteForAdmin);
+router.put("/institute/admin/:institute_id", adminAuth, editInstituteForAdmin);
+router.delete(
+  "/institute/admin/:institute_id",
+  adminAuth,
+  deleteInstituteForAdmin
+);
+router.get("/institute/find-one", findOneInstitute);
 
-router.post("/institute/enquiry", sendEnquiry);
+// // user routes
+router.get("/institute/user", userAuth, getInstitutesForUser);
+router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
+// router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
+
+// router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);
+// router.put('/institute/user/:institute_id/unfollow',userAuth, unfollowInstitute);
 
 module.exports = router;

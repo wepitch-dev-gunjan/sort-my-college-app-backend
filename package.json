@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "cors": "^2.8.5",
-    "enquirer": "^2.4.1"
+    "enquirer": "^2.4.1",
+    "express": "^4.19.2"
   }
 }

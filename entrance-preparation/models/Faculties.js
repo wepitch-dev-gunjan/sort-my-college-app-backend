@@ -1,16 +1,28 @@
 const {Schema , model} = require('mongoose');
 
-const faculties = new Schema ({
+const facultySchema = new Schema ({
     name :{
         type :String,
-        required :true
     },
-    profile_pic:{
-        type:String,
+    display_pic:{
+        type: String,
     },
-    qualification:{
-        type:String,
-        required:true
+    experience_in_years: {
+        type: Number
     },
-});
-module.exports = model('Faculties',faculties)
+    qualifications:{
+        type: String,
+    },
+    graduated_from: [String],
+    institute: {
+        type: Schema.Types.ObjectId,
+        ref: "EntranceInstitute"
+      }
+    },
+    {
+        strict: false,
+        timestamps: true
+    }
+);
+
+module.exports = model('Faculties',facultySchema)

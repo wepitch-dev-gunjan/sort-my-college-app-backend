@@ -87,9 +87,11 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
 
 exports.userAuth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization');
+    const token = req.header("Authorization");
     if (!token) {
-      return res.status(401).json({ error: 'No token found, authorization denied' });
+      return res
+        .status(401)
+        .json({ error: "No token found, authorization denied" });
     }
 
     // Verify the token using your secret key
@@ -97,12 +99,12 @@ exports.userAuth = async (req, res, next) => {
 
     const user = await axios.get(`${BACKEND_URL}/user/users`, null, {
       params: {
-        user_id: decoded.user_id
-      }
-    })
+        user_id: decoded.user_id,
+      },
+    });
 
     if (!user.data) {
-      return res.status(401).json({ error: 'User not authorized' });
+      return res.status(401).json({ error: "User not authorized" });
     }
 
     req.email = decoded.email;
@@ -112,6 +114,83 @@ exports.userAuth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.counsellorAuth = async (req, res, next) => {
+  try {
+    const token = req.header("Authorization");
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ error: "No token found, authorization denied" });
+    }
+
+    // Verify the token using your secret key
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const { data } = await axios.get(
+      `${process.env.BACKEND_URL}/counsellor/counsellors/find-one`,
+      {
+        // Update BACKEND_URL to use process.env
+        params: {
+          email: decoded.email,
+        },
+      }
+    );
+
+    if (!data) {
+      return res.status(401).json({ error: "User not authorized" });
+    }
+
+    req.email = decoded.email;
+    req.phoneNo = decoded.phoneNo;
+    req.counsellor_id = data._id;
+
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error in auth" });
+  }
+};
+
+exports.epAuth = async (req, res, next) => {
+  try {
+    const token = req.header("Authorization");
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ error: "No token found, authorization denied" });
+    }
+
+    // Verify the token using your secret key
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    const { data } = await axios.get(
+      `${process.env.BACKEND_URL}/ep/institute/find-one`,
+      {
+        params: {
+          institute_id: decoded.institute_id,
+        },
+      }
+      );
+      
+    if (!data) {
+      return res.status(401).json({ error: "User not authorized" });
+    }
+
+    req.email = decoded.email;
+    req.phoneNo = decoded.phoneNo;
+    req.institute_id = decoded.institute_id;
+
+    next()
+  } catch (error) {
+    console.log(error)
+    res.status(500).send({
+      error: "Internal server error!!!!!"
+    })
+  }
+}

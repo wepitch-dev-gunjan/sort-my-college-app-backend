@@ -1,137 +1,99 @@
-const { response } = require("express");
+// const EntranceCourse = require("../models/EntranceCourse");
+const jwt = require("jsonwebtoken");
+const { json } = require("express");
+
+const { JWT_SECRET } = process.env;
 const EntranceCourse = require("../models/EntranceCourse");
-
-exports.createCourse = async (req, res) => {
+const { uploadImage} = require("../services/cloudinary")
+// EP Panel Controllers
+// courses for Ep Panel
+exports.getCoursesForEp = async (req, res) => {
   try {
-    const { course_name, course_degree, online, offline } = req.body;
+    const { institute_id } = req;
+    // console.log(institute_id);
+    const courses = await EntranceCourse.find({ institute: institute_id });
 
-    if (!course_name || !course_degree || !online || !offline)
-      return res.status(400).send({
-        error: " All fields are required",
-      });
-
-    let course = await EntranceCourse.findOne({ course_name });
-    if (course)
-      return res.status(400).send({ error: "Course name already exists" });
-
-    course = new EntranceCourse({
-      course_name,
-      course_degree,
-      online,
-      offline,
-    });
-
-    course = await course.save();
-
-    res.status(200).send({
-      message: "Entrance Course successfully created",
-      course,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: error.message });
-  }
-};
-
-exports.getCourses = async (req, res) => {
-  try {
-    const { course_degree, online, offline } = req.query;
-    const filters = {};
-
-    if (course_degree)
-      filters.course_degree = Array.isArray(course_degree)
-        ? { $in: course_degree }
-        : [course_degree];
-    if (online) filters.online = online;
-    if (offline) filters.offline = offline;
-
-    const courses = await EntranceCourse.find(filters);
-
-    res.status(200).send(courses);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-exports.getCourse = async (req, res) => {
-  try {
-    const { course_id } = req.params;
-
-    const course = await EntranceCourse.findById(course_id);
-    if (!course) {
-      return res.status(404).send({ error: "Course not found" });
+    if (!courses || courses.length === 0) {
+      return res.status(200).json([]);
     }
-
-    res.status(200).send(course);
+      const massagedCourses = courses.map((course) =>({
+      image : course.image,
+    _id: course._id,
+    name: course.name,
+    type: course.type,
+    acedemic_session: course.acedemic_session,
+    course_fee: course.course_fee,
+    course_duration_in_days: course.course_duration_in_days,
+      }));
+    res.status(200).json(massagedCourses);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.log("Error Fetching Course", error);
+    res.status(500).json({ message: "Internal sever error" });
   }
 };
-
-exports.deleteCourse = async (req, res) => {
+// add course
+exports.addCourse = async (req, res) => {
+  // const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
   try {
-    const { course_id } = req.params;
-
-    const course = await EntranceCourse.findByIdAndDelete(course_id);
-    if (!course) {
-      return res.status(404).send({ error: "Course not found" });
-    }
-
-    res.status(200).send({ message: "Course Deleted Successfully" });
+   // const { file } = req;
+   // console.log(file);
+   // const fileName = `image-${Date.now()}.png`;
+   // const folderName = `Course_images`;
+   // const image = await uploadImage(file.buffer, fileName,folderName);
+   //  const existingCourse = await EntranceCourse.findOne({name: req.body.name});
+    //   if(existingCourse)
+    //   {
+    // return res.status(400).send({error : "course already exist"});
+    //   }
+    const { institute_id } = req;
+    const addCourse = new EntranceCourse({
+      name: req.body.name,
+      image:req.body.name,
+      type: req.body.type,
+      academic_session: req.body.academic_session,
+      course_fee: req.body.course_fee,
+      course_duration_in_days: req.body.course_duration_in_days,
+      institute: institute_id,
+    });
+    await addCourse.save();
+    res.status(201).json({
+      message: "course Added Succesfully",
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    res.status(500).json({
+      messge: "error adding course",
+    });
   }
 };
-
 exports.editCourse = async (req, res) => {
   try {
     const { course_id } = req.params;
-    const { course_name, course_degree, online, offline } = req.body;
-    console.log(req.body);
-    if (course_name || course_degree || online || offline) {
-      let course = await EntranceCourse.findById(course_id);
-      if (!course) return res.status(404).send({ error: "Course not found" });
-
-      const updateFields = {};
-      if (course_name) {
-        updateFields["course_name"] = course_name;
-      }
-
-      if (course_degree) {
-        updateFields["course_degree"] = course_degree;
-      }
-
-      if (online) {
-        updateFields["online"] = online;
-      }
-
-      if (offline) {
-        updateFields["offline"] = offline;
-      }
-
-      course = await EntranceCourse.findOne({ course_name });
-      if (course)
-        return res.status(400).send({ error: "Course name already exists" });
-
-      const updatedCourse = await EntranceCourse.findByIdAndUpdate(
-        course_id,
-        updateFields
-      );
-
-      if (!updatedCourse)
-        return res.status(400).json({ error: "Course can't be updated" });
-
-      res.status(200).json({ message: "Course updated successfully" });
-    } else {
-      return res.status(400).send({
-        error: "Atleast one field is required",
-      });
+    const updateCourse = req.body;
+    const updatedData = await EntranceCourse.findByIdAndUpdate(
+      course_id,
+      updateCourse,
+      { new: true }
+    );
+    if (!updatedData) {
+      return res.status(404).json({ message: " Course not found" });
     }
+    res.status(200).json(updatedData);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.log("Error editing Course");
+    res.status(500).json({ messge: "Internal Server Error" });
+  }
+};
+exports.deleteCourse = async (req, res) => {
+  try {
+    const { course_id } = req.params;
+    const deletedCourse = await EntranceCourse.findByIdAndDelete(course_id);
+    if (!deletedCourse) {
+      return res.status(400).json({ message: "Course Not Found" });
+    }
+    res.status(200).json({ message: "Course Deleted Succesfully" });
+  } catch (error) {
+    console.log("Error Deleting Course");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

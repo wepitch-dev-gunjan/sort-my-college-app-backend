@@ -1,25 +1,31 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
 const enquirySchema = new Schema(
   {
-    message: {
-      type: String,
-      required: true,
-    },
     enquirer: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+      ref: "User",
     },
     enquired_to: {
       type: Schema.Types.ObjectId,
-      ref: 'EntranceInstitute',
-      required: true,
+      ref: "EntranceInstitute",
+    },
+    courses: [String],
+    mode: [String],
+    preferred_time: [String],
+    message: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["Seen", "Unseen", "Replied"],
+      default: "Unseen",
     },
   },
   {
     timestamps: true,
+    strict: false,
   }
 );
 
-module.exports = model('Enquiry', enquirySchema);
+module.exports = model("Enquiry", enquirySchema);

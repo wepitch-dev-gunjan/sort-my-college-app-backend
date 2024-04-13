@@ -681,3 +681,109 @@ exports.getTotalSessionsCount = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getCheckoutDetails = async (req, res) => {
+  try {
+    const { session_id } = req.params;
+    const session = await Session.findById(session_id);
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    const counsellor_id = session.session_counsellor;
+    const counsellorDetails = await Counsellor.findById(counsellor_id);
+    if (!counsellorDetails) {
+      return res.status(404).json({ error: "Counsellor not found" });
+    }
+
+    const sessionFee = session.session_fee;
+    const gstAmount = 0.18 * sessionFee;
+    const feeWithGST = sessionFee + gstAmount;
+
+    const gatewayCharge = 0.05 * feeWithGST;
+
+    const totalAmount = feeWithGST + gatewayCharge;
+
+    const responseData = {
+      session_id: session._id,
+      sessionDate: session.session_date,
+      sessionType: session.session_type,
+      sessionFee: sessionFee,
+      gstAmount: gstAmount,
+      feeWithGST: feeWithGST,
+      gatewayCharge: gatewayCharge,
+      totalAmount: totalAmount,
+      counsellor_id: counsellorDetails._id,
+      counsellor_name: counsellorDetails.name,
+      counsellor_profile_pic: counsellorDetails.profile_pic,
+    };
+
+    return res.json([responseData]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getPopularWorkshops = async (req, res) => {
+  try {
+    let sessions = await Session.find().sort({ created_at: -1 }).limit(5); // Sort by creation date in descending order and limit to 5 sessions
+    let total_available_slots = 0;
+
+    if (sessions.length > 0) {
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      const massagedSessions = sessions.map((session) => {
+        total_available_slots += session.session_available_slots;
+        const sessionDate = new Date(session.session_date);
+        let session_massaged_date = "";
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (sessionDate.toDateString() == today.toDateString()) {
+          session_massaged_date = "today";
+        } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
+          session_massaged_date = "tomorrow";
+        } else {
+          const dayDiff = Math.ceil(
+            (sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
+          );
+
+          if (dayDiff <= 7 && dayDiff > 0) {
+            session_massaged_date = daysOfWeek[sessionDate.getDay()];
+            // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
+          } else {
+            // Keep the original date if not within the next 7 days
+            session_massaged_date = sessionDate.toDateString().slice(3);
+            session.session_time = sessionTimeIntoString(session.session_time);
+            console.log(session.session_time);
+          }
+        }
+        return {
+          ...session._doc,
+          session_massaged_date,
+        };
+      });
+      res.status(200).json(massagedSessions);
+    } else {
+      res.status(200).json({
+        total_available_slots: 0,
+        sessions: [],
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+

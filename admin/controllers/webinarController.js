@@ -53,14 +53,107 @@ exports.getWebinarsForUser = async (req, res) => {
     if (!webinars) return res.status(200).send([]);
 
     const massagedWebinars = webinars.map(webinar => {
+      const webinarDate = webinar.webinar_date;
+      webinarDate.setUTCHours(0, 0, 0, 0);
+
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      const dateDifference = getDateDifference(webinarDate, currentDate)
       const webinar_date = webinarDateModifier(webinar.webinar_date);
       const registered = webinar.registered_participants.includes(user_id)
       return {
+        id: webinar._id,
         webinar_image: webinar.webinar_image,
         webinar_title: webinar.webinar_title,
         webinar_date,
+        registered_date: webinar.webinar_date,
+        webinar_join_url: webinar.webinar_join_url,
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
+        webinar_starting_in_days: dateDifference,
+        registered
+      }
+    })
+
+    res.status(200).send(massagedWebinars)
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getMyWebinars = async (req, res) => {
+  try {
+    const { user_id } = req;
+
+    const webinars = await Webinar.find({ registered_participants: { $in: user_id } });
+    if (!webinars) return res.status(200).send([]);
+
+    const massagedWebinars = webinars.map(webinar => {
+      const webinarDate = webinar.webinar_date;
+      webinarDate.setUTCHours(0, 0, 0, 0);
+
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const webinar_date = webinarDateModifier(webinar.webinar_date);
+      const registered = webinar.registered_participants.includes(user_id)
+      return {
+        id: webinar._id,
+        webinar_image: webinar.webinar_image,
+        webinar_title: webinar.webinar_title,
+        webinar_date,
+        registered_date: webinar.webinar_date,
+        webinar_join_url: webinar.webinar_join_url,
+        webinar_by: webinar.webinar_by,
+        speaker_profile: webinar.speaker_profile,
+        webinar_starting_in_days: dateDifference,
+        registered
+      }
+    })
+
+    res.status(200).send(massagedWebinars)
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
+exports.getTrendingWebinars = async (req, res) => {
+  try {
+    const { user_id } = req;
+
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const webinars = await Webinar.find().sort({ webinar_date: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
+    if (!webinars || webinars.length === 0) return res.status(200).send([]);
+
+    const massagedWebinars = webinars.map(webinar => {
+      const webinarDate = webinar.webinar_date;
+      webinarDate.setUTCHours(0, 0, 0, 0);
+
+      const currentDate = new Date();
+      currentDate.setUTCHours(0, 0, 0, 0);
+
+      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const webinar_date = webinarDateModifier(webinar.webinar_date);
+      const registered = webinar.registered_participants.includes(user_id)
+      return {
+        id: webinar._id,
+        webinar_image: webinar.webinar_image,
+        webinar_title: webinar.webinar_title,
+        webinar_date,
+        registered_date: webinar.webinar_date,
+        webinar_join_url: webinar.webinar_join_url,
+        webinar_by: webinar.webinar_by,
+        speaker_profile: webinar.speaker_profile,
+        webinar_starting_in_days: dateDifference,
         registered
       }
     })
@@ -256,13 +349,21 @@ exports.getSingleWebinarForAdmin = async (req, res) => {
 
 exports.getSingleWebinarForUser = async (req, res) => {
   const { webinar_id } = req.params;
+  const { user_id } = req;
   try {
     const webinar = await Webinar.findOne({ _id: webinar_id });
     if (!webinar) {
       return res.status(404).json({ error: "No webinar found with this ID" });
     }
+    const webinarDate = webinar.webinar_date;
+    webinarDate.setUTCHours(0, 0, 0, 0);
 
-    console.log(webinar)
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const dateDifference = getDateDifference(webinarDate, currentDate)
+
+    const registered = webinar.registered_participants.includes(user_id)
 
     const massagedWebinar = {
       _id: webinar._id,
@@ -278,6 +379,8 @@ exports.getSingleWebinarForUser = async (req, res) => {
       webinar_total_slots: webinar.webinar_total_slots,
       registered_participants: webinar.registered_participants,
       attended_participants: webinar.attended_participants,
+      webinar_starting_in_day: dateDifference,
+      registered
     };
 
     res.status(200).send(massagedWebinar);
@@ -310,7 +413,6 @@ exports.registerParticipant = async (req, res) => {
 
     webinar.registered_participants.push(user_id);
     await webinar.save();
-
 
     res.status(200).send({
       message: "Registration completed",

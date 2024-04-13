@@ -1,410 +1,206 @@
-const { response } = require("express");
 const EntranceInstitute = require("../models/EntranceInstitute");
-const fs = require("fs");
 
-exports.createInstitute = async (req, res) => {
+// ep panel controllers
+exports.getProfile = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      profile_pic,
-      degree_focused,
-      country,
-      state,
-      city,
-      area,
-      working_time,
-      working_experience,
-      client_testimonials,
-      emergency_contact,
-    } = req.body;
+    const { institute_id } = req;
 
-    if (!name || !email)
-      return res.status(400).send({
-        error: "Name and email is required",
-      });
+    // Assuming you have some logic to identify the user's profile, for example, using req.user
+    // You can customize this query according to your needs
+    const profile = await EntranceInstitute.findOne({ _id: institute_id });
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).send({
-        error: "Invalid email format",
-      });
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
     }
 
-    const profile = {};
+    // You can customize the response data structure as per your requirements
+    res.status(200).json(profile);
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-    profile.email = email;
-    profile.name = name;
-    if (profile_pic) profile.profile_pic = profile_pic;
-    if (degree_focused) profile.degree_focused = degree_focused;
-    if (country) profile.country = country;
-    if (state) profile.state = state;
-    if (city) profile.city = city;
-    if (area) profile.area = area;
-    if (working_time) profile.working_time = working_time;
-    if (working_experience) profile.working_experience = working_experience;
-    if (client_testimonials) profile.client_testimonials = client_testimonials;
-    if (emergency_contact) profile.emergency_contact = emergency_contact;
+exports.editProfile = async (req, res) => {
+  try {
+    const { institute_id } = req; // Assuming institute_id is passed as a parameter
+    console.log(institute_id);
+    const { about, ...body } = req.body; // Extract about field from the request body
+    // console.log(about)
+    // Find the profile by institute_id
+    const profile = await EntranceInstitute.findById(institute_id);
 
-    let institute = new EntranceInstitute({
-      ...profile,
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    // Update the about field if it's included in the request body
+    if (about !== undefined) {
+      profile.about = about;
+    }
+
+    // Update other fields in the profile
+    Object.keys(body).forEach((key) => {
+      profile[key] = body[key];
     });
 
-    institute = await institute.save();
+    // Save the updated profile
+    await profile.save();
 
-    res.status(200).send({
-      message: "Entrance Institute successfully created",
-      institute,
-    });
+    res.status(200).json(profile);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error("Error editing profile:", error);
+    res.status(500).json({ message: "Internal edit profile server error" });
   }
 };
 
-exports.getInstitutes = async (req, res) => {
+// admin panel controllers
+exports.getInstitutesForAdmin = async (req, res) => {
   try {
-    const { degree, country, city, courses_focused } = req.query;
+    // Assuming you have some logic to authenticate the admin user and retrieve necessary information
+    // You can customize this query according to your needs
+    const institutes = await EntranceInstitute.find({});
 
-    const filters = {};
-    if (degree) filters.degree = degree;
-    if (country) filters.country = country;
-    if (city) filters.city = Array.isArray(city) ? { $in: city } : [city];
-    if (courses_focused)
-      filters.course = Array.isArray(courses_focused)
-        ? { $in: courses_focused }
-        : [courses_focused];
-
-    const institutes = await EntranceInstitute.find(filters);
-    console.log(institutes);
-    if (institutes.length === 0) {
-      return res.status(404).send({ error: "No Institutes found" });
+    if (!institutes || institutes.length === 0) {
+      return res.status(404).json({ message: "No institutes found" });
     }
 
-    const formattedInstitutes = institutes.map((institute) => {
-      const {
-        name,
-        profile_pic,
-        degree_focused,
-        state,
-        city,
-        area,
-        working_time,
-        client_testimonials,
-        _id,
-      } = institute;
-      return {
-        name,
-        profile_pic,
-        degree_focused,
-        state,
-        city,
-        area,
-        working_time,
-        client_testimonials,
-        _id,
-      };
-    });
+    const massagedInstitutes = institutes.map((institute) => ({
+      _id: institute._id,
+      name: institute.name,
+      profile_pic: institute.profile_pic,
+      email: institute.email,
+      status: institute.status,
+    }));
 
-    res.status(200).send(formattedInstitutes);
+    // You can customize the response data structure as per your requirements
+    res.status(200).json(massagedInstitutes);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error("Error fetching institutes:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-exports.getInstitute = async (req, res) => {
+exports.getInstituteForAdmin = async (req, res) => {
   try {
     const { institute_id } = req.params;
 
-    const institute = await EntranceInstitute.findById(institute_id);
+    // Assuming you have some logic to authenticate the admin user and retrieve necessary information
+    // You can customize this query according to your needs
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+
     if (!institute) {
-      return res.status(404).send({ error: "Institute not found" });
+      return res.status(404).json({ message: "Institute not found" });
     }
 
-    res.status(200).send(institute);
+    // You can customize the response data structure as per your requirements
+    res.status(200).json(institute);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error("Error fetching institute:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-exports.deleteInstitute = async (req, res) => {
+exports.editInstituteForAdmin = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const updateData = req.body;
+
+    // Update the institute using findByIdAndUpdate method
+    const updatedInstitute = await EntranceInstitute.findByIdAndUpdate(
+      institute_id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedInstitute) {
+      return res.status(404).json({ message: "Institute not found" });
+    }
+
+    res.status(200).json(updatedInstitute);
+  } catch (error) {
+    console.error("Error editing institute:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.deleteInstituteForAdmin = async (req, res) => {
   try {
     const { institute_id } = req.params;
 
-    const institute = await EntranceInstitute.findByIdAndDelete(institute_id);
+    // Delete the institute by ID
+    const deletedInstitute = await EntranceInstitute.findByIdAndDelete(
+      institute_id
+    );
+
+    if (!deletedInstitute) {
+      return res.status(404).json({ message: "Institute not found" });
+    }
+
+    res.status(200).json({ message: "Institute deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting institute:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// for Users
+exports.getInstitutesForUser = async (req, res) => {
+  try {
+    // Assuming you have some logic to authenticate the admin user and retrieve necessary information
+    // You can customize this query according to your needs
+    const institutes = await EntranceInstitute.find({});
+
+    if (!institutes || institutes.length === 0) {
+      return res.status(404).json({ message: "Institute not found" });
+    }
+    const massagedInstitutes = institutes.map((institute) => ({
+      _id: institute._id,
+      name: institute.name,
+      profile_pic: institute.profile_pic,
+      address: institute.address,
+      year_established_in: institute.year_established_in,
+      institute_timings: institute.institute_timings,
+    }));
+
+    // You can customize the response data structure as per your requirements
+    res.status(200).json(massagedInstitutes);
+  } catch (error) {
+    console.error("Error fetching institute:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getInstituteForUser = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+
     if (!institute) {
-      return res.status(404).send({ error: "Institute not found" });
+      return res.status(404).json({ message: "Institute not found !" });
     }
 
-    res.status(200).send({ message: "Institute Deleted Successfully" });
+    res.status(200).json(institute);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error("Error fetching institute for user: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-exports.editInstitute = async (req, res) => {
+exports.findOneInstitute = async (req, res) => {
   try {
-    const { institute_id } = req.params;
-    const {
-      name,
-      email,
-      profile_pic,
-      degree_focused,
-      country,
-      state,
-      city,
-      area,
-      working_time,
-      working_experience,
-      client_testimonials,
-      emergency_contact,
-    } = req.body;
-    console.log(req.body);
-    if (
-      name ||
-      email ||
-      profile_pic ||
-      degree_focused ||
-      country ||
-      state ||
-      city ||
-      area ||
-      working_time ||
-      working_experience ||
-      client_testimonials ||
-      emergency_contact
-    ) {
-      let course = await EntranceInstitute.findById(institute_id);
-      if (!course)
-        return res.status(404).send({ error: "Institute not found" });
+    const { institute_id } = req.query;
 
-      const updateFields = {};
-      if (name) {
-        updateFields["name"] = name;
-      }
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
-      if (email) {
-        updateFields["email"] = email;
-      }
-
-      if (profile_pic) {
-        updateFields["profile_pic"] = profile_pic;
-      }
-
-      if (degree_focused) {
-        updateFields["degree_focused"] = degree_focused;
-      }
-
-      if (country) {
-        updateFields["country"] = country;
-      }
-
-      if (state) {
-        updateFields["state"] = state;
-      }
-
-      if (city) {
-        updateFields["city"] = city;
-      }
-
-      if (area) {
-        updateFields["area"] = area;
-      }
-
-      if (working_time) {
-        updateFields["working_time"] = working_time;
-      }
-
-      if (working_experience) {
-        updateFields["working_experience"] = working_experience;
-      }
-
-      if (client_testimonials) {
-        updateFields["client_testimonials"] = client_testimonials;
-      }
-
-      if (emergency_contact) {
-        updateFields["emergency_contact"] = emergency_contact;
-      }
-
-      course = await EntranceInstitute.findOne({ name });
-      if (course)
-        return res.status(400).send({ error: "Institute name already exists" });
-
-      const updatedInstitute = await EntranceInstitute.findByIdAndUpdate(
-        institute_id,
-        updateFields
-      );
-
-      if (!updatedInstitute)
-        return res.status(400).json({ error: "institute can't be updated" });
-
-      res
-        .status(200)
-        .json({ message: "institute details updated successfully" });
-    } else {
-      return res.status(400).send({
-        error: "Atleast one field is required",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-};
-
-exports.getInstitute = async (req, res) => {
-  try {
-    const { institute_id } = req.params;
-
-    const institute = await EntranceInstitute.findById(institute_id);
     if (!institute) {
-      return res.status(404).send({ error: "Institute not found" });
+      return res.status(404).json({ message: "Institute not found !" });
     }
 
-    res.status(200).send(institute);
+    res.status(200).json(institute);
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-exports.deleteInstitute = async (req, res) => {
-  try {
-    const { institute_id } = req.params;
-
-    const institute = await EntranceInstitute.findByIdAndDelete(institute_id);
-    if (!institute) {
-      return res.status(404).send({ error: "Institute not found" });
-    }
-
-    res.status(200).send({ message: "Institute Deleted Successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-exports.editInstitute = async (req, res) => {
-  try {
-    const { institute_id } = req.params;
-    const {
-      name,
-      email,
-      profile_pic,
-      degree_focused,
-      country,
-      state,
-      city,
-      area,
-      working_time,
-      working_experience,
-      client_testimonials,
-      emergency_contact,
-    } = req.body;
-    console.log(req.body);
-    if (
-      name ||
-      email ||
-      profile_pic ||
-      degree_focused ||
-      country ||
-      state ||
-      city ||
-      area ||
-      working_time ||
-      working_experience ||
-      client_testimonials ||
-      emergency_contact
-    ) {
-      let course = await EntranceInstitute.findById(institute_id);
-      if (!course)
-        return res.status(404).send({ error: "Institute not found" });
-
-      const updateFields = {};
-      if (name) {
-        updateFields["name"] = name;
-      }
-
-      if (email) {
-        updateFields["email"] = email;
-      }
-
-      if (profile_pic) {
-        updateFields["profile_pic"] = profile_pic;
-      }
-
-      if (degree_focused) {
-        updateFields["degree_focused"] = degree_focused;
-      }
-
-      if (country) {
-        updateFields["country"] = country;
-      }
-
-      if (state) {
-        updateFields["state"] = state;
-      }
-
-      if (city) {
-        updateFields["city"] = city;
-      }
-
-      if (area) {
-        updateFields["area"] = area;
-      }
-
-      if (working_time) {
-        updateFields["working_time"] = working_time;
-      }
-
-      if (working_experience) {
-        updateFields["working_experience"] = working_experience;
-      }
-
-      if (client_testimonials) {
-        updateFields["client_testimonials"] = client_testimonials;
-      }
-
-      if (emergency_contact) {
-        updateFields["emergency_contact"] = emergency_contact;
-      }
-
-      course = await EntranceInstitute.findOne({ name });
-      if (course)
-        return res.status(400).send({ error: "Institute name already exists" });
-
-      const updatedInstitute = await EntranceInstitute.findByIdAndUpdate(
-        institute_id,
-        updateFields
-      );
-
-      if (!updatedInstitute)
-        return res.status(400).json({ error: "institute can't be updated" });
-
-      res
-        .status(200)
-        .json({ message: "Institute details updated successfully" });
-    } else {
-      return res.status(400).send({
-        error: "Atleast one field is required",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-};
-
-exports.sendEnquiry = async (req, res) => {
-  try {
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    console.error("Error fetching institute for user: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };

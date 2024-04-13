@@ -6,15 +6,34 @@ const {
   getPayment,
   getOutstandingBalance,
   clearOutstandingbalance,
+  paymentForCounsellor,
 } = require("../controllers/paymentController");
-const { counsellorOrUserAuth } = require("../middlewares/authMiddleware");
+const {
+  counsellorOrUserAuth,
+  counsellorAuth,
+  userAuth,
+} = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 router.post("/payments/create-order", counsellorOrUserAuth, createOrder);
 router.post("/payments/create-payment", counsellorOrUserAuth, createPayment);
 router.get("/payments", getPayments);
 router.get("/payments/get-payment/:payment_id", getPayment);
-router.get('/payments/:counsellor_id/outstanding-balance', getOutstandingBalance)
-router.put('/payments/:counsellor_id/outstanding-balance', clearOutstandingbalance)
+router.get(
+  "/payments/:counsellor_id/outstanding-balance",
+  getOutstandingBalance
+);
+router.put(
+  "/payments/:counsellor_id/outstanding-balance",
+  clearOutstandingbalance
+);
+router.get(
+  `/payment/payment-for-counsellor`,
+  counsellorAuth,
+  paymentForCounsellor
+);
+
+// user routes
+
 
 module.exports = router;
