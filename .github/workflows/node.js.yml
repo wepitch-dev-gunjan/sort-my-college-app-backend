@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
+      - name: Log in as root
+        run: sudo su
       - name: Stop all instances of pm2
         run: /root/.nvm/versions/node/v20.8.0/bin/pm2 stop all || true
       - name: Install dependencies
