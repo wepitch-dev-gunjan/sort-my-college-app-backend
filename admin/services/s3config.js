@@ -12,6 +12,7 @@ const s3Client = new S3Client({
   }
 });
 
+
 exports.getObjectURL = async (key) => {
   const command = new GetObjectCommand({
     Bucket: AWS_S3_BUCKET_NAME,
