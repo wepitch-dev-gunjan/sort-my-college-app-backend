@@ -2,5 +2,6 @@ node_modules
 ssl_certificates
 .env
 .env.prod
+.env.stage
 configs
 pair1.pem
