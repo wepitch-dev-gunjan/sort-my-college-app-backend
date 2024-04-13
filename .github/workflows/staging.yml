@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Staging.js CI
 
 on:
   push:
