@@ -93,8 +93,5 @@ jobs:
           cd ../api-gateway
           /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
 
-      # - name: Save PM2 list
-      #   run: /root/.nvm/versions/node/v20.8.0/bin/pm2 save -f
-
       - name: Restart all Node.js applications
         run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
