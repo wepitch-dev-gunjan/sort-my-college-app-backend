@@ -26,7 +26,7 @@ exports.editProfile = async (req, res) => {
     const { institute_id } = req; // Assuming institute_id is passed as a parameter
     console.log(institute_id);
     const { about, ...body } = req.body; // Extract about field from the request body
-    // console.log(about)
+    console.log(about)
     // Find the profile by institute_id
     const profile = await EntranceInstitute.findById(institute_id);
 

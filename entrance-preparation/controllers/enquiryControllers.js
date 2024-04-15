@@ -35,7 +35,7 @@ exports.addEnquiry = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
+// get Engueries for Ep
 exports.getEnquiries = async (req, res) => {
   try {
     const { institute_id } = req;
@@ -165,4 +165,48 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
     console.error("Error:", error);
     res.status(500).send({ message: "Internal server error" });
   }
+};
+
+
+// get Enqueries for Admin
+exports.getEnquiriesForAdmin = async (req, res) => {
+ try {
+   const { institute_id } = req.params;
+   if (!institute_id) {
+     return res.status(404).json({ message: "Specified institute not found" });
+   }
+   const enquiries = await Enquiry.find({ enquired_to: institute_id });
+   // console.log(enquiries);
+   if (!enquiries) return res.status(201).send([]);
+
+   const massagedDataPromise = Promise.all(
+     enquiries.map(async (enquiry) => {
+       const { data } = await axios.get(
+         `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+       );
+       // console.log("dataa,", data);
+       return {
+         _id: enquiry._id,
+         name: data.name,
+         phone_number: data.phone_number,
+         status: enquiry.status,
+         date: enquiry.date,
+       };
+     })
+   );
+
+   massagedDataPromise
+     .then((massagedData) => {
+       // console.log(massagedData);
+       res.status(200).json(massagedData);
+     })
+     .catch((error) => {
+       console.error(error);
+     });
+
+   // console.log(massagedData);
+ } catch (error) {
+   console.error("Error getting enquiries");
+   res.status(500).json({ message: "Internal  enquiries Server Error" });
+ }
 };
