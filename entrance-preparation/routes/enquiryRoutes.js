@@ -25,5 +25,5 @@ router.put("/singleEnqury/:enquiry_id", epAuth, EnquiryStatusChangeToReplies);
 
 
 // admin Route
-router.get("/enquiriesForAdmin/:institute_id", getEnquiriesForAdmin)
+router.get("/enquiriesForAdmin/:institute_id",adminAuth, getEnquiriesForAdmin)
 module.exports = router;

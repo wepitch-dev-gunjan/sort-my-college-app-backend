@@ -171,11 +171,29 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
 // get Enqueries for Admin
 exports.getEnquiriesForAdmin = async (req, res) => {
  try {
+  const {
+  search,
+  status,
+  } = req.query;
+console.log(search)
+  const queryObject = {};
+  if(search){
+   queryObject.$or = [
+    { name :{$regex: new RegExp(search, "i") } },
+    { status: {$regex: new RegExp(search, "i") } },
+
+   ]
+   console.log("haa shayd",new RegExp(search)); 
+   console.log(queryObject.$or[0].name)
+  }
+  if(status) {
+   queryObject.status = status;
+  }
    const { institute_id } = req.params;
    if (!institute_id) {
      return res.status(404).json({ message: "Specified institute not found" });
    }
-   const enquiries = await Enquiry.find({ enquired_to: institute_id });
+   const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
    // console.log(enquiries);
    if (!enquiries) return res.status(201).send([]);
 
@@ -184,7 +202,6 @@ exports.getEnquiriesForAdmin = async (req, res) => {
        const { data } = await axios.get(
          `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
        );
-       // console.log("dataa,", data);
        return {
          _id: enquiry._id,
          name: data.name,
@@ -194,11 +211,12 @@ exports.getEnquiriesForAdmin = async (req, res) => {
        };
      })
    );
-
+     console.log("data:", data)
    massagedDataPromise
      .then((massagedData) => {
-       // console.log(massagedData);
+       console.log(massagedData);
        res.status(200).json(massagedData);
+       
      })
      .catch((error) => {
        console.error(error);
@@ -206,7 +224,7 @@ exports.getEnquiriesForAdmin = async (req, res) => {
 
    // console.log(massagedData);
  } catch (error) {
-   console.error("Error getting enquiries");
+   console.error("Error getting enquiries!!");
    res.status(500).json({ message: "Internal  enquiries Server Error" });
  }
 };
