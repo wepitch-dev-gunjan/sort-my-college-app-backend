@@ -68,7 +68,7 @@ exports.userAuth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal user auth Server Error" });
   }
 };
 
@@ -191,8 +191,9 @@ exports.adminOrCounsellorAuth = async (req, res, next) => {
 
     if (!responseData) {
       return res.status(401).json({
-        error: `${decoded.counsellor_id ? "Counsellor" : "Admin"
-          } not authorized`,
+        error: `${
+          decoded.counsellor_id ? "Counsellor" : "Admin"
+        } not authorized`,
       });
     }
 

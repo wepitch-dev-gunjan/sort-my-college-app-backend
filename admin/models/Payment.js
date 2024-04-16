@@ -7,7 +7,12 @@ const paymentSchema = new Schema(
     order_id: { type: String, required: true },
     payment_id: { type: String, required: true },
     amount: { type: Number, required: true },
-    amount_due: { type: Number, default: function () { return this.amount; } },
+    amount_due: {
+      type: Number,
+      default: function () {
+        return this.amount;
+      },
+    },
     amount_paid: { type: Number, default: 0 },
     currency: { type: String, required: true },
     created_at: { type: Date, required: true },

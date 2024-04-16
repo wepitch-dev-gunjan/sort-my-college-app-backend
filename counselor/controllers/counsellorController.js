@@ -456,7 +456,7 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ error: "Counselor not found" });
     }
 
-    console.log(updatedCounselor);
+    // console.log(updatedCounselor);
     res.status(200).json(updatedCounselor);
   } catch (error) {
     console.error(error);
@@ -970,7 +970,7 @@ exports.incrementActivityPoints = async (req, res) => {
       .slice(0, 10);
     const currentDate = new Date().toISOString().slice(0, 10); // Corrected to get current date properly
 
-    console.log(lastCheckinDate, currentDate);
+    // console.log(lastCheckinDate, currentDate);
 
     if (lastCheckinDate !== currentDate) {
       counsellor.activity_points++;
