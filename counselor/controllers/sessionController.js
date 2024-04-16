@@ -504,7 +504,7 @@ exports.deleteSession = async (req, res) => {
 
     if (session_status === "Booked") {
       return res
-        .status(400)
+        .status(200)
         .json({ error: "You can't delete a session after a user booked it" });
     }
 
@@ -786,4 +786,3 @@ exports.getPopularWorkshops = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-

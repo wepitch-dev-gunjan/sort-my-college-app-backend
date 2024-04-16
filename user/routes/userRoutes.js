@@ -34,4 +34,4 @@ router.put("/counsellor/unsave", userAuth, unsaveCounsellor);
 router.post("/seesion/reschedule-request", userAuth, rescheduleRequest);
 router.post("/session/cancel-request", userAuth, cancelRequest);
 
-module.exports = router;
+dule.exports = router;
