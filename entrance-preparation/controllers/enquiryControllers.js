@@ -81,7 +81,6 @@ exports.getEnquiries = async (req, res) => {
 exports.getSingleEnquiry = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
-
     const enquiryData = await Enquiry.findById(enquiry_id.toString());
     if (!enquiryData)
       return res.status(404).send({ message: "No enquiry found with this ID" });
@@ -93,8 +92,11 @@ exports.getSingleEnquiry = async (req, res) => {
       `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
     );
     const userData = userDataResponse.data;
-
-    const courseData = await EntranceCourse.findById(enquiryData.courses);
+    
+    const courseData = await EntranceCourse.findById(enquiryData.courses.toString());
+    if(!courseData){
+     return res.status(400).send("no course details found with this id ")
+    }
 
     const responseData = {
       _id: enquiryData._id,
@@ -175,17 +177,7 @@ exports.getEnquiriesForAdmin = async (req, res) => {
   search,
   status,
   } = req.query;
-console.log(search)
   const queryObject = {};
-  if(search){
-   queryObject.$or = [
-    { name :{$regex: new RegExp(search, "i") } },
-    { status: {$regex: new RegExp(search, "i") } },
-
-   ]
-   console.log("haa shayd",new RegExp(search)); 
-   console.log(queryObject.$or[0].name)
-  }
   if(status) {
    queryObject.status = status;
   }
@@ -194,9 +186,7 @@ console.log(search)
      return res.status(404).json({ message: "Specified institute not found" });
    }
    const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
-   // console.log(enquiries);
    if (!enquiries) return res.status(201).send([]);
-
    const massagedDataPromise = Promise.all(
      enquiries.map(async (enquiry) => {
        const { data } = await axios.get(
@@ -211,19 +201,19 @@ console.log(search)
        };
      })
    );
-     console.log("data:", data)
+  
    massagedDataPromise
      .then((massagedData) => {
-       console.log(massagedData);
+       // console.log(massagedData);
        res.status(200).json(massagedData);
        
      })
      .catch((error) => {
        console.error(error);
      });
-
-   // console.log(massagedData);
+   // console.log(massagedDataPromise);
  } catch (error) {
+  console.log(error)
    console.error("Error getting enquiries!!");
    res.status(500).json({ message: "Internal  enquiries Server Error" });
  }
