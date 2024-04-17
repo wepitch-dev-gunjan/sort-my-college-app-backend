@@ -33,27 +33,20 @@ exports.register = async (req, res) => {
 exports.editUser = async (req, res) => {
   try {
     const { user_id } = req;
-    const {
-      email,
-      phone_number,
-      name,
-      gender,
-      date_of_birth,
-      location,
-      profile_pic,
-    } = req.body;
+    const { phone_number, name, gender, date_of_birth, location, profile_pic } =
+      req.body;
 
-    if (!email && !phone_number) {
+    if (!phone_number) {
       return res.status(400).json({
-        error: "Provide either email or phone_number to identify the user.",
+        error: "Provide  phone_number to identify the user.",
       });
     }
-
+    // console.log(req.body);
     const query = {};
     query._id = user_id;
 
     // Find the user based on email or phone_number
-    if (email) query.email = email;
+    // if (email) query.email = email;
     if (phone_number) query.phone_number = phone_number;
 
     let user = await User.findOne(query);
@@ -81,7 +74,7 @@ exports.editUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal  Server Error" });
   }
 };
 
@@ -136,7 +129,7 @@ exports.cancelRequest = (req, res) => {
   }
 };
 
-exports.saveCounsellor = async (req, res) => {
+exports.saveCounsellor = async (req, res) => {sort-my-college-accommodation-panel
   try {
     const { user_id } = req;
     const user = await User.findOne({ _id: user_id });

@@ -11,8 +11,6 @@ require("dotenv").config();
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
 
-const session_slots = 10;
-
 const { BACKEND_URL } = process.env;
 // GET
 exports.getSessions = async (req, res) => {
@@ -182,6 +180,7 @@ exports.addSession = async (req, res) => {
       session_duration,
       session_type,
       session_fee,
+      session_available_slots: session_slots,
     } = req.body;
 
     // Check if any of the required fields are missing
@@ -192,6 +191,7 @@ exports.addSession = async (req, res) => {
       !session_type ||
       !session_fee
     ) {
+      console.log(req.body);
       return res.status(400).send({
         error: "Missing required fields",
       });

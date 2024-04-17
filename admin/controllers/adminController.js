@@ -13,7 +13,7 @@ exports.adminLogin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password)
-      return ses.status(400).send({
+      return res.status(400).send({
         error: "Credentials are required",
       });
 
@@ -248,12 +248,10 @@ exports.getDashboardData = async (req, res) => {
       `${BACKEND_URL}/counsellor/counsellor-for-admin`
     );
 
-    res
-      .status(200)
-      .send({
-        totalUser: usersCount.data.length,
-        totalCounsellor: counsellorCount.data.length,
-      });
+    res.status(200).send({
+      totalUser: usersCount.data.length,
+      totalCounsellor: counsellorCount.data.length,
+    });
   } catch (error) {
     console.log(error);
   }
