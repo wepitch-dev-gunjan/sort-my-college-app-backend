@@ -11,7 +11,6 @@ const { JWT_SECRET } = process.env;
 exports.adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password)
       return res.status(400).send({
         error: "Credentials are required",

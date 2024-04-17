@@ -129,7 +129,7 @@ exports.cancelRequest = (req, res) => {
   }
 };
 
-exports.saveCounsellor = async (req, res) => {sort-my-college-accommodation-panel
+exports.saveCounsellor = async (req, res) => {
   try {
     const { user_id } = req;
     const user = await User.findOne({ _id: user_id });
