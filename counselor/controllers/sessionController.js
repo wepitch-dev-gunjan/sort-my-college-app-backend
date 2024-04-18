@@ -501,6 +501,7 @@ exports.deleteSession = async (req, res) => {
     }
 
     const { session_status } = counselingSession;
+    //validation
 
     if (session_status === "Booked") {
       return res
