@@ -76,6 +76,7 @@ exports.createPayment = async (req, res) => {
       description,
       status,
     });
+    console.log(payment_from);
 
     const counsellor = await axios.get(
       `${BACKEND_URL}/counsellor/counsellors/find-one`,
@@ -88,7 +89,7 @@ exports.createPayment = async (req, res) => {
 
     if (!counsellor)
       return res.status(404).send({
-        error: "Counsellor not found",
+        error: "Counsellor hi not found",
       });
 
     payment = await payment.save();

@@ -276,7 +276,7 @@ exports.addSession = async (req, res) => {
 
 exports.bookSession = async (req, res) => {
   try {
-    const { email, id } = req;
+    const { phone_number, id, email } = req;
 
     const { session_id } = req.params;
 
@@ -335,18 +335,20 @@ exports.bookSession = async (req, res) => {
     });
 
     // send email notification to user
-    await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
-      to: email,
-      date: session.session_date,
-      time: session.session_time,
-      counsellor: counsellor.name,
-      sessiontype: session.session_type,
-      duration: session.session_duration,
-      // location,
-      payment: session.session_fee,
-      // subject,
-      // username,
-    });
+    if (email) {
+      await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
+        to: phone_number,
+        date: session.session_date,
+        time: session.session_time,
+        counsellor: counsellor.name,
+        sessiontype: session.session_type,
+        duration: session.session_duration,
+        // location,
+        payment: session.session_fee,
+        // subject,
+        // username,
+      });
+    }
     // send email notification to counsellor
 
     await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
@@ -373,7 +375,7 @@ exports.bookSession = async (req, res) => {
     res.status(201).json({ message: "Counseling session booked successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal  booking Server Error" });
   }
 };
 

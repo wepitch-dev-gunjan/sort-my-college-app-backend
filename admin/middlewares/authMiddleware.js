@@ -77,11 +77,11 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     req.email = decoded.email;
     req.phone_number = decoded.phone_number;
     req.id = responseData._id; // Update response to responseData
-
+    console.log("sussess");
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: " AUTH Internal Server Error" });
   }
 };
 
@@ -168,7 +168,7 @@ exports.epAuth = async (req, res, next) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
-    
+
     const { data } = await axios.get(
       `${process.env.BACKEND_URL}/ep/institute/find-one`,
       {
@@ -176,8 +176,8 @@ exports.epAuth = async (req, res, next) => {
           institute_id: decoded.institute_id,
         },
       }
-      );
-      
+    );
+
     if (!data) {
       return res.status(401).json({ error: "User not authorized" });
     }
@@ -186,11 +186,11 @@ exports.epAuth = async (req, res, next) => {
     req.phoneNo = decoded.phoneNo;
     req.institute_id = decoded.institute_id;
 
-    next()
+    next();
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      error: "Internal server error!!!!!"
-    })
+      error: "Internal server error!!!!!",
+    });
   }
-}
+};
