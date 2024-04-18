@@ -11,6 +11,8 @@ const {
   getSingleEnquiry,
   EnquiryStatusChangeToReplies,
   getEnquiriesForAdmin,
+  getSingleEnquiryForAdmin,
+  changeStatus,
 } = require("../controllers/enquiryControllers");
 
 const router = express.Router();
@@ -26,4 +28,6 @@ router.put("/singleEnqury/:enquiry_id", epAuth, EnquiryStatusChangeToReplies);
 
 // admin Route
 router.get("/enquiriesForAdmin/:institute_id",adminAuth, getEnquiriesForAdmin)
+router.get("/singleEnquiryForAdmin/:enquiry_id" , adminAuth,getSingleEnquiryForAdmin);
+router.put("/changeStatus/:enquiry_id",adminAuth,changeStatus);
 module.exports = router;

@@ -218,3 +218,71 @@ exports.getEnquiriesForAdmin = async (req, res) => {
    res.status(500).json({ message: "Internal  enquiries Server Error" });
  }
 };
+
+// getSingleEnquiryForAdmin
+exports.getSingleEnquiryForAdmin = async (req,res) => {
+try {
+ const { enquiry_id} =req.params;
+ const dataEnquiry = await Enquiry.findById(enquiry_id);
+ if(!dataEnquiry) 
+ return res.status(404).send({message : "No Enquiry Found"});
+ const getUserData = await axios.get(`${BACKEND_URL}/user/users-for-admin/${dataEnquiry.enquirer}`
+ );
+ const userData = getUserData.data
+ const courseData = await EntranceCourse.findById(dataEnquiry.courses.toString());
+ if(!courseData) {
+  return res.status(400).send("no Course Found")
+ }
+ const fetchData = {
+  id: dataEnquiry.id,
+  enquirer: {
+_id: userData._id,
+name: userData.name,
+phone_number: userData.phone_number,
+  },
+  course: {
+   _id: courseData._id,
+   name: courseData.name,
+   phone_number: courseData.phone_number
+  },
+  message: dataEnquiry.message,
+  status: dataEnquiry.status ,
+  date: dataEnquiry.date,
+ }
+ res.status(200).send(fetchData)
+} catch (error) {
+ console.log(error)
+ res.status(500).json({message : "Internal Server Error"});
+}
+}
+// change status For Admin
+
+exports.changeStatus = async (req, res) => {
+ try {
+   const { enquiry_id } = req.params;
+
+   const enquiryData = await Enquiry.findById(enquiry_id.toString());
+   if (!enquiryData)
+     return res.status(404).send({ message: "No enquiry found with this ID" });
+
+   if (enquiryData.status === "Unseen") {
+     enquiryData.status = "Seen";
+   } else if (enquiryData.status === "Seen") {
+     enquiryData.status = enquiryData.status === "Replied" ? "Unseen" : "Replied";
+   } else if (enquiryData.status === "Replied") {
+     enquiryData.status = enquiryData.status === "Seen" ? "Unseen" : "Seen";
+   }
+
+   await enquiryData.save();
+
+   const responseData = {
+     status: enquiryData.status,
+   };
+
+   res.status(200).send(responseData);
+ } catch (error) {
+   console.error("Error:", error);
+   res.status(500).send({ message: "Internal server error" });
+ }
+};
+
