@@ -33,6 +33,7 @@ mongoose.connection.on('error', (err) => {
 readdirSync('./routes').map((r) => app.use('/', require('./routes/' + r)));
 app.use('/', require('./services/googleAuthentication'));
 
+
 app.listen(PORT, () => {
   console.log(`EP Server is running on port ${PORT}`);
 });
