@@ -187,10 +187,11 @@ exports.getOutstandingBalance = async (req, res) => {
       outstandingBalanceAggregation.length > 0
         ? outstandingBalanceAggregation[0].outstanding_balance
         : 0;
+
     res.status(200).send({ outstandingBalance });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: "Internal Server Error" });
+    res.status(500).send({ error: "Internal Server Error " });
   }
 };
 
