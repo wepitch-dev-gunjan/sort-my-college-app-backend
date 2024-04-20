@@ -67,7 +67,74 @@ const entranceInstituteSchema = new Schema({
   gstin: {
     type: String,
   },
-  timings: [Object],
+  timings: {
+    type: [
+      {
+        day: {
+          type: String,
+          default: 'MONDAY'
+        },
+        start_time: {
+          type: String,
+          default: '09:00 am'
+        },
+        end_time: {
+          type: String,
+          default: '06:00 pm'
+        },
+        is_open: {
+          type: Boolean,
+          default: true
+        }
+      }
+    ],
+    default: function() {
+      return [
+        {
+          day: 'MONDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'TUESDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'WEDNESDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'THURSDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'FRIDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'SATURDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: true
+        },
+        {
+          day: 'SUNDAY',
+          start_time: '09:00 am',
+          end_time: '06:00 pm',
+          is_open: false
+        }
+      ];
+    }
+  },
   mode_of_study: {
     type: [String],
     enum: ['ONLINE', 'OFFLINE']
