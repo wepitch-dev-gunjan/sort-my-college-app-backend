@@ -1,3 +1,4 @@
+const { week } = require("../helpers/instituteHelpers");
 const EntranceInstitute = require("../models/EntranceInstitute");
 
 // ep panel controllers
@@ -24,9 +25,13 @@ exports.getProfile = async (req, res) => {
 exports.editProfile = async (req, res) => {
   try {
     const { institute_id } = req; // Assuming institute_id is passed as a parameter
-    console.log(institute_id);
     const { about, ...body } = req.body; // Extract about field from the request body
-    console.log(about)
+
+    for (const timing of body.timings) {
+      if (!week.includes(timing.day)) return res.status(400).send({
+        error: "Invalid day field"
+      })
+    }
     // Find the profile by institute_id
     const profile = await EntranceInstitute.findById(institute_id);
 
@@ -38,7 +43,6 @@ exports.editProfile = async (req, res) => {
     if (about !== undefined) {
       profile.about = about;
     }
-
     // Update other fields in the profile
     Object.keys(body).forEach((key) => {
       profile[key] = body[key];

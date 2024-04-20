@@ -27,26 +27,26 @@ const entranceInstituteSchema = new Schema({
     type: String
   }],
   address: {
-    building_number:{
-     type: String,
-     default: "BULDING NUMBER",
-    } ,
+    building_number: {
+      type: String,
+      default: "BULDING NUMBER",
+    },
     area: {
-     type: String,
-     default: "AREA",
-    } ,
+      type: String,
+      default: "AREA",
+    },
 
-    city:{
-     type: String,
-     default: "CITY",
-    } ,
+    city: {
+      type: String,
+      default: "CITY",
+    },
     state: {
-     type: String,
-     default: "STATE",
+      type: String,
+      default: "STATE",
     },
     pin_code: {
-     type: String,
-     default: "PIN CODE",
+      type: String,
+      default: "PIN CODE",
     }
   },
   direction_url: {
@@ -67,16 +67,7 @@ const entranceInstituteSchema = new Schema({
   gstin: {
     type: String,
   },
-  institute_timings: {
-    day: {
-      type: [String],
-      enum: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
-    },
-    time: {
-      start_time: Date,
-      end_time: Date
-    }
-  },
+  timings: [Object],
   mode_of_study: {
     type: [String],
     enum: ['ONLINE', 'OFFLINE']

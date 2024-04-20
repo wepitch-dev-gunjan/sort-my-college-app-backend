@@ -1,3 +1,58 @@
 {
-  "workbench.colorTheme": "Dainty – Nord (chroma 0, lightness 0)"
+  "workbench.colorTheme": "Nord",
+  // "workbench.colorCustomizations": {
+  //     "editor.background": "#2d3137", // Background color for the editor
+  //     "editor.foreground": "#d8dee9", // Default foreground color
+  //     "editor.lineHighlightBackground": "#3b4252", // Background color for highlighted line
+  //     "editor.selectionBackground": "#4c566a", // Background color of selected text
+  //     "editorCursor.foreground": "#88d0bd", // Color of the cursor in the editor
+  //     "editor.findMatchBackground": "#88c0d0", // Background color of find matches in the editor
+  //     "editorBracketMatch.background": "#81a1c1", // Background color behind matching brackets
+  //     "editorIndentGuide.background": "#434c5e", // Color of the editor's indentation guides
+  //     "editorWhitespace.foreground": "#434c5e", // Color of whitespace characters in the editor
+  //     "titleBar.activeBackground": "#293137", // Background color of the active window's title bar
+  //     "sideBar.background": "#2e3440", // Background color of the side bar
+  //     "sideBar.foreground": "#d8dee9", // Foreground color of the side bar
+  //     "sideBarTitle.foreground": "#88c0d0", // Color of the title text in the side bar
+  //     "activityBar.background": "#2e3440", // Background color of the activity bar
+  //     "activityBar.foreground": "#d8dee9", // Foreground color of the activity bar
+  //     "statusBar.background": "#2e3440", // Background color of the status bar
+  //     "statusBar.foreground": "#d8dee9", // Foreground color of the status bar
+  //     "statusBar.debuggingBackground": "#5e81ac", // Background color of the status bar when debugging
+  //     "statusBar.debuggingForeground": "#eceff4", // Foreground color of the status bar when debugging
+  //     "statusBarItem.hoverBackground": "#4c566a", // Background color of status bar items on hover
+  //     "tab.activeBackground": "#3b4252", // Background color of the active tab
+  //     "tab.activeForeground": "#d8dee9", // Foreground color of the active tab
+  //     "tab.inactiveBackground": "#2e3440", // Background color of inactive tabs
+  //     "tab.inactiveForeground": "#d8dee9", // Foreground color of inactive tabs
+  //     "tab.border": "#3b4252", // Border color of tabs
+  //     "terminal.foreground": "#d8dee9", // Default foreground color in the terminal
+  //     "terminal.background": "#2e3440", // Background color of the terminal
+  //     "terminal.ansiBlack": "#4c566a", // ANSI black color in the terminal
+  //     "terminal.ansiBlue": "#81a1c1", // ANSI blue color in the terminal
+  //     "terminal.ansiGreen": "#a3be8c", // ANSI green color in the terminal
+  //     "terminal.ansiCyan": "#88c0d0", // ANSI cyan color in the terminal
+  //     "terminal.ansiRed": "#bf616a", // ANSI red color in the terminal
+  //     "terminal.ansiYellow": "#ebcb8b", // ANSI yellow color in the terminal
+  //     "terminal.ansiMagenta": "#b48ead", // ANSI magenta color in the terminal
+  //     "terminal.ansiWhite": "#e5e9f0", // ANSI white color in the terminal
+  //     "terminal.ansiBrightBlack": "#434c5e", // ANSI bright black color in the terminal
+  //     "terminal.ansiBrightBlue": "#81a1c1", // ANSI bright blue color in the terminal
+  //     "terminal.ansiBrightGreen": "#df3079", // ANSI bright green color in the terminal
+  //     "terminal.ansiBrightCyan": "#88c0d0", // ANSI bright cyan color in the terminal
+  //     "terminal.ansiBrightRed": "#bf616a", // ANSI bright red color in the terminal
+  //     "terminal.ansiBrightYellow": "#ebcb8b", // ANSI bright yellow color in the terminal
+  //     "terminal.ansiBrightMagenta": "#b48ead", // ANSI bright magenta color in the terminal
+  //     "terminal.ansiBrightWhite": "#e5e9f0", // ANSI bright white color in the terminal
+  //     // "editor.tokenColorCustomizations": {
+  //     //     "comments": "#747475", // Color of comments in the code
+  //     //     "strings": "#df3079", // Color of string literals in the code
+  //     //     "keywords": "#81a1c1", // Color of keywords in the code
+  //     //     "numbers": "#b48ead", // Color of numeric literals in the code
+  //     //     "functions": "#df3079", // Color of function names in the code
+  //     //     "variables": "#df3079", // Color of variables in the code
+  //     //     "types": "#d8dee9" // Color of data types in the code
+  //     // }
+  // }
 }
+>>>>>>> Stashed changes

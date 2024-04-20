@@ -36,3 +36,18 @@ async function getLocationInfo(geonamesID) {
     return null; // Return null in case of an error
   }
 }
+
+exports.convertTo24HourFormat = (timeString) => {
+  let [hourStr, period] = timeString.split(' ');
+  let [hour, minute] = hourStr.split(':').map(Number);
+
+  if (period === 'pm' && hour !== 12) {
+    hour += 12;
+  } else if (period === 'am' && hour === 12) {
+    hour = 0;
+  }
+
+  return hour;
+}
+
+exports.week = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
