@@ -274,7 +274,7 @@ exports.addSession = async (req, res) => {
   }
 };
 
-exports.bookSession = async (req, res) => {
+exports.bookSessionValidation = async (req, res) => {
   try {
     const { phone_number, id, email } = req;
 
@@ -299,11 +299,6 @@ exports.bookSession = async (req, res) => {
       });
     }
 
-    session.session_available_slots--;
-    if (session.session_available_slots <= 0) {
-      session.session_status = "Booked";
-    }
-
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
@@ -312,6 +307,31 @@ exports.bookSession = async (req, res) => {
         error:
           "Counselor has left the account, please choose another counselor",
       });
+
+    if (session.session_users.includes(id))
+      return res.status(400).send({
+        error: "user is already registered",
+      });
+
+    // Respond with a success message
+    res.status(201).json({ message: "Proceed to payment " });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal  booking Server Error" });
+  }
+};
+
+exports.bookSession = async (req, res) => {
+  try {
+    const { phone_number, id, email } = req;
+
+    const { session_id } = req.params;
+
+    let session = await Session.findOne({ _id: session_id });
+
+    const counsellor = await Counsellor.findOne({
+      _id: session.session_counsellor,
+    });
 
     const sessionDateTime = new Date(
       `${session.session_date} ${session.session_time}`
@@ -322,12 +342,11 @@ exports.bookSession = async (req, res) => {
     if (sessionDateTime > nextSessionDateTime) {
       counsellor.next_session_time = sessionDateTime;
     }
-    if (session.session_users.includes(id))
-      return res.status(400).send({
-        error: "user is already registered",
-      });
-
     session.session_users.push(id);
+    session.session_available_slots--;
+    if (session.session_available_slots <= 0) {
+      session.session_status = "Booked";
+    }
 
     // Save the updated session and counselor data
     await session.save();
