@@ -5,8 +5,8 @@ const sessionSchema = new Schema(
     session_counsellor: {
       type: String,
     },
-    session_user: {
-      type: Schema.Types.ObjectId,
+    session_users: {
+      type: [Schema.Types.ObjectId],
       ref: "User",
       default: null,
     },

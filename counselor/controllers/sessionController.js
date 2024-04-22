@@ -322,6 +322,12 @@ exports.bookSession = async (req, res) => {
     if (sessionDateTime > nextSessionDateTime) {
       counsellor.next_session_time = sessionDateTime;
     }
+    if (session.session_users.includes(id))
+      return res.status(400).send({
+        error: "user is already registered",
+      });
+
+    session.session_users.push(id);
 
     // Save the updated session and counselor data
     await session.save();

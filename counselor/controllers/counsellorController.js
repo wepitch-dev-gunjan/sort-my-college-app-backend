@@ -1025,6 +1025,7 @@ exports.clearOutstandingBalance = async (req, res) => {
 exports.incrementOutstandingBalance = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
+    console.log(counsellor_id);
     const { amount } = req.body;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
