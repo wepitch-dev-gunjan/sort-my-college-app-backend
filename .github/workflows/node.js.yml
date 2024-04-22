@@ -99,5 +99,7 @@ jobs:
           cd ../api-gateway
           pm2 start server.js --name="api-gateway" -f
 
-      # - name: Restart all Node.js applications
-      #   run: pm2 restart all
+      - name: Restart all Node.js applications
+        run: |
+          pm2 stop all
+          pm2 start all
