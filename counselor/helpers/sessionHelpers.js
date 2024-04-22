@@ -45,21 +45,12 @@ exports.isCounsellingSessionAvailable = async (sessionId) => {
 };
 
 exports.isSessionBefore24Hours = (session_date, session_time) => {
-  // Combine session_date and session_time into a single datetime string
-  const sessionDatetimeString = `${session_date}T${session_time}`;
-  console.log(sessionDatetimeString);
-
-  // Parse the session datetime string into a Moment.js object
-  const sessionDatetime = moment(sessionDatetimeString);
-
-  // Get the current datetime
-  const currentDatetime = moment();
-
-  // Calculate the difference in hours between the session datetime and the current datetime
-  const hoursDifference = sessionDatetime.diff(currentDatetime, "hours", true);
-
-  // Check if the session is at least 24 hours away from the current time
-  return hoursDifference >= 24;
+  const sessionDate = new Date(session_date);
+  const sessionTime = session_time.split(":");
+  sessionDate.setHours(parseInt(sessionTime[0]) + 5);
+  const eligibleDate = new Date(new Date());
+  eligibleDate.setHours(parseInt(sessionTime[0]) + 29);
+  return sessionDate > eligibleDate;
 };
 
 exports.createMeeting = async (startTime, endTime, refresh_token) => {

@@ -212,6 +212,11 @@ exports.addSession = async (req, res) => {
         error: "Invalid session_date or session_duration",
       });
     }
+    if (!isSessionBefore24Hours(session_date, session_time)) {
+      return res.status(400).send({
+        error: "Cannot add a session for today's date",
+      });
+    }
 
     // Check if a session is already there at the mentioned time
     const lowerTimeLimit = parsedSessionTime;
