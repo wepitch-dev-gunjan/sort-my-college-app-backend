@@ -208,3 +208,27 @@ exports.findOneInstitute = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.verifyInstitute = async (req, res) => {
+ try {
+   const { institute_id } = req.params;
+   const institute = await EntranceInstitute.findOne({ _id: institute_id });
+   if (!institute) {
+     return res.status(404).send({ error: "Institute Not Found" });
+   }
+
+   if (institute.verified) {
+     return res.status(400).send({ error: "Institute already verified" });
+   }
+
+   institute.status = "APPROVED";
+   institute.verified = true;
+   await institute.save();
+   res.status(200).send({
+    message: "Institute verfified succesfully",
+   });
+ } catch (error) {
+   console.log(error);
+   res.status(500).send({ error: "Internal Server Error" });
+ }
+};

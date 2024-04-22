@@ -146,6 +146,10 @@ const entranceInstituteSchema = new Schema({
     enum: ["APPROVED", "REJECTED", "PENDING"],
     default: "PENDING"
   },
+  verified: {
+   type: Boolean,
+   default: false,
+  },
   institute_key_features: [String],
 },
   {
