@@ -148,6 +148,34 @@ exports.deleteInstituteForAdmin = async (req, res) => {
   }
 };
 
+exports.rejectInstitute = async(req, res) => {
+  try {
+    const { institute_id } = req.params
+    const institute = await EntranceInstitute.findOne({_id: institute_id})
+
+    if (!institute) {
+      return res.status(404).send({ error: "Institute Not Found" });
+    }
+
+    if (!institute.verified) {
+      return res.status(400).send({ error: "Institute is already not verified" });
+    }
+
+    institute.status = "REJECTED";
+    institute.verified = false;
+
+    await institute.save();
+
+    res.status(200).send({
+      message: "Institute Successfully Rejected"
+    });
+
+  } catch(error) {
+    console.log(error)
+    res.status(500).send({error : "Internal Server Error"})
+  }
+}
+
 // for Users
 exports.getInstitutesForUser = async (req, res) => {
   try {
