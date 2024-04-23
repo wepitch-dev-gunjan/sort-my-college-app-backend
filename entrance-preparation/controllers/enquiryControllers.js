@@ -15,6 +15,12 @@ exports.addEnquiry = async (req, res) => {
       });
     const currentDate = new Date();
 
+    const formattedDate = currentDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
     const newEnquiry = new Enquiry({
       enquirer: id,
       enquired_to,
@@ -22,7 +28,7 @@ exports.addEnquiry = async (req, res) => {
       mode,
       preferred_time,
       message,
-      date: currentDate,
+      date: formattedDate,
     });
 
     await newEnquiry.save();
@@ -35,6 +41,7 @@ exports.addEnquiry = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 // get Engueries for Ep
 exports.getEnquiries = async (req, res) => {
   try {
@@ -42,7 +49,20 @@ exports.getEnquiries = async (req, res) => {
     if (!institute_id) {
       return res.status(404).json({ message: "Specified institute not found" });
     }
-    const enquiries = await Enquiry.find({ enquired_to: institute_id });
+
+    const { date, status } = req.query;
+
+    const filter = { enquired_to: institute_id };
+    if (date) {
+      filter.date = date;
+    }
+    if (status) {
+      filter.status = status;
+    }
+
+    const enquiries = await Enquiry.find(filter);
+
+    // const enquiries = await Enquiry.find({ enquired_to: institute_id });
     // console.log(enquiries);
 
     if (!enquiries) return res.status(201).send([]);
@@ -78,6 +98,7 @@ exports.getEnquiries = async (req, res) => {
     res.status(500).json({ message: "Internal  enquiries Server Error" });
   }
 };
+
 exports.getSingleEnquiry = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
