@@ -166,11 +166,12 @@ exports.getCounsellor = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
     const { id } = req;
+
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
     if (!counsellor) {
       return res.status(404).send({
-        error: "No counsellor found with the provided id",
+        error: "No counsellor found with the provided id"
       });
     }
 
@@ -206,7 +207,7 @@ exports.getCounsellor = async (req, res) => {
 
     // client testimonials
     const client_testimonials = await Feedback.find({
-      feedback_to: counsellor._id,
+      feedback_to: counsellor._id
     });
 
     // rating
@@ -222,10 +223,14 @@ exports.getCounsellor = async (req, res) => {
     // if followed by the user or not
     const follower = await Follower.findOne({
       followed_by: id,
-      followed_to: counsellor_id,
+      followed_to: counsellor_id
     });
 
-    const following = follower ? true : false;
+
+
+    console.log(`user id: ${id}`, 'counsellor_id: ' + counsellor_id)
+
+    const following = Boolean(follower);
 
     const messagedCounsellor = {
       ...counsellor._doc,

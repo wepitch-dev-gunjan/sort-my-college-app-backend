@@ -101,6 +101,7 @@ exports.unfollowCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Counsellor not found" });
     }
 
+    console.log(id, counsellor_id)
     let follower = await Follower.findOneAndDelete({
       followed_by: id,
       followed_to: counsellor_id,
