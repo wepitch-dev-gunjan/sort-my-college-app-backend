@@ -67,10 +67,12 @@ const accommodationSchema = new Schema(
 
     common_area_amenities: [String],
     house_rules: [String],
+    gate_opning_time: String,
+    gate_closing_time: String,
   },
   {
     timestamps: true,
     strict: false,
   }
 );
-module.exports = model("accommodation", accommodationSchema);
+module.exports = model("Accommodation", accommodationSchema);
