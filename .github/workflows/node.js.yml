@@ -22,6 +22,10 @@ jobs:
           cache: "npm"
       - name: Log in as root
         run: sudo su
+      - name: Stop all instances of PM2
+        run: |
+          PM2 stop all
+          PM2 kill
       - name: Install PM2
         run: npm install -g pm2
       - name: Verify PM2 Installation
