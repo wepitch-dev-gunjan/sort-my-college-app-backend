@@ -89,7 +89,7 @@ exports.createPayment = async (req, res) => {
 
     if (!counsellor)
       return res.status(404).send({
-        error: "Counsellor hi not found",
+        error: "Counsellor  not found",
       });
 
     payment = await payment.save();

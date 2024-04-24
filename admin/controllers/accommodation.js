@@ -177,5 +177,15 @@ exports.accommodationRegister = async (req, res) => {
     res.status(500).json({ message: "Failed to register user" });
   }
 };
+exports.getaccommodations = async (req, res) => {
+  try {
+    const accommodations = Accommodation.find({});
+
+    if (!accommodations) return res.send([]);
+    return res.state(200).send({ data: accommodations });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = router;
