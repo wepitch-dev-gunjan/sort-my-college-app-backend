@@ -84,24 +84,22 @@ jobs:
       - name: Start Node.js applications
         run: |
           cd counselor
-          pm2 start server.js --name="counsellor" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
 
           cd ../admin
-          pm2 start server.js --name="admin" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
 
           cd ../notification-service
-          pm2 start server.js --name="notification-service" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service" -f
 
           cd ../user
-          pm2 start server.js --name="user" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
 
           cd ../entrance-preparation
-          pm2 start server.js --name="entrance-preparation" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="entrance-preparation" -f
 
           cd ../api-gateway
-          pm2 start server.js --name="api-gateway" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
 
       - name: Restart all Node.js applications
-        run: |
-          pm2 stop all
-          pm2 start all
+        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
