@@ -101,7 +101,7 @@ exports.unfollowCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Counsellor not found" });
     }
 
-    const follower = await Follower.findOneAndDelete({
+    let follower = await Follower.findOneAndDelete({
       followed_by: id,
       followed_to: counsellor_id,
     });
@@ -124,11 +124,15 @@ exports.unfollowCounsellor = async (req, res) => {
     ]);
     counsellor.followers =
       followersCount.length > 0 ? followersCount[0].totalFollowers : 0;
-    console.log(counsellor.followers);
     await counsellor.save();
+
+    follower = {
+      ...follower._doc,
+      followed: false
+    }
     res.status(200).json({
       message: "User is now unfollowing the counsellor",
-      data: follower,
+      data: follower
     });
   } catch (error) {
     console.error(error);
