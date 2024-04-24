@@ -29,7 +29,7 @@ jobs:
       # - name: Stop all instances of pm2
       #   run: pm2 stop all || true
       - name: Stop all instances of pm2
-        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 stop all || true
+        run: pm2 stop all || true
       - name: Install dependencies
         run: |
           cd counselor
@@ -84,22 +84,24 @@ jobs:
       - name: Start Node.js applications
         run: |
           cd counselor
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
+          pm2 start server.js --name="counsellor" -f
 
           cd ../admin
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
+          pm2 start server.js --name="admin" -f
 
           cd ../notification-service
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service" -f
+          pm2 start server.js --name="notification-service" -f
 
           cd ../user
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
+          pm2 start server.js --name="user" -f
 
           cd ../entrance-preparation
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="entrance-preparation" -f
+          pm2 start server.js --name="entrance-preparation" -f
 
           cd ../api-gateway
-          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
+          pm2 start server.js --name="api-gateway" -f
 
       - name: Restart all Node.js applications
-        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all
+        run: |
+          pm2 stop all
+          pm2 start all
