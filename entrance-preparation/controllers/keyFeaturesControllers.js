@@ -23,12 +23,10 @@ exports.addKeyFeature = async (req, res) => {
     });
 
     await newKeyFeature.save();
-    res
-      .status(201)
-      .json({
-        message: "Key feature added successfully",
-        keyFeature: newKeyFeature,
-      });
+    res.status(201).json({
+      message: "Key feature added successfully",
+      keyFeature: newKeyFeature,
+    });
   } catch (error) {
     console.error("Error adding Key Features for Institutes");
     res.status(500).json({ message: "Internal Server Error" });
@@ -41,11 +39,9 @@ exports.getKeyFeatures = async (req, res) => {
     const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
 
     if (!allKeyFeatures || allKeyFeatures.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "Key features not found for the specified institute",
-        });
+      return res.status(404).json({
+        message: "Key features not found for the specified institute",
+      });
     }
 
     let key_feature_ids = allKeyFeatures.map(
@@ -267,9 +263,36 @@ exports.editKeyFeatures = async (req, res) => {
 //     }
 // }
 
-// ██╗░░██╗███████╗██╗░░░██╗  ███████╗███████╗░█████╗░████████╗██╗░░░██╗██████╗░███████╗░██████╗
-// ██║░██╔╝██╔════╝╚██╗░██╔╝  ██╔════╝██╔════╝██╔══██╗╚══██╔══╝██║░░░██║██╔══██╗██╔════╝██╔════╝
-// █████═╝░█████╗░░░╚████╔╝░  █████╗░░█████╗░░███████║░░░██║░░░██║░░░██║██████╔╝█████╗░░╚█████╗░
-// ██╔═██╗░██╔══╝░░░░╚██╔╝░░  ██╔══╝░░██╔══╝░░██╔══██║░░░██║░░░██║░░░██║██╔══██╗██╔══╝░░░╚═══██╗
-// ██║░╚██╗███████╗░░░██║░░░  ██║░░░░░███████╗██║░░██║░░░██║░░░╚██████╔╝██║░░██║███████╗██████╔╝
-// ╚═╝░░╚═╝╚══════╝░░░╚═╝░░░  ╚═╝░░░░░╚══════╝╚═╝░░╚═╝░░░╚═╝░░░░╚═════╝░╚═╝░░╚═╝╚══════╝╚═════╝░
+//user
+exports.getKeyFeaturesForUser = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const allKeyFeatures = await KeyFeatures.find({ institute: institute_id });
+
+    if (!allKeyFeatures || allKeyFeatures.length === 0) {
+      return res.status(404).json({
+        message: "Key features not found for the specified institute",
+      });
+    }
+
+    let key_feature_ids = allKeyFeatures.map(
+      (keyFeature) => keyFeature.key_feature
+    );
+
+    // console.log(key_feature_ids)
+
+    const { data } = await axios.get(
+      `${BACKEND_URL}/admin/key-features-institute/key-features`,
+      {
+        params: {
+          key_feature_ids: JSON.stringify(key_feature_ids),
+        },
+      }
+    );
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error getting Key Feature: ", error);
+    res.status(500).json({ message: "Internal Server Error!!" });
+  }
+};

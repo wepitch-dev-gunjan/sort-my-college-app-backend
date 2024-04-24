@@ -4,6 +4,7 @@ const {
   addCourse,
   editCourse,
   deleteCourse,
+  getCoursesForUser,
 } = require("../controllers/entranceCourseControllers");
 const {
   epAuth,
@@ -19,8 +20,8 @@ const router = express.Router();
 // EP Panel Routes
 router.get("/courses", epAuth, getCoursesForEp);
 router.post("/courses", epAuth, addCourse);
-router.put("/courses/:course_id", epAuth,editCourse);
-router.delete("/courses/:course_id", epAuth,deleteCourse);
+router.put("/courses/:course_id", epAuth, editCourse);
+router.delete("/courses/:course_id", epAuth, deleteCourse);
 
 //  ADMIN Panel Routes
 // router.get("/courses/admin", adminAuth, getCoursesForAdmin);
@@ -30,6 +31,6 @@ router.delete("/courses/:course_id", epAuth,deleteCourse);
 // router.delete("/courses/:course_id", adminAuth, deleteCourseForAdmin);
 
 // Routes for USER
-// router.get("/courses/user", userAuth, getCoursesForAdmin);
+router.get("/coursesForUser/:institute_id", userAuth, getCoursesForUser);
 
 module.exports = router;

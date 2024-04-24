@@ -39,12 +39,10 @@ exports.addAnnouncements = async (req, res) => {
 
     const newAnnouncement = await announcement.save();
 
-    res
-      .status(201)
-      .json({
-        message: "Announcement added successfully",
-        data: newAnnouncement,
-      });
+    res.status(201).json({
+      message: "Announcement added successfully",
+      data: newAnnouncement,
+    });
   } catch (error) {
     console.error("Error adding Announcements: ", error);
     res.status(500).json({ message: "Internal Server Error!!" });
@@ -72,14 +70,31 @@ exports.deleteAnnouncement = async (req, res) => {
       return res.status(404).json({ message: "Announcement not found!" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Announcement deleted successfully",
-        data: announcement,
-      });
+    res.status(200).json({
+      message: "Announcement deleted successfully",
+      data: announcement,
+    });
   } catch (error) {
     console.error("Error deleting Announcement: ", error);
+    res.status(500).json({ message: "Internal Server Error!!" });
+  }
+};
+
+// user APIs
+exports.getAnnouncementsForUsers = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const allAnnouncements = await Announcement.find({
+      institute: institute_id,
+    });
+    if (!allAnnouncements) {
+      return res
+        .status(404)
+        .json({ message: "Announcements not found wiht this institute" });
+    }
+    res.status(200).json(allAnnouncements);
+  } catch (error) {
+    console.error("Error getting Key Announcements: ", error);
     res.status(500).json({ message: "Internal Server Error!!" });
   }
 };

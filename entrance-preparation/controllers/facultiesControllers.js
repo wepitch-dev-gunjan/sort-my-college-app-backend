@@ -3,7 +3,7 @@ const Faculties = require("../models/Faculties");
 const { uploadImage } = require("../services/cloudinary");
 
 exports.getFaculties = async (req, res) => {
-  const { institute_id } = req;
+  const { institute_id } = req.params;
   try {
     const faculties = await Faculties.find({ institute: institute_id });
     if (!faculties || faculties.length === 0) {
@@ -22,7 +22,7 @@ exports.getFaculties = async (req, res) => {
     res.status(200).send(massagedFaculties);
   } catch (error) {
     console.log("error featching faculties", error);
-    res.status(500).json({ message: "Tnternal server error" });
+    res.status(500).json({ message: "nternal server error" });
   }
 };
 
@@ -85,5 +85,29 @@ exports.editFaculties = async (req, res) => {
   } catch (error) {
     console.log("Error Editing Faculty");
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+//user
+exports.getFacultiesForUser = async (req, res) => {
+  const { institute_id } = req.params;
+  try {
+    const faculties = await Faculties.find({ institute: institute_id });
+    if (!faculties || faculties.length === 0) {
+      return res.status(200).send([]);
+    }
+    const massagedFaculties = faculties.map((faculty) => ({
+      _id: faculty._id,
+      institute_id: institute_id,
+      name: faculty.name,
+      display_pic: faculty.display_pic,
+      experience_in_years: faculty.experience_in_years,
+      qualifications: faculty.qualifications,
+      graduated_from: faculty.graduated_from,
+    }));
+
+    res.status(200).send(massagedFaculties);
+  } catch (error) {
+    console.log("error featching faculties", error);
+    res.status(500).json({ message: "nternal server error" });
   }
 };
