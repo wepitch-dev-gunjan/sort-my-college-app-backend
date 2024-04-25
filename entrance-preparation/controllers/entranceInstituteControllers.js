@@ -38,15 +38,6 @@ exports.editProfile = async (req, res) => {
           error: "Invalid day field",
         });
 
-<<<<<<< HEAD
-      if (
-        convertTo24HourFormat(timing.start_date) > 23 ||
-        convertTo24HourFormat(timing.start_date) > 24
-      )
-        return res.status(400).send({
-          error: "Can't go further than 24 hours",
-        });
-=======
       const startTime = timing.start_time.split(' ')
 
       console.log(convertTo24HourFormat(timing.end_time))
@@ -54,7 +45,6 @@ exports.editProfile = async (req, res) => {
       if (convertTo24HourFormat(timing.start_time) > convertTo24HourFormat(timing.end_time) && convertTo24HourFormat(timing.end_time) !== 0) return res.status(400).send({
         error: "Can't go further than 24 hours"
       })
->>>>>>> f629f7078ba5e3cdbb26013cc7f0550911df574e
     }
 
     // Find the profile by institute_id
