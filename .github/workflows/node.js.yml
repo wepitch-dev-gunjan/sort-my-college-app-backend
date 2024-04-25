@@ -13,6 +13,96 @@ jobs:
         node-version: [20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
+    # steps:
+    #   - uses: actions/checkout@v3
+    #   - name: Use Node.js ${{ matrix.node-version }}
+    #     uses: actions/setup-node@v3
+    #     with:
+    #       node-version: ${{ matrix.node-version }}
+    #       cache: "npm"
+    #   # - name: Log in as root
+    #   #   run: sudo su
+    #   - name: Install PM2
+    #     run: npm install -g pm2
+    #   - name: Verify PM2 Installation
+    #     run: pm2 --version
+    #   # - name: Stop all instances of pm2
+    #   #   run: pm2 stop all || true
+    #   - name: Stop all instances of pm2
+    #     run: pm2 stop all || true
+    #   - name: Install dependencies
+    #     run: |
+    #       cd counselor
+    #       npm ci
+
+    #       cd ../admin
+    #       npm ci
+
+    #       cd ../notification-service
+    #       npm ci
+
+    #       cd ../user
+    #       npm ci
+
+    #       cd ../api-gateway
+    #       npm ci
+
+    #       cd ../entrance-preparation
+    #       npm ci
+
+    #   - name: Create SSL certificates
+    #     run: |
+    #       cd ssl_certificates
+    #       touch ca_bundle.crt
+    #       echo "${{ secrets.CA_BUNDLE }}" > ca_bundle.crt
+    #       touch certificate.crt
+    #       echo "${{ secrets.CERTIFICATE }}" > certificate.crt
+    #       touch private.key
+    #       echo "${{ secrets.PRIVATE_KEY }}" > private.key
+
+    #   - name: Create environment variables
+    #     run: |
+    #       cd counselor
+    #       touch .env
+    #       echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
+    #       cd ../admin
+    #       touch .env
+    #       echo "${{ secrets.ADMIN_SECRETS }}" > .env
+    #       cd ../notification-service
+    #       touch .env
+    #       echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
+    #       cd ../user
+    #       touch .env
+    #       echo "${{ secrets.USER_SECRETS }}" > .env
+    #       cd ../entrance-preparation
+    #       touch .env
+    #       echo "${{ secrets.EP_SECRETS }}" > .env
+    #       cd ../api-gateway
+    #       touch .env
+    #       echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
+
+    #   - name: Start Node.js applications
+    #     run: |
+    #       cd counselor
+    #       pm2 start server.js --name="counsellor" -f
+
+    #       cd ../admin
+    #       pm2 start server.js --name="admin" -f
+
+    #       cd ../notification-service
+    #       pm2 start server.js --name="notification-service" -f
+
+    #       cd ../user
+    #       pm2 start server.js --name="user" -f
+
+    #       cd ../entrance-preparation
+    #       pm2 start server.js --name="entrance-preparation" -f
+
+    #       cd ../api-gateway
+    #       pm2 start server.js --name="api-gateway" -f
+
+    #   - name: Restart all Node.js applications
+    #     run: pm2 restart all
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -20,16 +110,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-      - name: Log in as root
-        run: sudo su
-      - name: Install PM2
-        run: npm install -g pm2
-      - name: Verify PM2 Installation
-        run: pm2 --version
-      # - name: Stop all instances of pm2
-      #   run: pm2 stop all || true
       - name: Stop all instances of pm2
-        run: pm2 stop all || true
+        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 stop all || true
       - name: Install dependencies
         run: |
           cd counselor
@@ -64,19 +146,19 @@ jobs:
         run: |
           cd counselor
           touch .env
-          echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
+          echo "${{ secrets.COUNSELLOR_SECRETS_STAGING }}" > .env
           cd ../admin
           touch .env
-          echo "${{ secrets.ADMIN_SECRETS }}" > .env
+          echo "${{ secrets.ADMIN_SECRETS_STAGING }}" > .env
           cd ../notification-service
           touch .env
-          echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
+          echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS_STAGING }}" > .env
           cd ../user
           touch .env
-          echo "${{ secrets.USER_SECRETS }}" > .env
+          echo "${{ secrets.USER_SECRETS_STAGING }}" > .env
           cd ../entrance-preparation
           touch .env
-          echo "${{ secrets.EP_SECRETS }}" > .env
+          echo "${{ secrets.EP_SECRETS_STAGING }}" > .env
           cd ../api-gateway
           touch .env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
@@ -84,22 +166,22 @@ jobs:
       - name: Start Node.js applications
         run: |
           cd counselor
-          pm2 start server.js --name="counsellor" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="counsellor" -f
 
           cd ../admin
-          pm2 start server.js --name="admin" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="admin" -f
 
           cd ../notification-service
-          pm2 start server.js --name="notification-service" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="notification-service" -f
 
           cd ../user
-          pm2 start server.js --name="user" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="user" -f
 
           cd ../entrance-preparation
-          pm2 start server.js --name="entrance-preparation" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="entrance-preparation" -f
 
           cd ../api-gateway
-          pm2 start server.js --name="api-gateway" -f
+          /root/.nvm/versions/node/v20.8.0/bin/pm2 start server.js --name="api-gateway" -f
 
       - name: Restart all Node.js applications
-        run: pm2 restart all
+        run: /root/.nvm/versions/node/v20.8.0/bin/pm2 restart all

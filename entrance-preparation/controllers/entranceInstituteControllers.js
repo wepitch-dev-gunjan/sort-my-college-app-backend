@@ -1,4 +1,4 @@
-const { week } = require("../helpers/instituteHelpers");
+const { week, getDayFromDate, convertTo24HourFormat, getSlotsFromTotalSlots } = require("../helpers/instituteHelpers");
 const EntranceInstitute = require("../models/EntranceInstitute");
 
 // ep panel controllers
@@ -31,7 +31,13 @@ exports.editProfile = async (req, res) => {
       if (!week.includes(timing.day)) return res.status(400).send({
         error: "Invalid day field"
       })
+
+      if (convertTo24HourFormat(timing.start_date) > 23 ||
+        convertTo24HourFormat(timing.start_date) > 24) return res.status(400).send({
+          error: "Can't go further than 24 hours"
+        })
     }
+
     // Find the profile by institute_id
     const profile = await EntranceInstitute.findById(institute_id);
 
@@ -74,7 +80,7 @@ exports.getInstitutesForAdmin = async (req, res) => {
       name: institute.name,
       profile_pic: institute.profile_pic,
       email: institute.email,
-      status: institute.status,
+      status: institute.status
     }));
 
     // You can customize the response data structure as per your requirements
@@ -148,10 +154,10 @@ exports.deleteInstituteForAdmin = async (req, res) => {
   }
 };
 
-exports.rejectInstitute = async(req, res) => {
+exports.rejectInstitute = async (req, res) => {
   try {
     const { institute_id } = req.params
-    const institute = await EntranceInstitute.findOne({_id: institute_id})
+    const institute = await EntranceInstitute.findOne({ _id: institute_id })
 
     if (!institute) {
       return res.status(404).send({ error: "Institute Not Found" });
@@ -170,9 +176,9 @@ exports.rejectInstitute = async(req, res) => {
       message: "Institute Successfully Rejected"
     });
 
-  } catch(error) {
+  } catch (error) {
     console.log(error)
-    res.status(500).send({error : "Internal Server Error"})
+    res.status(500).send({ error: "Internal Server Error" })
   }
 }
 
@@ -192,7 +198,7 @@ exports.getInstitutesForUser = async (req, res) => {
       profile_pic: institute.profile_pic,
       address: institute.address,
       year_established_in: institute.year_established_in,
-      institute_timings: institute.institute_timings,
+      institute_timings: institute.institute_timings
     }));
 
     // You can customize the response data structure as per your requirements
@@ -219,6 +225,39 @@ exports.getInstituteForUser = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+exports.getInstituteEnquiryFormForUser = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const { date } = req.query;
+
+    if (!date) return res.status(400).send({
+      error: "Date not specified"
+    })
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+
+    if (!institute) {
+      return res.status(404).json({ message: "Institute not found !" });
+    }
+
+    const { timings } = institute;
+
+    const currentDay = getDayFromDate(date);
+    const currentDayTiming = timings.find(timing => timing.day === currentDay);
+
+    const startTime = convertTo24HourFormat(currentDayTiming.start_time);
+    const endTime = convertTo24HourFormat(currentDayTiming.end_time);
+
+    const totalSlots = (endTime - startTime) < 0 ? 24 - Math.abs(endTime - startTime) : (endTime - startTime);
+
+    const slots = getSlotsFromTotalSlots(startTime, totalSlots)
+
+    res.status(200).json(slots);
+  } catch (error) {
+    console.error("Error fetching institute for user: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 exports.findOneInstitute = async (req, res) => {
   try {
@@ -238,25 +277,25 @@ exports.findOneInstitute = async (req, res) => {
 };
 
 exports.verifyInstitute = async (req, res) => {
- try {
-   const { institute_id } = req.params;
-   const institute = await EntranceInstitute.findOne({ _id: institute_id });
-   if (!institute) {
-     return res.status(404).send({ error: "Institute Not Found" });
-   }
+  try {
+    const { institute_id } = req.params;
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute) {
+      return res.status(404).send({ error: "Institute Not Found" });
+    }
 
-   if (institute.verified) {
-     return res.status(400).send({ error: "Institute already verified" });
-   }
+    if (institute.verified) {
+      return res.status(400).send({ error: "Institute already verified" });
+    }
 
-   institute.status = "APPROVED";
-   institute.verified = true;
-   await institute.save();
-   res.status(200).send({
-    message: "Institute verfified succesfully",
-   });
- } catch (error) {
-   console.log(error);
-   res.status(500).send({ error: "Internal Server Error" });
- }
+    institute.status = "APPROVED";
+    institute.verified = true;
+    await institute.save();
+    res.status(200).send({
+      message: "Institute verfified succesfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
 };

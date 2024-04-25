@@ -50,4 +50,48 @@ exports.convertTo24HourFormat = (timeString) => {
   return hour;
 }
 
+exports.getDayFromDate = (dateString) => {
+  // Define an array of day names
+  const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
+  // Create a new Date object from the provided date string
+  const date = new Date(dateString.split('T')[0]);
+
+  // Get the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+  const dayOfWeek = date.getDay();
+
+  // Return the day of the week name
+  return dayNames[dayOfWeek];
+};
+
+exports.getSlotsFromTotalSlots = (startTime, totalSlots) => {
+  const slots = [];
+  let currentHour = startTime;
+
+  for (let i = 0; i < totalSlots; i++) {
+    const startSlot = formatHour(currentHour);
+    const endSlot = formatHour(currentHour + 1);
+
+    const slot = `${startSlot} - ${endSlot}`;
+    slots.push(slot);
+
+    currentHour++;
+  }
+
+  return slots;
+};
+
+const formatHour = (hour) => {
+  // Convert hour to 12-hour format
+  const hour12 = hour % 12 || 12;
+  // Determine AM or PM
+  const period = hour <= 12 ? 'am' : 'pm';
+
+  // Format the hour
+  const formattedHour = `${hour12.toString().padStart(2, '0')}:00 ${period}`;
+
+  return formattedHour;
+};
+
+
 exports.week = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']

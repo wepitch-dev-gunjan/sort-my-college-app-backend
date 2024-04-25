@@ -2,7 +2,7 @@ const express = require("express");
 const {
   epAuth,
   adminAuth,
-  userAuth,
+  userAuth
 } = require("../middlewares/authMiddleware");
 const {
   getProfile,
@@ -16,6 +16,7 @@ const {
   findOneInstitute,
   verifyInstitute,
   rejectInstitute,
+  getInstituteEnquiryFormForUser
 } = require("../controllers/entranceInstituteControllers");
 const router = express.Router();
 
@@ -32,13 +33,14 @@ router.delete(
   adminAuth,
   deleteInstituteForAdmin
 );
-router.put("/:institute_id/verify",adminAuth , verifyInstitute);
+router.put("/:institute_id/verify", adminAuth, verifyInstitute);
 router.get("/institute/find-one", findOneInstitute);
 router.put("/:institute_id/reject", adminAuth, rejectInstitute);
 
 // // user routes
 router.get("/institute/user", userAuth, getInstitutesForUser);
 router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
+router.get("/institute/user/:institute_id/enquiry-form", userAuth, getInstituteEnquiryFormForUser);
 // router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
 
 // router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);
