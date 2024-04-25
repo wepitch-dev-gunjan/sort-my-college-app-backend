@@ -215,7 +215,7 @@ jobs:
       - name: Stop all instances of pm2
         run: |
           if [ -x "$(command -v pm2)" ]; then
-            pm2 stop all || true
+            pm2 kill || true
           else
             echo "PM2 is not installed or not in the PATH."
           fi
