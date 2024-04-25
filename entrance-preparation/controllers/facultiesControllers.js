@@ -3,7 +3,8 @@ const Faculties = require("../models/Faculties");
 const { uploadImage } = require("../services/cloudinary");
 
 exports.getFaculties = async (req, res) => {
-  const { institute_id } = req.params;
+  const { institute_id } = req;
+  console.log(institute_id);
   try {
     const faculties = await Faculties.find({ institute: institute_id });
     if (!faculties || faculties.length === 0) {

@@ -179,12 +179,67 @@ exports.accommodationRegister = async (req, res) => {
 };
 exports.getaccommodations = async (req, res) => {
   try {
-    const accommodations = Accommodation.find({});
+    const accommodations = await Accommodation.find({});
 
-    if (!accommodations) return res.send([]);
-    return res.state(200).send({ data: accommodations });
+    if (!accommodations || accommodations.length === 0) {
+      return res.status(200).send({ data: [] });
+    }
+
+    return res.status(200).send({ data: accommodations });
   } catch (error) {
     console.log(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.getSingleAccommodation = async (req, res) => {
+  try {
+    const { accommodationId } = req.params;
+
+    if (!accommodationId) {
+      return res.status(400).send({ error: "Accommodation ID is required" });
+    }
+
+    const accommodation = await Accommodation.findById(accommodationId);
+
+    if (!accommodation) {
+      return res.status(404).send({ error: "Accommodation not found" });
+    }
+
+    return res.status(200).send({ data: accommodation });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+exports.editAccommodation = async (req, res) => {
+  try {
+    const accommodationId = req.params.id;
+    const updates = req.body;
+
+    if (!accommodationId) {
+      return res.status(400).send({ error: "Accommodation ID is required" });
+    }
+
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(
+      accommodationId,
+      updates,
+      { new: true }
+    );
+
+    if (!updatedAccommodation) {
+      return res.status(404).send({ error: "Accommodation not found" });
+    }
+
+    return res
+      .status(200)
+      .send({
+        message: "Accommodation updated successfully",
+        data: updatedAccommodation,
+      });
+  } catch (error) {
+    console.error("Error editing accommodation:", error);
+    return res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
