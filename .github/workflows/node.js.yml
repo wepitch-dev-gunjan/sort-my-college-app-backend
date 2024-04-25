@@ -182,8 +182,5 @@ jobs:
           cd ../api-gateway
           pm2 start server.js --name="api-gateway" -f
 
-      - name: Save PM2 process list
-        run: pm2 save
-
       - name: Restart all Node.js applications
         run: pm2 resurrect
