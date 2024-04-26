@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
 
     if (!name || !date_of_birth || !gender || !education_level)
       return res.status(400).send({
-        error: "Required fields not provided",
+        error: "Required fields not provided"
       });
 
     const user = await User.findOne({ _id: user_id });
