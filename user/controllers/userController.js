@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { uploadImage } = require("../services/cloudinary");
 require("dotenv");
 
 const { BACKEND_URL } = process.env;
@@ -22,7 +23,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     res.status(200).send({
-      message: "User registered successfully",
+      message: "User registered successfully"
     });
   } catch (error) {
     console.log(error);
@@ -32,29 +33,22 @@ exports.register = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   try {
-    const { user_id } = req;
-    const { phone_number, name, gender, date_of_birth, location, profile_pic } =
+    const { user_id, file } = req;
+    const { name, gender, date_of_birth, location } =
       req.body;
-
-    if (!phone_number) {
-      return res.status(400).json({
-        error: "Provide  phone_number to identify the user.",
-      });
-    }
+    console.log(req.file)
     // console.log(req.body);
     const query = {};
     query._id = user_id;
 
-    // Find the user based on email or phone_number
-    // if (email) query.email = email;
-    if (phone_number) query.phone_number = phone_number;
-
-    let user = await User.findOne(query);
+    const user = await User.findOne(query);
 
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
 
+
+    console.log(user)
     // Update user information
     if (name) user.name = name;
     if (gender) user.gender = gender;
@@ -63,14 +57,23 @@ exports.editUser = async (req, res) => {
       if (!user.location) user.location = {};
       user.location.city = location.city;
     }
-    if (profile_pic) user.profile_pic = profile_pic;
+    if (file) {
+      const fileName = `user-profile-pic-${Date.now()}.jpeg`;
+      const folderName = "user-profile-pics";
+
+      user.profile_pic = await uploadImage(
+        file.buffer,
+        fileName,
+        folderName
+      );
+    }
 
     // Save the updated user
     await user.save();
 
     return res.status(200).json({
       message: "User information updated successfully.",
-      user,
+      user
     });
   } catch (error) {
     console.error(error);

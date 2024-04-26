@@ -13,12 +13,13 @@ const {
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
 const { register } = require("../controllers/userController");
+const { upload } = require("../middlewares/uploadImage");
 // const { userAuth } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 // user routes
 router.get("/", userAuth, getProfile);
-router.put("/", userAuth, editUser);
+router.put("/", userAuth, upload.single('profile_pic'), editUser);
 router.put("/register", userAuth, register);
 
 // admin routes

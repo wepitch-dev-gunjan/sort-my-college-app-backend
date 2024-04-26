@@ -5,53 +5,52 @@ const userSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true
     },
     phone_number: {
       type: String,
       unique: true,
-      sparse: true,
+      sparse: true
     },
     name: {
-      type: String,
+      type: String
     },
     gender: {
       type: String,
-      enum: ["Male", "Female", "Other"],
+      enum: ["Male", "Female", "Other"]
     },
     date_of_birth: {
-      type: String,
+      type: String
     },
     location: {
-      city: String,
+      city: String
     },
     profile_pic: {
       type: String,
+      default: 'https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper-thumbnail.png'
     },
     education_level: {
       type: String,
       enum: ["Student", "College", "Graduated"],
-      default: "Student",
+      default: "Student"
     },
     verified: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   {
     timestamps: true,
-  },
-  {
-    strict: false,
+    strict: false
   }
-);
+)
 
 // Custom validation to check uniqueness for non-null values
 userSchema.path("phone_number").validate(async function (value) {
   if (value !== null) {
     const count = await this.model("User").countDocuments({
       phone_number: value,
-      _id: { $ne: this._id },
+      _id: { $ne: this._id }
     });
     return !count;
   }
@@ -62,7 +61,7 @@ userSchema.path("email").validate(async function (value) {
   if (value !== null) {
     const count = await this.model("User").countDocuments({
       email: value,
-      _id: { $ne: this._id },
+      _id: { $ne: this._id }
     });
     return !count;
   }
