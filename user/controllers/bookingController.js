@@ -59,7 +59,7 @@ exports.getBookings = async (req, res) => {
     if (upcoming) filter.upcoming = upcoming;
     filter.user = user_id;
 
-    const bookings = await Booking.find(filter);
+    const bookings = await Booking.find(filter).sort({ date: -1 });
     if (!bookings) bookings = [];
 
     res.status(200).send(bookings);
