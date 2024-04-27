@@ -1,117 +1,3 @@
-# name: Node.js CI
-
-# on:
-#   push:
-#     branches: ["main"]
-
-# jobs:
-#   build:
-#     runs-on: self-hosted
-
-#     strategy:
-#       matrix:
-#         node-version: [20.x]
-#         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-#     steps:
-#       - uses: actions/checkout@v3
-#       - name: Use Node.js ${{ matrix.node-version }}
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: ${{ matrix.node-version }}
-#           cache: "npm"
-#       - name: Log in as root
-#         run: sudo su
-#       - name: Stop all instances of pm2
-#         run: |
-#           if [ -x "$(command -v pm2)" ]; then
-#             pm2 kill || true
-#           else
-#             echo "PM2 is not installed or not in the PATH."
-#           fi
-#       - name: Install dependencies
-#         run: |
-#           cd counselor
-#           npm ci
-
-#           cd ../admin
-#           npm ci
-
-#           cd ../notification-service
-#           npm ci
-
-#           cd ../user
-#           npm ci
-
-#           cd ../api-gateway
-#           npm ci
-
-#           cd ../entrance-preparation
-#           npm ci
-
-#       - name: Create SSL certificates
-#         run: |
-#           cd ssl_certificates
-#           touch ca_bundle.crt
-#           echo "${{ secrets.CA_BUNDLE }}" > ca_bundle.crt
-#           touch certificate.crt
-#           echo "${{ secrets.CERTIFICATE }}" > certificate.crt
-#           touch private.key
-#           echo "${{ secrets.PRIVATE_KEY }}" > private.key
-
-#       - name: Create environment variables
-#         run: |
-#           cd counselor
-#           touch .env
-#           echo "${{ secrets.COUNSELLOR_SECRETS }}" > .env
-#           cd ../admin
-#           touch .env
-#           echo "${{ secrets.ADMIN_SECRETS }}" > .env
-#           cd ../notification-service
-#           touch .env
-#           echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > .env
-#           cd ../user
-#           touch .env
-#           echo "${{ secrets.USER_SECRETS }}" > .env
-#           cd ../entrance-preparation
-#           touch .env
-#           echo "${{ secrets.EP_SECRETS}}" > .env
-#           cd ../api-gateway
-#           touch .env
-#           echo "${{ secrets.API_GATEWAY_SECRETS }}" > .env
-
-#       - name: Start Node.js applications
-#         run: |
-#           if [ -x "$(command -v pm2)" ]; then
-#             cd counselor
-#             pm2 start server.js --name="counsellor" -f
-
-#             cd ../admin
-#             pm2 start server.js --name="admin" -f
-
-#             cd ../notification-service
-#             pm2 start server.js --name="notification-service" -f
-
-#             cd ../user
-#             pm2 start server.js --name="user" -f
-
-#             cd ../entrance-preparation
-#             pm2 start server.js --name="entrance-preparation" -f
-
-#             cd ../api-gateway
-#             pm2 start server.js --name="api-gateway" -f
-#           else
-#             echo "PM2 is not installed or not in the PATH."
-#           fi
-
-#       - name: Restart all Node.js applications
-#         run: |
-#           if [ -x "$(command -v pm2)" ]; then
-#             pm2 restart all
-#           else
-#             echo "PM2 is not installed or not in the PATH."
-#           fi
-
 name: Node.js CI
 
 on:
@@ -132,12 +18,11 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Login
-        run: sudo su
-
+      # Use `sudo` to execute commands with elevated privileges
       - name: Install PM2
-        run: npm install pm2 -g
+        run: sudo npm install pm2 -g
 
+      # Install project dependencies
       - name: Install dependencies
         run: |
           npm ci --prefix counselor
@@ -147,6 +32,7 @@ jobs:
           npm ci --prefix entrance-preparation
           npm ci --prefix api-gateway
 
+      # Create SSL certificates
       - name: Create SSL certificates
         run: |
           touch ssl_certificates/ca_bundle.crt
@@ -156,6 +42,7 @@ jobs:
           touch ssl_certificates/private.key
           echo "${{ secrets.PRIVATE_KEY }}" > ssl_certificates/private.key
 
+      # Create environment variables for each service
       - name: Create environment variables
         run: |
           echo "${{ secrets.COUNSELLOR_SECRETS }}" > counselor/.env
@@ -165,25 +52,28 @@ jobs:
           echo "${{ secrets.EP_SECRETS }}" > entrance-preparation/.env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
 
+      # Start Node.js applications using PM2
       - name: Start Node.js applications
         run: |
+          # Change directory to each service and start the server with PM2
           cd counselor
-          pm2 start server.js --name="counsellor" -f
+          sudo pm2 start server.js --name="counsellor" -f
 
           cd ../admin
-          pm2 start server.js --name="admin" -f
+          sudo pm2 start server.js --name="admin" -f
 
           cd ../notification-service
-          pm2 start server.js --name="notification-service" -f
+          sudo pm2 start server.js --name="notification-service" -f
 
           cd ../user
-          pm2 start server.js --name="user" -f
+          sudo pm2 start server.js --name="user" -f
 
           cd ../entrance-preparation
-          pm2 start server.js --name="entrance-preparation" -f
+          sudo pm2 start server.js --name="entrance-preparation" -f
 
           cd ../api-gateway
-          pm2 start server.js --name="api-gateway" -f
+          sudo pm2 start server.js --name="api-gateway" -f
 
+      # Restart all Node.js applications managed by PM2
       - name: Restart all Node.js applications
-        run: pm2 restart all
+        run: sudo pm2 restart all
