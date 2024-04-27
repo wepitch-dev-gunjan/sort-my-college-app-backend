@@ -5,6 +5,7 @@ const {
   getSlotsFromTotalSlots,
 } = require("../helpers/instituteHelpers");
 const EntranceInstitute = require("../models/EntranceInstitute");
+const { uploadImage } = require("../services/cloudinary")
 
 // ep panel controllers
 exports.getProfile = async (req, res) => {
@@ -337,3 +338,73 @@ exports.verifyInstitute = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+// for upload cover Image
+exports.uploadCoverImage = async (req,res) =>{
+ try {
+  const { file, institute_id } = req;
+
+  if (!file) {
+    return res.status(400).send({
+      error: "File can't be empty",
+    });
+  }
+
+  const institute = await EntranceInstitute.findById(institute_id);
+
+  if (!institute) {
+    return res.status(404).send({ error: "institute not found" });
+  }
+
+  const fileName = `institute-cover-image-${Date.now()}.jpeg`;
+  const folderName = "institute-cover-images";
+
+  institute.cover_image = await uploadImage(
+    file.buffer,
+    fileName,
+    folderName
+  );
+  await institute.save();
+
+  res.status(200).send({
+    message: "Cover Image uploaded successfully",
+  });
+} catch (error) {
+  console.log(error);
+  res.status(500).send({ error: "Internal Server Error" });
+}
+}
+// upload proifle pic
+exports.uploadProfilePic = async ( req,res) =>{
+ try {
+  const { file, institute_id } = req;
+
+  if (!file) {
+    return res.status(400).send({
+      error: "File can't be empty",
+    });
+  }
+
+  const institute = await EntranceInstitute.findById(institute_id);
+
+  if (!institute) {
+    return res.status(404).send({ error: "institute not found" });
+  }
+
+  const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
+  const folderName = "institute-profile-pics";
+
+  institute.profile_pic = await uploadImage(
+    file.buffer,
+    fileName,
+    folderName
+  );
+  await institute.save();
+
+  res.status(200).send({
+    message: "Profile pic uploaded successfully",
+  });
+} catch (error) {
+  console.log(error);
+  res.status(500).send({ error: "Internal Server Error" });
+}
+}

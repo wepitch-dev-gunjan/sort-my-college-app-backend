@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router();
 const {
   epAuth,
   adminAuth,
@@ -16,13 +17,20 @@ const {
   findOneInstitute,
   verifyInstitute,
   rejectInstitute,
-  getInstituteEnquiryFormForUser
+  getInstituteEnquiryFormForUser,
+  uploadCoverImage,
+  uploadProfilePic,
 } = require("../controllers/entranceInstituteControllers");
-const router = express.Router();
-
+const   upload  = require("../middlewares/uploadImage")
 // ep panel routes
 router.get("/institute", epAuth, getProfile);
 router.put("/institute", epAuth, editProfile);
+// cover Image
+router.post("/cover-image",epAuth ,
+upload.single("image")
+,uploadCoverImage);
+// ProfilePic
+router.post("/profile_pic" ,epAuth , upload.single("image"),uploadProfilePic)
 
 // // admin panel routes
 router.get("/institute/admin", adminAuth, getInstitutesForAdmin);
