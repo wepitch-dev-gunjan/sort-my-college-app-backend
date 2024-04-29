@@ -1,4 +1,4 @@
-const { Schema } = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const accommodationSchema = new Schema(
   {
@@ -33,7 +33,7 @@ const accommodationSchema = new Schema(
       },
       contact_numbers: [String],
       email: String,
-      adhar_card: String,
+      aadhar_card: String,
       pan_card: String,
     },
 
@@ -61,13 +61,13 @@ const accommodationSchema = new Schema(
     ],
 
     rating: {
-      type: parseFloat.toFixed(1),
+      type: Number,
       default: 0,
     },
 
     common_area_amenities: [String],
     house_rules: [String],
-    gate_opning_time: String,
+    gate_opening_time: String,
     gate_closing_time: String,
   },
   {
@@ -75,4 +75,5 @@ const accommodationSchema = new Schema(
     strict: false,
   }
 );
+
 module.exports = model("Accommodation", accommodationSchema);
