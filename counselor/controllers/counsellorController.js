@@ -176,10 +176,20 @@ exports.getCounsellor = async (req, res) => {
     }
 
     // Calculate total sessions attended
-    let total_sessions_attended = 0;
+    let sessions = 0;
     if (counsellor.sessions) {
       total_sessions_attended = counsellor.sessions.length;
     }
+
+    const latestSession = await Session.findOne({
+      session_counsellor: counsellor_id,
+      session_date: { $gte: new Date() }, // Only consider sessions that are on or after the current date
+    })
+      .sort({ session_date: -1, session_time: -1 }) // Sort by session date and time in descending order
+      .limit(1);
+    console.log("latest wala", latestSession.session_date);
+
+    // Extract session date and time from the result, if any
 
     // Calculate age from date of birth
     let age = null;
@@ -232,7 +242,9 @@ exports.getCounsellor = async (req, res) => {
 
     const messagedCounsellor = {
       ...counsellor._doc,
-      total_sessions_attended,
+
+      latestSession,
+      sessions,
       age,
       group_session_price,
       personal_session_price,
@@ -241,6 +253,7 @@ exports.getCounsellor = async (req, res) => {
       client_testimonials,
       following,
     };
+    console.log(messagedCounsellor);
 
     res.status(200).send([messagedCounsellor]);
   } catch (error) {
