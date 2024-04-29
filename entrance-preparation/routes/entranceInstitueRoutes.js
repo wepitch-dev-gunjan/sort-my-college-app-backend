@@ -21,16 +21,16 @@ const {
   uploadCoverImage,
   uploadProfilePic,
 } = require("../controllers/entranceInstituteControllers");
-const   upload  = require("../middlewares/uploadImage")
+const upload = require("../middlewares/uploadImage")
 // ep panel routes
 router.get("/institute", epAuth, getProfile);
 router.put("/institute", epAuth, editProfile);
 // cover Image
-router.post("/cover-image",epAuth ,
-upload.single("image")
-,uploadCoverImage);
+router.post("/cover-image", epAuth,
+  upload.single("image")
+  , uploadCoverImage);
 // ProfilePic
-router.post("/profile_pic" ,epAuth , upload.single("image"),uploadProfilePic)
+router.post("/profile-pic", epAuth, upload.single("image"), uploadProfilePic)
 
 // // admin panel routes
 router.get("/institute/admin", adminAuth, getInstitutesForAdmin);

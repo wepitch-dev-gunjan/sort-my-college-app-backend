@@ -201,7 +201,7 @@ exports.getInstitutesForUser = async (req, res) => {
 
     // Assuming you have some logic to authenticate the admin user and retrieve necessary information
     // You can customize this query according to your needs
-    const institutes = await EntranceInstitute.find(Object.keys(queryObject));
+    const institutes = await EntranceInstitute.find(queryObject);
 
     if (!institutes || institutes.length === 0) {
       return res.status(404).json({ message: "Institute not found" });
@@ -212,7 +212,7 @@ exports.getInstitutesForUser = async (req, res) => {
       profile_pic: institute.profile_pic,
       address: institute.address,
       year_established_in: institute.year_established_in,
-      institute_timings: institute.institute_timings,
+      institute_timings: institute.institute_timings
     }));
 
     // You can customize the response data structure as per your requirements
@@ -339,72 +339,72 @@ exports.verifyInstitute = async (req, res) => {
   }
 };
 // for upload cover Image
-exports.uploadCoverImage = async (req,res) =>{
- try {
-  const { file, institute_id } = req;
+exports.uploadCoverImage = async (req, res) => {
+  try {
+    const { file, institute_id } = req;
 
-  if (!file) {
-    return res.status(400).send({
-      error: "File can't be empty",
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty",
+      });
+    }
+
+    const institute = await EntranceInstitute.findById(institute_id);
+
+    if (!institute) {
+      return res.status(404).send({ error: "institute not found" });
+    }
+
+    const fileName = `institute-cover-image-${Date.now()}.jpeg`;
+    const folderName = "institute-cover-images";
+
+    institute.cover_image = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
+    await institute.save();
+
+    res.status(200).send({
+      message: "Cover Image uploaded successfully",
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
-
-  const institute = await EntranceInstitute.findById(institute_id);
-
-  if (!institute) {
-    return res.status(404).send({ error: "institute not found" });
-  }
-
-  const fileName = `institute-cover-image-${Date.now()}.jpeg`;
-  const folderName = "institute-cover-images";
-
-  institute.cover_image = await uploadImage(
-    file.buffer,
-    fileName,
-    folderName
-  );
-  await institute.save();
-
-  res.status(200).send({
-    message: "Cover Image uploaded successfully",
-  });
-} catch (error) {
-  console.log(error);
-  res.status(500).send({ error: "Internal Server Error" });
-}
 }
 // upload proifle pic
-exports.uploadProfilePic = async ( req,res) =>{
- try {
-  const { file, institute_id } = req;
+exports.uploadProfilePic = async (req, res) => {
+  try {
+    const { file, institute_id } = req;
 
-  if (!file) {
-    return res.status(400).send({
-      error: "File can't be empty",
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty",
+      });
+    }
+
+    const institute = await EntranceInstitute.findById(institute_id);
+
+    if (!institute) {
+      return res.status(404).send({ error: "institute not found" });
+    }
+
+    const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
+    const folderName = "institute-profile-pics";
+
+    institute.profile_pic = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
+    await institute.save();
+
+    res.status(200).send({
+      message: "Profile pic uploaded successfully",
     });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
-
-  const institute = await EntranceInstitute.findById(institute_id);
-
-  if (!institute) {
-    return res.status(404).send({ error: "institute not found" });
-  }
-
-  const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
-  const folderName = "institute-profile-pics";
-
-  institute.profile_pic = await uploadImage(
-    file.buffer,
-    fileName,
-    folderName
-  );
-  await institute.save();
-
-  res.status(200).send({
-    message: "Profile pic uploaded successfully",
-  });
-} catch (error) {
-  console.log(error);
-  res.status(500).send({ error: "Internal Server Error" });
-}
 }
