@@ -35,35 +35,32 @@ exports.getCoursesForEp = async (req, res) => {
 exports.addCourse = async (req, res) => {
   // const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
   try {
-    // const { file } = req;
-    // console.log(file);
-    // const fileName = `image-${Date.now()}.png`;
-    // const folderName = `Course_images`;
-    // const image = await uploadImage(file.buffer, fileName,folderName);
-    //  const existingCourse = await EntranceCourse.findOne({name: req.body.name});
-    //   if(existingCourse)
-    //   {
-    // return res.status(400).send({error : "course already exist"});
-    //   }
+    const existingCourse = await EntranceCourse.findOne({ name: req.body.name });
+    if (existingCourse) {
+      return res.status(400).send({ error: "course already exist" });
+    }
+    const { file } = req;
+    const fileName = `course-image-${Date.now()}.png`;
+    const folderName = `entrance-institute-course_images`;
+    const image = await uploadImage(file.buffer, fileName, folderName);
     const { institute_id } = req;
     const addCourse = new EntranceCourse({
       name: req.body.name,
-      image: req.body.name,
+      image,
       type: req.body.type,
       academic_session: req.body.academic_session,
       course_fee: req.body.course_fee,
       course_duration_in_days: req.body.course_duration_in_days,
-      institute: institute_id,
+      institute: institute_id
     });
-    console.log(addCourse);
     await addCourse.save();
     res.status(201).json({
-      message: "course Added Succesfully",
+      message: "course Added Succesfully"
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      messge: "error adding course",
+      messge: "error adding course"
     });
   }
 };
