@@ -48,6 +48,7 @@ exports.addFaculty = async (req, res) => {
       institute: institute_id
     });
 
+
     await faculty.save();
 
     res.status(201).send({ message: "Faculty added successfully " });
