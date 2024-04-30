@@ -187,7 +187,7 @@ exports.getCounsellor = async (req, res) => {
     })
       .sort({ session_date: -1, session_time: -1 }) // Sort by session date and time in descending order
       .limit(1);
-    console.log("latest wala", latestSession.session_date);
+    // console.log("latest wala", latestSession.session_date);
 
     // Extract session date and time from the result, if any
 

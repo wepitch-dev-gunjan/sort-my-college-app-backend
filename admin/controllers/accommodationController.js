@@ -19,9 +19,9 @@ exports.addAccommodation = async (req, res) => {
       gate_closing_time,
     } = req.body;
 
-    console.log(req.body)
+    console.log(req.body);
 
-    const {file} = req
+    const { file } = req;
 
     // Validation
     // if (!type || !["PG", "Hostel"].includes(type)) {
@@ -65,7 +65,7 @@ exports.addAccommodation = async (req, res) => {
     //   !owner.email ||
     //   !owner.aadhar_card ||
     //   !owner.pan_card
-    // ) 
+    // )
     // if (!rooms || rooms.length === 0) {
     //   return res.status(400).send({ error: "Rooms array must not be empty" });
     // }
@@ -168,7 +168,9 @@ exports.addAccommodation = async (req, res) => {
 
     await newAccommodation.save();
 
-    res.status(201).send({ message: "Accommodation added successfully", newAccommodation });
+    res
+      .status(201)
+      .send({ message: "Accommodation added successfully", newAccommodation });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ message: "Failed to add accommodation" });
@@ -180,10 +182,10 @@ exports.getAccommodations = async (req, res) => {
     const accommodations = await Accommodation.find({});
 
     if (!accommodations || accommodations.length === 0) {
-      return res.status(200).send({ data: [] });
+      return res.status(200).send([]);
     }
 
-    return res.status(200).send({ data: accommodations });
+    return res.status(200).send([accommodations]);
   } catch (error) {
     console.log(error);
     return res.status(500).send({ error: "Internal Server Error" });
@@ -192,19 +194,19 @@ exports.getAccommodations = async (req, res) => {
 
 exports.getAccommodation = async (req, res) => {
   try {
-    const { accommodationId } = req.params;
+    const { accomodation_id } = req.params;
 
-    if (!accommodationId) {
+    if (!accomodation_id) {
       return res.status(400).send({ error: "Accommodation ID is required" });
     }
 
-    const accommodation = await Accommodation.findById(accommodationId);
+    const accommodation = await Accommodation.findById(accomodation_id);
 
     if (!accommodation) {
       return res.status(404).send({ error: "Accommodation not found" });
     }
 
-    return res.status(200).send({ data: accommodation });
+    return res.status(200).send([accommodation]);
   } catch (error) {
     console.log(error);
     return res.status(500).send({ error: "Internal Server Error" });
@@ -213,15 +215,16 @@ exports.getAccommodation = async (req, res) => {
 
 exports.editAccommodation = async (req, res) => {
   try {
-    const accommodationId = req.params.id;
+    const { accomodation_id } = req.params;
     const updates = req.body;
+    console.log(updates);
 
-    if (!accommodationId) {
+    if (!accomodation_id) {
       return res.status(400).send({ error: "Accommodation ID is required" });
     }
 
     const updatedAccommodation = await Accommodation.findByIdAndUpdate(
-      accommodationId,
+      accomodation_id,
       updates,
       { new: true }
     );
@@ -230,14 +233,25 @@ exports.editAccommodation = async (req, res) => {
       return res.status(404).send({ error: "Accommodation not found" });
     }
 
-    return res
-      .status(200)
-      .send({
-        message: "Accommodation updated successfully",
-        data: updatedAccommodation,
-      });
+    return res.status(200).send({
+      message: "Accommodation updated successfully",
+      data: updatedAccommodation,
+    });
   } catch (error) {
     console.error("Error editing accommodation:", error);
-    return res.status(500).send({ error: "Internal Server Error" });
+    return res.status(500).send({ error: "Internal  Server Error" });
   }
+};
+
+exports.deleteAccommodation = async (req, res) => {
+  const { accomodation_id } = req.params;
+
+  const accommodation = await Accommodation.findByIdAndDelete(accomodation_id);
+  if (!accommodation)
+    return res
+      .status(404)
+      .send({ error: "No Accommodation Found With This ID" });
+  return res
+    .status(200)
+    .send({ message: "Accommodation Deleted successfully" });
 };

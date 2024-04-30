@@ -56,13 +56,16 @@ router.get("/auth/google/callback", async (req, res) => {
       await counsellor.save();
     }
 
-    const token = generateToken({
-      counsellor_id: counsellor._id,
-      email: counsellor.email,
-      name: counsellor.name,
-      picture: counsellor.profile_pic,
-      tokens,
-    });
+    const token = generateToken(
+      {
+        counsellor_id: counsellor._id,
+        email: counsellor.email,
+        name: counsellor.name,
+        picture: counsellor.profile_pic,
+        tokens,
+      },
+      "7d"
+    );
 
     const user = {
       _id: counsellor._id,

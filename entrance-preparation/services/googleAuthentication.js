@@ -20,14 +20,17 @@ const oauth2Client = new google.auth.OAuth2(
 
 // Route for initiating Google OAuth2 authentication
 router.get("/auth/google", (req, res) => {
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: [
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email",
-    ],
-  });
+  const url = oauth2Client.generateAuthUrl(
+    {
+      access_type: "offline",
+      prompt: "consent",
+      scope: [
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+    "7d"
+  );
 
   res.redirect(url);
 });
@@ -55,13 +58,16 @@ router.get("/auth/google/callback", async (req, res) => {
       await institute.save();
     }
 
-    const token = generateToken({
-      institute_id: institute._id,
-      email: institute.email,
-      name: institute.name,
-      picture: institute.profile_pic,
-      tokens,
-    });
+    const token = generateToken(
+      {
+        institute_id: institute._id,
+        email: institute.email,
+        name: institute.name,
+        picture: institute.profile_pic,
+        tokens,
+      },
+      "7d"
+    );
 
     const user = {
       _id: institute._id,
