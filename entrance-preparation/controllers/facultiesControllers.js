@@ -34,7 +34,7 @@ exports.addFaculty = async (req, res) => {
   try {
     if (file) {
       const fileName = `display_pic-${Date.now()}.png`;
-      const folderName = `Faculty_display_pic`;
+      const folderName = `Faculty_display_pics`;
       display_pic = await uploadImage(req.file.buffer, fileName, folderName);
     } else {
       display_pic = "https://www.shutterstock.com/search/default";
@@ -45,12 +45,12 @@ exports.addFaculty = async (req, res) => {
       experience_in_years: req.body.experience_in_years,
       qualifications: req.body.qualifications,
       graduated_from: req.body.graduated_from,
-      institute: institute_id,
+      institute: institute_id
     });
 
     await faculty.save();
 
-    res.status(201).send({ message: "added " });
+    res.status(201).send({ message: "Faculty added successfully " });
   } catch (error) {
     console.log(error);
     res.status(400).send(error);
