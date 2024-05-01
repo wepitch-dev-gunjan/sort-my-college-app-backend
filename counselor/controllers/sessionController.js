@@ -358,11 +358,19 @@ exports.bookSession = async (req, res) => {
 
     counsellor.reward_points += 5;
     await counsellor.save();
-    await axios.post(`${BACKEND_URL}/user/booking`, {
-      booked_entity: counsellor,
-      booking_type: "Counsellor",
-      booking_data: session,
-    });
+
+    try {
+      await axios.post(`${BACKEND_URL}/user/booking`, {
+        booked_by: id,
+        booked_entity: counsellor,
+        booking_type: "Counsellor",
+        booking_data: session,
+      })
+    } catch (error) {
+      console.log(error.message)
+    }
+
+    await counsellor.save();
 
     // send email notification to user
     if (email) {

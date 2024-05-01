@@ -8,6 +8,7 @@ exports.createBooking = async (req, res) => {
         error: "Booking fields can't be empty",
       });
 
+    console.log(booked_by)
     const booking = new Booking({
       user: booked_by,
       booked_entity,
