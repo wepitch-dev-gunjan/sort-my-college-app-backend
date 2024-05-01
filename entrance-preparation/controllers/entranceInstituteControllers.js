@@ -5,7 +5,7 @@ const {
   getSlotsFromTotalSlots,
 } = require("../helpers/instituteHelpers");
 const EntranceInstitute = require("../models/EntranceInstitute");
-const { uploadImage } = require("../services/cloudinary")
+const { uploadImage } = require("../services/cloudinary");
 
 // ep panel controllers
 exports.getProfile = async (req, res) => {
@@ -39,13 +39,18 @@ exports.editProfile = async (req, res) => {
           error: "Invalid day field",
         });
 
-      const startTime = timing.start_time.split(' ')
+      const startTime = timing.start_time.split(" ");
 
-      console.log(convertTo24HourFormat(timing.end_time))
+      console.log(convertTo24HourFormat(timing.end_time));
 
-      if (convertTo24HourFormat(timing.start_time) > convertTo24HourFormat(timing.end_time) && convertTo24HourFormat(timing.end_time) !== 0) return res.status(400).send({
-        error: "Can't go further than 24 hours"
-      })
+      if (
+        convertTo24HourFormat(timing.start_time) >
+          convertTo24HourFormat(timing.end_time) &&
+        convertTo24HourFormat(timing.end_time) !== 0
+      )
+        return res.status(400).send({
+          error: "Can't go further than 24 hours",
+        });
     }
 
     // Find the profile by institute_id
@@ -63,6 +68,8 @@ exports.editProfile = async (req, res) => {
     Object.keys(body).forEach((key) => {
       profile[key] = body[key];
     });
+    profile.status = "PENDING";
+    profile.verified = false;
 
     // Save the updated profile
     await profile.save();
@@ -136,6 +143,8 @@ exports.editInstituteForAdmin = async (req, res) => {
     if (!updatedInstitute) {
       return res.status(404).json({ message: "Institute not found" });
     }
+    updatedInstitute.verified = false;
+    updatedInstitute.status = "PENDING";
 
     res.status(200).json(updatedInstitute);
   } catch (error) {
@@ -212,7 +221,7 @@ exports.getInstitutesForUser = async (req, res) => {
       profile_pic: institute.profile_pic,
       address: institute.address,
       year_established_in: institute.year_established_in,
-      institute_timings: institute.institute_timings
+      institute_timings: institute.institute_timings,
     }));
 
     // You can customize the response data structure as per your requirements
@@ -372,7 +381,7 @@ exports.uploadCoverImage = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 // upload proifle pic
 exports.uploadProfilePic = async (req, res) => {
   try {
@@ -407,4 +416,4 @@ exports.uploadProfilePic = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};

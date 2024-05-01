@@ -1,6 +1,7 @@
 const { default: axios } = require("axios");
 const Payment = require("../models/Payment");
 const instance = require("../services/razorpayConfig");
+const { getCounsellorAmount } = require("../helpers/paymentHelpers");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -47,7 +48,6 @@ exports.createPayment = async (req, res) => {
       order_id,
       payment_id,
       amount,
-      amount_due,
       amount_paid,
       currency,
       created_at,
@@ -59,6 +59,7 @@ exports.createPayment = async (req, res) => {
       status,
     } = req.body;
 
+    const amount_due = getCounsellorAmount(amount);
     let payment = new Payment({
       payment_to,
       payment_from,
@@ -76,7 +77,6 @@ exports.createPayment = async (req, res) => {
       description,
       status,
     });
-    console.log(payment_from);
 
     const counsellor = await axios.get(
       `${BACKEND_URL}/counsellor/counsellors/find-one`,
@@ -93,11 +93,8 @@ exports.createPayment = async (req, res) => {
       });
 
     payment = await payment.save();
-    const imcrementOutstandingBalance = await axios.put(
-      `${BACKEND_URL}/counsellor/${payment_to}/increment-outstanding-balance`,
-      {
-        amount,
-      }
+    await axios.put(
+      `${BACKEND_URL}/counsellor/${payment_to}/update-outstanding-balance`
     );
 
     res.status(200).send({
@@ -165,7 +162,6 @@ exports.getPayment = async (req, res) => {
 exports.getOutstandingBalance = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
-
     const outstandingBalanceAggregation = await Payment.aggregate([
       {
         $match: {
@@ -183,6 +179,7 @@ exports.getOutstandingBalance = async (req, res) => {
       },
     ]);
 
+    console.log(counsellor_id);
     const outstandingBalance =
       outstandingBalanceAggregation.length > 0
         ? outstandingBalanceAggregation[0].outstanding_balance

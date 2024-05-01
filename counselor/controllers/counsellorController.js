@@ -1038,10 +1038,9 @@ exports.clearOutstandingBalance = async (req, res) => {
   }
 };
 
-exports.incrementOutstandingBalance = async (req, res) => {
+exports.updateOutstandingBalance = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
-    console.log(counsellor_id);
     const { amount } = req.body;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
@@ -1050,7 +1049,11 @@ exports.incrementOutstandingBalance = async (req, res) => {
         error: "Counsellor not found",
       });
 
-    counsellor.outstanding_balance += amount;
+    const { data } = await axios.get(
+      `${BACKEND_URL}/admin/payments/${counsellor_id}/outstanding-balance`
+    );
+
+    counsellor.outstanding_balance = data.outstandingBalance;
 
     await counsellor.save();
 

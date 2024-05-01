@@ -35,5 +35,4 @@ router.get(
 
 // user routes
 
-
 module.exports = router;

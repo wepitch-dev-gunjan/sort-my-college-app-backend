@@ -51,6 +51,7 @@ exports.editBooking = async (req, res) => {
 exports.getBookings = async (req, res) => {
   try {
     const { user_id } = req;
+
     const { past, today, upcoming } = req.query;
 
     const filter = {};
