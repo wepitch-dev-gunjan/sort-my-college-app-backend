@@ -193,9 +193,8 @@ exports.adminOrEpAuth = async (req, res, next) => {
 
     if (!responseData) {
       return res.status(401).json({
-        error: `${
-          decoded.institute_id ? "Entrance Institute" : "Admin"
-        } not authorized`,
+        error: `${decoded.institute_id ? "Entrance Institute" : "Admin"
+          } not authorized`,
       });
     }
 

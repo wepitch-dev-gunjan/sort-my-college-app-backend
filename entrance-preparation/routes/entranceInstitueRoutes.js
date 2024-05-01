@@ -20,6 +20,8 @@ const {
   getInstituteEnquiryFormForUser,
   uploadCoverImage,
   uploadProfilePic,
+  followInstitute,
+  unfollowInstitute
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage")
 // ep panel routes
@@ -49,6 +51,8 @@ router.put("/:institute_id/reject", adminAuth, rejectInstitute);
 router.get("/institute/user", userAuth, getInstitutesForUser);
 router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
 router.get("/institute/user/:institute_id/enquiry-form", userAuth, getInstituteEnquiryFormForUser);
+router.put("/institute/user/:institute_id/follow", userAuth, followInstitute);
+router.put("/institute/user/:institute_id/unfollow", userAuth, unfollowInstitute);
 // router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
 
 // router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);

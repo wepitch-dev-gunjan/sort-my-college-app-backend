@@ -148,14 +148,12 @@ const entranceInstituteSchema = new Schema({
   },
   verified: {
    type: Boolean,
-   default: false,
+   default: false
   },
-  institute_key_features: [String],
+  institute_key_features: [String]
 },
   {
-    timestamps: true
-  },
-  {
+    timestamps: true,
     strict: false
   });
 

@@ -45,7 +45,7 @@ exports.editProfile = async (req, res) => {
 
       if (
         convertTo24HourFormat(timing.start_time) >
-          convertTo24HourFormat(timing.end_time) &&
+        convertTo24HourFormat(timing.end_time) &&
         convertTo24HourFormat(timing.end_time) !== 0
       )
         return res.status(400).send({
@@ -415,5 +415,60 @@ exports.uploadProfilePic = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+}
+
+exports.followInstitute = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const { id } = req;
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute) return res.status(404).send({
+      error: "Institute not found"
+    })
+
+    const isFollowing = institute.followers.includes(id);
+    if (isFollowing) return res.status(400).send({
+      error: "User is already following the institute"
+    })
+
+    institute.followers.push(id);
+    await institute.save();
+    res.status(200).send({
+      message: "User has followed the institute",
+      followers: institute.followers.length
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.unfollowInstitute = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const { id } = req;
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute) return res.status(404).send({
+      error: "Institute not found"
+    });
+
+    const isFollowing = institute.followers.includes(id);
+    if (!isFollowing) return res.status(400).send({
+      error: "User is already not following the institute"
+    });
+
+    // Corrected filter method
+    institute.followers = institute.followers.filter(user_id => user_id.toString() !== id);
+
+    await institute.save();
+    res.status(200).send({
+      message: "User has unfollowed the institute",
+      followers: institute.followers.length
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
