@@ -8,11 +8,13 @@ const {
   editAccommodation,
   deleteAccommodation,
 } = require("../controllers/accommodationController");
-
+const { upload } =require("../middlewares/uploadImage");
 // routes for admin
 router.get("/accommodation", adminAuth, getAccommodations);
 router.get("/accommodation/:accomodation_id", adminAuth, getAccommodation);
-router.post("/accommodation", adminAuth, addAccommodation);
+// add Accommodation
+router.post("/accommodation", adminAuth,upload.array("images"), addAccommodation);
+
 router.put("/accommodation/:accomodation_id", adminAuth, editAccommodation);
 router.delete(
   "/accommodation/:accomodation_id",
