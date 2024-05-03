@@ -365,9 +365,9 @@ exports.bookSession = async (req, res) => {
         booked_entity: counsellor,
         booking_type: "Counsellor",
         booking_data: session,
-      })
+      });
     } catch (error) {
-      console.log(error.message)
+      console.log(error.message);
     }
 
     await counsellor.save();
@@ -822,6 +822,37 @@ exports.getPopularWorkshops = async (req, res) => {
         sessions: [],
       });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.isSessionAboutToStart = async (req, res) => {
+  try {
+    const { session_id } = req.params;
+
+    const session = await Session.findById(session_id);
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
+    const sessionTimeMinutes = session.session_time;
+    const currentTime = new Date();
+
+    const sessionTimeEpoch = new Date(currentTime);
+    sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
+    sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
+    sessionTimeEpoch.setSeconds(0);
+    sessionTimeEpoch.setMilliseconds(0);
+
+    const threshold = 30 * 60 * 1000;
+
+    const isAboutToStart =
+      Math.abs(sessionTimeEpoch - currentTime) <= threshold;
+
+    res.status(200).json({ isAboutToStart });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
