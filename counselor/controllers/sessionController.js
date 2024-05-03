@@ -155,13 +155,31 @@ exports.getSession = async (req, res) => {
     });
 
     if (!counselingSession)
-      res.status(200).json({ message: "Session not found" });
+      res.status(404).json({ message: "Session not found" });
+
+    // Convert session time from minutes past midnight to milliseconds since epoch
+    const sessionTimeMinutes = counselingSession.session_time;
+    const currentTime = new Date();
+    const sessionTimeEpoch = new Date(currentTime);
+    sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
+    sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
+    sessionTimeEpoch.setSeconds(0);
+    sessionTimeEpoch.setMilliseconds(0);
+
+    // Define the threshold for 'about to start' in milliseconds
+    const threshold = 30 * 60 * 1000; // 30 minutes
+
+    // Check if the session time is within the threshold
+    const isAboutToStart =
+      Math.abs(sessionTimeEpoch - currentTime) <= threshold;
 
     const session_time = sessionTimeIntoString(counselingSession.session_time);
     const response = {
-      ...counselingSession,
+      ...counselingSession.toObject(),
       session_time,
+      is_about_to_start: isAboutToStart,
     };
+
     res.status(200).json(response);
   } catch (error) {
     console.error(error);
