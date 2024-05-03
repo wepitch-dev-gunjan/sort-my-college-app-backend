@@ -91,6 +91,60 @@ exports.getSessions = async (req, res) => {
   }
 };
 
+// exports.getSessionsForCounsellor = async (req, res) => {
+//   try {
+//     const {
+//       session_type,
+//       session_dates,
+//       session_status,
+//       session_fee,
+//       session_duration,
+//     } = req.query;
+//     const { counsellor_id } = req.params;
+
+//     const filter = { session_counsellor: counsellor_id };
+//     if (session_type && session_type !== "All") {
+//       filter.session_type = session_type;
+//     }
+
+//     if (session_dates && session_dates.length === 2) {
+//       const [startDate, endDate] = session_dates;
+
+//       filter.session_date = {
+//         $gte: new Date(startDate),
+//         $lte: new Date(endDate),
+//       };
+//     }
+
+//     if (session_status && session_status !== "All") {
+//       filter.session_status = session_status;
+//     }
+
+//     if (session_fee) {
+//       filter.session_fee = {
+//         $gte: session_fee[0],
+//         $lte: session_fee[1],
+//       };
+//     }
+
+//     if (session_duration) {
+//       filter.session_duration = { $lte: session_duration };
+//     }
+
+//     let sessions = await Session.find(filter);
+
+//     const massagedSessions = sessions.map((session) => {
+//       const session_time = sessionTimeIntoString(session.session_time);
+//       return { ...session._doc, session_time };
+//     });
+
+//     res.status(200).send(massagedSessions);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 exports.getSessionsForCounsellor = async (req, res) => {
   try {
     const {
@@ -135,8 +189,23 @@ exports.getSessionsForCounsellor = async (req, res) => {
 
     const massagedSessions = sessions.map((session) => {
       const session_time = sessionTimeIntoString(session.session_time);
-      return { ...session._doc, session_time };
+      const sessionTimeMinutes = session.session_time;
+      const currentTime = new Date();
+      const sessionTimeEpoch = new Date(currentTime);
+      sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
+      sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
+      sessionTimeEpoch.setSeconds(0);
+      sessionTimeEpoch.setMilliseconds(0);
+      const threshold = 30 * 60 * 1000; // 30 minutes
+      const isAboutToStart =
+        Math.abs(sessionTimeEpoch - currentTime) <= threshold;
+      return {
+        ...session._doc,
+        session_time,
+        is_about_to_start: isAboutToStart,
+      };
     });
+    console.log(massagedSessions);
 
     res.status(200).send(massagedSessions);
   } catch (error) {
