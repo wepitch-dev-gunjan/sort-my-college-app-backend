@@ -3,6 +3,7 @@ const Accommodation = require("../models/Accommodation");
 
 
 exports.addAccommodation = async (req, res) => {
+
  try {
    const {
      type,
@@ -21,14 +22,17 @@ exports.addAccommodation = async (req, res) => {
      gate_closing_time,
    } = req.body;
    
-   const images = [];
-   for (const file of req.files) {
-     const fileName = `course-image-${Date.now()}.png`;
-     const folderName = `ep-course_images`;
-     const imagePath = await uploadImage(file.buffer, fileName, folderName);
-     images.push(imagePath);
-
-   }   const newAccommodation = new Accommodation({
+   let images = [];
+ // Check if req.files exists and is an array
+ if (req.files && Array.isArray(req.files)) {
+  for (const file of req.files) {
+    const fileName = `course-image-${Date.now()}.png`;
+    const folderName = `ep-course_images`;
+    const imagePath = await uploadImage(file.buffer, fileName, folderName);
+    images.push(imagePath);
+  }
+}
+   const newAccommodation = new Accommodation({
      type,
      images,
      name,
@@ -45,8 +49,7 @@ exports.addAccommodation = async (req, res) => {
      gate_opening_time,
      gate_closing_time,
    });
-
-
+   console.log(newAccommodation)
    await newAccommodation.save();
    res.status(201).send({ message: "Accommodation added successfully", newAccommodation });
  } catch (error) {
