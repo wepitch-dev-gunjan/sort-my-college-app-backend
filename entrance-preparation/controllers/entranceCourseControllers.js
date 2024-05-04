@@ -33,16 +33,16 @@ exports.getCoursesForEp = async (req, res) => {
 };
 // add course
 // exports.addCourse = async (req, res) => {
-  // const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
-  // try {
-    // const existingCourse = await EntranceCourse.findOne({ name: req.body.name });
-    // if (existingCourse) {
-    //   return res.status(400).send({ error: "course already exist" });
-    // }
-    // const { file } = req;
-    // const fileName = `course-image-${Date.now()}.png`;
-    // const folderName = `entrance-institute-course_images`;
-    // const image = await uploadImage(file.buffer, fileName, folderName);
+// const { name,type,academic_session,course_fee,course_duration_in_days} =req.body;
+// try {
+// const existingCourse = await EntranceCourse.findOne({ name: req.body.name });
+// if (existingCourse) {
+//   return res.status(400).send({ error: "course already exist" });
+// }
+// const { file } = req;
+// const fileName = `course-image-${Date.now()}.png`;
+// const folderName = `entrance-institute-course_images`;
+// const image = await uploadImage(file.buffer, fileName, folderName);
 //     const { institute_id } = req;
 //     const addCourse = new EntranceCourse({
 //       name: req.body.name,
@@ -66,8 +66,10 @@ exports.getCoursesForEp = async (req, res) => {
 // };
 exports.addCourse = async (req, res) => {
   try {
-    const { institute_id } = req; request
-    const existingCourse = await EntranceCourse.findOne({ name: req.body.name });
+    const { institute_id } = req;
+    const existingCourse = await EntranceCourse.findOne({
+      name: req.body.name,
+    });
     if (existingCourse) {
       return res.status(400).send({ error: "course already exist" });
     }
@@ -77,18 +79,18 @@ exports.addCourse = async (req, res) => {
       academic_session: req.body.academic_session,
       course_fee: req.body.course_fee,
       course_duration_in_days: req.body.course_duration_in_days,
-      institute: institute_id
+      institute: institute_id,
     });
 
     await addCourse.save();
 
     res.status(201).json({
-      message: "Course Added Successfully"
+      message: "Course Added Successfully",
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error adding course"
+      message: "Error adding course",
     });
   }
 };
