@@ -32,6 +32,21 @@ exports.addAnnouncements = async (req, res) => {
       return res.status(404).json({ message: "Update not found!" });
     }
 
+    // Check the number of announcements for this institute
+    const announcementCount = await Announcement.countDocuments({
+      institute: institute_id,
+    });
+
+    // If the institute has already added 20 announcements, return an error
+    if (announcementCount >= 20) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "You have reached the maximum limit of announcements. Please delete previous announcements to add new ones.",
+        });
+    }
+
     const announcement = new Announcement({
       institute: institute_id,
       update,
