@@ -17,6 +17,7 @@ const options = {
 };
 
 exports.uploadImage = async (imageBuffer, filename, folderName) => {
+  console.log("Trynna upload image")
   try {
     const options = {
       folder: folderName,

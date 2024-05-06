@@ -28,17 +28,29 @@ exports.getFaculties = async (req, res) => {
 };
 
 exports.addFaculty = async (req, res) => {
-  const { file } = req;
-
-  const { institute_id } = req;
   try {
-    if (file) {
-      const fileName = `display_pic-${Date.now()}.png`;
-      const folderName = `Faculty_display_pics`;
-      display_pic = await uploadImage(req.file.buffer, fileName, folderName);
-    } else {
-      display_pic = "https://www.shutterstock.com/search/default";
+    const { file } = req;
+    const { institute_id } = req;
+    // if (file) {
+    //   const fileName = `display_pic-${Date.now()}.png`;
+    //   const folderName = `Faculty_display_pics`;
+    //   display_pic = await uploadImage(req.file.buffer, fileName, folderName);
+    // } else {
+    //   display_pic = "https://www.shutterstock.com/search/default";
+    // }
+
+    if(!file) {
+      return res.status(400).json({message: "Faculty image not found!"})
     }
+    const fileName = `faculty_display_pic-${Date.now()}.jpg`;
+    const folderName = `faculty-display-pics`;
+
+    const display_pic = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
+
     const faculty = new Faculties({
       name: req.body.name,
       display_pic,
@@ -51,7 +63,7 @@ exports.addFaculty = async (req, res) => {
 
     await faculty.save();
 
-    res.status(201).send({ message: "Faculty added successfully " });
+    res.status(201).send({ message: "Faculty added successfully ",  newFaculty : faculty});
   } catch (error) {
     console.log(error);
     res.status(400).send(error);

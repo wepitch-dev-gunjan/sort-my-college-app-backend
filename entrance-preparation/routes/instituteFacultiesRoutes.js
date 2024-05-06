@@ -7,7 +7,7 @@ const {
   getFacultiesForUser,
 } = require("../controllers/facultiesControllers");
 const { epAuth, userAuth } = require("../middlewares/authMiddleware");
-const upload = require("../middlewares/uploadImage");
+const upload = require("../middlewares/uploadBanner");
 const router = express.Router();
 //get APIs
 router.get("/faculties", epAuth, getFaculties);
@@ -24,4 +24,4 @@ router.put("/editfaculties/:faculty_id", editFaculties);
 // users
 router.get("/facultiesForUsers/:institute_id", userAuth, getFacultiesForUser);
 
-module.exports = router;
+module.exports = router;  
