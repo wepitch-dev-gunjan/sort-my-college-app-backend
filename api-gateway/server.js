@@ -48,6 +48,7 @@ const io = socketIo(server, {
   },
 });
 
+
 // Configure proxy for each service
 const proxyConfig = {
   "/user": USER_PORT,
