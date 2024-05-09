@@ -16,7 +16,6 @@ exports.getDocuments = async (req, res) => {
     const documents = await Document.find({
       user: counsellor_id,
     });
-    console.log(documents);
     if (!documents)
       return res.status(404).send({
         error: "Documents not found",

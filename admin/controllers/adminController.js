@@ -99,7 +99,6 @@ exports.getAdmin = async (req, res) => {
 
     res.status(200).send(admin);
   } catch (error) {
-    console.log("error");
     console.log(error);
     res.status(500).send({ error: " admin Internal server error" });
   }
@@ -158,7 +157,6 @@ exports.editProfile = async (req, res) => {
       return res.status(404).json({ error: "Admin not found" });
     }
 
-    console.log(updatedAdmin);
     res.status(200).json(updatedAdmin);
   } catch (error) {
     console.error(error);

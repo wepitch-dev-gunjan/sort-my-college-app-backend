@@ -1,61 +1,63 @@
-const { uploadImage } = require("../../entrance-preparation/services/cloudinary");
+const {
+  uploadImage,
+} = require("../../entrance-preparation/services/cloudinary");
 const Accommodation = require("../models/Accommodation");
 
-
 exports.addAccommodation = async (req, res) => {
+  try {
+    const {
+      type,
+      name,
+      address,
+      direction,
+      total_beds,
+      recommended_for,
+      owner,
+      rooms,
+      nearby_locations,
+      rating,
+      common_area_amenities,
+      house_rules,
+      gate_opening_time,
+      gate_closing_time,
+    } = req.body;
 
- try {
-   const {
-     type,
-     name,
-     address,
-     direction,
-     total_beds,
-     recommended_for,
-     owner,
-     rooms,
-     nearby_locations,
-     rating,
-     common_area_amenities,
-     house_rules,
-     gate_opening_time,
-     gate_closing_time,
-   } = req.body;
-   
-   let images = [];
- // Check if req.files exists and is an array
- if (req.files && Array.isArray(req.files)) {
-  for (const file of req.files) {
-    const fileName = `course-image-${Date.now()}.png`;
-    const folderName = `ep-course_images`;
-    const imagePath = await uploadImage(file.buffer, fileName, folderName);
-    images.push(imagePath);
+    let images = [];
+    // Check if req.files exists and is an array
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files) {
+        const fileName = `course-image-${Date.now()}.png`;
+        const folderName = `ep-course_images`;
+        const imagePath = await uploadImage(file.buffer, fileName, folderName);
+        images.push(imagePath);
+      }
+    }
+    const newAccommodation = new Accommodation({
+      type,
+      images,
+      name,
+      address,
+      direction,
+      total_beds,
+      recommended_for,
+      owner,
+      rooms,
+      nearby_locations,
+      rating,
+      common_area_amenities,
+      house_rules,
+      gate_opening_time,
+      gate_closing_time,
+    });
+    console.log(newAccommodation);
+    await newAccommodation.save();
+    res
+      .status(201)
+      .send({ message: "Accommodation added successfully", newAccommodation });
+  } catch (error) {
+    console.error("Error adding accommodation:", error);
+    res.status(500).json({ message: "Failed to add accommodation" });
   }
-}
-   const newAccommodation = new Accommodation({
-     type,
-     images,
-     name,
-     address,
-     direction,
-     total_beds,
-     recommended_for,
-     owner,
-     rooms,
-     nearby_locations,
-     rating,
-     common_area_amenities,
-     house_rules,
-     gate_opening_time,
-     gate_closing_time,
-   });
-   console.log(newAccommodation)
-   await newAccommodation.save();
-   res.status(201).send({ message: "Accommodation added successfully", newAccommodation });
- } catch (error) {
-   console.error("Error adding accommodation:", error);
-   res.status(500).json({ message: "Failed to add accommodation" });
- }
 };
 
 exports.getAccommodations = async (req, res) => {
@@ -98,7 +100,6 @@ exports.editAccommodation = async (req, res) => {
   try {
     const { accomodation_id } = req.params;
     const updates = req.body;
-    console.log(updates);
 
     if (!accomodation_id) {
       return res.status(400).send({ error: "Accommodation ID is required" });

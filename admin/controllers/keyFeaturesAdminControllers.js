@@ -37,10 +37,10 @@ exports.getRemainingKeyFeaturesForInstitute = async (req, res) => {
     );
     const existing_key_features_ids = response.data;
     const all_key_features = await KeyFeaturesAdmin.find();
-    const remaining_key_features = all_key_features.filter(keyFeature => {
+    const remaining_key_features = all_key_features.filter((keyFeature) => {
       return !existing_key_features_ids.includes(keyFeature.id); // Assuming each key feature object has an 'id' property
     });
-    
+
     if (remaining_key_features.length === 0) {
       return res.status(200).json(all_key_features);
     }
@@ -66,8 +66,8 @@ exports.addKeyFeatureAdmin = async (req, res) => {
       return res.status(400).json({ message: "Icon not found" });
     }
 
-        const fileName = `key-features-icon-${Date.now()}.svg`;
-        const folderName = `key-features-icon`;
+    const fileName = `key-features-icon-${Date.now()}.svg`;
+    const folderName = `key-features-icon`;
 
     const key_features_icon = await uploadImage(
       file.buffer,
@@ -93,16 +93,14 @@ exports.addKeyFeatureAdmin = async (req, res) => {
 };
 
 exports.editKeyFeaturesAdmin = async (req, res) => {
-    try {
-        const { key_feature_id } = req.params;
-        const { name } = req.body;
-        const { file } = req;
+  try {
+    const { key_feature_id } = req.params;
+    const { name } = req.body;
+    const { file } = req;
 
-        console.log(key_feature_id)
-
-        if (!key_feature_id) {
-            return res.status(400).json({ message: "Key feature ID is required" });
-        }
+    if (!key_feature_id) {
+      return res.status(400).json({ message: "Key feature ID is required" });
+    }
 
     let keyFeaturesAdmin = await KeyFeaturesAdmin.findById(key_feature_id);
 
@@ -110,23 +108,26 @@ exports.editKeyFeaturesAdmin = async (req, res) => {
       return res.status(404).json({ message: "Key feature not found" });
     }
 
-        if (name) {
-            keyFeaturesAdmin.name = name;
-        }
+    if (name) {
+      keyFeaturesAdmin.name = name;
+    }
 
-        if (file) {
-            const fileName = `key-features-icon-${Date.now()}.svg`;
-            const folderName = `key-features-icon`;
-            const key_features_icon = await uploadImage(file.buffer, fileName, folderName);
-            
-            // Delete the previous image from Cloudinary
-            if (keyFeaturesAdmin.key_features_icon) {
-                await deleteImage(keyFeaturesAdmin.key_features_icon);
-            }
+    if (file) {
+      const fileName = `key-features-icon-${Date.now()}.svg`;
+      const folderName = `key-features-icon`;
+      const key_features_icon = await uploadImage(
+        file.buffer,
+        fileName,
+        folderName
+      );
 
-            keyFeaturesAdmin.key_features_icon = key_features_icon;
-        }
+      // Delete the previous image from Cloudinary
+      if (keyFeaturesAdmin.key_features_icon) {
+        await deleteImage(keyFeaturesAdmin.key_features_icon);
+      }
 
+      keyFeaturesAdmin.key_features_icon = key_features_icon;
+    }
 
     keyFeaturesAdmin = await keyFeaturesAdmin.save();
 
@@ -175,48 +176,51 @@ exports.deleteKeyFeatureAdmin = async (req, res) => {
 exports.findOneKeyFeatureAdmin = async (req, res) => {
   try {
     const { key_feature_id } = req.params;
-    
-    const keyFeatureAdmin = await keyFeaturesAdmin.findOne({ _id: key_feature_id});
+
+    const keyFeatureAdmin = await keyFeaturesAdmin.findOne({
+      _id: key_feature_id,
+    });
 
     if (!keyFeatureAdmin) {
       return res.status(404).send({
-        error: "Key feature not found"
+        error: "Key feature not found",
       });
     }
 
     // If key feature is found, send it in the response
     res.status(200).send(keyFeatureAdmin);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).send({
-      error: "Internal server error"
-    })
+      error: "Internal server error",
+    });
   }
-}
+};
 
 exports.getKeyFeaturesByIds = async (req, res) => {
   try {
     let { key_feature_ids } = req.query;
     key_feature_ids = JSON.parse(key_feature_ids);
-    console.log(key_feature_ids)
 
-    const all_ids = await KeyFeaturesAdmin.find({}, '_id');
-    const all_ids_strings = all_ids.map(item => item._id.toString());
-    const ids_in_key_features = all_ids_strings.filter(id => key_feature_ids.includes(id));
+    const all_ids = await KeyFeaturesAdmin.find({}, "_id");
+    const all_ids_strings = all_ids.map((item) => item._id.toString());
+    const ids_in_key_features = all_ids_strings.filter((id) =>
+      key_feature_ids.includes(id)
+    );
 
-    const keyFeatures = await KeyFeaturesAdmin.find({ _id: { $in: ids_in_key_features } });
-    
+    const keyFeatures = await KeyFeaturesAdmin.find({
+      _id: { $in: ids_in_key_features },
+    });
 
     if (keyFeatures.length === 0) {
       return res.status(200).send([]);
     }
 
-
     res.status(200).send(keyFeatures);
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      error: "Internal server error"
+      error: "Internal server error",
     });
   }
 };

@@ -179,7 +179,6 @@ exports.getOutstandingBalance = async (req, res) => {
       },
     ]);
 
-    console.log(counsellor_id);
     const outstandingBalance =
       outstandingBalanceAggregation.length > 0
         ? outstandingBalanceAggregation[0].outstanding_balance
@@ -206,8 +205,6 @@ exports.clearOutstandingbalance = async (req, res) => {
         error: "There is no payment to update",
       });
 
-    console.log(paymentsToUpdate);
-
     for (const payment of paymentsToUpdate) {
       payment.amount_paid = payment.amount_due;
       payment.amount_due = 0;
@@ -228,7 +225,6 @@ exports.paymentForCounsellor = async (req, res) => {
 
   try {
     const payments = await Payment.find({ payment_to: counsellor_id });
-    console.log(payments);
 
     if (payments.length === 0) return res.status(200).send([]);
     const massagedData = payments.map((payment) => ({
