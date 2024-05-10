@@ -202,7 +202,7 @@ exports.getSessionsForCounsellor = async (req, res) => {
       return {
         ...session._doc,
         session_time,
-        is_about_to_start: isAboutToStart,
+        // is_about_to_start: isAboutToStart,
       };
     });
     console.log(massagedSessions);
