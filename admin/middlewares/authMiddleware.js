@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { default: axios } = require("axios");
 const Admin = require("../models/Admin");
+const User = require("../dbQueries/user/iidex");
 require("dotenv").config();
 const { JWT_SECRET } = process.env;
 const { BACKEND_URL } = process.env;
@@ -97,19 +98,15 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await axios.get(`${BACKEND_URL}/user/users`, null, {
-      params: {
-        user_id: decoded.user_id,
-      },
-    });
+    const user = await User.findOne({ _id: decoded.user_id })
 
-    if (!user.data) {
+    if (!user) {
       return res.status(401).json({ error: "User not authorized" });
     }
 
     req.email = decoded.email;
     req.phoneNo = decoded.phoneNo;
-    req.user_id = user.data._id;
+    req.user_id = decoded.user_id;
 
     next();
   } catch (error) {

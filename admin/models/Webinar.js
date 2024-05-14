@@ -13,12 +13,12 @@ const webinarSchema = new Schema(
     webinar_join_url: String,
     webinar_password: String,
     webinar_total_slots: Number,
-    registered_participants: [{ type: String }],
-    attended_participants: [{ type: String }],
+    registered_participants: [{ type: Object }],
+    attended_participants: [{ type: Object }]
   },
   {
     timestamps: true,
-    strict: false,
+    strict: false
   }
 );
 

@@ -3,8 +3,10 @@ const { getZoomAccessToken, webinarDateModifier, getDateDifference } = require("
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
+const User = require("../dbQueries/user/iidex");
 
 require("dotenv").config();
+const EARLY_JOIN_MINUTES = 10;
 
 exports.getWebinarsForAdmin = async (req, res) => {
   try {
@@ -59,9 +61,16 @@ exports.getWebinarsForUser = async (req, res) => {
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
-      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const dateDifference = getDateDifference(webinarDate, currentDate);
       const webinar_date = webinarDateModifier(webinar.webinar_date);
-      const registered = webinar.registered_participants.includes(user_id)
+      const registered = webinar.registered_participants.some(participant => participant._id === user_id);
+
+      const earlyJoinTime = new Date(webinar.webinar_date);
+      earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+      // Check if the user can join the webinar
+      const now = new Date();
+      const canJoin = now >= earlyJoinTime || now >= webinar.webinar_date;
+
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
@@ -72,16 +81,19 @@ exports.getWebinarsForUser = async (req, res) => {
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
-        registered
-      }
-    })
+        registered,
+        can_join: canJoin
+      };
+    });
 
-    res.status(200).send(massagedWebinars)
+    res.status(200).send(massagedWebinars);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+
 
 exports.getMyWebinars = async (req, res) => {
   try {
@@ -407,11 +419,18 @@ exports.registerParticipant = async (req, res) => {
 
     const dateDifference = getDateDifference(webinarDate, currentDate)
 
-    if (webinar.registered_participants.includes(user_id)) return res.status(400).send({
+    if (webinar.registered_participants.find(user => user._id === user_id)) return res.status(400).send({
       error: "Participant is already registered"
     })
 
-    webinar.registered_participants.push(user_id);
+    // get user details
+    const user = await User.findOne({ _id: user_id });
+
+    webinar.registered_participants.push({
+      name: user.name,
+      _id: user._id,
+      profile_pic: user.profile_pic
+    });
     await webinar.save();
 
     res.status(200).send({
