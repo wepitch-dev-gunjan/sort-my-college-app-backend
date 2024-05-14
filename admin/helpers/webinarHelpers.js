@@ -28,6 +28,7 @@ exports.getZoomAccessToken = async () => {
 exports.webinarDateModifier = (dateString) => {
   // Parse the input date string
   const date = new Date(dateString);
+  // console.log(date)
 
   // Extract day, month, hour, and minute
   const day = date.getDate();
@@ -62,10 +63,10 @@ exports.getDateDifference = (date1, date2) => {
   const d2 = new Date(date2);
 
   // Calculate the difference in milliseconds
-  const differenceMs = Math.abs(d1 - d2);
+  const differenceMs = (Math.abs(d1 - d2));
 
   // Convert milliseconds to days
-  const differenceDays = differenceMs / (1000 * 60 * 60 * 24);
+  const differenceDays = Math.floor(differenceMs / (1000 * 60 * 60 * 24));
 
   return differenceDays;
 }

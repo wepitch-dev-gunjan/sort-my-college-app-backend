@@ -54,10 +54,10 @@ exports.getWebinarsForUser = async (req, res) => {
     const webinars = await Webinar.find(filter);
     if (!webinars) return res.status(200).send([]);
 
+
     const massagedWebinars = webinars.map(webinar => {
       const webinarDate = webinar.webinar_date;
-      webinarDate.setUTCHours(0, 0, 0, 0);
-
+      // webinarDate.setUTCHours(0, 0, 0, 0);
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
@@ -67,9 +67,12 @@ exports.getWebinarsForUser = async (req, res) => {
 
       const earlyJoinTime = new Date(webinar.webinar_date);
       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+
+
       // Check if the user can join the webinar
       const now = new Date();
-      const canJoin = now >= earlyJoinTime || now >= webinar.webinar_date;
+      now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
+      const canJoin = now >= earlyJoinTime;
 
       return {
         id: webinar._id,
