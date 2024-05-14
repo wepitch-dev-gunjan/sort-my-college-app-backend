@@ -201,6 +201,9 @@ const counsellorSchema = new Schema(
       default: new Date(),
     },
     // bank details
+    recepient_name: {
+     type: String,
+    },
     bank_name: {
       type: String,
     },

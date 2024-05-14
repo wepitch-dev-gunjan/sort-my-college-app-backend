@@ -439,6 +439,9 @@ exports.editProfile = async (req, res) => {
       updateFields.date_of_birth = req.body.date_of_birth;
     }
 
+    if (req.body.recepient_name) {
+      updateFields.recepient_name = req.body.recepient_name;
+    }
     if (req.body.bank_name) {
       updateFields.bank_name = req.body.bank_name;
     }
