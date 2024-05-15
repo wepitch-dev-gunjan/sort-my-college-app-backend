@@ -24,7 +24,7 @@ jobs:
 
       # Stop all instances of PM2
       - name: Stop all instances of PM2
-        run: pm2 delete all || true
+        run: sudo pm2 delete all || true
 
       # Install project dependencies
       - name: Install dependencies
