@@ -236,8 +236,6 @@ exports.getCounsellor = async (req, res) => {
       followed_to: counsellor_id,
     });
 
-    console.log(`user id: ${id}`, "counsellor_id: " + counsellor_id);
-
     const following = Boolean(follower);
 
     const messagedCounsellor = {
@@ -253,7 +251,6 @@ exports.getCounsellor = async (req, res) => {
       client_testimonials,
       following,
     };
-    console.log(messagedCounsellor);
 
     res.status(200).send([messagedCounsellor]);
   } catch (error) {
@@ -503,7 +500,13 @@ exports.deleteCounsellor = async (req, res) => {
 
 exports.getCounsellors = async (req, res) => {
   try {
-    const { locations_focused, degree_focused, courses_focused, page = 1, limit = 5 } = req.query;
+    const {
+      locations_focused,
+      degree_focused,
+      courses_focused,
+      page = 1,
+      limit = 5,
+    } = req.query;
 
     const queryObject = {};
 
@@ -544,6 +547,7 @@ exports.getCounsellors = async (req, res) => {
           qualifications: counsellor.specializations,
           next_session: counsellor.next_session,
           average_rating: counsellor.average_rating,
+          courses_focused: counsellor.courses_focused,
           experience_in_years: counsellor.experience_in_years,
           total_sessions: counsellor.sessions.length,
           reward_points: counsellor.reward_points,
@@ -558,7 +562,6 @@ exports.getCounsellors = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
 
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
@@ -760,7 +763,6 @@ exports.getReviewsCounsellor = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
-    console.log(counsellor);
 
     if (!counsellor)
       return res.status(400).send({
@@ -850,7 +852,6 @@ exports.postReviewCounsellor = async (req, res) => {
     if (!counsellor)
       return res.status(404).send({ error: "Counsellor not found" });
 
-    console.log(counsellor.client_testimonials);
     if (
       counsellor.client_testimonials.some(
         (testimonial) => testimonial.user_id === user_id

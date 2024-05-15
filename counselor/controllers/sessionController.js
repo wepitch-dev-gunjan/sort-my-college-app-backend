@@ -10,6 +10,7 @@ const {
 require("dotenv").config();
 const Counsellor = require("../models/Counsellor");
 const Session = require("../models/Session");
+const User = require("../dbQueries/user/iidex");
 
 const { BACKEND_URL } = process.env;
 // GET
@@ -67,7 +68,6 @@ exports.getSessions = async (req, res) => {
             // Keep the original date if not within the next 7 days
             session_massaged_date = sessionDate.toDateString().slice(3);
             session.session_time = sessionTimeIntoString(session.session_time);
-            console.log(session.session_time);
           }
         }
         return {
@@ -205,7 +205,6 @@ exports.getSessionsForCounsellor = async (req, res) => {
         // is_about_to_start: isAboutToStart,
       };
     });
-    console.log(massagedSessions);
 
     res.status(200).send(massagedSessions);
   } catch (error) {
@@ -278,7 +277,6 @@ exports.addSession = async (req, res) => {
       !session_type ||
       !session_fee
     ) {
-      console.log(req.body);
       return res.status(400).send({
         error: "Missing required fields",
       });
@@ -415,7 +413,8 @@ exports.bookSessionValidation = async (req, res) => {
 
 exports.bookSession = async (req, res) => {
   try {
-    const { phone_number, id, email } = req;
+    const { phone_number, id } = req;
+    const user = await User.findOne({ _id: id });
 
     const { session_id } = req.params;
 
@@ -460,9 +459,9 @@ exports.bookSession = async (req, res) => {
     await counsellor.save();
 
     // send email notification to user
-    if (email) {
+    if (user.email) {
       await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
-        to: phone_number,
+        to: user.email,
         date: session.session_date,
         time: session.session_time,
         counsellor: counsellor.name,
@@ -480,7 +479,7 @@ exports.bookSession = async (req, res) => {
       to: counsellor.email,
       date: session.session_date,
       time: session.session_time,
-      client: email,
+      client: user.name,
       sessiontype: session.session_type,
       duration: session.session_duration,
       // location,
@@ -490,11 +489,12 @@ exports.bookSession = async (req, res) => {
     });
 
     // send in app notification to counsellor
-    await axios.post(`${BACKEND_URL}/notification/in-app`, {
+    const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
       user_id: counsellor._id,
       title: "New Booking",
-      message: `${email} booked a ${session.session_type} session`,
+      message: `${user.name} booked a ${session.session_type} session`,
     });
+    console.log(response);
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
@@ -872,7 +872,6 @@ exports.getPopularWorkshops = async (req, res) => {
           const counsellor = await Counsellor.findOne({
             _id: session.session_counsellor,
           });
-          console.log(counsellor);
           total_available_slots += session.session_available_slots;
           const sessionDate = new Date(session.session_date);
           let session_massaged_date = "";
@@ -905,7 +904,6 @@ exports.getPopularWorkshops = async (req, res) => {
           };
         })
       );
-      console.log(massagedSessions);
       res.status(200).json(massagedSessions);
     } else {
       res.status(200).json([]);
