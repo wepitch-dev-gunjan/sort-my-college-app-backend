@@ -2,6 +2,8 @@ const { default: axios } = require("axios");
 const Payment = require("../models/Payment");
 const instance = require("../services/razorpayConfig");
 const { getCounsellorAmount } = require("../helpers/paymentHelpers");
+const { default: mongoose } = require("mongoose");
+const { ObjectId } = mongoose.Types;
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -248,5 +250,31 @@ exports.paymentForCounsellor = async (req, res) => {
   } catch (error) {
     console.error("Error fetching payment details:", error);
     throw error;
+  }
+};
+
+exports.paymentofcounsellor = async (req, res) => {
+  try {
+    const { counsellor_id } = req; // Assuming the counselor ID is passed as a URL parameter
+    console.log(counsellor_id);
+
+    // Check if counselorId is a valid ObjectId
+    if (!ObjectId.isValid(counsellor_id)) {
+      return res.status(400).json({ error: "Invalid counselor ID" });
+    }
+
+    const result = await Payment.aggregate([
+      { $match: { payment_to: counsellor_id } },
+      { $group: { _id: "$payment_to", totalIncome: { $sum: "$amount_due" } } },
+    ]);
+
+    const totalIncome = result.length > 0 ? result[0].totalIncome : 0;
+
+    res.json({ counsellor_id, totalIncome });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while calculating total income" });
   }
 };

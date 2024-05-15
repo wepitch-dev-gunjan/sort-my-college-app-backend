@@ -49,7 +49,6 @@ exports.addAccommodation = async (req, res) => {
       gate_opening_time,
       gate_closing_time,
     });
-    console.log(newAccommodation);
     await newAccommodation.save();
     res
       .status(201)
