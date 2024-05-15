@@ -503,7 +503,7 @@ exports.deleteCounsellor = async (req, res) => {
 
 exports.getCounsellors = async (req, res) => {
   try {
-    const { locations_focused, degree_focused, courses_focused } = req.query;
+    const { locations_focused, degree_focused, courses_focused, page = 1, limit = 5 } = req.query;
 
     const queryObject = {};
 
@@ -521,10 +521,14 @@ exports.getCounsellors = async (req, res) => {
 
     queryObject.verified = true;
 
-    // If no query parameters are provided, remove the queryObject to fetch all counselors
+    const skip = (page - 1) * limit;
+
     const counsellors = await Counsellor.find(
       Object.keys(queryObject).length === 0 ? {} : queryObject
-    ).sort({ reward_points: -1 });
+    )
+      .sort({ reward_points: -1 })
+      .skip(skip)
+      .limit(limit);
 
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });
@@ -554,6 +558,7 @@ exports.getCounsellors = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
 
 exports.getCounsellorsForAdmin = async (req, res) => {
   try {
