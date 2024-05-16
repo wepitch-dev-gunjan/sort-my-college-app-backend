@@ -46,7 +46,6 @@ exports.editUser = async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-    console.log(user);
     // Update user information
     if (name) user.name = name;
     if (gender) user.gender = gender;
