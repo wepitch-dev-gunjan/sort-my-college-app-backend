@@ -2,6 +2,7 @@ const axios = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
+const User = require("../dbQueries/user/iidex");
 require("dotenv").config();
 
 const { BACKEND_URL } = process.env;
@@ -101,7 +102,7 @@ exports.unfollowCounsellor = async (req, res) => {
       return res.status(404).json({ error: "Counsellor not found" });
     }
 
-    console.log(id, counsellor_id)
+    console.log(id, counsellor_id);
     let follower = await Follower.findOneAndDelete({
       followed_by: id,
       followed_to: counsellor_id,
@@ -129,11 +130,11 @@ exports.unfollowCounsellor = async (req, res) => {
 
     follower = {
       ...follower._doc,
-      followed: false
-    }
+      followed: false,
+    };
     res.status(200).json({
       message: "User is now unfollowing the counsellor",
-      data: follower
+      data: follower,
     });
   } catch (error) {
     console.error(error);
@@ -146,37 +147,55 @@ exports.getFollowingCounsellorsForUser = async (req, res) => {
     const { id } = req;
     const following = await Follower.aggregate([
       {
-        $match: { 'followed_by': id }
+        $match: { followed_by: id },
       },
       {
         $group: {
           _id: null,
-          followed_to_ids: { $addToSet: '$followed_to' }
-        }
-      }
+          followed_to_ids: { $addToSet: "$followed_to" },
+        },
+      },
     ]);
 
     const followingCounsellorsIds = following[0].followed_to_ids;
 
-    const followingCounsellors = await Counsellor.find({ _id: { $in: followingCounsellorsIds } })
+    const followingCounsellors = await Counsellor.find({
+      _id: { $in: followingCounsellorsIds },
+    });
 
-    const massagedfollowingCounsellors = followingCounsellors.map(counsellor => ({
-      _id: counsellor._id,
-      name: counsellor.name,
-      profile_pic: counsellor.profile_pic,
-      designation: counsellor.designation,
-      qualifications: counsellor.specializations,
-      next_session: counsellor.next_session,
-      average_rating: counsellor.average_rating,
-      experience_in_years: counsellor.experience_in_years,
-      total_sessions: counsellor.sessions.length,
-      reward_points: counsellor.reward_points,
-      reviews: counsellor.client_testimonials.length,
-    }))
+    const massagedfollowingCounsellors = followingCounsellors.map(
+      (counsellor) => ({
+        _id: counsellor._id,
+        name: counsellor.name,
+        profile_pic: counsellor.profile_pic,
+        designation: counsellor.designation,
+        qualifications: counsellor.specializations,
+        next_session: counsellor.next_session,
+        average_rating: counsellor.average_rating,
+        experience_in_years: counsellor.experience_in_years,
+        total_sessions: counsellor.sessions.length,
+        reward_points: counsellor.reward_points,
+        reviews: counsellor.client_testimonials.length,
+      })
+    );
 
-    res.status(200).send(massagedfollowingCounsellors)
+    res.status(200).send(massagedfollowingCounsellors);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+exports.getUserForCounsellor = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    console.log(user_id);
+
+    const user = await User.findOne({ _id: user_id });
+    if (!user)
+      return res.status(404).send({ error: "No user Found With This Id" });
+    return res.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };

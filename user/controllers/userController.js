@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
 
     if (!name || !date_of_birth || !gender || !education_level)
       return res.status(400).send({
-        error: "Required fields not provided"
+        error: "Required fields not provided",
       });
 
     const user = await User.findOne({ _id: user_id });
@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     res.status(200).send({
-      message: "User registered successfully"
+      message: "User registered successfully",
     });
   } catch (error) {
     console.log(error);
@@ -34,9 +34,8 @@ exports.register = async (req, res) => {
 exports.editUser = async (req, res) => {
   try {
     const { user_id, file } = req;
-    const { name, gender, date_of_birth, location } =
-      req.body;
-    console.log(req.file)
+    const { name, gender, date_of_birth, location } = req.body;
+    console.log(req.file);
     // console.log(req.body);
     const query = {};
     query._id = user_id;
@@ -47,8 +46,7 @@ exports.editUser = async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-
-    console.log(user)
+    console.log(user);
     // Update user information
     if (name) user.name = name;
     if (gender) user.gender = gender;
@@ -61,11 +59,7 @@ exports.editUser = async (req, res) => {
       const fileName = `user-profile-pic-${Date.now()}.jpeg`;
       const folderName = "user-profile-pics";
 
-      user.profile_pic = await uploadImage(
-        file.buffer,
-        fileName,
-        folderName
-      );
+      user.profile_pic = await uploadImage(file.buffer, fileName, folderName);
     }
 
     // Save the updated user
@@ -73,7 +67,7 @@ exports.editUser = async (req, res) => {
 
     return res.status(200).json({
       message: "User information updated successfully.",
-      user
+      user,
     });
   } catch (error) {
     console.error(error);
