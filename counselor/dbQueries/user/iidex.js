@@ -14,7 +14,6 @@ class User {
       });
       return data; // Assuming you want to return the data from the response
     } catch (error) {
-      console.error("Error fetching user:", error);
       throw error;
     }
   }

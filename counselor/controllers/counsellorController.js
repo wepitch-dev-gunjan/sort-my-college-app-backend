@@ -536,9 +536,13 @@ exports.getCounsellors = async (req, res) => {
     if (counsellors.length === 0) {
       return res.status(404).send({ error: "No counselors found" });
     }
+    console.log(counsellors);
 
     const massagedCounsellors = await Promise.all(
       counsellors.map(async (counsellor) => {
+        const sessions = await Session.find({
+          session_counsellor: counsellor._id,
+        });
         return {
           _id: counsellor._id,
           name: counsellor.name,
@@ -549,7 +553,7 @@ exports.getCounsellors = async (req, res) => {
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,
           experience_in_years: counsellor.experience_in_years,
-          total_sessions: counsellor.sessions.length,
+          total_sessions: sessions.length,
           reward_points: counsellor.reward_points,
           reviews: counsellor.client_testimonials.length,
         };
