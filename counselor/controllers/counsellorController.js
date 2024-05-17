@@ -205,7 +205,7 @@ exports.getCounsellor = async (req, res) => {
 
     // client testimonials
     const client_testimonials = await Feedback.find({
-      feedback_to: counsellor._id,
+      feedback_to: counsellor_id,
     });
 
     // rating
@@ -213,8 +213,8 @@ exports.getCounsellor = async (req, res) => {
       (accumulator, testimonial) => accumulator + testimonial.rating,
       0
     );
-    const avg_rating = allRatingsCount / client_testimonials.length;
 
+    const avg_rating = allRatingsCount / client_testimonials.length;
     // reviews
     const reviews = client_testimonials.length;
 
@@ -529,6 +529,9 @@ exports.getCounsellors = async (req, res) => {
         const sessions = await Session.find({
           session_counsellor: counsellor._id,
         });
+        const client_testimonials = await Feedback.find({
+          feedback_to: counsellor._id,
+        });
         return {
           _id: counsellor._id,
           name: counsellor.name,
@@ -541,11 +544,10 @@ exports.getCounsellors = async (req, res) => {
           experience_in_years: counsellor.experience_in_years,
           total_sessions: sessions.length,
           reward_points: counsellor.reward_points,
-          reviews: counsellor.client_testimonials.length,
+          reviews: client_testimonials.length,
         };
       })
     );
-    console.log(counsellors.next_session);
 
     res.status(200).send(massagedCounsellors);
   } catch (error) {
