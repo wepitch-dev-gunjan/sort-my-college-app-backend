@@ -7,7 +7,7 @@ const {
   getOutstandingBalance,
   clearOutstandingbalance,
   paymentForCounsellor,
-  paymentofcounsellor,
+  incomeofcounsellor,
 } = require("../controllers/paymentController");
 const {
   counsellorOrUserAuth,
@@ -27,7 +27,7 @@ router.get(
 router.get(
   "/payment/getincomeofcounsellor",
   counsellorAuth,
-  paymentofcounsellor
+  incomeofcounsellor
 );
 router.put(
   "/payments/:counsellor_id/outstanding-balance",
