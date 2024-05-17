@@ -66,7 +66,6 @@ exports.createFeedback = async (req, res) => {
 exports.getFeedbacks = async (req, res) => {
   try {
     const { counsellor_id, user_id, page = 1, limit = 10 } = req.query;
-    // Validate page and limit to be positive integers
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
@@ -81,17 +80,11 @@ exports.getFeedbacks = async (req, res) => {
         .json({ error: "Invalid page or limit parameters." });
     }
 
-    // Fetch counsellor and user data
     const [counsellor, user] = await Promise.all([
       Counsellor.findOne({ _id: counsellor_id }),
-      axios.get(`${BACKEND_URL}/user/users`, null, {
-        params: {
-          user_id,
-        },
-      }),
+      axios.get(`${BACKEND_URL}/user/users`, { params: { user_id } }),
     ]);
 
-    // Check if counsellor and user exist
     if (!counsellor) {
       return res.status(404).json({ error: "Counsellor not found" });
     }
@@ -100,32 +93,21 @@ exports.getFeedbacks = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Calculate skip value for pagination
     const skip = (pageNumber - 1) * limitNumber;
-
     const query = {};
     if (user_id) query.feedback_from = user_id;
     if (counsellor_id) query.feedback_to = counsellor_id;
 
-    // Retrieve feedbacks for the specified user with pagination
     const feedbacks = await Feedback.find(query)
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limitNumber)
       .exec();
 
-    // Prepare the response
-    // const response = feedbacks.map((feedback) => ({
-    //   _id: feedback._id,
-    //   profile_pic: user.data.profile_pic, // Assuming profile_pic is in user.data
-    //   user_name: user.data.name, // Assuming name is in user.data
-    //   feedback_to: feedback.feedback_to,
-    //   feedback_from: feedback.feedback_from,
-    //   rating: feedback.rating,
-    //   message: feedback.message,
-    // }));
+    const totalFeedbacks = await Feedback.countDocuments(query);
+    const totalPages = Math.ceil(totalFeedbacks / limitNumber);
 
-    res.status(200).json(feedbacks);
+    res.status(200).json({ feedbacks, totalPages, currentPage: pageNumber });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
