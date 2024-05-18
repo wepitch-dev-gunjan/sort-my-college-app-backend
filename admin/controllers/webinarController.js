@@ -1,5 +1,9 @@
 const { KJUR } = require("jsrsasign");
-const { getZoomAccessToken, webinarDateModifier, getDateDifference } = require("../helpers/webinarHelpers");
+const {
+  getZoomAccessToken,
+  webinarDateModifier,
+  getDateDifference,
+} = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
@@ -28,7 +32,7 @@ exports.getWebinarsForUser = async (req, res) => {
     const { user_id } = req;
     const { query } = req.query;
 
-    const filter = {}
+    const filter = {};
 
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -39,23 +43,22 @@ exports.getWebinarsForUser = async (req, res) => {
     if (query === "Today") {
       filter.webinar_date = {
         $gte: currentDate,
-        $lte: endOfDay
-      }
+        $lte: endOfDay,
+      };
     } else if (query === "Past") {
       filter.webinar_date = {
-        $lt: currentDate
-      }
+        $lt: currentDate,
+      };
     } else if (query === "Upcoming") {
       filter.webinar_date = {
-        $gt: endOfDay
-      }
+        $gt: endOfDay,
+      };
     }
 
     const webinars = await Webinar.find(filter);
     if (!webinars) return res.status(200).send([]);
 
-
-    const massagedWebinars = webinars.map(webinar => {
+    const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
       // webinarDate.setUTCHours(0, 0, 0, 0);
       const currentDate = new Date();
@@ -63,11 +66,12 @@ exports.getWebinarsForUser = async (req, res) => {
 
       const dateDifference = getDateDifference(webinarDate, currentDate);
       const webinar_date = webinarDateModifier(webinar.webinar_date);
-      const registered = webinar.registered_participants.some(participant => participant._id === user_id);
+      const registered = webinar.registered_participants.some(
+        (participant) => participant._id === user_id
+      );
 
       const earlyJoinTime = new Date(webinar.webinar_date);
       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
-
 
       // Check if the user can join the webinar
       const now = new Date();
@@ -85,36 +89,48 @@ exports.getWebinarsForUser = async (req, res) => {
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
         registered,
-        can_join: canJoin
+        can_join: canJoin,
       };
     });
 
     res.status(200).send(massagedWebinars);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
-
 
 exports.getMyWebinars = async (req, res) => {
   try {
     const { user_id } = req;
 
-    const webinars = await Webinar.find({ registered_participants: { $in: user_id } });
+    const webinars = await Webinar.find({
+      "registered_participants._id": user_id,
+    });
+    console.log(webinars);
     if (!webinars) return res.status(200).send([]);
 
-    const massagedWebinars = webinars.map(webinar => {
+    const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
       webinarDate.setUTCHours(0, 0, 0, 0);
 
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
-      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const dateDifference = getDateDifference(webinarDate, currentDate);
       const webinar_date = webinarDateModifier(webinar.webinar_date);
-      const registered = webinar.registered_participants.includes(user_id)
+      const registered = webinar.registered_participants.some(
+        (participant) => participant._id === user_id
+      );
+
+      const earlyJoinTime = new Date(webinar.webinar_date);
+      earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+
+      // Check if the user can join the webinar
+      const now = new Date();
+      now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
+      const canJoin = now >= earlyJoinTime;
+
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
@@ -125,14 +141,15 @@ exports.getMyWebinars = async (req, res) => {
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
-        registered
-      }
-    })
+        registered,
+        can_join: canJoin,
+      };
+    });
 
-    res.status(200).send(massagedWebinars)
+    res.status(200).send(massagedWebinars);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -149,16 +166,16 @@ exports.getTrendingWebinars = async (req, res) => {
     const webinars = await Webinar.find().sort({ webinar_date: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
     if (!webinars || webinars.length === 0) return res.status(200).send([]);
 
-    const massagedWebinars = webinars.map(webinar => {
+    const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
       webinarDate.setUTCHours(0, 0, 0, 0);
 
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
-      const dateDifference = getDateDifference(webinarDate, currentDate)
+      const dateDifference = getDateDifference(webinarDate, currentDate);
       const webinar_date = webinarDateModifier(webinar.webinar_date);
-      const registered = webinar.registered_participants.includes(user_id)
+      const registered = webinar.registered_participants.includes(user_id);
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
@@ -169,14 +186,14 @@ exports.getTrendingWebinars = async (req, res) => {
         webinar_by: webinar.webinar_by,
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
-        registered
-      }
-    })
+        registered,
+      };
+    });
 
-    res.status(200).send(massagedWebinars)
+    res.status(200).send(massagedWebinars);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -237,7 +254,6 @@ exports.addWebinar = async (req, res) => {
     const fileName = `webinar-image-${Date.now()}.jpeg`;
     const folderName = "webinar-images";
 
-
     const webinar_image = await uploadImage(file.buffer, fileName, folderName);
 
     // Create a new instance of the Webinar model
@@ -293,7 +309,7 @@ exports.deleteWebinar = async (req, res) => {
 
     if (!webinar_id) {
       return res.status(404).send({
-        error: "Webinar not found!!"
+        error: "Webinar not found!!",
       });
     }
     if (cloudinary_image_id) {
@@ -302,8 +318,8 @@ exports.deleteWebinar = async (req, res) => {
     await Webinar.findByIdAndDelete(webinar_id);
 
     res.status(200).send({
-      message: "Webinar Deleted Successfully"
-    })
+      message: "Webinar Deleted Successfully",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Serverr Error" });
@@ -376,9 +392,9 @@ exports.getSingleWebinarForUser = async (req, res) => {
     const currentDate = new Date();
     currentDate.setUTCHours(0, 0, 0, 0);
 
-    const dateDifference = getDateDifference(webinarDate, currentDate)
+    const dateDifference = getDateDifference(webinarDate, currentDate);
 
-    const registered = webinar.registered_participants.includes(user_id)
+    const registered = webinar.registered_participants.includes(user_id);
 
     const massagedWebinar = {
       _id: webinar._id,
@@ -395,7 +411,7 @@ exports.getSingleWebinarForUser = async (req, res) => {
       registered_participants: webinar.registered_participants,
       attended_participants: webinar.attended_participants,
       webinar_starting_in_day: dateDifference,
-      registered
+      registered,
     };
 
     res.status(200).send(massagedWebinar);
@@ -410,21 +426,23 @@ exports.registerParticipant = async (req, res) => {
     const { webinar_id } = req.params;
     const { user_id } = req;
 
-    const webinar = await Webinar.findOne({ _id: webinar_id })
-    if (!webinar) return res.status(404).send({
-      error: "Webinar not found"
-    })
+    const webinar = await Webinar.findOne({ _id: webinar_id });
+    if (!webinar)
+      return res.status(404).send({
+        error: "Webinar not found",
+      });
     const webinarDate = webinar.webinar_date;
     webinarDate.setUTCHours(0, 0, 0, 0);
 
     const currentDate = new Date();
     currentDate.setUTCHours(0, 0, 0, 0);
 
-    const dateDifference = getDateDifference(webinarDate, currentDate)
+    const dateDifference = getDateDifference(webinarDate, currentDate);
 
-    if (webinar.registered_participants.find(user => user._id === user_id)) return res.status(400).send({
-      error: "Participant is already registered"
-    })
+    if (webinar.registered_participants.find((user) => user._id === user_id))
+      return res.status(400).send({
+        error: "Participant is already registered",
+      });
 
     // get user details
     const user = await User.findOne({ _id: user_id });
@@ -432,17 +450,17 @@ exports.registerParticipant = async (req, res) => {
     webinar.registered_participants.push({
       name: user.name,
       _id: user._id,
-      profile_pic: user.profile_pic
+      profile_pic: user.profile_pic,
     });
     await webinar.save();
 
     res.status(200).send({
       message: "Registration completed",
-      webinar_starting_in_days: dateDifference
-    })
+      webinar_starting_in_days: dateDifference,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
@@ -467,8 +485,6 @@ exports.removeParticipant = async (req, res) => {
     res.status(200).send({ message: "Participant removed successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
-
