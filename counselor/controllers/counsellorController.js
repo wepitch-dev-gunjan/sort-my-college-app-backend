@@ -8,6 +8,7 @@ const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
 const { uploadImage } = require("../services/cloudinary");
+const { convertTo24HourFormat } = require("../utils");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -533,6 +534,8 @@ exports.getCounsellors = async (req, res) => {
         const client_testimonials = await Feedback.find({
           feedback_to: counsellor._id,
         });
+
+        const nextSessionAt = convertTo24HourFormat
         return {
           _id: counsellor._id,
           name: counsellor.name,
@@ -540,10 +543,7 @@ exports.getCounsellors = async (req, res) => {
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
           next_session: sessions[0]
-            ? new Date(sessions[0].createdAt)
-                .toISOString()
-                .split("T")[1]
-                .split("Z")[0]
+            ? convertTo24HourFormat(sessions[0].createdAt)
             : "No sessions yet",
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,
