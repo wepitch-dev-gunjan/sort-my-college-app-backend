@@ -2,13 +2,11 @@ const { default: axios } = require("axios");
 const Counsellor = require("../models/Counsellor");
 const Course = require("../models/Course");
 const Feed = require("../models/Feed");
-const { putObject, getObjectURL } = require("../services/s3config");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const Feedback = require("../models/Feedback");
 const Follower = require("../models/Follower");
 const Session = require("../models/Session");
 const { uploadImage } = require("../services/cloudinary");
-const { convertTo24HourFormat } = require("../utils");
+const { convertTo12HourFormat } = require("../utils");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -542,7 +540,7 @@ exports.getCounsellors = async (req, res) => {
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
           next_session: sessions[0]
-            ? `Next session at ${convertTo24HourFormat(sessions[0].session_time)}`
+            ? `Next session at ${convertTo12HourFormat(sessions[0].session_time)}`
             : "No sessions yet",
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,
