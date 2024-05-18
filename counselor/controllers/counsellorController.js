@@ -527,7 +527,39 @@ exports.getCounsellors = async (req, res) => {
       counsellors.map(async (counsellor) => {
         const sessions = await Session.find({
           session_counsellor: counsellor._id,
-        }).sort({ createdAt: -1 });
+        }).sort({ session_date: -1 });
+
+        if (sessions.length === 0) {
+          return {
+            _id: counsellor._id,
+            name: counsellor.name,
+            profile_pic: counsellor.profile_pic,
+            designation: counsellor.designation,
+            qualifications: counsellor.specializations,
+            next_session: "No sessions yet",
+            average_rating: counsellor.average_rating,
+            courses_focused: counsellor.courses_focused,
+            experience_in_years: counsellor.experience_in_years,
+            total_sessions: sessions.length,
+            reward_points: counsellor.reward_points,
+            reviews: 0,
+          };
+        }
+
+        const latestDate = sessions[0].session_date;
+        const currentTime = new Date();
+        const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+
+        const latestSessions = sessions.filter(session => {
+          const sessionDate = new Date(session.session_date);
+          const sessionTimeInMinutes = session.session_time;
+          return sessionDate.getTime() === latestDate.getTime() && sessionTimeInMinutes >= currentTimeInMinutes;
+        });
+
+
+        const nextSession = latestSessions.reduce((minSession, session) => {
+          return (session.session_time < minSession.session_time) ? session : minSession;
+        }, latestSessions[0]);
 
         const client_testimonials = await Feedback.find({
           feedback_to: counsellor._id,
@@ -539,8 +571,8 @@ exports.getCounsellors = async (req, res) => {
           profile_pic: counsellor.profile_pic,
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
-          next_session: sessions[0]
-            ? `Next session at ${convertTo12HourFormat(sessions[0].session_time)}`
+          next_session: nextSession
+            ? `Next session at ${convertTo12HourFormat(nextSession.session_time)}`
             : "No sessions yet",
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,
