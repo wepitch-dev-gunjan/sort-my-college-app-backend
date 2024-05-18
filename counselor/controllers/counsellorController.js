@@ -542,7 +542,7 @@ exports.getCounsellors = async (req, res) => {
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
           next_session: sessions[0]
-            ? `Next session at ${convertTo24HourFormat(sessions[0].createdAt)}`
+            ? `Next session at ${convertTo24HourFormat(sessions[0].session_time)}`
             : "No sessions yet",
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,

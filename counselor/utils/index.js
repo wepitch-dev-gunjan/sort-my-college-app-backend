@@ -14,9 +14,8 @@ exports.formatObjectId = (str) => {
 };
 
 exports.convertTo24HourFormat = (timeString) => {
-  const date = new Date(timeString);
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
+  let hours = timeString / 60;
+  const minutes = timeString % 60;
   const period = hours >= 12 ? 'pm' : 'am';
 
   // Convert 24-hour format to 12-hour format
