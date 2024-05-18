@@ -13,8 +13,8 @@ exports.formatObjectId = (str) => {
   }
 };
 
-exports.convertTo24HourFormat = (timeString) => {
-  let hours = timeString / 60;
+exports.convertTo12HourFormat = (timeString) => {
+  let hours = Math.floor(timeString / 60);
   const minutes = timeString % 60;
   const period = hours >= 12 ? 'pm' : 'am';
 
@@ -27,5 +27,3 @@ exports.convertTo24HourFormat = (timeString) => {
 
   return `${formattedHour}:${formattedMinute} ${period}`;
 }
-
-
