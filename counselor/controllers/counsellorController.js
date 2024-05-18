@@ -528,7 +528,8 @@ exports.getCounsellors = async (req, res) => {
       counsellors.map(async (counsellor) => {
         const sessions = await Session.find({
           session_counsellor: counsellor._id,
-        });
+        }).sort({ createdAt: -1 });
+
         const client_testimonials = await Feedback.find({
           feedback_to: counsellor._id,
         });
@@ -538,7 +539,12 @@ exports.getCounsellors = async (req, res) => {
           profile_pic: counsellor.profile_pic,
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
-          next_session: counsellor.next_session,
+          next_session: sessions[0]
+            ? new Date(sessions[0].createdAt)
+                .toISOString()
+                .split("T")[1]
+                .split("Z")[0]
+            : "No sessions yet",
           average_rating: counsellor.average_rating,
           courses_focused: counsellor.courses_focused,
           experience_in_years: counsellor.experience_in_years,
