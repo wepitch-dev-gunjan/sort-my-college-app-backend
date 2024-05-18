@@ -529,7 +529,7 @@ exports.getCounsellors = async (req, res) => {
       counsellors.map(async (counsellor) => {
         const sessions = await Session.find({
           session_counsellor: counsellor._id,
-        }).sort({ createdAt: 1 });
+        }).sort({ createdAt: -1 });
 
         const client_testimonials = await Feedback.find({
           feedback_to: counsellor._id,
