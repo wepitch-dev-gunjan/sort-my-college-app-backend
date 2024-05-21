@@ -390,10 +390,6 @@ exports.editProfile = async (req, res) => {
       updateFields.average_rating = req.body.average_rating;
     }
 
-    if (req.body.sessions) {
-      updateFields.sessions = req.body.sessions;
-    }
-
     if (req.body.how_will_i_help) {
       updateFields.how_will_i_help = req.body.how_will_i_help;
     }
@@ -555,10 +551,10 @@ exports.getCounsellors = async (req, res) => {
           const sessionTimeInMinutes = session.session_time;
           return sessionDate.getTime() === latestDate.getTime() && sessionTimeInMinutes >= currentTimeInMinutes;
         });
-
+        console.log(latestSessions)
 
         const nextSession = latestSessions.reduce((minSession, session) => {
-          return (session.session_time < minSession.session_time) ? session : minSession;
+          return (session.session_time < minSession.session_time && session.session_date < minSession.session_date) ? session : minSession;
         }, latestSessions[0]);
 
         const client_testimonials = await Feedback.find({

@@ -127,7 +127,6 @@ const counsellorSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "Session",
-        default: null,
       },
     ],
 
@@ -202,7 +201,7 @@ const counsellorSchema = new Schema(
     },
     // bank details
     recepient_name: {
-     type: String,
+      type: String,
     },
     bank_name: {
       type: String,
