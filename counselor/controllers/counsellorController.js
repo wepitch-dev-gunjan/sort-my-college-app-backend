@@ -238,7 +238,7 @@ exports.getCounsellor = async (req, res) => {
       following,
     };
 
-    res.status(200).send([messagedCounsellor]);
+    res.status(200).send(messagedCounsellor);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
