@@ -253,3 +253,34 @@ exports.getDashboardData = async (req, res) => {
     console.log(error);
   }
 };
+
+exports.changeAdminPassword = async (req, res) => {
+  const admin_id = "65eee831b02ebab9d1bea6f7";
+  const { key, password, confirmPassword } = req.body;
+  console.log(admin_id);
+  if (!key || !password || !confirmPassword) {
+    return res
+      .status(400)
+      .send({ message: "Key and new passwords are required" });
+  }
+
+  try {
+    const admin = await Admin.find({ _id: admin_id });
+    if (!admin) {
+      return res.status(404).send({ message: "Admin not found" });
+    }
+    if (!key === "1234") return res.send({ message: "Key is incorrect" });
+
+    const hashedNewPassword = await bcrypt.hash(password, 10);
+
+    const newAdmin = new Admin({
+      password: hashedNewPassword,
+    });
+    const data = await newAdmin.save();
+
+    res.status(200).send({ message: "Password changed successfully", data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};

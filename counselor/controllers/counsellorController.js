@@ -7,7 +7,7 @@ const Follower = require("../models/Follower");
 const Session = require("../models/Session");
 const { uploadImage } = require("../services/cloudinary");
 const { convertTo12HourFormat } = require("../utils");
-const moment = require('moment-timezone');
+const moment = require("moment-timezone");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -214,9 +214,10 @@ exports.getCounsellor = async (req, res) => {
       0
     );
 
-    const average_rating = (allRatingsCount / client_testimonials.length) ?
-      (allRatingsCount / client_testimonials.length).toFixed(2).toString()
-      : '0';
+    const average_rating =
+      allRatingsCount / client_testimonials.length
+        ? (allRatingsCount / client_testimonials.length).toFixed(2).toString()
+        : "0";
     // reviews
     const reviews = client_testimonials.length;
 
@@ -538,18 +539,25 @@ exports.getCounsellors = async (req, res) => {
           0
         );
 
-        const average_rating = (allRatingsCount / client_testimonials.length) ?
-          (allRatingsCount / client_testimonials.length).toFixed(2).toString()
-          : '0';
+        const average_rating =
+          allRatingsCount / client_testimonials.length
+            ? (allRatingsCount / client_testimonials.length)
+                .toFixed(2)
+                .toString()
+            : "0";
 
         // Filter out past sessions
-        const currentTime = moment().tz('Asia/Kolkata');
-        const upcomingSessions = sessions.filter(session => {
-          const sessionDate = moment(session.session_date).tz('Asia/Kolkata');
-          const isToday = sessionDate.isSame(currentTime, 'day');
+        const currentTime = moment().tz("Asia/Kolkata");
+        const upcomingSessions = sessions.filter((session) => {
+          const sessionDate = moment(session.session_date).tz("Asia/Kolkata");
+          const isToday = sessionDate.isSame(currentTime, "day");
           const sessionTimeInMinutes = session.session_time;
-          const currentTimeInMinutes = currentTime.hours() * 60 + currentTime.minutes();
-          return (sessionDate.isAfter(currentTime)) || (isToday && sessionTimeInMinutes > currentTimeInMinutes);
+          const currentTimeInMinutes =
+            currentTime.hours() * 60 + currentTime.minutes();
+          return (
+            sessionDate.isAfter(currentTime) ||
+            (isToday && sessionTimeInMinutes > currentTimeInMinutes)
+          );
         });
 
         if (upcomingSessions.length === 0) {
@@ -572,19 +580,25 @@ exports.getCounsellors = async (req, res) => {
         const nextSession = upcomingSessions[0];
 
         // Determine the appropriate message for the next session
-        const sessionDate = moment(nextSession.session_date).tz('Asia/Kolkata');
+        const sessionDate = moment(nextSession.session_date).tz("Asia/Kolkata");
 
-        const daysDifference = Math.abs(sessionDate.date() - currentTime.date());
+        const daysDifference = Math.abs(
+          sessionDate.date() - currentTime.date()
+        );
 
         let nextSessionMessage;
         if (daysDifference === 0) {
-          nextSessionMessage = `Next session at ${convertTo12HourFormat(nextSession.session_time)}`;
+          nextSessionMessage = `Next session at ${convertTo12HourFormat(
+            nextSession.session_time
+          )}`;
         } else if (daysDifference === 1) {
           nextSessionMessage = "Next session tomorrow";
         } else if (daysDifference <= 7) {
-          nextSessionMessage = `Next session on ${sessionDate.format('dddd')}`;
+          nextSessionMessage = `Next session on ${sessionDate.format("dddd")}`;
         } else {
-          nextSessionMessage = `Next session on ${sessionDate.format('MMMM Do YYYY')}`;
+          nextSessionMessage = `Next session on ${sessionDate.format(
+            "MMMM Do YYYY"
+          )}`;
         }
 
         return {
@@ -626,7 +640,6 @@ exports.getCounsellorsForAdmin = async (req, res) => {
     const queryObject = {};
 
     if (search) {
-      // Use regular expression to perform case-insensitive search on multiple fields
       queryObject.$or = [
         { name: { $regex: new RegExp(search, "i") } },
         { email: { $regex: new RegExp(search, "i") } },
