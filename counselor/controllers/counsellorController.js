@@ -213,7 +213,9 @@ exports.getCounsellor = async (req, res) => {
       0
     );
 
-    const avg_rating = allRatingsCount / client_testimonials.length;
+    const average_rating = (allRatingsCount / client_testimonials.length) ?
+      (allRatingsCount / client_testimonials.length).toFixed(2).toString()
+      : '0';
     // reviews
     const reviews = client_testimonials.length;
 
@@ -233,7 +235,7 @@ exports.getCounsellor = async (req, res) => {
       group_session_price,
       personal_session_price,
       reviews,
-      avg_rating,
+      average_rating,
       client_testimonials,
       following,
     };
