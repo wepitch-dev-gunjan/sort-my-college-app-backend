@@ -7,6 +7,7 @@ const Follower = require("../models/Follower");
 const Session = require("../models/Session");
 const { uploadImage } = require("../services/cloudinary");
 const { convertTo12HourFormat } = require("../utils");
+const moment = require('moment-timezone');
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
@@ -525,7 +526,7 @@ exports.getCounsellors = async (req, res) => {
       counsellors.map(async (counsellor) => {
         const sessions = await Session.find({
           session_counsellor: counsellor._id,
-        }).sort({ session_date: -1 });
+        }).sort({ session_date: 1, session_time: 1 });
 
         const client_testimonials = await Feedback.find({
           feedback_to: counsellor._id,
@@ -541,36 +542,50 @@ exports.getCounsellors = async (req, res) => {
           (allRatingsCount / client_testimonials.length).toFixed(2).toString()
           : '0';
 
-        if (sessions.length === 0) {
+        // Filter out past sessions
+        const currentTime = moment().tz('Asia/Kolkata');
+        const upcomingSessions = sessions.filter(session => {
+          const sessionDate = moment(session.session_date).tz('Asia/Kolkata');
+          const isToday = sessionDate.isSame(currentTime, 'day');
+          const sessionTimeInMinutes = session.session_time;
+          const currentTimeInMinutes = currentTime.hours() * 60 + currentTime.minutes();
+          return (sessionDate.isAfter(currentTime)) || (isToday && sessionTimeInMinutes > currentTimeInMinutes);
+        });
+
+        if (upcomingSessions.length === 0) {
           return {
             _id: counsellor._id,
             name: counsellor.name,
             profile_pic: counsellor.profile_pic,
             designation: counsellor.designation,
             qualifications: counsellor.specializations,
-            next_session: "No sessions yet",
+            next_session: "No sessions available",
             average_rating,
             courses_focused: counsellor.courses_focused,
             experience_in_years: counsellor.experience_in_years,
             total_sessions: sessions.length,
             reward_points: counsellor.reward_points,
-            reviews: 0,
+            reviews: client_testimonials.length,
           };
         }
 
-        const latestDate = sessions[0].session_date;
-        const currentTime = new Date();
-        const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+        const nextSession = upcomingSessions[0];
 
-        const latestSessions = sessions.filter(session => {
-          const sessionDate = new Date(session.session_date);
-          const sessionTimeInMinutes = session.session_time;
-          return sessionDate.getTime() === latestDate.getTime() && sessionTimeInMinutes >= currentTimeInMinutes;
-        });
+        // Determine the appropriate message for the next session
+        const sessionDate = moment(nextSession.session_date).tz('Asia/Kolkata');
 
-        const nextSession = latestSessions.reduce((minSession, session) => {
-          return (session.session_time < minSession.session_time && session.session_date < minSession.session_date) ? session : minSession;
-        }, latestSessions[0]);
+        const daysDifference = Math.abs(sessionDate.date() - currentTime.date());
+
+        let nextSessionMessage;
+        if (daysDifference === 0) {
+          nextSessionMessage = `Next session at ${convertTo12HourFormat(nextSession.session_time)}`;
+        } else if (daysDifference === 1) {
+          nextSessionMessage = "Next session tomorrow";
+        } else if (daysDifference <= 7) {
+          nextSessionMessage = `Next session on ${sessionDate.format('dddd')}`;
+        } else {
+          nextSessionMessage = `Next session on ${sessionDate.format('MMMM Do YYYY')}`;
+        }
 
         return {
           _id: counsellor._id,
@@ -578,9 +593,7 @@ exports.getCounsellors = async (req, res) => {
           profile_pic: counsellor.profile_pic,
           designation: counsellor.designation,
           qualifications: counsellor.specializations,
-          next_session: nextSession
-            ? `Next session at ${convertTo12HourFormat(nextSession.session_time)}`
-            : "No sessions yet",
+          next_session: nextSessionMessage,
           average_rating,
           courses_focused: counsellor.courses_focused,
           experience_in_years: counsellor.experience_in_years,
