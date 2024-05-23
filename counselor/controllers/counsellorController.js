@@ -525,6 +525,18 @@ exports.getCounsellors = async (req, res) => {
           session_counsellor: counsellor._id,
         }).sort({ session_date: -1 });
 
+        const client_testimonials = await Feedback.find({
+          feedback_to: counsellor._id,
+        });
+
+        // rating
+        const allRatingsCount = client_testimonials.reduce(
+          (accumulator, testimonial) => accumulator + testimonial.rating,
+          0
+        );
+
+        const average_rating = allRatingsCount / client_testimonials.length;
+
         if (sessions.length === 0) {
           return {
             _id: counsellor._id,
@@ -551,15 +563,10 @@ exports.getCounsellors = async (req, res) => {
           const sessionTimeInMinutes = session.session_time;
           return sessionDate.getTime() === latestDate.getTime() && sessionTimeInMinutes >= currentTimeInMinutes;
         });
-        console.log(latestSessions)
 
         const nextSession = latestSessions.reduce((minSession, session) => {
           return (session.session_time < minSession.session_time && session.session_date < minSession.session_date) ? session : minSession;
         }, latestSessions[0]);
-
-        const client_testimonials = await Feedback.find({
-          feedback_to: counsellor._id,
-        });
 
         return {
           _id: counsellor._id,
@@ -570,7 +577,7 @@ exports.getCounsellors = async (req, res) => {
           next_session: nextSession
             ? `Next session at ${convertTo12HourFormat(nextSession.session_time)}`
             : "No sessions yet",
-          average_rating: counsellor.average_rating,
+          average_rating,
           courses_focused: counsellor.courses_focused,
           experience_in_years: counsellor.experience_in_years,
           total_sessions: sessions.length,
