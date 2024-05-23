@@ -82,7 +82,7 @@ exports.getSessions = async (req, res) => {
     } else {
       res.status(200).json({
         total_available_slots: 0,
-        sessions: []
+        sessions: [],
       });
     }
   } catch (error) {
@@ -772,11 +772,9 @@ exports.getCheckoutDetails = async (req, res) => {
 
     const sessionFee = session.session_fee;
     const gstAmount = 0.18 * sessionFee;
-    const feeWithGST = sessionFee + gstAmount;
+    const gatewayCharge = 0.05 * sessionFee;
 
-    const gatewayCharge = 0.05 * feeWithGST;
-
-    const totalAmount = feeWithGST + gatewayCharge;
+    const totalAmount = sessionFee + gstAmount + gatewayCharge;
 
     const responseData = {
       session_id: session._id,
@@ -801,8 +799,10 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getPopularWorkshops = async (req, res) => {
   try {
-    const currentDate = new Date()
-    const sessions = await Session.find({ session_date: { $gte: currentDate } }).sort({ created_at: -1 }).limit(5);
+    const currentDate = new Date();
+    const sessions = await Session.find({ session_date: { $gte: currentDate } })
+      .sort({ created_at: -1 })
+      .limit(5);
     let total_available_slots = 0;
     if (sessions.length > 0) {
       const daysOfWeek = [
@@ -812,12 +812,12 @@ exports.getPopularWorkshops = async (req, res) => {
         "Wednesday",
         "Thursday",
         "Friday",
-        "Saturday"
+        "Saturday",
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
-            _id: session.session_counsellor
+            _id: session.session_counsellor,
           });
           total_available_slots += session.session_available_slots;
           const sessionDate = new Date(session.session_date);
