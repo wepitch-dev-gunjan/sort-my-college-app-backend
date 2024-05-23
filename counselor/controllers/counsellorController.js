@@ -535,7 +535,9 @@ exports.getCounsellors = async (req, res) => {
           0
         );
 
-        const average_rating = allRatingsCount / client_testimonials.length;
+        const average_rating = (allRatingsCount / client_testimonials.length) ?
+          (allRatingsCount / client_testimonials.length).toFixed(2).toString()
+          : '0';
 
         if (sessions.length === 0) {
           return {
@@ -545,7 +547,7 @@ exports.getCounsellors = async (req, res) => {
             designation: counsellor.designation,
             qualifications: counsellor.specializations,
             next_session: "No sessions yet",
-            average_rating: counsellor.average_rating,
+            average_rating,
             courses_focused: counsellor.courses_focused,
             experience_in_years: counsellor.experience_in_years,
             total_sessions: sessions.length,
