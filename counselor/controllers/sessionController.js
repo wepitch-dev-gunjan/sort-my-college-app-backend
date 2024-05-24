@@ -40,7 +40,7 @@ exports.getSessions = async (req, res) => {
         "Wednesday",
         "Thursday",
         "Friday",
-        "Saturday",
+        "Saturday"
       ];
 
       const massagedSessions = sessions.map((session) => {
@@ -60,7 +60,6 @@ exports.getSessions = async (req, res) => {
           const dayDiff = Math.ceil(
             (sessionDate.getTime() - today.getTime()) / (1000 * 3600 * 24)
           );
-
           if (dayDiff <= 7 && dayDiff > 0) {
             session_massaged_date = daysOfWeek[sessionDate.getDay()];
             // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
@@ -72,17 +71,17 @@ exports.getSessions = async (req, res) => {
         }
         return {
           ...session._doc,
-          session_massaged_date,
+          session_massaged_date
         };
       });
       res.status(200).json({
         total_available_slots,
-        sessions: massagedSessions,
+        sessions: massagedSessions
       });
     } else {
       res.status(200).json({
         total_available_slots: 0,
-        sessions: [],
+        sessions: []
       });
     }
   } catch (error) {
@@ -797,11 +796,11 @@ exports.getCheckoutDetails = async (req, res) => {
   }
 };
 
-exports.getPopularWorkshops = async (req, res) => {
+exports.getLatestSessions = async (req, res) => {
   try {
     const currentDate = new Date();
     const sessions = await Session.find({ session_date: { $gte: currentDate } })
-      .sort({ created_at: -1 })
+      .sort({ createdAt: -1 })
       .limit(5);
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -812,19 +811,21 @@ exports.getPopularWorkshops = async (req, res) => {
         "Wednesday",
         "Thursday",
         "Friday",
-        "Saturday",
+        "Saturday"
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
-            _id: session.session_counsellor,
+            _id: session.session_counsellor
           });
           total_available_slots += session.session_available_slots;
           const sessionDate = new Date(session.session_date);
           let session_massaged_date = "";
+
           const today = new Date();
           const tomorrow = new Date(today);
           tomorrow.setDate(today.getDate() + 1);
+
           if (sessionDate.toDateString() === today.toDateString()) {
             session_massaged_date = "today";
           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
@@ -837,6 +838,7 @@ exports.getPopularWorkshops = async (req, res) => {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
+              session.session_time = sessionTimeIntoString(session.session_time);
             }
           }
           return {
@@ -847,7 +849,7 @@ exports.getPopularWorkshops = async (req, res) => {
             counsellor_designation: counsellor.designation, // Fixed typo in "designation"
             session_time: session.session_time,
             session_date: session_massaged_date,
-            session_fee: session.session_fee,
+            session_fee: session.session_fee
           };
         })
       );
