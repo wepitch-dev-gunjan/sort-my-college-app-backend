@@ -781,13 +781,14 @@ exports.getCheckoutDetails = async (req, res) => {
       sessionType: session.session_type,
       sessionFee: sessionFee,
       gstAmount: gstAmount,
-      feeWithGST: feeWithGST,
+      // feeWithGST: feeWithGST,
       gatewayCharge: gatewayCharge,
       totalAmount: totalAmount,
       counsellor_id: counsellorDetails._id,
       counsellor_name: counsellorDetails.name,
       counsellor_profile_pic: counsellorDetails.profile_pic,
     };
+    console.log(responseData);
 
     return res.json([responseData]);
   } catch (error) {
