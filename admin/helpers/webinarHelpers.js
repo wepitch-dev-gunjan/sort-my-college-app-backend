@@ -1,4 +1,5 @@
 const { default: axios } = require('axios');
+const moment = require('moment-timezone');
 
 require('dotenv').config();
 const { ZOOM_S2S_ACOUNT_ID, ZOOM_S2S_CLIENT_ID, ZOOM_S2S_CLIENT_SECRET, ZOOM_OAUTH_ENDPOINT } = process.env;
@@ -25,16 +26,16 @@ exports.getZoomAccessToken = async () => {
   }
 }
 
+
 exports.webinarDateModifier = (dateString) => {
-  // Parse the input date string
-  const date = new Date(dateString);
-  // console.log(date)
+  // Parse the input date string and add 5 hours and 30 minutes to convert to IST
+  const date = moment(dateString).subtract(5, 'hours').subtract(30, 'minutes');
 
   // Extract day, month, hour, and minute
-  const day = date.getDate();
-  const month = date.toLocaleString('default', { month: 'short' });
-  const hour = date.getHours();
-  const minute = date.getMinutes();
+  const day = date.date();
+  const month = date.format('MMM');
+  const hour = date.hours();
+  const minute = date.minutes();
 
   // Determine the suffix for the day (st, nd, rd, th)
   let daySuffix;
@@ -49,13 +50,15 @@ exports.webinarDateModifier = (dateString) => {
   }
 
   // Format the time
-  let formattedTime = `${hour % 12}:${minute < 10 ? '0' : ''}${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
+  let formattedTime = `${hour % 12 || 12}:${minute < 10 ? '0' : ''}${minute} ${hour >= 12 ? 'PM' : 'AM'}`;
 
   // Format the date
   let formattedDate = `${day}${daySuffix} ${month} @ ${formattedTime} Onwards`;
 
+  console.log(dateString, formattedDate);
   return formattedDate;
 }
+
 
 exports.getDateDifference = (date1, date2) => {
   // Convert the date strings to Date objects
