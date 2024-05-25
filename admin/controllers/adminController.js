@@ -23,20 +23,24 @@ exports.adminLogin = async (req, res) => {
         error: "Admin not found",
       });
 
-    const passwordMatch = bcrypt.compare(password, existingAdmin.password);
+    const passwordMatch = await bcrypt.compare(
+      password,
+      existingAdmin.password
+    );
+
+    console.log(`Password provided: ${password}`);
+    console.log(`Stored hashed password: ${existingAdmin.password}`);
+    console.log(`Password match: ${passwordMatch}`);
 
     if (!passwordMatch)
       return res.status(401).send({
         error: "Invalid password",
       });
 
-    const token = JWT.sign(
-      { email, password, admin_id: existingAdmin._id },
-      JWT_SECRET
-    );
+    const token = JWT.sign({ email, admin_id: existingAdmin._id }, JWT_SECRET);
 
     res.status(200).send({
-      message: "Login succesful",
+      message: "Login successful",
       token,
     });
   } catch (error) {
@@ -47,17 +51,32 @@ exports.adminLogin = async (req, res) => {
 
 exports.createAdmin = async (req, res) => {
   try {
-    const {
-      password,
-      // email, profile_pic
-    } = req.body;
+    const { password, email, name, permissions } = req.body;
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).send({ error: "Invalid email format" });
+    }
+
+    // Check if the email already exists
+    const existingAdmin = await Admin.findOne({ email });
+    if (existingAdmin) {
+      return res.status(400).send({ error: "Email already exists" });
+    }
+
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create the new admin with all fields
     const newAdmin = new Admin({
+      email,
+      name,
+      permissions,
       password: hashedPassword,
     });
 
+    // Save the new admin to the database
     const data = await newAdmin.save();
 
     res.status(200).send({
@@ -65,7 +84,7 @@ exports.createAdmin = async (req, res) => {
       data,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).send({ error: "Internal server error" });
   }
 };
@@ -254,31 +273,41 @@ exports.getDashboardData = async (req, res) => {
   }
 };
 
-exports.changeAdminPassword = async (req, res) => {
-  const admin_id = "65eee831b02ebab9d1bea6f7";
-  const { key, password, confirmPassword } = req.body;
-  console.log(admin_id);
-  if (!key || !password || !confirmPassword) {
+exports.changePassword = async (req, res) => {
+  const admin_id = req;
+  const { key, password } = req.body;
+
+  if (!key || !password) {
     return res
       .status(400)
       .send({ message: "Key and new passwords are required" });
   }
 
   try {
-    const admin = await Admin.find({ _id: admin_id });
+    // Fetch the admin from the database
+    const admin = await Admin.findOne({ _id: admin_id });
+
     if (!admin) {
       return res.status(404).send({ message: "Admin not found" });
     }
-    if (!key === "1234") return res.send({ message: "Key is incorrect" });
 
+    // Check if the provided key is correct
+    if (key !== "1234") {
+      return res.status(401).send({ message: "Key is incorrect" });
+    }
+
+    // Hash the new password
     const hashedNewPassword = await bcrypt.hash(password, 10);
 
-    const newAdmin = new Admin({
-      password: hashedNewPassword,
-    });
-    const data = await newAdmin.save();
+    // Update the admin's password
+    admin.password = hashedNewPassword;
 
-    res.status(200).send({ message: "Password changed successfully", data });
+    // Save the updated admin to the database
+    const updatedAdmin = await admin.save();
+
+    res
+      .status(200)
+      .send({ message: "Password changed successfully", data: updatedAdmin });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });

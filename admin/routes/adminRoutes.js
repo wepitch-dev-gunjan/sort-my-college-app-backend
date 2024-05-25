@@ -10,7 +10,7 @@ const {
   uploadProfilePic,
   adminLogin,
   getDashboardData,
-  changeAdminPassword,
+  changePassword,
 } = require("../controllers/adminController");
 const { adminAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -22,7 +22,7 @@ router.delete("/:admin_id", deleteAdmin);
 router.put("/:admin_id", adminAuth, editProfile);
 router.post("/login", adminLogin);
 router.get("/dashboard/dashboard-data", adminAuth, getDashboardData);
-router.put("/", changeAdminPassword);
+router.put("/", adminAuth, changePassword);
 
 router.post(
   "/profile-pic",

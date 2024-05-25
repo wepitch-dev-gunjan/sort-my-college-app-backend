@@ -26,6 +26,7 @@ exports.adminAuth = async (req, res, next) => {
 
     req.email = decoded.email;
     req.admin_id = decoded.admin_id;
+    req.permissions = admin.permissions;
     // req.refresh_token = decoded.tokens.refresh_token;
 
     next();
@@ -98,7 +99,7 @@ exports.userAuth = async (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    const user = await User.findOne({ _id: decoded.user_id })
+    const user = await User.findOne({ _id: decoded.user_id });
 
     if (!user) {
       return res.status(401).json({ error: "User not authorized" });
@@ -188,6 +189,247 @@ exports.epAuth = async (req, res, next) => {
     console.log(error);
     res.status(500).send({
       error: "Internal server error!!!!!",
+    });
+  }
+};
+
+exports.paymentReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("payment_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.paymentWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("payment_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.counsellorReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("counsellor_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.counsellorWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("counsellor_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.userReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("user_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.userWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("user_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.instituteReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("institute_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.instituteWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("institute_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.accommodationReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("accommodation_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.accommodationWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("accommodation_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.bannersReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("banners_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.bannersWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("banners_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.helpReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("help_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.helpWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("help_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.adminReadAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("admin_read")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
+    });
+  }
+};
+exports.adminWriteAuth = async (req, res, next) => {
+  try {
+    const { permissions } = req;
+    if (permissions.includes("admin_write")) next();
+    else
+      res.status(403).send({
+        error: "Unauthorized access",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      error: "Internal server error",
     });
   }
 };
