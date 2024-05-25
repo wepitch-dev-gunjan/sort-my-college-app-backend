@@ -55,7 +55,6 @@ exports.webinarDateModifier = (dateString) => {
   // Format the date
   let formattedDate = `${day}${daySuffix} ${month} @ ${formattedTime} Onwards`;
 
-  console.log(dateString, formattedDate);
   return formattedDate;
 }
 

@@ -34,12 +34,19 @@ exports.getWebinarsForUser = async (req, res) => {
 
     const filter = {};
 
+    // Get current date and time, then adjust to IST
     const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
+    currentDate.setTime(currentDate.getTime() + (5.5 * 60 * 60 * 1000));
+    // currentDate.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(currentDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    // Set endOfDay to 11:59:59 PM of the same day in IST
+    const endOfDay = new Date()
+    endOfDay.setUTCHours(23, 59, 59, 99)
 
+    console.log("Current Date (IST):", currentDate);
+    console.log("End of Day (IST):", endOfDay);
+
+    // Filter webinars based on the query
     if (query === "Today") {
       filter.webinar_date = {
         $gte: currentDate,
@@ -60,7 +67,6 @@ exports.getWebinarsForUser = async (req, res) => {
 
     const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
-      // webinarDate.setUTCHours(0, 0, 0, 0);
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
