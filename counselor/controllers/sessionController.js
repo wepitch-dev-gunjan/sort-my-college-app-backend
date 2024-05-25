@@ -786,7 +786,7 @@ exports.getCheckoutDetails = async (req, res) => {
       totalAmount: totalAmount,
       counsellor_id: counsellorDetails._id,
       counsellor_name: counsellorDetails.name,
-      counsellor_profile_pic: counsellorDetails.profile_pic,
+      counsellor_profile_pic: counsellorDetails.profile_pic
     };
     console.log(responseData);
 

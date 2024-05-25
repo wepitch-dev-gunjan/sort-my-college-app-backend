@@ -102,12 +102,12 @@ const counsellorSchema = new Schema(
 
     reward_points: {
       type: Number,
-      default: 0,
+      default: 10,
     },
 
     activity_points: {
       type: Number,
-      default: 0,
+      default: 10,
     },
 
     client_testimonials: [
