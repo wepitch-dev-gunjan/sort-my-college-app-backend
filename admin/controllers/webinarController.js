@@ -43,25 +43,24 @@ exports.getWebinarsForUser = async (req, res) => {
     const endOfDay = new Date()
     endOfDay.setUTCHours(23, 59, 59, 99)
 
-    console.log("Current Date (IST):", currentDate);
-    console.log("End of Day (IST):", endOfDay);
-
     // Filter webinars based on the query
     if (query === "Today") {
       filter.webinar_date = {
         $gte: currentDate,
         $lte: endOfDay
       };
+    } else if (query === "MyWebinars") {
+      filter['registered_participants._id'] = user_id;
     } else if (query === "Upcoming") {
       filter.webinar_date = {
-        $gt: endOfDay
+        $gt: endOfDay,
       };
     }
 
     const webinars = await Webinar.find(filter);
     if (!webinars) return res.status(200).send([]);
 
-    let massagedWebinars = webinars.map((webinar) => {
+    const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
@@ -93,13 +92,7 @@ exports.getWebinarsForUser = async (req, res) => {
         registered,
         can_join: canJoin,
       };
-    })
-
-    if (query === 'MyWebinars') {
-      massagedWebinars = massagedWebinars.filter(webinar =>
-        webinar.registered_participants && webinar.registered_participants.find(participant => participant._id === user_id)
-      )
-    }
+    });
 
     res.status(200).send(massagedWebinars);
   } catch (error) {
