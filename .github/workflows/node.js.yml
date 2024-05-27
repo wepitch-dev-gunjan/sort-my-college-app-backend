@@ -40,11 +40,11 @@ jobs:
       - name: Create SSL certificates
         run: |
           sudo touch ssl_certificates/ca_bundle.crt
-          echo "${{ secrets.CA_BUNDLE }}" > ssl_certificates/ca_bundle.crt
+          sudo echo "${{ secrets.CA_BUNDLE }}" > ssl_certificates/ca_bundle.crt
           sudo touch ssl_certificates/certificate.crt
-          echo "${{ secrets.CERTIFICATE }}" > ssl_certificates/certificate.crt
+          sudo echo "${{ secrets.CERTIFICATE }}" > ssl_certificates/certificate.crt
           sudo touch ssl_certificates/private.key
-          echo "${{ secrets.PRIVATE_KEY }}" > ssl_certificates/private.key
+          sudo echo "${{ secrets.PRIVATE_KEY }}" > ssl_certificates/private.key
 
       # Create environment variables for each service
       - name: Create environment variables
