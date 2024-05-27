@@ -24,7 +24,7 @@ jobs:
 
       # Stop all instances of PM2
       - name: Stop all instances of PM2
-        run: sudo pm2 delete all || true
+        run: pm2 delete all || true
 
       # Install project dependencies
       - name: Install dependencies
@@ -39,12 +39,10 @@ jobs:
       # Create SSL certificates
       - name: Create SSL certificates
         run: |
-          sudo touch ssl_certificates/ca_bundle.crt
-          sudo echo "${{ secrets.CA_BUNDLE }}" > ssl_certificates/ca_bundle.crt
-          sudo touch ssl_certificates/certificate.crt
-          sudo echo "${{ secrets.CERTIFICATE }}" > ssl_certificates/certificate.crt
-          sudo touch ssl_certificates/private.key
-          sudo echo "${{ secrets.PRIVATE_KEY }}" > ssl_certificates/private.key
+          sudo mkdir -p ssl_certificates
+          echo "${{ secrets.CA_BUNDLE }}" | sudo tee ssl_certificates/ca_bundle.crt
+          echo "${{ secrets.CERTIFICATE }}" | sudo tee ssl_certificates/certificate.crt
+          echo "${{ secrets.PRIVATE_KEY }}" | sudo tee ssl_certificates/private.key
 
       # Create environment variables for each service
       - name: Create environment variables
@@ -59,24 +57,12 @@ jobs:
       # Start Node.js applications using PM2
       - name: Start Node.js applications
         run: |
-          # Change directory to each service and start the server with PM2
-          cd counselor
-          sudo pm2 start server.js --name="counsellor" -f
-
-          cd ../admin
-          sudo pm2 start server.js --name="admin" -f
-
-          cd ../notification-service
-          sudo pm2 start server.js --name="notification-service" -f
-
-          cd ../user
-          sudo pm2 start server.js --name="user" -f
-
-          cd ../entrance-preparation
-          sudo pm2 start server.js --name="entrance-preparation" -f
-
-          cd ../api-gateway
-          sudo pm2 start server.js --name="api-gateway" -f
+          pm2 start counselor/server.js --name="counsellor" -f
+          pm2 start admin/server.js --name="admin" -f
+          pm2 start notification-service/server.js --name="notification-service" -f
+          pm2 start user/server.js --name="user" -f
+          pm2 start entrance-preparation/server.js --name="entrance-preparation" -f
+          pm2 start api-gateway/server.js --name="api-gateway" -f
 
       - name: Restart all Node.js applications
-        run: sudo pm2 restart all
+        run: pm2 restart all
