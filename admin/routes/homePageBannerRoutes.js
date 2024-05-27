@@ -9,7 +9,7 @@ const { adminAuth, paymentReadAuth } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 router.post("/home-page-banner", upload.single("banner"), createBanner);
-router.get("/home-page-banner", adminAuth, paymentReadAuth, getBanners);
+router.get("/home-page-banner", getBanners);
 router.delete("/home-page-banner/:_id", deleteBanner);
 
 module.exports = router;
