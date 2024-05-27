@@ -29,7 +29,7 @@ exports.getZoomAccessToken = async () => {
 
 exports.webinarDateModifier = (dateString) => {
   // Parse the input date string and add 5 hours and 30 minutes to convert to IST
-  const date = moment(dateString).subtract(5, 'hours').subtract(30, 'minutes');
+  const date = moment(dateString);
 
   // Extract day, month, hour, and minute
   const day = date.date();
