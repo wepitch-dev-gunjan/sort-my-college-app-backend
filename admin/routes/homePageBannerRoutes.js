@@ -2,7 +2,7 @@ const express = require("express");
 const {
   createBanner,
   getBanners,
-  deleteBanner,
+  deleteBanner
 } = require("../controllers/homePageBannerController");
 const upload = require("../middlewares/uploadBanner"); // Import the updated upload middleware
 const { adminAuth, paymentReadAuth } = require("../middlewares/authMiddleware");

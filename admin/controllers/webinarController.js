@@ -230,6 +230,8 @@ exports.addWebinar = async (req, res) => {
         error: "Webinar host is required",
       });
 
+    console.log(webinar_time)
+
     const [year, month, day] = webinar_date.split("-"); // Split webinar_date into year, month, and day
     const [hours, minutes] = webinar_time.split(":"); // Split webinar_time into hours and minutes
 
