@@ -40,7 +40,7 @@ exports.getSessions = async (req, res) => {
         "Wednesday",
         "Thursday",
         "Friday",
-        "Saturday"
+        "Saturday",
       ];
 
       const massagedSessions = sessions.map((session) => {
@@ -71,17 +71,17 @@ exports.getSessions = async (req, res) => {
         }
         return {
           ...session._doc,
-          session_massaged_date
+          session_massaged_date,
         };
       });
       res.status(200).json({
         total_available_slots,
-        sessions: massagedSessions
+        sessions: massagedSessions,
       });
     } else {
       res.status(200).json({
         total_available_slots: 0,
-        sessions: []
+        sessions: [],
       });
     }
   } catch (error) {
@@ -242,11 +242,11 @@ exports.addSession = async (req, res) => {
         error: "Invalid session_date or session_duration",
       });
     }
-    // if (!isSessionBefore24Hours(session_date, session_time)) {
-    //   return res.status(400).send({
-    //     error: "Cannot add a session for today's date",
-    //   });
-    // }
+    if (!isSessionBefore24Hours(session_date, session_time)) {
+      return res.status(400).send({
+        error: "Cannot add a session for today's date",
+      });
+    }
 
     // Check if a session is already there at the mentioned time
     const lowerTimeLimit = parsedSessionTime;
@@ -786,7 +786,7 @@ exports.getCheckoutDetails = async (req, res) => {
       totalAmount: totalAmount,
       counsellor_id: counsellorDetails._id,
       counsellor_name: counsellorDetails.name,
-      counsellor_profile_pic: counsellorDetails.profile_pic
+      counsellor_profile_pic: counsellorDetails.profile_pic,
     };
     console.log(responseData);
 
@@ -812,12 +812,12 @@ exports.getLatestSessions = async (req, res) => {
         "Wednesday",
         "Thursday",
         "Friday",
-        "Saturday"
+        "Saturday",
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
-            _id: session.session_counsellor
+            _id: session.session_counsellor,
           });
           total_available_slots += session.session_available_slots;
           const sessionDate = new Date(session.session_date);
@@ -839,7 +839,9 @@ exports.getLatestSessions = async (req, res) => {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-              session.session_time = sessionTimeIntoString(session.session_time);
+              session.session_time = sessionTimeIntoString(
+                session.session_time
+              );
             }
           }
           return {
@@ -850,7 +852,7 @@ exports.getLatestSessions = async (req, res) => {
             counsellor_designation: counsellor.designation, // Fixed typo in "designation"
             session_time: session.session_time,
             session_date: session_massaged_date,
-            session_fee: session.session_fee
+            session_fee: session.session_fee,
           };
         })
       );
