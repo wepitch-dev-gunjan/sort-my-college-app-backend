@@ -21,7 +21,7 @@ exports.getCoursesForEp = async (req, res) => {
       _id: course._id,
       name: course.name,
       type: course.type,
-      acedemic_session: course.acedemic_session,
+      academic_session: course.academic_session,
       course_fee: course.course_fee,
       course_duration_in_days: course.course_duration_in_days,
     }));
