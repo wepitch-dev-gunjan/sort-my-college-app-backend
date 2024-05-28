@@ -196,6 +196,7 @@ exports.getOutstandingBalance = async (req, res) => {
 exports.clearOutstandingbalance = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
+    console.log(counsellor_id);
 
     const paymentsToUpdate = await Payment.find({
       payment_to: counsellor_id,

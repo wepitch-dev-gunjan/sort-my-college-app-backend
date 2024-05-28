@@ -15,17 +15,16 @@ exports.createBanner = async (req, res) => {
       });
     }
 
-
     const fileName = `banner-image-${Date.now()}.jpeg`;
     const folderName = "banner-images";
 
     const banner_image = await uploadImage(file.buffer, fileName, folderName);
 
     const banner = new homePageBanner({
-      url: banner_image
-    })
+      url: banner_image,
+    });
 
-    await banner.save()
+    await banner.save();
     res.json(banner);
   } catch (error) {
     console.error("Error creating banner:", error);
@@ -37,6 +36,7 @@ exports.getBanners = async (req, res) => {
   try {
     const { page, limit } = req.query;
     const query = {};
+    const { permissions } = req;
 
     // Fetch banners sorted by date in descending order
     const banners = await homePageBanner.find().sort({ createdAt: -1 });
@@ -48,7 +48,7 @@ exports.getBanners = async (req, res) => {
     res.status(200).send(banners);
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
