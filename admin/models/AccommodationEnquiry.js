@@ -23,4 +23,4 @@ const accommodationEnquirySchema = new Schema(
   }
 );
 
-module.exports = model("Enquiry", accommodationEnquirySchema);
+module.exports = model("AccommodationEnquiry", accommodationEnquirySchema);

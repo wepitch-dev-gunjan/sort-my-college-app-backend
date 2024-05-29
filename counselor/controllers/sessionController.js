@@ -187,10 +187,21 @@ exports.getSession = async (req, res) => {
       Math.abs(sessionTimeEpoch - currentTime) <= threshold;
 
     const session_time = sessionTimeIntoString(counselingSession.session_time);
+    const allSessions = await Session.find({});
+    let count = 0;
+
+    allSessions.forEach((session) => {
+      if (session.session_counsellor === counselingSession.session_counsellor) {
+        if (session.session_available_slots < session.session_slots) {
+          count++;
+        }
+      }
+    });
     const response = {
       ...counselingSession.toObject(),
       session_time,
       is_about_to_start: isAboutToStart,
+      booking_sessions: count,
     };
 
     res.status(200).json(response);
