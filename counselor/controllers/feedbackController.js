@@ -11,6 +11,7 @@ exports.createFeedback = async (req, res) => {
     let { counsellor_id, rating, message } = req.body;
 
     if (!rating) rating = 0;
+    rating = parseFloat(rating);
     if (!message) message = "";
 
     const { data } = await axios.get(`${BACKEND_URL}/user/users`, {
@@ -18,7 +19,6 @@ exports.createFeedback = async (req, res) => {
     });
 
     const user = data;
-    console.log(user);
     if (!user) {
       return res.status(404).send({
         error: "User not found",
@@ -38,10 +38,10 @@ exports.createFeedback = async (req, res) => {
       feedback_to: counsellor_id,
     });
 
-    if (feedback)
-      return res.status(400).send({
-        error: "Feedback is already given by the user",
-      });
+    // if (feedback)
+    //   return res.status(400).send({
+    //     error: "Feedback is already given by the user",
+    //   });
 
     feedback = new Feedback({
       feedback_from: user._id,

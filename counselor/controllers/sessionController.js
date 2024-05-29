@@ -222,9 +222,7 @@ exports.addSession = async (req, res) => {
       !session_type ||
       !session_fee
     ) {
-      return res.status(400).send({
-        error: "Missing required fields",
-      });
+      return res.status(400).send({ error: "Missing required fields" });
     }
 
     // Parse session_date and session_duration to Date objects
@@ -238,33 +236,44 @@ exports.addSession = async (req, res) => {
       isNaN(parsedSessionDuration) ||
       parsedSessionDuration <= 0
     ) {
-      return res.status(400).send({
-        error: "Invalid session_date or session_duration",
-      });
+      return res
+        .status(400)
+        .send({ error: "Invalid session_date or session_duration" });
     }
-    // if (!isSessionBefore24Hours(session_date, session_time)) {
-    //   return res.status(400).send({
-    //     error: "Cannot add a session for today's date",
-    //   });
-    // }
 
-    // Check if a session is already there at the mentioned time
+    // Ensure session_date is not in the past
+    if (parsedSessionDate < new Date().setHours(0, 0, 0, 0)) {
+      return res
+        .status(400)
+        .send({ error: "Session date cannot be in the past" });
+    }
+
+    // Check if a session is already there at the mentioned time and validate the 30-minute gap
     const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
-    const existingSession = await Session.findOne({
+    const existingSessions = await Session.find({
       session_counsellor: counsellor_id,
       session_date: parsedSessionDate,
-      session_time: {
-        $gte: lowerTimeLimit,
-        $lt: upperTimeLimit,
-      },
     });
 
-    if (existingSession) {
-      return res.status(400).send({
-        error: "A session already exists at this date and time",
-      });
+    for (let session of existingSessions) {
+      const existingSessionStart = session.session_time;
+      const existingSessionEnd =
+        session.session_time + session.session_duration;
+
+      // Check for overlapping session or within 30-minute buffer
+      if (
+        (lowerTimeLimit < existingSessionEnd &&
+          upperTimeLimit > existingSessionStart) ||
+        (lowerTimeLimit < existingSessionEnd + 30 &&
+          lowerTimeLimit >= existingSessionEnd)
+      ) {
+        return res.status(400).send({
+          error:
+            "A session already exists at this date and time or within the 30-minute buffer period",
+        });
+      }
     }
 
     // Calculate start and end DateTimes for the meeting
@@ -303,10 +312,35 @@ exports.addSession = async (req, res) => {
       .send({ message: "Session successfully added", session: createdSession });
   } catch (error) {
     console.error(error);
-    res.status(500).send({
-      error: "Internal server error",
-    });
+    res.status(500).send({ error: "Internal server error" });
   }
+  // Utility Functions
+  function sessionTimeIntoMinutes(timeStr) {
+    // Implement the function to convert time string (e.g., "14:30") to minutes since midnight
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+
+  function getSessionDateTime(date, timeInMinutes) {
+    // Implement the function to combine date and timeInMinutes into a DateTime object
+    const dateTime = new Date(date);
+    dateTime.setMinutes(dateTime.getMinutes() + timeInMinutes);
+    return dateTime;
+  }
+
+  // async function createMeeting(startDateTime, endDateTime, refreshToken) {
+  //   // Implement the function to create a Google Calendar event using the provided parameters
+  //   // This should return the meeting details including the hangout link
+  //   // Example:
+  //   // const event = {
+  //   //   summary: 'Counselling Session',
+  //   //   start: { dateTime: startDateTime },
+  //   //   end: { dateTime: endDateTime },
+  //   //   // ... other event details ...
+  //   // };
+  //   // const meetingDetails = await googleCalendarClient.createEvent(event, refreshToken);
+  //   // return meetingDetails;
+  // }
 };
 
 exports.bookSessionValidation = async (req, res) => {
