@@ -201,7 +201,7 @@ exports.getSession = async (req, res) => {
       ...counselingSession.toObject(),
       session_time,
       is_about_to_start: isAboutToStart,
-      booking_sessions: count,
+      booked_sessions: count,
     };
 
     res.status(200).json(response);
