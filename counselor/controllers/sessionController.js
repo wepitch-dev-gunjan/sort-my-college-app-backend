@@ -845,9 +845,36 @@ exports.getCheckoutDetails = async (req, res) => {
 exports.getLatestSessions = async (req, res) => {
   try {
     const currentDate = new Date();
-    const sessions = await Session.find({ session_date: { $gte: currentDate } })
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const hours = currentDate.getHours() * 60 + 60;
+    const minutes = currentDate.getMinutes();
+
+    const sessionTime = hours + minutes;
+
+    currentDate.setHours(0, 0, 0, 0);
+    currentDate.setDate(currentDate.getDate() + 1);
+    console.log(currentDate, sessionTime);
+    let sessions = [];
+    // Push the results of the first query into the sessions array
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $eq: currentDate },
+        session_time: { $gte: sessionTime },
+      }))
+    );
+
+    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
+    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
+    currentDate.setDate(currentDate.getDate() + 1); // Add one day
+    console.log(currentDate.getDate(), currentDate);
+
+    // Push the results of the second query into the sessions array
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $gte: currentDate },
+      })
+        .sort({ createdAt: -1 })
+        .limit(5))
+    );
     let total_available_slots = 0;
     if (sessions.length > 0) {
       const daysOfWeek = [

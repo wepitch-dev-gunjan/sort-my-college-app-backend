@@ -100,6 +100,7 @@ exports.userAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const user = await User.findOne({ _id: decoded.user_id });
+    console.log(user);
 
     if (!user) {
       return res.status(401).json({ error: "User not authorized" });

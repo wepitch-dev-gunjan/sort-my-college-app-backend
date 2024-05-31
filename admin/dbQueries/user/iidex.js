@@ -1,5 +1,5 @@
 const axios = require("axios");
-require('dotenv').config();
+require("dotenv").config();
 const { BACKEND_URL } = process.env;
 
 class User {
@@ -10,13 +10,13 @@ class User {
 
     try {
       const { data } = await axios.get(`${BACKEND_URL}/user/users`, {
-        params: q
+        params: q,
       });
-      console.log(data)
+      if (!data) return res.status(404).send({ error: "User Not Found" });
       return data; // Assuming you want to return the data from the response
     } catch (error) {
-      console.error('Error fetching user:', error);
-      throw error;
+      console.error("Error fetching user:", error);
+      // throw error;
     }
   }
 }

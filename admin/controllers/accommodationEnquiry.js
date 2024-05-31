@@ -93,3 +93,99 @@ exports.deleteEnquiryForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+exports.getEnquiriesForAAdmin = async (req, res) => {
+  try {
+    const { accommodation_id } = req.query;
+
+    if (!accommodation_id) {
+      return res.status(400).json({ message: "Accommodation ID is required" });
+    }
+
+    const enquiries = await AccommodationEnquiry.find({
+      enquired_to: accommodation_id,
+    });
+
+    if (!enquiries) {
+      return res.status(404).json([]);
+    }
+
+    const massagedDataPromise = Promise.all(
+      enquiries.map(async (enquiry) => {
+        const { data } = await axios.get(
+          `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+        );
+        return {
+          _id: enquiry._id,
+          name: data.name,
+          phone_number: data.phone_number,
+          status: enquiry.enquiryStatus, // Assuming `enquiryStatus` is the correct field name
+          date: enquiry.createdAt, // Assuming `createdAt` is the correct field name
+        };
+      })
+    );
+
+    massagedDataPromise
+      .then((massagedData) => {
+        res.status(200).json(massagedData);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+      });
+  } catch (error) {
+    console.error("Error getting enquiries:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getEnquiryForAdmin = async (req, res) => {
+  try {
+    const { enquiryId } = req.params;
+
+    const enquiry = await AccommodationEnquiry.findById(enquiryId);
+
+    if (!enquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    const { data } = await axios.get(
+      `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+    );
+
+    const massagedData = {
+      _id: enquiry._id,
+      name: data.name,
+      phone_number: data.phone_number,
+      status: enquiry.enquiryStatus, // Assuming `enquiryStatus` is the correct field name
+      date: enquiry.createdAt, // Assuming `createdAt` is the correct field name
+    };
+
+    res.status(200).json(massagedData);
+  } catch (error) {
+    console.error("Error getting enquiry:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+exports.getEnquiryForUser = async (req, res) => {
+  try {
+    const { enquiryId } = req.params;
+
+    const enquiry = await AccommodationEnquiry.findById(enquiryId);
+
+    if (!enquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    // Check if the user requesting the enquiry is the enquirer
+    if (enquiry.enquirer.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to view this enquiry" });
+    }
+
+    res.status(200).json(enquiry);
+  } catch (error) {
+    console.error("Error getting enquiry:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
