@@ -435,18 +435,22 @@ exports.bookSession = async (req, res) => {
     counsellor.reward_points += 5;
     await counsellor.save();
 
+    // Ensure session.session_date is a Date object
+    const bookingData = {
+      ...session._doc,
+      session_date: new Date(session.session_date)
+    };
+
     try {
       await axios.post(`${BACKEND_URL}/user/booking`, {
         booked_by: id,
         booked_entity: counsellor,
         booking_type: "Counsellor",
-        booking_data: session,
+        booking_data: bookingData,
       });
     } catch (error) {
       console.log(error.message);
     }
-
-    await counsellor.save();
 
     // send email notification to user
     if (user.email) {
@@ -457,26 +461,25 @@ exports.bookSession = async (req, res) => {
         counsellor: counsellor.name,
         sessiontype: session.session_type,
         duration: session.session_duration,
-        // location,
         payment: session.session_fee,
-        // subject,
-        // username,
       });
     }
-    // send email notification to counsellor
 
-    await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
-      to: counsellor.email,
-      date: session.session_date,
-      time: session.session_time,
-      client: user.name,
-      sessiontype: session.session_type,
-      duration: session.session_duration,
-      // location,
-      payment: session.session_fee,
-      // subject,
-      username: counsellor.name,
-    });
+    // send email notification to counsellor
+    try {
+      await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
+        to: counsellor.email,
+        date: session.session_date,
+        time: session.session_time,
+        client: user.name,
+        sessiontype: session.session_type,
+        duration: session.session_duration,
+        payment: session.session_fee,
+        username: counsellor.name
+      });
+    } catch (err) {
+      console.log(err);
+    }
 
     // send in app notification to counsellor
     const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
@@ -484,13 +487,12 @@ exports.bookSession = async (req, res) => {
       title: "New Booking",
       message: `${user.name} booked a ${session.session_type} session`,
     });
-    console.log(response);
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal  booking Server Error" });
+    res.status(500).json({ error: "Internal booking Server Error" });
   }
 };
 
