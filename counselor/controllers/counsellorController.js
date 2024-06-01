@@ -235,7 +235,6 @@ exports.getCounsellor = async (req, res) => {
 
     const messagedCounsellor = {
       ...counsellor._doc,
-
       sessions: sessionsLength,
       age,
       group_session_price,
