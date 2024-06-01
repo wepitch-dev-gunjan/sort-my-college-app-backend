@@ -178,7 +178,13 @@ exports.getCounsellor = async (req, res) => {
     // Calculate total sessions attended
     const sessions = await Session.find({ session_counsellor: counsellor._id });
     const sessionsLength = sessions.length;
+    let count = 0;
 
+    sessions.forEach((session) => {
+      if (session.session_status == "Booked") {
+        count++;
+      }
+    });
     // Calculate age from date of birth
     let age = null;
     if (counsellor.date_of_birth) {
@@ -240,6 +246,7 @@ exports.getCounsellor = async (req, res) => {
       average_rating,
       client_testimonials,
       following,
+      booked_sessions: count,
     };
 
     res.status(200).send(messagedCounsellor);
