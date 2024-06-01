@@ -847,17 +847,19 @@ exports.getLatestSessions = async (req, res) => {
     const currentDate = new Date();
     const hours = currentDate.getHours() * 60 + 60;
     const minutes = currentDate.getMinutes();
+    console.log(currentDate.getDate(), hours / 60, minutes);
 
     const sessionTime = hours + minutes;
 
-    currentDate.setHours(0, 0, 0, 0);
-    currentDate.setDate(currentDate.getDate() + 1);
-    console.log(currentDate, sessionTime);
+    const resetDate = new Date(currentDate);
+    // resetDate.setUTCDate(resetDate.getUTCDate() + 1); // Move to the next day
+    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
+    // currentDate.setDate(currentDate.getDate());
     let sessions = [];
     // Push the results of the first query into the sessions array
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: currentDate },
+        session_date: { $eq: resetDate },
         session_time: { $gte: sessionTime },
       }))
     );
@@ -865,12 +867,12 @@ exports.getLatestSessions = async (req, res) => {
     currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
     currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
     currentDate.setDate(currentDate.getDate() + 1); // Add one day
-    console.log(currentDate.getDate(), currentDate);
+    // console.log(currentDate.getDate(), currentDate);
 
     // Push the results of the second query into the sessions array
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: currentDate },
+        session_date: { $gte: resetDate },
       })
         .sort({ createdAt: -1 })
         .limit(5))
