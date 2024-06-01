@@ -932,7 +932,7 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
-      res.status(200).json(massagedSessions);
+      res.status(200).json(massagedSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
     }
