@@ -2,6 +2,7 @@ const {
   uploadImage,
 } = require("../../entrance-preparation/services/cloudinary");
 const Accommodation = require("../models/Accommodation");
+
 exports.addAccommodation = async (req, res) => {
  try {
    const {
@@ -30,6 +31,11 @@ exports.addAccommodation = async (req, res) => {
      ? common_area_amenities
      : JSON.parse(common_area_amenities);
 
+     const parsedHouseRules = Array.isArray(house_rules)
+     ? house_rules
+     : JSON.parse(house_rules);
+     
+
    let images = [];
    if (req.files && Array.isArray(req.files)) {
      for (const file of req.files) {
@@ -54,7 +60,7 @@ exports.addAccommodation = async (req, res) => {
      nearby_locations: parsedNearbyLocations,
      rating,
      common_area_amenities: parsedCommonAreaAmenities,
-     house_rules,
+     house_rules :parsedHouseRules ,
      gate_opening_time,
      gate_closing_time,
    });
