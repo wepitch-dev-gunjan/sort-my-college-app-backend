@@ -435,18 +435,22 @@ exports.bookSession = async (req, res) => {
     counsellor.reward_points += 5;
     await counsellor.save();
 
+    // Ensure session.session_date is a Date object
+    const bookingData = {
+      ...session._doc,
+      session_date: new Date(session.session_date)
+    };
+
     try {
       await axios.post(`${BACKEND_URL}/user/booking`, {
         booked_by: id,
         booked_entity: counsellor,
         booking_type: "Counsellor",
-        booking_data: session,
+        booking_data: bookingData,
       });
     } catch (error) {
       console.log(error.message);
     }
-
-    await counsellor.save();
 
     // send email notification to user
     if (user.email) {
@@ -457,26 +461,25 @@ exports.bookSession = async (req, res) => {
         counsellor: counsellor.name,
         sessiontype: session.session_type,
         duration: session.session_duration,
-        // location,
         payment: session.session_fee,
-        // subject,
-        // username,
       });
     }
-    // send email notification to counsellor
 
-    await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
-      to: counsellor.email,
-      date: session.session_date,
-      time: session.session_time,
-      client: user.name,
-      sessiontype: session.session_type,
-      duration: session.session_duration,
-      // location,
-      payment: session.session_fee,
-      // subject,
-      username: counsellor.name,
-    });
+    // send email notification to counsellor
+    try {
+      await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
+        to: counsellor.email,
+        date: session.session_date,
+        time: session.session_time,
+        client: user.name,
+        sessiontype: session.session_type,
+        duration: session.session_duration,
+        payment: session.session_fee,
+        username: counsellor.name
+      });
+    } catch (err) {
+      console.log(err);
+    }
 
     // send in app notification to counsellor
     const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
@@ -484,13 +487,12 @@ exports.bookSession = async (req, res) => {
       title: "New Booking",
       message: `${user.name} booked a ${session.session_type} session`,
     });
-    console.log(response);
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal  booking Server Error" });
+    res.status(500).json({ error: "Internal booking Server Error" });
   }
 };
 
@@ -847,17 +849,19 @@ exports.getLatestSessions = async (req, res) => {
     const currentDate = new Date();
     const hours = currentDate.getHours() * 60 + 60;
     const minutes = currentDate.getMinutes();
+    console.log(currentDate.getDate(), hours / 60, minutes);
 
     const sessionTime = hours + minutes;
 
-    currentDate.setHours(0, 0, 0, 0);
-    currentDate.setDate(currentDate.getDate() + 1);
-    console.log(currentDate, sessionTime);
+    const resetDate = new Date(currentDate);
+    // resetDate.setUTCDate(resetDate.getUTCDate() + 1); // Move to the next day
+    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
+    // currentDate.setDate(currentDate.getDate());
     let sessions = [];
     // Push the results of the first query into the sessions array
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: currentDate },
+        session_date: { $eq: resetDate },
         session_time: { $gte: sessionTime },
       }))
     );
@@ -865,12 +869,12 @@ exports.getLatestSessions = async (req, res) => {
     currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
     currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
     currentDate.setDate(currentDate.getDate() + 1); // Add one day
-    console.log(currentDate.getDate(), currentDate);
+    // console.log(currentDate.getDate(), currentDate);
 
     // Push the results of the second query into the sessions array
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: currentDate },
+        session_date: { $gte: resetDate },
       })
         .sort({ createdAt: -1 })
         .limit(5))
@@ -928,7 +932,7 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
-      res.status(200).json(massagedSessions);
+      res.status(200).json(massagedSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
     }
