@@ -2,7 +2,6 @@ const {
   uploadImage,
 } = require("../../entrance-preparation/services/cloudinary");
 const Accommodation = require("../models/Accommodation");
-
 exports.addAccommodation = async (req, res) => {
  try {
    const {
@@ -21,16 +20,16 @@ exports.addAccommodation = async (req, res) => {
      gate_opening_time,
      gate_closing_time,
    } = req.body;
+
    // Parse these fields back into objects
    const parsedAddress = JSON.parse(address);
    const parsedOwner = JSON.parse(owner);
    const parsedNearbyLocations = JSON.parse(nearby_locations);
    const parsedRooms = JSON.parse(rooms);
-   // Log the parsed data
-   console.log("Parsed Address: ", parsedAddress);
-   console.log("Parsed Owner: ", parsedOwner);
-   console.log("Parsed Nearby Locations: ", parsedNearbyLocations);
-   console.log("Parsed Rooms: ", parsedRooms);
+   const parsedCommonAreaAmenities = Array.isArray(common_area_amenities)
+     ? common_area_amenities
+     : JSON.parse(common_area_amenities);
+
    let images = [];
    if (req.files && Array.isArray(req.files)) {
      for (const file of req.files) {
@@ -41,6 +40,7 @@ exports.addAccommodation = async (req, res) => {
        images.push(imagePath);
      }
    }
+
    const newAccommodation = new Accommodation({
      type,
      images,
@@ -53,11 +53,12 @@ exports.addAccommodation = async (req, res) => {
      rooms: parsedRooms,
      nearby_locations: parsedNearbyLocations,
      rating,
-     common_area_amenities,
+     common_area_amenities: parsedCommonAreaAmenities,
      house_rules,
      gate_opening_time,
      gate_closing_time,
    });
+
    await newAccommodation.save();
    res
      .status(201)
@@ -67,6 +68,7 @@ exports.addAccommodation = async (req, res) => {
    res.status(500).json({ message: "Failed to add accommodation" });
  }
 };
+
 exports.getAccommodations = async (req, res) => {
   try {
     const accommodations = await Accommodation.find({});
