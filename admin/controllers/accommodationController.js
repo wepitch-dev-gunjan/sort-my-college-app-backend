@@ -4,61 +4,69 @@ const {
 const Accommodation = require("../models/Accommodation");
 
 exports.addAccommodation = async (req, res) => {
-  try {
-    const {
-      type,
-      name,
-      address,
-      direction,
-      total_beds,
-      recommended_for,
-      owner,
-      rooms,
-      nearby_locations,
-      rating,
-      common_area_amenities,
-      house_rules,
-      gate_opening_time,
-      gate_closing_time,
-    } = req.body;
-
-    let images = [];
-    // Check if req.files exists and is an array
-    if (req.files && Array.isArray(req.files)) {
-      for (const file of req.files) {
-        const fileName = `course-image-${Date.now()}.png`;
-        const folderName = `ep-course_images`;
-        const imagePath = await uploadImage(file.buffer, fileName, folderName);
-        images.push(imagePath);
-      }
-    }
-    const newAccommodation = new Accommodation({
-      type,
-      images,
-      name,
-      address,
-      direction,
-      total_beds,
-      recommended_for,
-      owner,
-      rooms,
-      nearby_locations,
-      rating,
-      common_area_amenities,
-      house_rules,
-      gate_opening_time,
-      gate_closing_time,
-    });
-    await newAccommodation.save();
-    res
-      .status(201)
-      .send({ message: "Accommodation added successfully", newAccommodation });
-  } catch (error) {
-    console.error("Error adding accommodation:", error);
-    res.status(500).json({ message: "Failed to add accommodation" });
-  }
+ try {
+   const {
+     type,
+     name,
+     address,
+     direction,
+     total_beds,
+     recommended_for,
+     owner,
+     rooms,
+     nearby_locations,
+     rating,
+     common_area_amenities,
+     house_rules,
+     gate_opening_time,
+     gate_closing_time,
+   } = req.body;
+   // Parse these fields back into objects
+   const parsedAddress = JSON.parse(address);
+   const parsedOwner = JSON.parse(owner);
+   const parsedNearbyLocations = JSON.parse(nearby_locations);
+   const parsedRooms = JSON.parse(rooms);
+   // Log the parsed data
+   console.log("Parsed Address: ", parsedAddress);
+   console.log("Parsed Owner: ", parsedOwner);
+   console.log("Parsed Nearby Locations: ", parsedNearbyLocations);
+   console.log("Parsed Rooms: ", parsedRooms);
+   let images = [];
+   if (req.files && Array.isArray(req.files)) {
+     for (const file of req.files) {
+       console.log("Trynna upload image");
+       const fileName = `acc-image-${Date.now()}.png`;
+       const folderName = `accommodation_images`;
+       const imagePath = await uploadImage(file.buffer, fileName, folderName);
+       images.push(imagePath);
+     }
+   }
+   const newAccommodation = new Accommodation({
+     type,
+     images,
+     name,
+     address: parsedAddress,
+     direction,
+     total_beds,
+     recommended_for,
+     owner: parsedOwner,
+     rooms: parsedRooms,
+     nearby_locations: parsedNearbyLocations,
+     rating,
+     common_area_amenities,
+     house_rules,
+     gate_opening_time,
+     gate_closing_time,
+   });
+   await newAccommodation.save();
+   res
+     .status(201)
+     .send({ message: "Accommodation added successfully", newAccommodation });
+ } catch (error) {
+   console.error("Error adding accommodation:", error);
+   res.status(500).json({ message: "Failed to add accommodation" });
+ }
 };
-
 exports.getAccommodations = async (req, res) => {
   try {
     const accommodations = await Accommodation.find({});
