@@ -3,6 +3,7 @@ const {
   getZoomAccessToken,
   webinarDateModifier,
   getDateDifference,
+  convertTo12HourFormat,
 } = require("../helpers/webinarHelpers");
 const { default: axios } = require("axios");
 const Webinar = require("../models/Webinar");
@@ -36,21 +37,21 @@ exports.getWebinarsForUser = async (req, res) => {
 
     // Get current date and time, then adjust to IST
     const currentDate = new Date();
-    currentDate.setTime(currentDate.getTime() + (5.5 * 60 * 60 * 1000));
+    currentDate.setTime(currentDate.getTime() + 5.5 * 60 * 60 * 1000);
     // currentDate.setHours(0, 0, 0, 0);
 
     // Set endOfDay to 11:59:59 PM of the same day in IST
-    const endOfDay = new Date()
-    endOfDay.setUTCHours(23, 59, 59, 99)
+    const endOfDay = new Date();
+    endOfDay.setUTCHours(23, 59, 59, 99);
 
     // Filter webinars based on the query
     if (query === "Today") {
       filter.webinar_date = {
         $gte: currentDate,
-        $lte: endOfDay
+        $lte: endOfDay,
       };
     } else if (query === "MyWebinars") {
-      filter['registered_participants._id'] = user_id;
+      filter["registered_participants._id"] = user_id;
     } else if (query === "Upcoming") {
       filter.webinar_date = {
         $gt: endOfDay,
@@ -169,6 +170,10 @@ exports.getTrendingWebinars = async (req, res) => {
 
     const massagedWebinars = webinars.map((webinar) => {
       const webinarDate = webinar.webinar_date;
+
+      const timeString = webinarDate.toISOString().split("T")[1].slice(0, 5);
+      const webinar_time = convertTo12HourFormat(timeString);
+
       webinarDate.setUTCHours(0, 0, 0, 0);
 
       const currentDate = new Date();
@@ -182,6 +187,7 @@ exports.getTrendingWebinars = async (req, res) => {
         webinar_image: webinar.webinar_image,
         webinar_title: webinar.webinar_title,
         webinar_date,
+        webinar_time,
         registered_date: webinar.webinar_date,
         webinar_join_url: webinar.webinar_join_url,
         webinar_by: webinar.webinar_by,
@@ -230,7 +236,7 @@ exports.addWebinar = async (req, res) => {
         error: "Webinar host is required",
       });
 
-    console.log(webinar_time)
+    console.log(webinar_time);
 
     const [year, month, day] = webinar_date.split("-"); // Split webinar_date into year, month, and day
     const [hours, minutes] = webinar_time.split(":"); // Split webinar_time into hours and minutes

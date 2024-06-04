@@ -2,6 +2,9 @@ const { Schema, model, mongoose } = require("mongoose");
 
 const sessionSchema = new Schema(
   {
+    session_topic: {
+      type: String,
+    },
     session_counsellor: {
       type: String,
     },

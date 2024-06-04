@@ -217,6 +217,7 @@ exports.addSession = async (req, res) => {
     // Extract data from the request body
     const { counsellor_id, refresh_token } = req;
     const {
+      session_topic,
       session_date,
       session_time,
       session_duration,
@@ -305,6 +306,7 @@ exports.addSession = async (req, res) => {
     );
 
     const newSession = new Session({
+      session_topic,
       session_counsellor: counsellor_id,
       session_time: parsedSessionTime,
       session_date: parsedSessionDate,
@@ -438,7 +440,7 @@ exports.bookSession = async (req, res) => {
     // Ensure session.session_date is a Date object
     const bookingData = {
       ...session._doc,
-      session_date: new Date(session.session_date)
+      session_date: new Date(session.session_date),
     };
 
     try {
@@ -475,7 +477,7 @@ exports.bookSession = async (req, res) => {
         sessiontype: session.session_type,
         duration: session.session_duration,
         payment: session.session_fee,
-        username: counsellor.name
+        username: counsellor.name,
       });
     } catch (err) {
       console.log(err);
