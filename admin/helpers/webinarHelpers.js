@@ -38,8 +38,8 @@ exports.webinarDateModifier = (dateString) => {
   const date = new Date(dateString);
 
   // Add 5 hours and 30 minutes to convert to IST
-  date.setHours(date.getHours() - 5);
-  date.setMinutes(date.getMinutes() - 30);
+  date.setHours(date.getHours());
+  date.setMinutes(date.getMinutes());
   // Extract day, month, hour, and minute
   const day = date.getDate();
   const month = date.toLocaleString("default", { month: "short" });
