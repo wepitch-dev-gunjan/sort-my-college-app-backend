@@ -34,14 +34,17 @@ exports.getZoomAccessToken = async () => {
 };
 
 exports.webinarDateModifier = (dateString) => {
-  // Parse the input date string and add 5 hours and 30 minutes to convert to IST
-  const date = moment(dateString);
+  // Parse the input date string (assuming it's in ISO 8601 format)
+  const date = new Date(dateString);
 
+  // Add 5 hours and 30 minutes to convert to IST
+  date.setHours(date.getHours() - 5);
+  date.setMinutes(date.getMinutes() - 30);
   // Extract day, month, hour, and minute
-  const day = date.date();
-  const month = date.format("MMM");
-  const hour = date.hours();
-  const minute = date.minutes();
+  const day = date.getDate();
+  const month = date.toLocaleString("default", { month: "short" });
+  let hour = date.getHours();
+  const minute = date.getMinutes();
 
   // Determine the suffix for the day (st, nd, rd, th)
   let daySuffix;
@@ -55,10 +58,12 @@ exports.webinarDateModifier = (dateString) => {
     daySuffix = "th";
   }
 
+  // Convert hour to 12-hour format and determine AM/PM
+  const meridiem = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12;
+
   // Format the time
-  let formattedTime = `${hour % 12 || 12}:${minute < 10 ? "0" : ""}${minute} ${
-    hour >= 12 ? "PM" : "AM"
-  }`;
+  let formattedTime = `${hour}:${minute < 10 ? "0" : ""}${minute} ${meridiem}`;
 
   // Format the date
   let formattedDate = `${day}${daySuffix} ${month} @ ${formattedTime} Onwards`;

@@ -169,8 +169,7 @@ exports.getTrendingWebinars = async (req, res) => {
     if (!webinars || webinars.length === 0) return res.status(200).send([]);
 
     const massagedWebinars = webinars.map((webinar) => {
-      const webinarDate = webinar.webinar_date;
-
+      const webinarDate = new Date(webinar.webinar_date);
       const timeString = webinarDate.toISOString().split("T")[1].slice(0, 5);
       const webinar_time = convertTo12HourFormat(timeString);
 
