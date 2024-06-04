@@ -23,4 +23,5 @@ const bookingSchema = new Schema({
   strict: false
 })
 
+
 module.exports = model('Booking', bookingSchema);
