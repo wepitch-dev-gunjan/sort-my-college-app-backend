@@ -471,6 +471,34 @@ exports.registerParticipant = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+exports.attendedParticipant = async (req, res) => {
+  try {
+    const { webinar_id } = req.params;
+    const { user_id } = req;
+
+    const webinar = await Webinar.findOne({ _id: webinar_id });
+    if (!webinar)
+      return res.status(404).send({
+        error: "Webinar not found",
+      });
+
+    const user = await User.findOne({ _id: user_id });
+
+    webinar.attended_participants.push({
+      name: user.name,
+      _id: user._id,
+      profile_pic: user.profile_pic,
+    });
+    await webinar.save();
+
+    res.status(200).send({
+      message: " User Joined completed",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
 
 exports.removeParticipant = async (req, res) => {
   try {
