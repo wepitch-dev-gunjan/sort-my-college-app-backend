@@ -13,7 +13,16 @@ const { upload } =require("../middlewares/uploadImage");
 router.get("/accommodation", adminAuth, getAccommodations);
 router.get("/accommodation/:accomodation_id", adminAuth, getAccommodation);
 // add Accommodation
-router.post("/accommodation", adminAuth, upload.array("images"), addAccommodation);
+router.post("/accommodation", adminAuth, upload.fields([
+  { name: 'images', maxCount: 10 },
+  { name: 'aadhar_card', maxCount: 1 },
+  { name: 'pan_card', maxCount: 1 }
+]), (req, res, next) => {
+  console.log('Files:', req.files);
+  console.log('Body:', req.body);
+  next();
+}, addAccommodation);
+
 
 router.put("/accommodation/:accomodation_id", adminAuth, editAccommodation);
 router.delete(
