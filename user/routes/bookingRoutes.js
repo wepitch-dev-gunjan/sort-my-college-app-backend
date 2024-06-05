@@ -13,7 +13,7 @@ const router = express.Router();
 router.post("/booking", createBooking);
 router.put("/booking/:booking_id", editBooking);
 router.get("/booking", userAuth, getBookings);
-router.get("/booking/:booking_id", getBooking);
+router.get("/booking/:booking_id", userAuth, getBooking);
 router.delete("/booking/:booking_id", deleteBooking);
 
 module.exports = router;
