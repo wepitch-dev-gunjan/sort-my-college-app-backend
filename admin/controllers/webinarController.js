@@ -373,15 +373,45 @@ exports.zoomGenerateSignature = (req, res) => {
 
 exports.getSingleWebinarForAdmin = async (req, res) => {
   const { webinar_id } = req.params;
+  const { filter } = req.query;
+
+  console.log(filter);
+
+  // Validate webinar_id format
+
   try {
-    const webinar = await Webinar.findOne({ _id: webinar_id });
+    const webinar = await Webinar.findById(webinar_id);
+    console.log(webinar);
+
     if (!webinar) {
       return res.status(404).json({ error: "No webinar found with this ID" });
     }
 
-    res.status(200).send(webinar);
+    let participants;
+    if (filter) {
+      if (filter === "Registered") {
+        participants = webinar.registered_participants;
+      } else if (filter === "Joined") {
+        participants = webinar.attended_participants;
+      } else if (filter === "notJoined") {
+        participants = webinar.registered_participants.filter(
+          (participant) =>
+            !webinar.attended_participants.some(
+              (attendedParticipant) =>
+                attendedParticipant._id === participant._id
+            )
+        );
+      } else {
+        return res.status(200).json({ error: "Invalid filter type" });
+      }
+    }
+
+    res.status(200).json({
+      ...webinar.toObject(),
+      filteredParticipants: participants,
+    });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching webinar:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
