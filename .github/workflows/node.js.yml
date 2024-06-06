@@ -79,6 +79,5 @@ jobs:
           cd ../api-gateway
           sudo pm2 start server.js --name="api-gateway" -f
 
-      # Restart all Node.js applications managed by PM2
       - name: Restart all Node.js applications
         run: sudo pm2 restart all
