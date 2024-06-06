@@ -24,22 +24,22 @@ const {
 
 const app = express();
 const server =
-  NODE_ENV === "production"
-// ? https.createServer(
-//   {
-//     key: fs.readFileSync(
-//       path.join(__dirname, "..", "ssl_certificates", "private.key")
-//     ),
-//     cert: fs.readFileSync(
-//       path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
-//     ),
-//     ca: fs.readFileSync(
-//       path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
-//     ),
-//   },
-//   app
-// ) :
-http.createServer(app);
+  // NODE_ENV === "production"
+  // ? https.createServer(
+  //   {
+  //     key: fs.readFileSync(
+  //       path.join(__dirname, "..", "ssl_certificates", "private.key")
+  //     ),
+  //     cert: fs.readFileSync(
+  //       path.join(__dirname, "..", "ssl_certificates", "certificate.crt")
+  //     ),
+  //     ca: fs.readFileSync(
+  //       path.join(__dirname, "..", "ssl_certificates", "ca_bundle.crt")
+  //     ),
+  //   },
+  //   app
+  // ) :
+  http.createServer(app);
 
 const io = socketIo(server, {
   cors: {
@@ -112,9 +112,9 @@ io.on("connection", (socket) => {
   });
 });
 
-server.on("error", (err) => {
-  console.error("Server encountered an error:", err);
-});
+// server.on("error", (err) => {
+//   console.error("Server encountered an error:", err);
+// });
 
 server.listen(PORT, () => {
   console.log(`Server started in ${NODE_ENV} mode at port: ${PORT}`);
