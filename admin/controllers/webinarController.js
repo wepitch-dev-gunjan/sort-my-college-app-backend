@@ -165,7 +165,7 @@ exports.getTrendingWebinars = async (req, res) => {
     const endOfDay = new Date(currentDate);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const webinars = await Webinar.find().sort({ createdAt: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
+    const webinars = await Webinar.find().sort({ webinar_date: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
     if (!webinars || webinars.length === 0) return res.status(200).send([]);
 
     const massagedWebinars = webinars.map((webinar) => {
