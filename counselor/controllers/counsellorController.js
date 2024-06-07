@@ -1042,6 +1042,7 @@ exports.getDashboardData = async (req, res) => {
       totalFollowers: followersCount,
       totalSessions: sessionsCount,
       dynamicIncome: data.totalIncome,
+      //dynamic income
     });
   } catch (error) {
     console.log(error);
