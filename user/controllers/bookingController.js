@@ -26,6 +26,7 @@ exports.createBooking = async (req, res) => {
       sessionFee: booking_data.session_fee,
       gstAmount: 0.18 * sessionFee,
       gatewayCharge: 0.05 * sessionFee,
+      //chnages
     });
 
     await booking.save();
