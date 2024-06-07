@@ -10,7 +10,10 @@ exports.createBooking = async (req, res) => {
     }
 
     // Ensure booking_data.session_date is a Date object
-    if (booking_data.session_date && !(booking_data.session_date instanceof Date)) {
+    if (
+      booking_data.session_date &&
+      !(booking_data.session_date instanceof Date)
+    ) {
       booking_data.session_date = new Date(booking_data.session_date);
     }
 
@@ -20,6 +23,9 @@ exports.createBooking = async (req, res) => {
       booked_entity,
       booking_type,
       booking_data,
+      sessionFee: booking_data.session_fee,
+      gstAmount: 0.18 * sessionFee,
+      gatewayCharge: 0.05 * sessionFee,
     });
 
     await booking.save();
@@ -29,7 +35,6 @@ exports.createBooking = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
 
 exports.editBooking = async (req, res) => {
   try {
@@ -70,18 +75,18 @@ exports.getBookings = async (req, res) => {
     let filter = {};
     if (past || today || upcoming) {
       if (past) {
-        filter = { 'booking_data.session_date': { $lt: new Date(startOfDay) } };
+        filter = { "booking_data.session_date": { $lt: new Date(startOfDay) } };
       }
       if (today) {
         filter = {
-          'booking_data.session_date': {
+          "booking_data.session_date": {
             $gte: new Date(startOfDay.toISOString()),
-            $lte: new Date(endOfDay.toISOString())
-          }
+            $lte: new Date(endOfDay.toISOString()),
+          },
         };
       }
       if (upcoming) {
-        filter = { 'booking_data.session_date': { $gt: new Date(endOfDay) } };
+        filter = { "booking_data.session_date": { $gt: new Date(endOfDay) } };
       }
     }
     filter = { ...filter, user: user_id };
@@ -93,7 +98,6 @@ exports.getBookings = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
-
 
 exports.getBooking = async (req, res) => {
   try {
