@@ -1034,10 +1034,15 @@ exports.getDashboardData = async (req, res) => {
     const sessionsCount = await Session.countDocuments({
       session_counsellor: counsellor_id,
     });
+    const { data } = await axios.get(
+      `${BACKEND_URL}/admin/payment/getincomeofcounsellor/${counsellor_id}`
+    );
 
-    res
-      .status(200)
-      .json({ totalFollowers: followersCount, totalSessions: sessionsCount });
+    res.status(200).json({
+      totalFollowers: followersCount,
+      totalSessions: sessionsCount,
+      dynamicIncome: data.totalIncome,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });

@@ -256,11 +256,11 @@ exports.paymentForCounsellor = async (req, res) => {
 
 exports.incomeofcounsellor = async (req, res) => {
   try {
-    const { counsellor_id } = req; // Assuming the counselor ID is passed as a URL parameter
+    const { counsellor_id } = req.params; // Assuming the counselor ID is passed as a URL parameter
     console.log(counsellor_id);
 
     // Check if counselorId is a valid ObjectId
-    if (!ObjectId.isValid(counsellor_id)) {
+    if (!counsellor_id) {
       return res.status(400).json({ error: "Invalid counselor ID" });
     }
 

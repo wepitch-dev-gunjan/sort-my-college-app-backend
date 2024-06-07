@@ -24,11 +24,7 @@ router.get(
   "/payments/:counsellor_id/outstanding-balance",
   getOutstandingBalance
 );
-router.get(
-  "/payment/getincomeofcounsellor",
-  counsellorAuth,
-  incomeofcounsellor
-);
+router.get("/payment/getincomeofcounsellor/:counsellor_id", incomeofcounsellor);
 router.put(
   "/payments/:counsellor_id/outstanding-balance",
   clearOutstandingbalance
