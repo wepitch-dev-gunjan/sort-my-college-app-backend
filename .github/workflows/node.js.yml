@@ -37,15 +37,15 @@ jobs:
           npm ci --prefix api-gateway
 
       # Create SSL certificates
-      - name: Create SSL certificates
-        run: |
-          sudo mkdir -p ssl_certificates
-          sudo touch ssl_certificates/ca_bundle.crt
-          echo "${{ secrets.CA_BUNDLE }}" | sudo tee ssl_certificates/ca_bundle.crt
-          sudo touch ssl_certificates/certificate.crt
-          echo "${{ secrets.CERTIFICATE }}" | sudo tee ssl_certificates/certificate.crt
-          sudo touch ssl_certificates/private.key
-          echo "${{ secrets.PRIVATE_KEY }}" | sudo tee ssl_certificates/private.key
+      # - name: Create SSL certificates
+      #   run: |
+      #     sudo mkdir -p ssl_certificates
+      #     sudo touch ssl_certificates/ca_bundle.crt
+      #     echo "${{ secrets.CA_BUNDLE }}" | sudo tee ssl_certificates/ca_bundle.crt
+      #     sudo touch ssl_certificates/certificate.crt
+      #     echo "${{ secrets.CERTIFICATE }}" | sudo tee ssl_certificates/certificate.crt
+      #     sudo touch ssl_certificates/private.key
+      #     echo "${{ secrets.PRIVATE_KEY }}" | sudo tee ssl_certificates/private.key
 
       # Create environment variables for each service
       - name: Create environment variables
