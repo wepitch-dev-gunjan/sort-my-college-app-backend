@@ -6,7 +6,7 @@ const entranceCourseSchema = new Schema({
     required: true
   },
   image: {
-   type : String
+   type: String
   },
   type: {
     type: String,
@@ -19,8 +19,12 @@ const entranceCourseSchema = new Schema({
   course_fee: {
     type: Number
   },
-  course_duration_in_days: {
+  course_duration: {
     type: Number
+  },
+  duration_unit: {
+    type: String,
+    enum: ['days', 'months', 'years']
   },
   institute: {
     type: Schema.Types.ObjectId,

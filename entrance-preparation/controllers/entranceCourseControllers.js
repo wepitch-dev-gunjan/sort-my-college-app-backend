@@ -23,7 +23,8 @@ exports.getCoursesForEp = async (req, res) => {
       type: course.type,
       academic_session: course.academic_session,
       course_fee: course.course_fee,
-      course_duration_in_days: course.course_duration_in_days,
+      course_duration: course.course_duration,
+      duration_unit: course.duration_unit,
     }));
     res.status(200).json(massagedCourses);
   } catch (error) {
@@ -65,35 +66,38 @@ exports.getCoursesForEp = async (req, res) => {
 //   }
 // };
 exports.addCourse = async (req, res) => {
-  try {
-    const { institute_id } = req;
-    const existingCourse = await EntranceCourse.findOne({
-      name: req.body.name,
-    });
-    if (existingCourse) {
-      return res.status(400).send({ error: "course already exist" });
-    }
-    const addCourse = new EntranceCourse({
-      name: req.body.name,
-      type: req.body.type,
-      academic_session: req.body.academic_session,
-      course_fee: req.body.course_fee,
-      course_duration_in_days: req.body.course_duration_in_days,
-      institute: institute_id,
-    });
+ try {
+   const { institute_id } = req;
+   const existingCourse = await EntranceCourse.findOne({
+     name: req.body.name,
+   });
+   if (existingCourse) {
+     return res.status(400).send({ error: "Course already exists" });
+   }
+   
+   const addCourse = new EntranceCourse({
+     name: req.body.name,
+     type: req.body.type,
+     academic_session: req.body.academic_session,
+     course_fee: req.body.course_fee,
+     course_duration: req.body.course_duration,
+     duration_unit: req.body.duration_unit,
+     institute: institute_id,
+   });
 
-    await addCourse.save();
+   await addCourse.save();
 
-    res.status(201).json({
-      message: "Course Added Successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Error adding course",
-    });
-  }
+   res.status(201).json({
+     message: "Course added successfully",
+   });
+ } catch (error) {
+   console.error(error);
+   res.status(500).json({
+     message: "Error adding course",
+   });
+ }
 };
+
 exports.editCourse = async (req, res) => {
   try {
     const { course_id } = req.params;
@@ -126,7 +130,7 @@ exports.deleteCourse = async (req, res) => {
   }
 };
 
-// user
+// user changes needed
 exports.getCoursesForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
