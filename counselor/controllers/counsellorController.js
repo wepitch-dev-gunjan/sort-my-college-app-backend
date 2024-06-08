@@ -956,6 +956,13 @@ exports.verifyCounsellor = async (req, res) => {
     counsellor.status = "APPROVED";
     counsellor.verified = true;
     await counsellor.save();
+    const { data } = await axios.post(
+      `${BACKEND_URL}/notification/counsellor/verify`,
+      {
+        to: counsellor.email,
+        username: counsellor.name,
+      }
+    );
 
     res.status(200).send({
       message: "Counsellor successfully verified",

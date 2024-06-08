@@ -34,7 +34,6 @@ const Accommodation = require("../models/Accommodation");
 //      const parsedHouseRules = Array.isArray(house_rules)
 //      ? house_rules
 //      : JSON.parse(house_rules);
-     
 
 //    let images = [];
 //    if (req.files && Array.isArray(req.files)) {
@@ -198,7 +197,9 @@ exports.addAccommodation = async (req, res) => {
 
     // Parse rooms and house rules
     const parsedRooms = JSON.parse(rooms);
-    const parsedHouseRules = Array.isArray(house_rules) ? house_rules : JSON.parse(house_rules);
+    const parsedHouseRules = Array.isArray(house_rules)
+      ? house_rules
+      : JSON.parse(house_rules);
 
     // Parse common area amenities
     const parsedCommonAreaAmenities = Array.isArray(common_area_amenities)
@@ -215,7 +216,7 @@ exports.addAccommodation = async (req, res) => {
     };
 
     // Upload aadhar card if available
-    let aadharCard = '';
+    let aadharCard = "";
     if (req.files && req.files.aadhar_card) {
       const file = req.files.aadhar_card[0];
       console.log("Uploading aadhar card:", file.originalname);
@@ -225,7 +226,7 @@ exports.addAccommodation = async (req, res) => {
     }
 
     // Upload pan card if available
-    let panCard = '';
+    let panCard = "";
     if (req.files && req.files.pan_card) {
       const file = req.files.pan_card[0];
       console.log("Uploading pan card:", file.originalname);
@@ -271,14 +272,14 @@ exports.addAccommodation = async (req, res) => {
 
     // Save new accommodation
     await newAccommodation.save();
-    res.status(201).send({ message: "Accommodation added successfully", newAccommodation });
+    res
+      .status(201)
+      .send({ message: "Accommodation added successfully", newAccommodation });
   } catch (error) {
     console.error("Error adding accommodation:", error);
     res.status(500).json({ message: "Failed to add accommodation" });
   }
 };
-
-
 
 exports.getAccommodations = async (req, res) => {
   try {
