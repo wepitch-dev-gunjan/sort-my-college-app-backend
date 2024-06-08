@@ -59,6 +59,7 @@ exports.createPayment = async (req, res) => {
       phone_no,
       description,
       status,
+      session_type,
     } = req.body;
 
     const amount_due = getCounsellorAmount(amount);

@@ -205,4 +205,3 @@ exports.getSingleUser = async (req, res) => {
     res.status(500).json({ error: "Internal user Server Error" });
   }
 };
-// testing edt only
