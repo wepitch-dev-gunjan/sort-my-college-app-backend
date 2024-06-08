@@ -79,6 +79,7 @@ exports.createPayment = async (req, res) => {
       phone_no,
       description,
       status,
+      session_type,
     });
 
     const counsellor = await axios.get(
