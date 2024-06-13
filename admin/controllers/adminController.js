@@ -1,9 +1,10 @@
-  const Admin = require("../models/Admin");
+const Admin = require("../models/Admin");
 const User = require("../../user/models/User.js");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const Counsellor = require("../../counselor/models/Counsellor.js");
 const { default: axios } = require("axios");
+const Payment = require("../models/Payment.js");
 require("dotenv").config();
 const { BACKEND_URL } = process.env;
 const { JWT_SECRET } = process.env;
@@ -258,21 +259,38 @@ exports.uploadProfilePic = async (req, res) => {
 
 exports.getDashboardData = async (req, res) => {
   try {
-    const usersCount = await axios.get(`${BACKEND_URL}/user/users-for-admin`);
-
-    const counsellorCount = await axios.get(
+    const usersResponse = await axios.get(
+      `${BACKEND_URL}/user/users-for-admin`
+    );
+    const counsellorsResponse = await axios.get(
       `${BACKEND_URL}/counsellor/counsellor-for-admin`
     );
 
+    const usersCount = usersResponse.data.length;
+    const counsellorsCount = counsellorsResponse.data.length;
+
+    const totalPayment = await Payment.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmountDue: { $sum: "$amount_due" },
+        },
+      },
+    ]);
+
     res.status(200).send({
-      totalUser: usersCount.data.length,
-      totalCounsellor: counsellorCount.data.length,
+      totalUser: usersCount,
+      totalCounsellor: counsellorsCount,
+      totalPayment:
+        totalPayment.length > 0 ? totalPayment[0].totalAmountDue : 0,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching dashboard data:", error);
+    res.status(500).send({
+      error: "Failed to fetch dashboard data. Please try again later.",
+    });
   }
 };
-
 exports.changePassword = async (req, res) => {
   const admin_id = req;
   const { key, password } = req.body;
