@@ -248,6 +248,7 @@ exports.paymentForCounsellor = async (req, res) => {
       phone_no: payment.phone_no,
       description: payment.description,
       status: payment.status,
+      session_type: payment.session_type,
     }));
     res.status(200).send(massagedData);
   } catch (error) {
