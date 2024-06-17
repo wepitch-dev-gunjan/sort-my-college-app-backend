@@ -983,11 +983,47 @@ exports.rejectCounsellor = async (req, res) => {
       return res.status(404).send({
         error: "Counsellor not found",
       });
+    if (counsellor.verified === "PENDING") {
+      counsellor.status = "REJECTED";
+      counsellor.verified = false;
+      await counsellor.save();
 
-    if (!counsellor.verified)
-      return res.status(400).send({
-        error: "Counsellor is not verified or already rejected",
+      const { data } = await axios.post(
+        `${BACKEND_URL}/notification/counsellor/reject`,
+        {
+          to: counsellor.email,
+          username: counsellor.name,
+          reason,
+        }
+      );
+
+      return res.status(200).send({
+        message: "Counsellor successfully rejected",
       });
+    }
+
+    // if (!counsellor.verified)
+    //   return res.status(400).send({
+    //     error: "Counsellor is not verified or already rejected",
+    //   });
+    if (counsellor.verified == "PENDING") {
+      counsellor.status = "REJECTED";
+      counsellor.verified = false;
+      await counsellor.save();
+
+      const { data } = await axios.post(
+        `${BACKEND_URL}/notification/counsellor/reject`,
+        {
+          to: counsellor.email,
+          username: counsellor.name,
+          reason,
+        }
+      );
+
+      res.status(200).send({
+        message: "Counsellor successfully rejected",
+      });
+    }
 
     counsellor.status = "REJECTED";
     counsellor.verified = false;
