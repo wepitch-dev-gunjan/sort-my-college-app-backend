@@ -1305,7 +1305,7 @@ exports.verifyCounsellorEmailNotification = async (req, res) => {
     console.log(to, username);
     const mailOptions = {
       to,
-      subject: "Counsellor Verification Approved",
+      subject: "SortMyCollege Counsellor Verification Approved",
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -1317,7 +1317,7 @@ exports.verifyCounsellorEmailNotification = async (req, res) => {
                     <tr>
                       <td align="center">
                         <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/10/cropped-SORTMYCOLLEGE-12-1.png" alt="" width="400" height="100" style="display: block;">
                         </a>
                       </td>
                     </tr>
@@ -1325,14 +1325,15 @@ exports.verifyCounsellorEmailNotification = async (req, res) => {
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          Your verification is Approved.<br><br> 
-                                     
+                          To,<br>
+                           ${username} <br><br>
+                           We hope this email finds you well.                                    
                           <br><br>                          
-                          You can see it on  <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          portal.<br><br>
+                          We are pleased to inform you that your verification request has been approved. You now have access to the <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Counsellor Portal</a>
+                          and can start launching sessions and connecting with students seeking career guidance.<br> <br>
+                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
                           Best regards, <br />
-                          The
+                          
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           Team
                         </p>
@@ -1369,7 +1370,7 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
     console.log(to, reason, username);
     const mailOptions = {
       to,
-      subject: "Counsellor Verification Rejected",
+      subject: "SortMyCollege Counsellor Verification Rejected",
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -1381,7 +1382,7 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
                     <tr>
                       <td align="center">
                         <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/10/cropped-SORTMYCOLLEGE-12-1.png" alt="" width="400" height="100" style="display: block;">
                         </a>
                       </td>
                     </tr>
@@ -1389,14 +1390,17 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          Your verification is rejected.<br><br> 
+                          To,<br>
+                           ${username} <br><br>
+                           We hope this email finds you well. <br>
+                           We regret to inform you that your verification request has been rejected.<br><br> 
                           <b>Reason </b>: ${reason}               
                           <br><br>                          
-                          You can see it on  <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          portal.<br><br>
+                          Please log in to the <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Counsellor Portal</a>
+                          to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
+                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
                           Best regards, <br />
-                          The
+                          
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           Team
                         </p>
