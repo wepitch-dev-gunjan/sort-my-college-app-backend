@@ -1329,7 +1329,7 @@ exports.verifyCounsellorEmailNotification = async (req, res) => {
                           Your verification is Approved.<br><br> 
                                      
                           <br><br>                          
-                          You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          You can see it on  <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           portal.<br><br>
                           Best regards, <br />
                           The
@@ -1393,7 +1393,7 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
                           Your verification is rejected.<br><br> 
                           <b>Reason </b>: ${reason}               
                           <br><br>                          
-                          You can see it on  <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          You can see it on  <a href="https://counsellor.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           portal.<br><br>
                           Best regards, <br />
                           The

@@ -22,7 +22,7 @@ router.delete("/:admin_id", deleteAdmin);
 router.put("/:admin_id", adminAuth, editProfile);
 router.post("/login", adminLogin);
 router.get("/dashboard/dashboard-data", adminAuth, getDashboardData);
-router.put("/", adminAuth, changePassword);
+router.put("/", changePassword);
 
 router.post(
   "/profile-pic",

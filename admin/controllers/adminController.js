@@ -267,7 +267,10 @@ exports.getDashboardData = async (req, res) => {
     );
 
     const usersCount = usersResponse.data.length;
-    const counsellorsCount = counsellorsResponse.data.length;
+    const verifiedCounsellors = counsellorsResponse.data.filter(
+      (counsellor) => counsellor.verified === true
+    );
+    const counsellorsCount = verifiedCounsellors.length;
 
     const totalPayment = await Payment.aggregate([
       {
@@ -292,19 +295,17 @@ exports.getDashboardData = async (req, res) => {
   }
 };
 exports.changePassword = async (req, res) => {
-  const admin_id = req;
   const { key, password } = req.body;
 
   if (!key || !password) {
     return res
       .status(400)
-      .send({ message: "Key and new passwords are required" });
+      .send({ message: "Key and new password are required" });
   }
 
   try {
     // Fetch the admin from the database
-    const admin = await Admin.findOne({ _id: admin_id });
-
+    const admin = await Admin.findOne();
     if (!admin) {
       return res.status(404).send({ message: "Admin not found" });
     }
@@ -321,11 +322,11 @@ exports.changePassword = async (req, res) => {
     admin.password = hashedNewPassword;
 
     // Save the updated admin to the database
-    const updatedAdmin = await admin.save();
+    await admin.save();
 
     res
       .status(200)
-      .send({ message: "Password changed successfully", data: updatedAdmin });
+      .send({ message: "Password changed successfully", data: admin });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
