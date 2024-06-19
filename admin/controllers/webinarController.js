@@ -71,6 +71,7 @@ exports.getWebinarsForUser = async (req, res) => {
       const registered = webinar.registered_participants.some(
         (participant) => participant._id === user_id
       );
+      console.log(registered);
 
       const earlyJoinTime = new Date(webinar.webinar_date);
       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);

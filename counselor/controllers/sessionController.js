@@ -260,6 +260,21 @@ exports.addSession = async (req, res) => {
         .send({ error: "Session date cannot be in the past" });
     }
 
+    const currentTime = new Date();
+    const sessionDateTime = getSessionDateTime(
+      parsedSessionDate,
+      parsedSessionTime
+    );
+    if (
+      sessionDateTime < new Date(currentTime.getTime() + 24 * 60 * 60 * 1000)
+    ) {
+      return res
+        .status(400)
+        .send({
+          error: "Session must be scheduled at least 24 hours in advance",
+        });
+    }
+
     // Check if a session is already there at the mentioned time and validate the 30-minute gap
     const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
