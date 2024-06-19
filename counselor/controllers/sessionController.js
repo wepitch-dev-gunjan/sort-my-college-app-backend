@@ -268,11 +268,9 @@ exports.addSession = async (req, res) => {
     if (
       sessionDateTime < new Date(currentTime.getTime() + 24 * 60 * 60 * 1000)
     ) {
-      return res
-        .status(400)
-        .send({
-          error: "Session must be scheduled at least 24 hours in advance",
-        });
+      return res.status(400).send({
+        error: "Session must be scheduled at least 24 hours in advance",
+      });
     }
 
     // Check if a session is already there at the mentioned time and validate the 30-minute gap
@@ -442,9 +440,8 @@ exports.bookSession = async (req, res) => {
     }
     session.session_users.push(id);
     session.session_available_slots--;
-    if (session.session_available_slots <= 0) {
-      session.session_status = "Booked";
-    }
+
+    session.session_status = "Booked";
 
     // Save the updated session and counselor data
     await session.save();
