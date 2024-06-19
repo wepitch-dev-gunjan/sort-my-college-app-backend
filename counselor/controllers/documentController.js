@@ -138,7 +138,7 @@ exports.deleteDocument = async (req, res) => {
       res.status(500).send({ error: "Image not deleted" });
     }
     res.status(200).send({
-      message: "document succesfully deletes",
+      message: "document successfully deleted",
     });
   } catch (error) {
     console.log(error);
