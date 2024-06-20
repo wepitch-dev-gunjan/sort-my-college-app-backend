@@ -181,7 +181,9 @@ exports.getTrendingWebinars = async (req, res) => {
 
       const dateDifference = getDateDifference(webinarDate, currentDate);
       const webinar_date = webinarDateModifier(webinar.webinar_date);
-      const registered = webinar.registered_participants.includes(user_id);
+      const registered = webinar.registered_participants.some(
+        (participant) => participant._id === user_id
+      );
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
