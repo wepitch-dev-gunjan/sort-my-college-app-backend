@@ -487,8 +487,6 @@ exports.bookSession = async (req, res) => {
         time: session.session_time,
         client: user.name,
         sessiontype: session.session_type,
-        sessionTopic: session.session_topic,
-        session_link: session.session.session_link,
         duration: session.session_duration,
         payment: session.session_fee,
         username: counsellor.name,
