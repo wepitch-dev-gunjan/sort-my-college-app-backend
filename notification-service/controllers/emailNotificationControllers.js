@@ -442,7 +442,7 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
       time,
       client,
       session_link,
-      counsellor,
+
       sessiontype,
       duration,
       // location,
@@ -471,7 +471,7 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
                               sessionTopic
                                 ? `<li><strong>Session Topic:</strong> ${sessionTopic}</li>`
                                 : ""
-                            }
+                            } 
                             <li><strong>Duration:</strong> ${duration}</li>
                             <li><strong>Payment:</strong> ${payment}</li>
                             <li><strong>Meeting Link:</strong> <a href="${session_link}" style="color: #ffffff; text-decoration: none; background-color: #1f0a68; padding: 10px 20px; border-radius: 5px; display: inline-block; transition: background-color 0.3s;" target="_blank">Click Here to Join Meeting</a></li>
