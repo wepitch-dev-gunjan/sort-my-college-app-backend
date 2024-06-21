@@ -422,6 +422,8 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
   try {
     const {
       to,
+      client,
+      session_link,
       date,
       time,
       counsellor,
@@ -431,97 +433,56 @@ exports.bookedSessionUserEmailNotification = async (req, res) => {
       payment,
       // subject,
       username,
+      sessionTopic,
     } = req.body;
     console.log(req.body);
 
     const mailOptions = {
       date,
       time,
+      client,
+      session_link,
       counsellor,
       sessiontype,
       duration,
       // location,
       payment,
+      username,
+      sessionTopic,
       to,
       // subject,
-      html: `<body>
-      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-        <tr>
-          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
-            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-              <tr>
-                <td align="center" bgcolor="#ffffff">
-                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
-                    <tr>
-                      <td align="center">
+      html: ` <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;">
+            <div style="width: 100%; margin: 0 auto; padding: 20px;">
+                <div style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
                         <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                            <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="SortMyCollege Logo" width="200" height="50" style="display: block;">
                         </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td align="center">
-                        <h1 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size: 3vh; color: black;">
-                          Welcome to
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                        </h1>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          We're thrilled to confirm your counseling session booking! Here are the details: <br><br>
-                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
-                            <tr>
-                              <td><b>Date and Time:</b></td>
-                              <td> ${date} ${time}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Counselor:</b></td>
-                              <td>${counsellor}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Session Type:</b></td>
-                              <td>${sessiontype}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Duration:</b></td>
-                              <td>${duration}</td>
-                            </tr>
-                            <tr>
-                              <td><b>Payment Total:</b></td>
-                              <td>${payment}</td>
-                            </tr>
-                          </table>
-                          <br><br>
-                          Please take note of the following: <br><br>
-                          <ul style="list-style-type: none; margin: 0; padding: 0; font-size: 2vh; font-family: Georgia; color: black;">
-                            <li>Ensure that you are in a quiet and comfortable space for your session.</li>
-                            <li>If this is a virtual session, click the provided meeting link at the scheduled time.</li>
-                            <li>If this is an in-person session, please arrive at the counseling center [Address] 10 minutes before your scheduled time.</li>
-                          </ul>
-                          <br>
-                          Should you need to reschedule or cancel your session, please do so at least 24 hours in advance to avoid any cancellation fees. <br><br>
-                          If you have any questions or require further assistance, feel free to contact us at [Customer Support Email or Phone Number]. <br><br>
-                          We're here to support you on your journey to well-being. Thank you for choosing our counseling service. <br><br>
-                          Best regards, <br />
-                          The
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
-                        </p>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    
-    `,
+                        <h2 style="font-family: Arial, sans-serif; color: #1f0a68; margin: 0; font-size: 24px;">New Counselling Session Booked</h2>
+                    </div>
+                    <div style="font-size: 16px; color: #333; line-height: 1.6; margin-bottom: 20px;">
+                        <p>Dear ${username},</p>
+                        <p>We are delighted to inform you that a new counselling session has been booked through our platform. Below are the details of the booking:</p>
+                        <ul style="padding-left: 20px;">
+                            <li><strong>Client Name:</strong> ${client}</li>
+                            <li><strong>Date and Time:</strong> ${date} ${time}</li>
+                            <li><strong>Session Type:</strong> ${sessiontype}</li>
+                            ${
+                              sessionTopic
+                                ? `<li><strong>Session Topic:</strong> ${sessionTopic}</li>`
+                                : ""
+                            }
+                            <li><strong>Duration:</strong> ${duration}</li>
+                            <li><strong>Payment:</strong> ${payment}</li>
+                            <li><strong>Meeting Link:</strong> <a href="${session_link}" style="color: #ffffff; text-decoration: none; background-color: #1f0a68; padding: 10px 20px; border-radius: 5px; display: inline-block; transition: background-color 0.3s;" target="_blank">Click Here to Join Meeting</a></li>
+                        </ul>
+                        <p>Please ensure that you are available and prepared for the scheduled session. If you have any inquiries or require additional information regarding this booking, please do not hesitate to contact us at <a href="mailto:support@sortmycollege.com" style="color: #1f0a68; text-decoration: none;">support@sortmycollege.com</a>.</p>
+                        <p>We greatly appreciate your dedication to providing counselling services. Your expertise and support are invaluable.</p>
+                        <p>Best Regards,<br>SortMyCollege</p>
+                    </div>
+                </div>
+            </div>
+        </body>`,
     };
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
