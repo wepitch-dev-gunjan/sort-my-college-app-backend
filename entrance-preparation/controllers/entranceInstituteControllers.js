@@ -472,3 +472,40 @@ exports.unfollowInstitute = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
+
+exports.editInstituteProfile = async (req, res) => {
+ try {
+   const { file } = req;
+   const {institute_id} = req.params;
+   console.log("file",institute_id)
+   
+   if (!file) {
+     return res.status(400).send({
+       error: "File can't be empty",
+     });
+   }
+
+   const institute = await EntranceInstitute.findById(institute_id);
+
+   if (!institute) {
+     return res.status(404).send({ error: "institute not found" });
+   }
+
+   const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
+   const folderName = "institute-profile-pics";
+
+   institute.profile_pic = await uploadImage(
+     file.buffer,
+     fileName,
+     folderName
+   );
+   await institute.save();
+
+   res.status(200).send({
+     message: "Profile pic uploaded successfully",
+   });
+ } catch (error) {
+   console.log(error);
+   res.status(500).send({ error: "Internal Server Error" });
+ }
+}
