@@ -15,7 +15,7 @@ const EARLY_JOIN_MINUTES = 10;
 
 exports.getWebinarsForAdmin = async (req, res) => {
   try {
-    const webinars = await Webinar.find();
+    const webinars = await Webinar.find().sort({ createdAt: -1 });
     if (!webinars)
       return res.status(404).send({
         error: "Webinars not found",
