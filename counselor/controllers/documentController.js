@@ -78,18 +78,29 @@ exports.postDocument = async (req, res) => {
     const { file, id } = req;
     const formattedId = JSON.stringify(id);
     const { document_type } = req.query;
-    if (!document_type)
+
+    if (!document_type) {
       return res.status(404).send({
         error: "DocumentType is required",
       });
+    }
 
     if (!file) {
       return res.status(400).json({ error: "No files uploaded" });
     }
 
+    // Validate that the file is an image (JPEG, PNG, JPG)
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      return res
+        .status(400)
+        .send({ error: "Only image files (JPEG, PNG, JPG) are allowed" });
+    }
+
     const documentType = await DocumentType.findOne({ _id: document_type });
-    if (!documentType)
+    if (!documentType) {
       return res.status(400).send({ error: "Document type does not exist" });
+    }
 
     const existingDocument = await Document.findOne({
       document_type: documentType._id,
@@ -103,10 +114,11 @@ exports.postDocument = async (req, res) => {
       document_type: documentType,
       user: id,
     });
-    if (newDocument)
+    if (newDocument) {
       return res.status(400).send({
         error: "Document already exists, Can't re-upload same document",
       });
+    }
 
     const fileName = `document-image-${Date.now()}.jpeg`;
     const folderName = "document-images";
