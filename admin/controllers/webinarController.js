@@ -184,6 +184,13 @@ exports.getTrendingWebinars = async (req, res) => {
       const registered = webinar.registered_participants.some(
         (participant) => participant._id === user_id
       );
+      const earlyJoinTime = new Date(webinar.webinar_date);
+      earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+
+      // Check if the user can join the webinar
+      const now = new Date();
+      now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
+      const canJoin = now >= earlyJoinTime;
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
@@ -196,6 +203,7 @@ exports.getTrendingWebinars = async (req, res) => {
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
         registered,
+        canJoin,
       };
     });
 
