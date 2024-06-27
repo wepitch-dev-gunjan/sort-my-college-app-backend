@@ -1190,3 +1190,39 @@ exports.updateOutstandingBalance = async (req, res) => {
     });
   }
 };
+
+exports.editProfilePic =async (req, res) => {
+ try {
+  const { file} = req;
+  const {counsellor_id} =req.params;
+
+  if (!file) {
+    return res.status(400).send({
+      error: "File can't be empty",
+    });
+  }
+
+  const counsellor = await Counsellor.findById(counsellor_id);
+
+  if (!counsellor) {
+    return res.status(404).send({ error: "Counsellor not found" });
+  }
+
+  const fileName = `counsellor-profile-pic-${Date.now()}.jpeg`;
+  const folderName = "counsellor-profile-pics";
+
+  counsellor.profile_pic = await uploadImage(
+    file.buffer,
+    fileName,
+    folderName
+  );
+  await counsellor.save();
+
+  res.status(200).send({
+    message: "Profile pic uploaded successfully",
+  });
+} catch (error) {
+  console.log(error);
+  res.status(500).send({ error: "Internal Server Error" });
+}
+}

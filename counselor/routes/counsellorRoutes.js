@@ -23,6 +23,7 @@ const {
   incrementActivityPoints,
   clearOutstandingBalance,
   updateOutstandingBalance,
+  editProfilePic,
 } = require("../controllers/counsellorController");
 const {
   counsellorAuth,
@@ -71,7 +72,7 @@ router.put(
   counsellorAuth,
   incrementActivityPoints
 );
-
+router.put("/edit-Profile-Pic/admin/:counsellor_id" ,adminAuth,upload.single("image") , editProfilePic);
 // POST
 router.post("/login", login);
 router.post("/register", register);
