@@ -27,8 +27,7 @@ const userSchema = new Schema(
     },
     profile_pic: {
       type: String,
-      default:
-        "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
+      default: "https://shorturl.at/war0c",
     },
     education_level: {
       type: String,
