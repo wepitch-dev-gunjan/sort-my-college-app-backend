@@ -29,10 +29,6 @@ exports.adminLogin = async (req, res) => {
       existingAdmin.password
     );
 
-    console.log(`Password provided: ${password}`);
-    console.log(`Stored hashed password: ${existingAdmin.password}`);
-    console.log(`Password match: ${passwordMatch}`);
-
     if (!passwordMatch)
       return res.status(401).send({
         error: "Invalid password",
