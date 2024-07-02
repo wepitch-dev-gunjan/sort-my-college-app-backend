@@ -967,9 +967,14 @@ exports.isSessionAboutToStart = async (req, res) => {
     }
 
     const sessionTimeMinutes = session.session_time;
-    const currentTime = new Date();
 
-    const sessionTimeEpoch = new Date(currentTime);
+    // Get the current time in IST
+    const currentTime = new Date();
+    const currentTimeIST = new Date(
+      currentTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
+
+    const sessionTimeEpoch = new Date(currentTimeIST);
     sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
     sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
     sessionTimeEpoch.setSeconds(0);
@@ -978,7 +983,7 @@ exports.isSessionAboutToStart = async (req, res) => {
     const threshold = 30 * 60 * 1000;
 
     const isAboutToStart =
-      Math.abs(sessionTimeEpoch - currentTime) <= threshold;
+      Math.abs(sessionTimeEpoch - currentTimeIST) <= threshold;
 
     res.status(200).json({ isAboutToStart });
   } catch (error) {
