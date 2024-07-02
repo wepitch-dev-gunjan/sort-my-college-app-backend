@@ -980,7 +980,7 @@ exports.isSessionAboutToStart = async (req, res) => {
     sessionTimeEpoch.setSeconds(0);
     sessionTimeEpoch.setMilliseconds(0);
 
-    const threshold = 30 * 60 * 1000;
+    const threshold = 10 * 60 * 1000;
 
     const isAboutToStart =
       Math.abs(sessionTimeEpoch - currentTimeIST) <= threshold;
