@@ -552,6 +552,8 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
       payment,
       subject,
       username,
+      session_topic,
+      link,
     } = req.body;
     console.log(req.body);
     const mailOptions = {
@@ -562,6 +564,8 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
       duration,
       location,
       payment,
+      link,
+      session_topic,
       to,
       subject,
       html: `<body>
@@ -590,40 +594,46 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                     <tr>
                       <td>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          Hello ${username} <br><br>
-                          We are pleased to inform you that a new counseling session has been booked on our platform. Please find the details of the booking below: <br><br>
+                          To <br/> ${username},<br><br>
+                          We are delighted to inform you that a new counselling session has been booked through our platform. Below are the details of the booking: <br><br>
                           <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
-                            <tr>
-                              <td><b>Date and Time:</b></td>
-                              <td> ${date} ${time}</td>
-                            </tr>
                             <tr>
                               <td><b>Client Name:</b></td>
                               <td>${client}</td>
+                            </tr>
+                            <tr>
+                              <td><b>Date and Time:</b></td>
+                              <td>${date} ${time}</td>
                             </tr>
                             <tr>
                               <td><b>Session Type:</b></td>
                               <td>${sessiontype}</td>
                             </tr>
                             <tr>
+                              <td><b>Session Topic:</b></td>
+                              <td>${
+                                sessiontype === "Group"
+                                  ? session_topic
+                                  : "Personal session"
+                              }</td>
+                            </tr>
+                            <tr>
                               <td><b>Duration:</b></td>
                               <td>${duration}</td>
                             </tr>
                             <tr>
-                              <td><b>Location:</b></td>
-                              <td>${location}</td>
+                              <td><b>Payment:</b></td>
+                              <td>${payment}</td>
                             </tr>
                             <tr>
-                              <td><b>Payment Total:</b></td>
-                              <td>${payment}</td>
+                              <td><b>Meeting Link:</b></td>
+                              <td><a href=${link}>Link</a></td>
                             </tr>
                           </table>
                           <br><br>
-                          
-                          Please ensure that you are available and prepared for the scheduled session. If you have any questions or need further information about this booking, please do not hesitate to contact us <br><br>
-                          Thank you for your commitment to providing counseling services through our platform. We appreciate your dedication to helping individuals in need
-                          <br /><br />Best regards, <br />
-                          The
+                          Please ensure that you are available and prepared for the scheduled session. If you have any inquiries or require additional information regarding this booking, please do not hesitate to contact us at support@sortmycollege.com. <br><br>
+                         We greatly appreciate your dedication to providing counselling services. Your expertise and support are invaluable.<br><br>
+                          Best regards, <br />
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           Team
                         </p>
@@ -636,9 +646,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
-    </body>
-    
-    `,
+    </body>`,
     };
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {

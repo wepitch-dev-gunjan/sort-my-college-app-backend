@@ -476,6 +476,7 @@ exports.bookSession = async (req, res) => {
         sessiontype: session.session_type,
         duration: session.session_duration,
         payment: session.session_fee,
+        link: session.session_link,
       });
     }
 
@@ -490,6 +491,8 @@ exports.bookSession = async (req, res) => {
         duration: session.session_duration,
         payment: session.session_fee,
         username: counsellor.name,
+        session_topic: session.session_topic,
+        subject: "Subject: New Counselling Session Booked",
       });
     } catch (err) {
       console.log(err);
