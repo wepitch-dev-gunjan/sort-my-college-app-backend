@@ -555,6 +555,19 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
       session_topic,
       link,
     } = req.body;
+    function formatTime(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const period = hours >= 12 ? "PM" : "AM";
+      const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+      const formattedMinutes = mins < 10 ? "0" + mins : mins; // Pad minutes with zero if needed
+      return `${formattedHours}:${formattedMinutes} ${period}`;
+    }
+    const formattedDate = new Date(date).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
     console.log(req.body);
     const mailOptions = {
       date,
@@ -603,7 +616,9 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                             </tr>
                             <tr>
                               <td><b>Date and Time:</b></td>
-                              <td id="formatted-date"></td>
+                              <td>${formattedDate(date)} ${formatTime(
+        time
+      )}</td>
                             </tr>
                             <tr>
                               <td><b>Session Type:</b></td>
@@ -646,15 +661,6 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
-       <script>
-   
-    document.addEventListener("DOMContentLoaded", function() {
-      var dateStr = "${date}"; // Assuming ${date} is the date string in the format "2024-05-24T00:00:00.000Z"
-      var date = new Date(dateStr);
-      var formattedDate = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + date.getDate()).slice(-2);
-      document.getElementById("formatted-date").textContent = formattedDate + " ${time}"; // Append time if needed
-    });
-  </script>
     </body>`,
     };
     transporter.sendMail(mailOptions, (error, info) => {
