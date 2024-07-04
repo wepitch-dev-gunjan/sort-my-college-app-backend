@@ -644,11 +644,12 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                             </tr>
                           </table>
                           <br><br>
+                          <p style="font-size: 2vh; font-family: Georgia, 'Times New Roman', Times, serif; color: black;">
                           Please ensure that you are available and prepared for the scheduled session. If you have any inquiries or require additional information regarding this booking, please do not hesitate to contact us at support@sortmycollege.com. <br><br>
                           We greatly appreciate your dedication to providing counselling services. Your expertise and support are invaluable.<br><br>
-                          Best regards, <br />
+                          Best regards </p> <br />
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
+                          
                         </p>
                       </td>
                     </tr>

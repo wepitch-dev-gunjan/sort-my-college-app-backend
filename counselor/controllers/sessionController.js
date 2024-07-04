@@ -492,7 +492,7 @@ exports.bookSession = async (req, res) => {
         username: counsellor.name,
         session_topic: session.session_topic,
         link: session.session_link,
-        subject: "Subject: New Counselling Session Booked",
+        subject: "New Counselling Session Booked",
       });
     } catch (err) {
       console.log(err);
