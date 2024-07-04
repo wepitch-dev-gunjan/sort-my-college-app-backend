@@ -616,9 +616,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                             </tr>
                             <tr>
                               <td><b>Date and Time:</b></td>
-                              <td>${formattedDate(date)} ${formatTime(
-        time
-      )}</td>
+                              <td>${formattedDate} ${formatTime(time)}</td>
                             </tr>
                             <tr>
                               <td><b>Session Type:</b></td>
