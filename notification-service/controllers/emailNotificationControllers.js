@@ -579,7 +579,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                     <tr>
                       <td align="center">
                         <a href="https://sortmycollege.com/">
-                          <img src="https://sortmycollege.com/wp-content/uploads/2023/05/SORTMYCOLLEGE-12.png" alt="" width="400" height="100" style="display: block;">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/10/cropped-SORTMYCOLLEGE-12-1.png" alt="" width="400" height="100" style="display: block;">
                         </a>
                       </td>
                     </tr>
@@ -593,10 +593,10 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                     </tr>
                     <tr>
                       <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                        <p style="font-size: 2vh; font-family: Georgia, 'Times New Roman', Times, serif; color: black;">
                           To <br/> ${username},<br><br>
                           We are delighted to inform you that a new counselling session has been booked through our platform. Below are the details of the booking: <br><br>
-                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia; color: black;">
+                          <table border="0" cellspacing="0" cellpadding="0" style="font-size: 2vh; font-family: Georgia, 'Times New Roman', Times, serif; color: black;">
                             <tr>
                               <td><b>Client Name:</b></td>
                               <td>${client}</td>
@@ -632,7 +632,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                           </table>
                           <br><br>
                           Please ensure that you are available and prepared for the scheduled session. If you have any inquiries or require additional information regarding this booking, please do not hesitate to contact us at support@sortmycollege.com. <br><br>
-                         We greatly appreciate your dedication to providing counselling services. Your expertise and support are invaluable.<br><br>
+                          We greatly appreciate your dedication to providing counselling services. Your expertise and support are invaluable.<br><br>
                           Best regards, <br />
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           Team
