@@ -603,7 +603,7 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
                             </tr>
                             <tr>
                               <td><b>Date and Time:</b></td>
-                              <td>${date} ${time / 60}</td>
+                              <td id="formatted-date"></td>
                             </tr>
                             <tr>
                               <td><b>Session Type:</b></td>
@@ -646,6 +646,15 @@ exports.bookedSessionCounsellorEmailNotification = (req, res) => {
           </td>
         </tr>
       </table>
+       <script>
+   
+    document.addEventListener("DOMContentLoaded", function() {
+      var dateStr = "${date}"; // Assuming ${date} is the date string in the format "2024-05-24T00:00:00.000Z"
+      var date = new Date(dateStr);
+      var formattedDate = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + ("0" + date.getDate()).slice(-2);
+      document.getElementById("formatted-date").textContent = formattedDate + " ${time}"; // Append time if needed
+    });
+  </script>
     </body>`,
     };
     transporter.sendMail(mailOptions, (error, info) => {
