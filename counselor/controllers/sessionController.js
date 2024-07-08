@@ -867,6 +867,25 @@ exports.getLatestSessions = async (req, res) => {
     const hours = currentDate.getHours() * 60 + 60;
     const minutes = currentDate.getMinutes();
     console.log(currentDate.getDate(), hours / 60, minutes);
+    // Create a new date object for the current time
+    let now = new Date();
+
+    // Get the current time in milliseconds
+    let currentTime = now.getTime();
+
+    // Calculate the IST offset in milliseconds (IST is UTC+5:30)
+    let istOffset = 5.5 * 60 * 60 * 1000;
+
+    // Create a new date object for IST time
+    let istDate = new Date(currentTime + istOffset);
+
+    // Set the IST date hours, minutes, seconds, and milliseconds to 0
+    istDate.setUTCHours(0, 0, 0, 0);
+
+    // Adjust the IST date back by the IST offset to get the correct date in local time
+    istDate = new Date(istDate.getTime() - istOffset);
+
+    console.log("IST Date: " + istDate);
 
     const sessionTime = hours + minutes;
 
@@ -878,7 +897,7 @@ exports.getLatestSessions = async (req, res) => {
     // Push the results of the first query into the sessions array
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: resetDate },
+        session_date: { $eq: istDate },
         session_time: { $gte: sessionTime },
       }))
     );

@@ -166,6 +166,7 @@ exports.getPayment = async (req, res) => {
 exports.getOutstandingBalance = async (req, res) => {
   try {
     const { counsellor_id } = req.params;
+
     const outstandingBalanceAggregation = await Payment.aggregate([
       {
         $match: {
@@ -183,11 +184,11 @@ exports.getOutstandingBalance = async (req, res) => {
       },
     ]);
 
+    console.log(outstandingBalanceAggregation);
     const outstandingBalance =
       outstandingBalanceAggregation.length > 0
         ? outstandingBalanceAggregation[0].outstanding_balance
         : 0;
-
     res.status(200).send({ outstandingBalance });
   } catch (error) {
     console.log(error);
@@ -196,9 +197,10 @@ exports.getOutstandingBalance = async (req, res) => {
 };
 
 exports.clearOutstandingbalance = async (req, res) => {
+  console.log("hit");
   try {
     const { counsellor_id } = req.params;
-    console.log(counsellor_id);
+    console.log("adasd", counsellor_id);
 
     const paymentsToUpdate = await Payment.find({
       payment_to: counsellor_id,
