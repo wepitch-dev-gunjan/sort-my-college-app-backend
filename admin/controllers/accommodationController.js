@@ -153,10 +153,38 @@ exports.editAccommodation = async (req, res) => {
     const { accomodation_id } = req.params;
     const updates = req.body;
 
+ 
+
     if (!accomodation_id) {
       return res.status(400).send({ error: "Accommodation ID is required" });
     }
+// edit files
+ if (req.files) {
+  if (req.files.aadhar_card) {
+    const file = req.files.aadhar_card[0];
+    const fileName = `aadhar-card-${Date.now()}.png`;
+    const folderName = `aadhar_cards`;
+    updates['owner.aadhar_card'] = await uploadImage(file.buffer, fileName, folderName);
+  }
 
+  if (req.files.pan_card) {
+    const file = req.files.pan_card[0];
+    const fileName = `pan-card-${Date.now()}.png`;
+    const folderName = `pan_cards`;
+    updates['owner.pan_card'] = await uploadImage(file.buffer, fileName, folderName);
+  }
+
+  if (req.files.images) {
+    let images = [];
+    for (const file of req.files.images) {
+      const fileName = `acc-image-${Date.now()}.png`;
+      const folderName = `accommodation_images`;
+      const imagePath = await uploadImage(file.buffer, fileName, folderName);
+      images.push(imagePath);
+    }
+    updates.images = images;
+  }
+}
     const updatedAccommodation = await Accommodation.findByIdAndUpdate(
       accomodation_id,
       updates,

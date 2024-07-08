@@ -24,7 +24,15 @@ router.post("/accommodation", adminAuth, upload.fields([
 }, addAccommodation);
 
 
-router.put("/accommodation/:accomodation_id", adminAuth, editAccommodation);
+router.put("/accommodation/:accomodation_id", adminAuth,upload.fields([
+ { name: 'images', maxCount: 10 },
+ { name: 'aadhar_card', maxCount: 1 },
+ { name: 'pan_card', maxCount: 1 }
+]), (req, res, next) => {
+ console.log('Files:', req.files);
+ console.log('Body:', req.body);
+ next();
+}, editAccommodation);
 router.delete(
   "/accommodation/:accomodation_id",
   adminAuth,
