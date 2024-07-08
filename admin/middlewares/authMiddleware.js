@@ -36,6 +36,23 @@ exports.adminAuth = async (req, res, next) => {
   }
 };
 
+exports.permissionAuth = async (req, res) => {
+  try {
+    const { token } = req.headers['Authorization']
+    const decoded = jwt.verify(token, JWT_SECRET)
+    const admin = await Admin.findOne({ email: decoded.email })
+    const permissions = admin.permissions;
+    if (!permissions.includes(req.permission)) {
+      return res.status(401).json({ error: "Admin not authorized" });
+    }
+
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+
 exports.counsellorOrUserAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
@@ -432,5 +449,141 @@ exports.adminWriteAuth = async (req, res, next) => {
     res.status(500).send({
       error: "Internal server error",
     });
+  }
+};
+
+exports.paymentReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "payment_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.counsellorReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "counsellor_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.counsellorWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "counsellor_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.userReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "user_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.userWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "user_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.instituteReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "institute_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.instituteWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "institute_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.accommodationReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "accommodation_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.accommodationWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "accommodation_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.bannersReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "banners_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.bannersWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "banners_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.helpReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "help_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.helpWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "help_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.adminReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "admin_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.adminWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "admin_write";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };

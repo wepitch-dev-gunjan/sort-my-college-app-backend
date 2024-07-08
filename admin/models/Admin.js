@@ -2,17 +2,15 @@ const { Schema, model } = require("mongoose");
 
 const adminSchema = new Schema(
   {
-    name: {
+    role: {
       type: String,
       default: "ADMIN",
+      enum: ['SUPER_ADMIN', "ADMIN"]
     },
     password: {
       type: String,
     },
     email: {
-      type: String,
-    },
-    type: {
       type: String,
     },
     permissions: {
