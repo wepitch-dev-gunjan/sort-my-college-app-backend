@@ -93,7 +93,7 @@ exports.deleteEnquiryForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-exports.getEnquiriesForAAdmin = async (req, res) => {
+exports.getEnquiriesForAdmin = async (req, res) => {
   try {
     const { accommodation_id } = req.query;
 

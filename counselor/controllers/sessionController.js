@@ -18,20 +18,20 @@ exports.getSessions = async (req, res) => {
   try {
     const { session_type, session_date } = req.query;
     const { counsellor_id } = req.params;
-
     const filter = { session_counsellor: counsellor_id };
-
+    // Add session type to the filter if provided
     if (session_type) {
       filter.session_type = session_type;
     }
-
+    // Add session date to the filter if provided
     if (session_date) {
       filter.session_date = new Date(session_date);
+      if (isNaN(filter.session_date)) {
+        return res.status(400).json({ error: "Invalid session date" });
+      }
     }
-
     let sessions = await Session.find(filter);
     let total_available_slots = 0;
-
     if (sessions.length > 0) {
       const daysOfWeek = [
         "Sunday",
@@ -42,19 +42,17 @@ exports.getSessions = async (req, res) => {
         "Friday",
         "Saturday",
       ];
-
       const massagedSessions = sessions.map((session) => {
         total_available_slots += session.session_available_slots;
         const sessionDate = new Date(session.session_date);
         let session_massaged_date = "";
-
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
-
-        if (sessionDate.toDateString() == today.toDateString()) {
+        // Determine the session massaged date
+        if (sessionDate.toDateString() === today.toDateString()) {
           session_massaged_date = "today";
-        } else if (sessionDate.toDateString() == tomorrow.toDateString()) {
+        } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
           session_massaged_date = "tomorrow";
         } else {
           const dayDiff = Math.ceil(
@@ -62,11 +60,9 @@ exports.getSessions = async (req, res) => {
           );
           if (dayDiff <= 7 && dayDiff > 0) {
             session_massaged_date = daysOfWeek[sessionDate.getDay()];
-            // session.session_date = daysOfWeek[sessionDate.getDay()].toString();
           } else {
             // Keep the original date if not within the next 7 days
             session_massaged_date = sessionDate.toDateString().slice(3);
-            session.session_time = sessionTimeIntoString(session.session_time);
           }
         }
         return {
@@ -868,6 +864,8 @@ exports.getLatestSessions = async (req, res) => {
     const minutes = currentDate.getMinutes();
     console.log(currentDate.getDate(), hours / 60, minutes);
     // Create a new date object for the current time
+
+    //newww
     let now = new Date();
 
     // Get the current time in milliseconds
@@ -886,6 +884,7 @@ exports.getLatestSessions = async (req, res) => {
     istDate = new Date(istDate.getTime() - istOffset);
 
     console.log("IST Date: " + istDate);
+    // end of new
 
     const sessionTime = hours + minutes;
 
