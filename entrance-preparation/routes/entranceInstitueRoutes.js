@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   epAuth,
   adminAuth,
-  userAuth
+  userAuth,
 } = require("../middlewares/authMiddleware");
 const {
   getProfile,
@@ -22,18 +22,16 @@ const {
   uploadProfilePic,
   followInstitute,
   unfollowInstitute,
-  editInstituteProfile
+  editInstituteProfile,
 } = require("../controllers/entranceInstituteControllers");
-const upload = require("../middlewares/uploadImage")
+const upload = require("../middlewares/uploadImage");
 // ep panel routes
 router.get("/institute", epAuth, getProfile);
 router.put("/institute", epAuth, editProfile);
 // cover Image
-router.post("/cover-image", epAuth,
-  upload.single("image")
-  , uploadCoverImage);
+router.post("/cover-image", epAuth, upload.single("image"), uploadCoverImage);
 // ProfilePic
-router.post("/profile-pic", epAuth, upload.single("image"), uploadProfilePic)
+router.post("/profile-pic", epAuth, upload.single("image"), uploadProfilePic);
 
 // // admin panel routes
 router.get("/institute/admin", adminAuth, getInstitutesForAdmin);
@@ -51,13 +49,26 @@ router.put("/:institute_id/reject", adminAuth, rejectInstitute);
 // // user routes
 router.get("/institute/user", userAuth, getInstitutesForUser);
 router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
-router.get("/institute/user/:institute_id/enquiry-form", userAuth, getInstituteEnquiryFormForUser);
+router.get(
+  "/institute/user/:institute_id/enquiry-form",
+  userAuth,
+  getInstituteEnquiryFormForUser
+);
 router.put("/institute/user/:institute_id/follow", userAuth, followInstitute);
-router.put("/institute/user/:institute_id/unfollow", userAuth, unfollowInstitute);
+router.put(
+  "/institute/user/:institute_id/unfollow",
+  userAuth,
+  unfollowInstitute
+);
 // router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
 
 // router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);
 // router.put('/institute/user/:institute_id/unfollow',userAuth, unfollowInstitute);
- // edit institute image
- router.put("/editinstitute/profile-pic/admin/:institute_id" , adminAuth,upload.single("image"),editInstituteProfile);
+// edit institute image
+router.put(
+  "/editinstitute/profile-pic/admin/:institute_id",
+  adminAuth,
+  upload.single("image"),
+  editInstituteProfile
+);
 module.exports = router;
