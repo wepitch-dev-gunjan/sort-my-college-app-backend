@@ -38,10 +38,10 @@ exports.createFeedback = async (req, res) => {
       feedback_to: counsellor_id,
     });
 
-    // if (feedback)
-    //   return res.status(400).send({
-    //     error: "Feedback is already given by the user",
-    //   });
+    if (feedback)
+      return res.status(400).send({
+        error: "Feedback is already given by the user",
+      });
 
     feedback = new Feedback({
       feedback_from: user._id,

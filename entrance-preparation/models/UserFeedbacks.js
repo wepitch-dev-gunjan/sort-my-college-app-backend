@@ -1,26 +1,31 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model } = require("mongoose");
 
-const userFeedbacksSchema = new Schema ({
-    user_id: {
-        type: String,
-        required: true
+const userFeedbacksSchema = new Schema(
+  {
+    feedback_to: {
+      type: String,
+      required: true,
+    },
+    feedback_from: {
+      type: String,
     },
     rating: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 5
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
     },
     comment: {
-        type: String,
-        reuired: true
-    }
-},
-{
+      type: String,
+      reuired: true,
+    },
+  },
+  {
     timestamps: true,
-},
-{
-    strict: false
-  });
+  },
+  {
+    strict: false,
+  }
+);
 
-module.exports = model('UserFeedbacks', userFeedbacksSchema)
+module.exports = model("UserFeedbacks", userFeedbacksSchema);
