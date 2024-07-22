@@ -69,7 +69,7 @@ exports.generateOtpByPhone = async (req, res) => {
 
 exports.verifyOtpByPhone = async (req, res) => {
   try {
-    const { phone_number, otp } = req.body;
+    const { phone_number, otp, name } = req.body;
 
     if (phone_number == "917297827346" && otp == "1234") {
       let user = await User.findOne({ phone_number });
@@ -116,14 +116,22 @@ exports.verifyOtpByPhone = async (req, res) => {
 
     // If OTP is valid, you can proceed with user verification
     let user = await User.findOne({ phone_number });
-    const already_registered = !!user;
+
+    // phle wala code by gunjan sir
+    // const already_registered = !!user;
+    let already_registered = user && user.name ? true : false;
 
     if (!user) {
       user = new User({
         phone_number,
+        name,
         verified: true,
       });
 
+      await user.save();
+    }
+    if (user) {
+      user.name = name;
       await user.save();
     }
 
