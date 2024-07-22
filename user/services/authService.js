@@ -130,7 +130,7 @@ exports.verifyOtpByPhone = async (req, res) => {
 
       await user.save();
     }
-    if (user) {
+    if (user && name) {
       user.name = name;
       await user.save();
     }
