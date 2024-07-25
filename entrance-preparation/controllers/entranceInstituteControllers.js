@@ -4,6 +4,7 @@ const {
   convertTo24HourFormat,
   getSlotsFromTotalSlots,
 } = require("../helpers/instituteHelpers");
+const EntranceCourse = require("../models/EntranceCourse");
 const EntranceInstitute = require("../models/EntranceInstitute");
 const { uploadImage } = require("../services/cloudinary");
 
@@ -45,7 +46,7 @@ exports.editProfile = async (req, res) => {
 
       if (
         convertTo24HourFormat(timing.start_time) >
-        convertTo24HourFormat(timing.end_time) &&
+          convertTo24HourFormat(timing.end_time) &&
         convertTo24HourFormat(timing.end_time) !== 0
       )
         return res.status(400).send({
@@ -139,10 +140,14 @@ exports.getInstitutesForAdmin = async (req, res) => {
           { "address.city": { $regex: regex } },
           { "address.state": { $regex: regex } },
           { "address.pin_code": { $regex: regex } },
-        ]
+        ],
       };
-      console.log("Query Object: ", JSON.stringify(queryObject, (key, value) => 
-        key === '$regex' ? value.toString() : value));
+      console.log(
+        "Query Object: ",
+        JSON.stringify(queryObject, (key, value) =>
+          key === "$regex" ? value.toString() : value
+        )
+      );
     } else {
       console.log("Search parameter is empty");
     }
@@ -151,7 +156,9 @@ exports.getInstitutesForAdmin = async (req, res) => {
 
     if (search && (!institutes || institutes.length === 0)) {
       // If search input is present and no institutes found, do not return "No matches found"
-      console.log("No matches found for the search input, returning all institutes instead.");
+      console.log(
+        "No matches found for the search input, returning all institutes instead."
+      );
       queryObject = {}; // Reset the queryObject to fetch all institutes
       institutes = await EntranceInstitute.find(queryObject);
     }
@@ -174,9 +181,6 @@ exports.getInstitutesForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
-
 
 exports.getInstituteForAdmin = async (req, res) => {
   try {
@@ -278,24 +282,44 @@ exports.getInstitutesForUser = async (req, res) => {
     const queryObject = {};
     queryObject.verified = true;
 
-    // Assuming you have some logic to authenticate the admin user and retrieve necessary information
-    // You can customize this query according to your needs
     const institutes = await EntranceInstitute.find(queryObject);
 
     if (!institutes || institutes.length === 0) {
       return res.status(404).json({ message: "Institute not found" });
     }
-    const massagedInstitutes = institutes.map((institute) => ({
-      _id: institute._id,
-      name: institute.name,
-      profile_pic: institute.profile_pic,
-      address: institute.address,
-      year_established_in: institute.year_established_in,
-      institute_timings: institute.institute_timings,
-    }));
 
-    // You can customize the response data structure as per your requirements
-    res.status(200).json(massagedInstitutes);
+    // Fetch courses for each institute
+    const institutesWithCourses = await Promise.all(
+      institutes.map(async (institute) => {
+        const courses = await EntranceCourse.find({ institute: institute._id });
+
+        const massagedCourses = courses.map((course) => ({
+          _id: course._id,
+          name: course.name,
+          description: course.description,
+          duration: course.duration,
+          fees: course.fees,
+        }));
+        const currentYear = new Date().getFullYear();
+        const establishedYear = new Date(
+          institute.year_established_in
+        ).getFullYear();
+        const yearsOfExperience = currentYear - establishedYear;
+
+        return {
+          _id: institute._id,
+          name: institute.name,
+          profile_pic: institute.profile_pic,
+          address: institute.address,
+          year_established_in: institute.year_established_in,
+          years_of_experience: yearsOfExperience,
+          institute_timings: institute.timings,
+          courses: massagedCourses,
+        };
+      })
+    );
+
+    res.status(200).json(institutesWithCourses);
   } catch (error) {
     console.error("Error fetching institute:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -486,7 +510,7 @@ exports.uploadProfilePic = async (req, res) => {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
-}
+};
 
 exports.followInstitute = async (req, res) => {
   try {
@@ -494,24 +518,26 @@ exports.followInstitute = async (req, res) => {
     const { id } = req;
 
     const institute = await EntranceInstitute.findOne({ _id: institute_id });
-    if (!institute) return res.status(404).send({
-      error: "Institute not found"
-    })
+    if (!institute)
+      return res.status(404).send({
+        error: "Institute not found",
+      });
 
     const isFollowing = institute.followers.includes(id);
-    if (isFollowing) return res.status(400).send({
-      error: "User is already following the institute"
-    })
+    if (isFollowing)
+      return res.status(400).send({
+        error: "User is already following the institute",
+      });
 
     institute.followers.push(id);
     await institute.save();
     res.status(200).send({
       message: "User has followed the institute",
-      followers: institute.followers.length
-    })
+      followers: institute.followers.length,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 exports.unfollowInstitute = async (req, res) => {
@@ -520,62 +546,66 @@ exports.unfollowInstitute = async (req, res) => {
     const { id } = req;
 
     const institute = await EntranceInstitute.findOne({ _id: institute_id });
-    if (!institute) return res.status(404).send({
-      error: "Institute not found"
-    });
+    if (!institute)
+      return res.status(404).send({
+        error: "Institute not found",
+      });
 
     const isFollowing = institute.followers.includes(id);
-    if (!isFollowing) return res.status(400).send({
-      error: "User is already not following the institute"
-    });
+    if (!isFollowing)
+      return res.status(400).send({
+        error: "User is already not following the institute",
+      });
 
     // Corrected filter method
-    institute.followers = institute.followers.filter(user_id => user_id.toString() !== id);
+    institute.followers = institute.followers.filter(
+      (user_id) => user_id.toString() !== id
+    );
 
     await institute.save();
     res.status(200).send({
       message: "User has unfollowed the institute",
-      followers: institute.followers.length
+      followers: institute.followers.length,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: 'Internal Server Error' });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
 
 exports.editInstituteProfile = async (req, res) => {
- try {
-   const { file } = req;
-   const {institute_id} = req.params;
-   console.log("file",institute_id)
-   
-   if (!file) {
-     return res.status(400).send({
-       error: "File can't be empty",
-     });
-   }
+  try {
+    const { file } = req;
+    const { institute_id } = req.params;
+    console.log("file", institute_id);
 
-   const institute = await EntranceInstitute.findById(institute_id);
+    if (!file) {
+      return res.status(400).send({
+        error: "File can't be empty",
+      });
+    }
 
-   if (!institute) {
-     return res.status(404).send({ error: "institute not found" });
-   }
+    const institute = await EntranceInstitute.findById(institute_id);
 
-   const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
-   const folderName = "institute-profile-pics";
+    if (!institute) {
+      return res.status(404).send({ error: "institute not found" });
+    }
 
-   institute.profile_pic = await uploadImage(
-     file.buffer,
-     fileName,
-     folderName
-   );
-   await institute.save();
+    const fileName = `institute-profile-pic-${Date.now()}.jpeg`;
+    const folderName = "institute-profile-pics";
 
-   res.status(200).send({
-     message: "Profile pic uploaded successfully",
-   });
- } catch (error) {
-   console.log(error);
-   res.status(500).send({ error: "Internal Server Error" });
- }
-}
+    institute.profile_pic = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
+    await institute.save();
+
+    res.status(200).send({
+      message: "Profile pic uploaded successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};

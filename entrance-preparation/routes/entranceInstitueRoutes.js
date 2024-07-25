@@ -47,7 +47,7 @@ router.get("/institute/find-one", findOneInstitute);
 router.put("/:institute_id/reject", adminAuth, rejectInstitute);
 
 // // user routes
-router.get("/institute/user", userAuth, getInstitutesForUser);
+router.get("/institute/user", getInstitutesForUser);
 router.get("/institute/user/:institute_id", userAuth, getInstituteForUser);
 router.get(
   "/institute/user/:institute_id/enquiry-form",
