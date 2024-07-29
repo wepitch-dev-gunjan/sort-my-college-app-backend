@@ -307,3 +307,43 @@ exports.changeStatus = async (req, res) => {
  }
 };
 
+exports.getAllEnquiriesForAdmin = async (req, res) => {
+ try {
+   const enquiries = await Enquiry.find(); 
+
+   if (!enquiries.length) {
+     return res.status(200).send([]);
+   }
+
+   const massagedDataPromise = Promise.all(
+     enquiries.map(async (enquiry) => {
+       try {
+         const { data } = await axios.get(
+           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+         );
+         return {
+           _id: enquiry._id,
+           name: data.name,
+           phone_number: data.phone_number,
+           status: enquiry.status,
+           date: enquiry.date,
+         };
+       } catch (error) {
+         console.error(`Error fetching user details for enquiry ${enquiry._id}:`, error);
+         return null;
+       }
+     })
+   );
+
+   const massagedData = await massagedDataPromise;
+
+
+   const validData = massagedData.filter(item => item !== null);
+
+   res.status(200).json(validData);
+
+ } catch (error) {
+   console.error("Error getting enquiries:", error);
+   res.status(500).json({ message: "Internal Server Error" });
+ }
+};
