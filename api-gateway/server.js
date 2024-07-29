@@ -41,14 +41,12 @@ const server =
   // ) :
   http.createServer(app);
 
-
 const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
 });
-
 
 // Configure proxy for each service
 const proxyConfig = {
@@ -82,7 +80,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 // Google Authentication
 app.use("/", require("./services/googleAuthentication"));

@@ -9,6 +9,7 @@ const {
   findOneUser,
   getUsersForAdmin,
   getSingleUser,
+  getUserForEp,
 } = require("../controllers/userController");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
@@ -19,8 +20,11 @@ const router = express.Router();
 
 // user routes
 router.get("/", userAuth, getProfile);
-router.put("/", userAuth, upload.single('profile_pic'), editUser);
+router.put("/", userAuth, upload.single("profile_pic"), editUser);
+
 router.put("/register", userAuth, register);
+//user for ep
+router.get("/ep/:user_id", getUserForEp);
 
 // admin routes
 router.get("/users", findOneUser);
