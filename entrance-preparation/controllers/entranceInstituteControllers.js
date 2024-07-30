@@ -1,3 +1,4 @@
+const { default: axios } = require("axios");
 const {
   week,
   getDayFromDate,
@@ -8,6 +9,7 @@ const EntranceCourse = require("../models/EntranceCourse");
 const EntranceInstitute = require("../models/EntranceInstitute");
 const UserFeedbacks = require("../models/UserFeedbacks");
 const { uploadImage } = require("../services/cloudinary");
+const { BACKEND_URL } = process.env;
 
 // ep panel controllers
 exports.getProfile = async (req, res) => {
@@ -339,19 +341,97 @@ exports.getInstitutesForUser = async (req, res) => {
 exports.getInstituteForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
+    const { user_id } = req; // Assuming user ID is available in the request
 
+    // Fetch the institute details
     const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
     if (!institute) {
-      return res.status(404).json({ message: "Institute not found !" });
+      return res.status(404).json({ message: "Institute not found" });
     }
 
-    res.status(200).json(institute);
+    // Fetch courses for the institute
+    const courses = await EntranceCourse.find({ institute: institute._id });
+
+    const massagedCourses = courses.map((course) => ({
+      _id: course._id,
+      type: course.type,
+      name: course.name,
+      description: course.description,
+      duration: course.duration,
+      fees: course.fees,
+    }));
+
+    // Calculate years of experience
+    const currentYear = new Date().getFullYear();
+    const establishedYear = new Date(
+      institute.year_established_in
+    ).getFullYear();
+    const yearsOfExperience = currentYear - establishedYear;
+
+    // Fetch feedbacks
+    const feedbacks = await UserFeedbacks.find({ feedback_to: institute._id });
+
+    // Calculate the rating
+    const totalRating = feedbacks.reduce(
+      (sum, feedback) => sum + feedback.rating,
+      0
+    );
+    const rating = feedbacks.length ? totalRating / feedbacks.length : 0;
+
+    // Fetch user details for each feedback
+    const feedbackDetails = await Promise.all(
+      feedbacks.map(async (feedback) => {
+        try {
+          const { data } = await axios.get(
+            `${BACKEND_URL}/user/ep/${feedback.feedback_from}`
+          );
+          return {
+            rating: feedback.rating,
+            comment: feedback.comment,
+            userName: data.name,
+            profile_pic: data.profile_pic,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching user details for feedback ${feedback.feedback_from}:`,
+            error
+          );
+          return {
+            rating: feedback.rating,
+            comment: feedback.comment,
+            user: {
+              name: "Unknown",
+              profile_pic: "",
+            },
+          };
+        }
+      })
+    );
+
+    // Check if the user is following the institute
+
+    // Prepare the response object
+    const instituteWithDetails = {
+      _id: institute._id,
+      name: institute.name,
+      profile_pic: institute.profile_pic,
+      address: institute.address,
+      year_established_in: institute.year_established_in,
+      years_of_experience: yearsOfExperience,
+      institute_timings: institute.timings,
+      courses: massagedCourses,
+      rating: rating,
+      feedbacks: feedbackDetails,
+    };
+
+    res.status(200).json(instituteWithDetails);
   } catch (error) {
     console.error("Error fetching institute for user: ", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 exports.getInstituteEnquiryFormForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
