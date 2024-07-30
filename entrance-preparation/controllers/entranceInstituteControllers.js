@@ -621,8 +621,9 @@ exports.followInstitute = async (req, res) => {
     institute.followers.push(id);
     await institute.save();
     res.status(200).send({
+      status: "true",
       message: "User has followed the institute",
-      followers: institute.followers.length,
+      followersCount: institute.followers.length,
     });
   } catch (error) {
     console.log(error);
@@ -653,8 +654,9 @@ exports.unfollowInstitute = async (req, res) => {
 
     await institute.save();
     res.status(200).send({
+      status: "false",
       message: "User has unfollowed the institute",
-      followers: institute.followers.length,
+      followersCount: institute.followers.length,
     });
   } catch (error) {
     console.log(error);
