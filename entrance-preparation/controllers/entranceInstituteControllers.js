@@ -6,6 +6,7 @@ const {
 } = require("../helpers/instituteHelpers");
 const EntranceCourse = require("../models/EntranceCourse");
 const EntranceInstitute = require("../models/EntranceInstitute");
+const UserFeedbacks = require("../models/UserFeedbacks");
 const { uploadImage } = require("../services/cloudinary");
 
 // ep panel controllers
@@ -305,6 +306,14 @@ exports.getInstitutesForUser = async (req, res) => {
           institute.year_established_in
         ).getFullYear();
         const yearsOfExperience = currentYear - establishedYear;
+        const feedbacks = await UserFeedbacks.find({
+          feedback_to: institute._id,
+        });
+        const totalRating = feedbacks.reduce(
+          (sum, feedback) => sum + feedback.rating,
+          0
+        );
+        const rating = feedbacks.length ? totalRating / feedbacks.length : 0;
 
         return {
           _id: institute._id,
@@ -315,6 +324,7 @@ exports.getInstitutesForUser = async (req, res) => {
           years_of_experience: yearsOfExperience,
           institute_timings: institute.timings,
           courses: massagedCourses,
+          rating: rating,
         };
       })
     );
