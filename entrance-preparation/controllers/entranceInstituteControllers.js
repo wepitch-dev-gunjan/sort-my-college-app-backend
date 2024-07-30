@@ -343,7 +343,6 @@ exports.getInstituteForUser = async (req, res) => {
     const { institute_id } = req.params;
     const { user_id } = req; // Assuming user ID is available in the request
 
-    // Fetch the institute details
     const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
     if (!institute) {
