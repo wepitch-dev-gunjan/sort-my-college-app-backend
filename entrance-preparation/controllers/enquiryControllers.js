@@ -192,53 +192,123 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
 
 
 // get Enqueries for Admin
-exports.getEnquiriesForAdmin = async (req, res) => {
- try {
-  const {
-  search,
-  status,
-  } = req.query;
-  const queryObject = {};
-  if(status) {
-   queryObject.status = status;
-  }
-   const { institute_id } = req.params;
-   if (!institute_id) {
-     return res.status(404).json({ message: "Specified institute not found" });
-   }
-   const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
-   if (!enquiries) return res.status(201).send([]);
-   const massagedDataPromise = Promise.all(
-     enquiries.map(async (enquiry) => {
-       const { data } = await axios.get(
-         `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-       );
-       return {
-         _id: enquiry._id,
-         name: data.name,
-         phone_number: data.phone_number,
-         status: enquiry.status,
-         date: enquiry.date,
-       };
-     })
-   );
+// exports.getEnquiriesForAdmin = async (req, res) => {
+//  try {
+//   const {
+//   search,
+//   status,
+//   } = req.query;
+//   const queryObject = {};
+//   if(status) {
+//    queryObject.status = status;
+//   }
+//    const { institute_id } = req.params;
+//    console.log("Institute: ", institute_id)
+//    if (!institute_id) {
+//      return res.status(404).json({ message: "Specified institute not found" });
+//    }
+//   //  const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
+//    const enquiries = await Enquiry.find({ enquired_to: institute_id });
+
+//    if (!enquiries) return res.status(201).send([]);
+//    console.log("Enquirer: -> -> ", `${enquiry.enquirer.toString()}`)
+//    const massagedDataPromise = Promise.all(
+//      enquiries.map(async (enquiry) => {
+//        const { data } = await axios.get(
+//          `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//        );
+//        return {
+//          _id: enquiry._id,
+//          name: data.name,
+//          phone_number: data.phone_number,
+//          status: enquiry.status,
+//          date: enquiry.date,
+//        };
+//      })
+//    );
   
-   massagedDataPromise
-     .then((massagedData) => {
-       // console.log(massagedData);
-       res.status(200).json(massagedData);
+//    massagedDataPromise
+//      .then((massagedData) => {
+//        // console.log(massagedData);
+//        res.status(200).json(massagedData);
        
-     })
-     .catch((error) => {
-       console.error(error);
-     });
-   // console.log(massagedDataPromise);
- } catch (error) {
-  console.log(error)
-   console.error("Error getting enquiries!!");
-   res.status(500).json({ message: "Internal  enquiries Server Error" });
- }
+//      })
+//      .catch((error) => {
+//        console.error(error);
+//      });
+//    // console.log(massagedDataPromise);
+//  } catch (error) {
+//   console.log(error)
+//    console.error("Error getting enquiries!!");
+//    res.status(500).json({ message: "Internal  enquiries Server Error" });
+//  }
+// };
+
+
+exports.getEnquiriesForAdmin = async (req, res) => {
+  try {
+    const { search, status } = req.query;
+    const queryObject = {};
+
+    // Handle status query
+    if (status) {
+      queryObject.status = status;
+    }
+
+    const { institute_id } = req.params;
+    console.log("Institute: ", institute_id);
+
+    if (!institute_id) {
+      return res.status(404).json({ message: "Specified institute not found" });
+    }
+
+    // Handle search query (example: searching in name field)
+    if (search) {
+      queryObject.name = { $regex: search, $options: 'i' };
+    }
+
+    // Query for enquiries
+    const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
+
+    if (!enquiries.length) return res.status(201).send([]);
+
+    // Process enquiries to fetch user data
+    const massagedDataPromise = Promise.all(
+      enquiries.map(async (enquiry) => {
+        try {
+          const { data } = await axios.get(
+            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+          );
+          return {
+            _id: enquiry._id,
+            name: data.name,
+            phone_number: data.phone_number,
+            status: enquiry.status,
+            date: enquiry.date,
+          };
+        } catch (error) {
+          console.error(`Error fetching user data for enquiry ${enquiry._id}: `, error);
+          return null; // Handle cases where user data fetch fails
+        }
+      })
+    );
+
+    massagedDataPromise
+      .then((massagedData) => {
+        // Filter out null results from failed fetches
+        const filteredData = massagedData.filter(item => item !== null);
+        res.status(200).json(filteredData);
+      })
+      .catch((error) => {
+        console.error("Error processing enquiries: ", error);
+        res.status(500).json({ message: "Internal server error while processing enquiries" });
+      });
+  } catch (error) {
+    console.error("Error getting enquiries!!", error);
+    res.status(500).json({ message: "Internal enquiries server error" });
+  }
 };
+
 
 // getSingleEnquiryForAdmin
 exports.getSingleEnquiryForAdmin = async (req,res) => {
@@ -276,6 +346,8 @@ phone_number: userData.phone_number,
  res.status(500).json({message : "Internal Server Error"});
 }
 }
+
+
 // change status For Admin
 
 exports.changeStatus = async (req, res) => {
