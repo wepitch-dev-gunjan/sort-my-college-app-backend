@@ -45,6 +45,7 @@ exports.addEnquiry = async (req, res) => {
 // get Engueries for Ep
 exports.getEnquiries = async (req, res) => {
   try {
+    console.log("Reached")
     const { institute_id } = req;
     if (!institute_id) {
       return res.status(404).json({ message: "Specified institute not found" });
@@ -72,7 +73,7 @@ exports.getEnquiries = async (req, res) => {
         const { data } = await axios.get(
           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
         );
-        // console.log("dataa,", data);
+        console.log("dataa,", data);
         return {
           _id: enquiry._id,
           name: data.name,
@@ -279,12 +280,14 @@ exports.getEnquiriesForAdmin = async (req, res) => {
           const { data } = await axios.get(
             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
           );
+          const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
           return {
             _id: enquiry._id,
             name: data.name,
             phone_number: data.phone_number,
             status: enquiry.status,
             date: enquiry.date,
+            createdAt: createdAtTime,
           };
         } catch (error) {
           console.error(`Error fetching user data for enquiry ${enquiry._id}: `, error);
@@ -393,12 +396,14 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
          const { data } = await axios.get(
            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
          );
+         const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
          return {
            _id: enquiry._id,
            name: data.name,
            phone_number: data.phone_number,
            status: enquiry.status,
            date: enquiry.date,
+           createdAt: createdAtTime,
          };
        } catch (error) {
          console.error(`Error fetching user details for enquiry ${enquiry._id}:`, error);

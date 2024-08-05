@@ -28,7 +28,7 @@ router.put("/singleEnqury/:enquiry_id", epAuth, EnquiryStatusChangeToReplies);
 
 
 // admin Route
-router.get("/enquiriesForAdmin/:institute_id", adminAuth, getEnquiriesForAdmin)
+router.get("/enquiriesForAdmin/:institute_id", getEnquiriesForAdmin)
 router.get("/allEnquiriesForAdmin",adminAuth, getAllEnquiriesForAdmin)
 router.get("/singleEnquiryForAdmin/:enquiry_id" , adminAuth,getSingleEnquiryForAdmin);
 router.put("/changeStatus/:enquiry_id",adminAuth,changeStatus);

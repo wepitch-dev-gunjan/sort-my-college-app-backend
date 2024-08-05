@@ -964,6 +964,8 @@ exports.getLatestSessions = async (req, res) => {
             session_time: session.session_time,
             session_date: session_massaged_date,
             session_fee: session.session_fee,
+            session_topic: session.session_topic,
+            session_duration:session.session_duration,
           };
         })
       );
