@@ -327,6 +327,7 @@ exports.getInstitutesForUser = async (req, res) => {
           institute_timings: institute.timings,
           courses: massagedCourses,
           rating: rating,
+          cover_image:institute.cover_image,
         };
       })
     );
