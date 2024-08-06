@@ -391,6 +391,7 @@ exports.getInstituteForUser = async (req, res) => {
             comment: feedback.comment,
             userName: data.name,
             profile_pic: data.profile_pic,
+            
           };
         } catch (error) {
           console.error(
@@ -423,6 +424,7 @@ exports.getInstituteForUser = async (req, res) => {
       courses: massagedCourses,
       rating: rating,
       feedbacks: feedbackDetails,
+      cover_image: institute.cover_image,
     };
 
     res.status(200).json(instituteWithDetails);
