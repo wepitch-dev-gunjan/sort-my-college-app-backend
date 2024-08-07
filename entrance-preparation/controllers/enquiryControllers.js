@@ -382,45 +382,106 @@ exports.changeStatus = async (req, res) => {
  }
 };
 
+// exports.getAllEnquiriesForAdmin = async (req, res) => {
+//  try {
+//    const enquiries = await Enquiry.find(); 
+
+//    if (!enquiries.length) {
+//      return res.status(200).send([]);
+//    }
+
+//    const massagedDataPromise = Promise.all(
+//      enquiries.map(async (enquiry) => {
+//        try {
+//          const { data } = await axios.get(
+//            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//          );
+//          const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
+//          return {
+//            _id: enquiry._id,
+//            name: data.name,
+//            phone_number: data.phone_number,
+//            status: enquiry.status,
+//            date: enquiry.date,
+//            createdAt: createdAtTime,
+//          };
+//        } catch (error) {
+//          console.error(`Error fetching user details for enquiry ${enquiry._id}:`, error);
+//          return null;
+//        }
+//      })
+//    );
+
+//    const massagedData = await massagedDataPromise;
+
+
+//    const validData = massagedData.filter(item => item !== null);
+
+//    res.status(200).json(validData);
+
+//  } catch (error) {
+//    console.error("Error getting enquiries:", error);
+//    res.status(500).json({ message: "Internal Server Error" });
+//  }
+// };
+
 exports.getAllEnquiriesForAdmin = async (req, res) => {
- try {
-   const enquiries = await Enquiry.find(); 
+  try {
+    const { status, startDate, endDate } = req.query;
 
-   if (!enquiries.length) {
-     return res.status(200).send([]);
-   }
+    // Construct the query object
+    let query = {};
+    if (status) {
+      query.status = status;
+    }
+    if (startDate && endDate) {
+      const start = new Date(startDate).toISOString();
+      const end = new Date(endDate).toISOString();
+      query.createdAt = {
+        $gte: start,
+        $lte: end,
+      };
+    }
 
-   const massagedDataPromise = Promise.all(
-     enquiries.map(async (enquiry) => {
-       try {
-         const { data } = await axios.get(
-           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-         );
-         const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
-         return {
-           _id: enquiry._id,
-           name: data.name,
-           phone_number: data.phone_number,
-           status: enquiry.status,
-           date: enquiry.date,
-           createdAt: createdAtTime,
-         };
-       } catch (error) {
-         console.error(`Error fetching user details for enquiry ${enquiry._id}:`, error);
-         return null;
-       }
-     })
-   );
+    const enquiries = await Enquiry.find(query);
 
-   const massagedData = await massagedDataPromise;
+    if (!enquiries.length) {
+      return res.status(200).send([]);
+    }
 
+    const massagedDataPromise = Promise.all(
+      enquiries.map(async (enquiry) => {
+        try {
+          const { data } = await axios.get(
+            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+          );
+          const createdAtTime = new Date(
+            enquiry.createdAt
+          ).toLocaleTimeString();
+          return {
+            _id: enquiry._id,
+            name: data.name,
+            phone_number: data.phone_number,
+            status: enquiry.status,
+            date: enquiry.date,
+            createdAt: createdAtTime,
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching user details for enquiry ${enquiry._id}:`,
+            error
+          );
+          return null;
+        }
+      })
+    );
 
-   const validData = massagedData.filter(item => item !== null);
+    const massagedData = await massagedDataPromise;
+    const validData = massagedData.filter((item) => item !== null);
 
-   res.status(200).json(validData);
-
- } catch (error) {
-   console.error("Error getting enquiries:", error);
-   res.status(500).json({ message: "Internal Server Error" });
- }
+    res.status(200).json(validData);
+  } catch (error) {
+    console.error("Error getting enquiries:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
