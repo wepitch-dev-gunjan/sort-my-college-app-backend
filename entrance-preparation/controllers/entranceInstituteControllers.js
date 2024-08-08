@@ -121,11 +121,77 @@ exports.editProfile = async (req, res) => {
 //   }
 // };
 
+
+
+// exports.getInstitutesForAdmin = async (req, res) => {
+//   try {
+//     console.log("Request Query: ", req.query);
+
+//     const search = req.query.search; // Directly access the search parameter
+//     console.log("Search Parameter: ", search);
+
+//     let queryObject = {};
+
+//     if (search) {
+//       const regex = new RegExp(search, "i");
+//       queryObject = {
+//         $or: [
+//           { name: { $regex: regex } },
+//           { registrant_full_name: { $regex: regex } },
+//           { registrant_contact_number: { $regex: regex } },
+//           { registrant_email: { $regex: regex } },
+//           { "address.building_number": { $regex: regex } },
+//           { "address.area": { $regex: regex } },
+//           { "address.city": { $regex: regex } },
+//           { "address.state": { $regex: regex } },
+//           { "address.pin_code": { $regex: regex } },
+//         ],
+//       };
+//       console.log(
+//         "Query Object: ",
+//         JSON.stringify(queryObject, (key, value) =>
+//           key === "$regex" ? value.toString() : value
+//         )
+//       );
+//     } else {
+//       console.log("Search parameter is empty");
+//     }
+
+//     const institutes = await EntranceInstitute.find(queryObject);
+
+//     if (search && (!institutes || institutes.length === 0)) {
+//       // If search input is present and no institutes found, do not return "No matches found"
+//       console.log(
+//         "No matches found for the search input, returning all institutes instead."
+//       );
+//       queryObject = {}; // Reset the queryObject to fetch all institutes
+//       institutes = await EntranceInstitute.find(queryObject);
+//     }
+
+//     if (!institutes || institutes.length === 0) {
+//       return res.status(404).json({ message: "No institutes found" });
+//     }
+
+//     const massagedInstitutes = institutes.map((institute) => ({
+//       _id: institute._id,
+//       name: institute.name,
+//       profile_pic: institute.profile_pic,
+//       email: institute.email,
+//       status: institute.status,
+//     }));
+
+//     res.status(200).json(massagedInstitutes);
+//   } catch (error) {
+//     console.error("Error fetching institutes:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
 exports.getInstitutesForAdmin = async (req, res) => {
   try {
     console.log("Request Query: ", req.query);
 
-    const search = req.query.search; // Directly access the search parameter
+    const search = req.query.search && req.query.search.trim(); // Directly access the search parameter and trim whitespace
     console.log("Search Parameter: ", search);
 
     let queryObject = {};
@@ -152,10 +218,10 @@ exports.getInstitutesForAdmin = async (req, res) => {
         )
       );
     } else {
-      console.log("Search parameter is empty");
+      console.log("Search parameter is empty or only whitespace");
     }
 
-    const institutes = await EntranceInstitute.find(queryObject);
+    let institutes = await EntranceInstitute.find(queryObject);
 
     if (search && (!institutes || institutes.length === 0)) {
       // If search input is present and no institutes found, do not return "No matches found"
@@ -184,6 +250,8 @@ exports.getInstitutesForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 
 exports.getInstituteForAdmin = async (req, res) => {
   try {
