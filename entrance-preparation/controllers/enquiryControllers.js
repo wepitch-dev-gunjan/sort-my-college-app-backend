@@ -248,7 +248,7 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
 
 exports.getEnquiriesForAdmin = async (req, res) => {
   try {
-    const { search, status } = req.query;
+    const { search, status, startDate, endDate } = req.query;
     const queryObject = {};
 
     // Handle status query
@@ -262,6 +262,17 @@ exports.getEnquiriesForAdmin = async (req, res) => {
     if (!institute_id) {
       return res.status(404).json({ message: "Specified institute not found" });
     }
+    if (startDate && endDate) {
+      const start = new Date(startDate).toISOString();
+      const endDateObject = new Date(endDate);
+      endDateObject.setHours(23, 59, 59, 999); 
+      const end = endDateObject.toISOString();
+      queryObject.createdAt = {
+        $gte: start,
+        $lte: end,
+      };
+    }
+
 
     // Handle search query (example: searching in name field)
     if (search) {
@@ -436,7 +447,9 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
     }
     if (startDate && endDate) {
       const start = new Date(startDate).toISOString();
-      const end = new Date(endDate).toISOString();
+      const endDateObject = new Date(endDate);
+      endDateObject.setHours(23, 59, 59, 999);
+      const end = endDateObject.toISOString();
       query.createdAt = {
         $gte: start,
         $lte: end,
