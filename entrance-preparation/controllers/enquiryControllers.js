@@ -4,34 +4,77 @@ const User = require("../../user/models/User");
 const EntranceCourse = require("../models/EntranceCourse");
 const { BACKEND_URL } = process.env;
 
+// exports.addEnquiry = async (req, res) => {
+//   try {
+//     const { id } = req;
+//     const { enquired_to, courses, mode, preferred_time, message } = req.body;
+
+//     if (!enquired_to || !message)
+//       return res.status(400).send({
+//         error: "required fields are not filled",
+//       });
+//     const currentDate = new Date();
+
+//     const formattedDate = currentDate.toLocaleDateString("en-GB", {
+//       day: "2-digit",
+//       month: "2-digit",
+//       year: "numeric",
+//     });
+
+//     const newEnquiry = new Enquiry({
+//       enquirer: id,
+//       enquired_to,
+//       courses,
+//       mode,
+//       preferred_time,
+//       message,
+//       date: formattedDate,
+//     });
+
+//     await newEnquiry.save();
+//     res.status(201).json({
+//       message: "Enquiry added successfully",
+//       data: newEnquiry,
+//     });
+//   } catch (error) {
+//     console.error("Error adding Enquiry:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+// get Engueries for Ep
+
 exports.addEnquiry = async (req, res) => {
   try {
     const { id } = req;
-    const { enquired_to, courses, mode, preferred_time, message } = req.body;
+    const { enquired_to, courses } = req.body;
 
-    if (!enquired_to || !message)
+    // Check for required fields
+    if (!enquired_to) {
       return res.status(400).send({
         error: "required fields are not filled",
       });
-    const currentDate = new Date();
+    }
 
+    const currentDate = new Date();
     const formattedDate = currentDate.toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
 
+    // Create the new enquiry object
     const newEnquiry = new Enquiry({
       enquirer: id,
       enquired_to,
-      courses,
-      mode,
-      preferred_time,
-      message,
+      courses: courses || [], // If courses are not provided, default to an empty array
       date: formattedDate,
     });
 
+    // Save the new enquiry
     await newEnquiry.save();
+
+    // Respond with success message
     res.status(201).json({
       message: "Enquiry added successfully",
       data: newEnquiry,
@@ -42,7 +85,7 @@ exports.addEnquiry = async (req, res) => {
   }
 };
 
-// get Engueries for Ep
+
 exports.getEnquiries = async (req, res) => {
   try {
     console.log("Reached")
