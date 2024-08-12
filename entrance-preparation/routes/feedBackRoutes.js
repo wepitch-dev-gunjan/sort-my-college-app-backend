@@ -6,6 +6,6 @@ const {
 } = require("../controllers/feedbackController");
 const router = express.Router();
 
-router.post("/feedback/", userAuth, createFeedback);
-router.get("/feedbacks/getall/:ep_id", getFeedbacks);
+router.post("/feedback", userAuth, createFeedback);
+router.get("/feedbacks/getall/:institute_id", getFeedbacks);
 module.exports = router;

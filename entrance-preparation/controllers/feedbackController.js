@@ -2,17 +2,20 @@ const { default: axios } = require("axios");
 const EntranceInstitute = require("../models/EntranceInstitute");
 const UserFeedbacks = require("../models/UserFeedbacks");
 const { BACKEND_URL } = process.env;
+
+
 exports.createFeedback = async (req, res) => {
   try {
-    let { institute_id, rating, comment, user_id } = req.body;
-    console.log(user_id);
+    const { id } = req;
+    console.log("User Id:", id);
+    let { institute_id, rating, comment } = req.body;
 
     if (!rating) rating = 0;
     rating = parseFloat(rating);
     if (!comment) comment = "";
     console.log("api");
 
-    const url = `${BACKEND_URL}/user/ep/${user_id}`;
+    const url = `${BACKEND_URL}/user/ep/${id}`;
     console.log(`Fetching user data from URL: ${url}`);
     const { data } = await axios.get(url);
     console.log(data);
@@ -62,45 +65,82 @@ exports.createFeedback = async (req, res) => {
   }
 };
 
+// exports.getFeedbacks = async (req, res) => {
+//   try {
+//     const { page = 1, limit = 10 } = req.query;
+//     const { ep_id } = req.params;
+//     const { user_id } = req.body;
+//     const pageNumber = parseInt(page, 10);
+//     const limitNumber = parseInt(limit, 10);
+
+//     if (
+//       isNaN(pageNumber) ||
+//       isNaN(limitNumber) ||
+//       pageNumber < 1 ||
+//       limitNumber < 1
+//     ) {
+//       return res
+//         .status(400)
+//         .json({ error: "Invalid page or limit parameters." });
+//     }
+
+//     const ep = await EntranceInstitute.findOne({ _id: ep_id });
+
+//     if (!ep) {
+//       return res.status(404).json({ error: "Institute not found" });
+//     }
+
+//     const url = `${BACKEND_URL}/user/ep/${user_id}`;
+//     console.log(`Fetching user data from URL: ${url}`);
+//     const { data } = await axios.get(url);
+//     console.log(data);
+//     const user = data;
+
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     const skip = (pageNumber - 1) * limitNumber;
+//     const query = {};
+//     if (user_id) query.feedback_from = user_id;
+//     if (ep_id) query.feedback_to = ep_id;
+
+//     const feedbacks = await UserFeedbacks.find(query)
+//       .sort({ updatedAt: -1 })
+//       .skip(skip)
+//       .limit(limitNumber)
+//       .exec();
+
+//     const totalFeedbacks = await UserFeedbacks.countDocuments(query);
+//     const totalPages = Math.ceil(totalFeedbacks / limitNumber);
+
+//     res
+//       .status(200)
+//       .json({ feedbacks, totalPages, currentPage: pageNumber, user });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 exports.getFeedbacks = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    const { ep_id } = req.params;
-    const { user_id } = req.body;
+    const { institute_id } = req.params;
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
 
-    if (
-      isNaN(pageNumber) ||
-      isNaN(limitNumber) ||
-      pageNumber < 1 ||
-      limitNumber < 1
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Invalid page or limit parameters." });
+    if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber < 1 || limitNumber < 1) {
+      return res.status(400).json({ error: "Invalid page or limit parameters." });
     }
 
-    const ep = await EntranceInstitute.findOne({ _id: ep_id });
-
-    if (!ep) {
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute) {
       return res.status(404).json({ error: "Institute not found" });
     }
 
-    const url = `${BACKEND_URL}/user/ep/${user_id}`;
-    console.log(`Fetching user data from URL: ${url}`);
-    const { data } = await axios.get(url);
-    console.log(data);
-    const user = data;
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
     const skip = (pageNumber - 1) * limitNumber;
-    const query = {};
-    if (user_id) query.feedback_from = user_id;
-    if (ep_id) query.feedback_to = ep_id;
+    const query = { feedback_to: institute_id };
 
     const feedbacks = await UserFeedbacks.find(query)
       .sort({ updatedAt: -1 })
@@ -111,11 +151,22 @@ exports.getFeedbacks = async (req, res) => {
     const totalFeedbacks = await UserFeedbacks.countDocuments(query);
     const totalPages = Math.ceil(totalFeedbacks / limitNumber);
 
-    res
-      .status(200)
-      .json({ feedbacks, totalPages, currentPage: pageNumber, user });
+    // Fetch user details for each feedback
+    const feedbacksWithUser = await Promise.all(
+      feedbacks.map(async (feedback) => {
+        const userUrl = `${BACKEND_URL}/user/ep/${feedback.feedback_from}`;
+        const { data: user } = await axios.get(userUrl);
+        return {
+          ...feedback.toObject(), // Convert feedback to a plain object
+          user_name: user.name,   // Add user name to feedback
+        };
+      })
+    );
+
+    res.status(200).json({ feedbacks: feedbacksWithUser, totalPages, currentPage: pageNumber });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching feedbacks:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
