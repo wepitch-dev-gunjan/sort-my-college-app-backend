@@ -220,16 +220,23 @@ exports.getInstitutesForAdmin = async (req, res) => {
     } else {
       console.log("Search parameter is empty or only whitespace");
     }
+     let institutes = await EntranceInstitute.find(queryObject).sort({
+       createdAt: -1, 
+     });
 
-    let institutes = await EntranceInstitute.find(queryObject);
+    //let institutes = await EntranceInstitute.find(queryObject);
 
     if (search && (!institutes || institutes.length === 0)) {
       // If search input is present and no institutes found, do not return "No matches found"
       console.log(
         "No matches found for the search input, returning all institutes instead."
       );
-      queryObject = {}; // Reset the queryObject to fetch all institutes
-      institutes = await EntranceInstitute.find(queryObject);
+      // queryObject = {}; // Reset the queryObject to fetch all institutes
+      // institutes = await EntranceInstitute.find(queryObject);
+      queryObject = {}; 
+      institutes = await EntranceInstitute.find(queryObject).sort({
+        createdAt: -1, 
+      });
     }
 
     if (!institutes || institutes.length === 0) {
