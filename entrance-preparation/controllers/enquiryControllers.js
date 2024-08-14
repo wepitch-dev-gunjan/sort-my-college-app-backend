@@ -165,10 +165,73 @@ exports.addEnquiry = async (req, res) => {
 //   }
 // };
 
+// exports.getEnquiries = async (req, res) => {
+//   try {
+//     console.log("Reached");
+//     const { institute_id } = req;
+//     if (!institute_id) {
+//       return res.status(404).json({ message: "Specified institute not found" });
+//     }
+
+//     const { status, startDate, endDate } = req.query;
+//     let query = { enquired_to: institute_id };
+
+//     if (status) {
+//       query.status = status;
+//     }
+
+//     if (startDate && endDate) {
+//       // Parse startDate and endDate and normalize them
+//       const start = new Date(startDate);
+//       start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
+
+//       const end = new Date(endDate);
+//       end.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
+
+//       query.createdAt = {
+//         $gte: start.toISOString(),
+//         $lte: end.toISOString(),
+//       };
+//     }
+
+//     const enquiries = await Enquiry.find(query);
+
+//     if (!enquiries) return res.status(201).send([]);
+
+//     const massagedDataPromise = Promise.all(
+//       enquiries.map(async (enquiry) => {
+//         const { data } = await axios.get(
+//           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//         );
+//         console.log("data,", data);
+//         return {
+//           _id: enquiry._id,
+//           name: data.name,
+//           phone_number: data.phone_number,
+//           status: enquiry.status,
+//           date: enquiry.date,
+//         };
+//       })
+//     );
+
+//     massagedDataPromise
+//       .then((massagedData) => {
+//         res.status(200).json(massagedData);
+//       })
+//       .catch((error) => {
+//         console.error(error);
+//       });
+//   } catch (error) {
+//     console.error("Error getting enquiries");
+//     res.status(500).json({ message: "Internal enquiries Server Error" });
+//   }
+// };
+
 exports.getEnquiries = async (req, res) => {
   try {
     console.log("Reached");
     const { institute_id } = req;
+
     if (!institute_id) {
       return res.status(404).json({ message: "Specified institute not found" });
     }
@@ -181,7 +244,6 @@ exports.getEnquiries = async (req, res) => {
     }
 
     if (startDate && endDate) {
-      // Parse startDate and endDate and normalize them
       const start = new Date(startDate);
       start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
 
@@ -196,37 +258,47 @@ exports.getEnquiries = async (req, res) => {
 
     const enquiries = await Enquiry.find(query);
 
-    if (!enquiries) return res.status(201).send([]);
+    if (!enquiries || enquiries.length === 0) {
+      return res.status(200).json([]);
+    }
 
     const massagedDataPromise = Promise.all(
       enquiries.map(async (enquiry) => {
-        const { data } = await axios.get(
-          `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-        );
-        console.log("data,", data);
-        return {
-          _id: enquiry._id,
-          name: data.name,
-          phone_number: data.phone_number,
-          status: enquiry.status,
-          date: enquiry.date,
-        };
+        try {
+          const { data } = await axios.get(
+            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+          );
+          console.log("data,", data);
+          return {
+            _id: enquiry._id,
+            name: data.name,
+            phone_number: data.phone_number,
+            status: enquiry.status,
+            date: enquiry.createdAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+          };
+        } catch (err) {
+          console.error(
+            `Error fetching user data for enquiry ${enquiry._id}:`,
+            err
+          );
+          return {
+            _id: enquiry._id,
+            name: "N/A",
+            phone_number: "N/A",
+            status: enquiry.status,
+            date: enquiry.createdAt.toISOString().split("T")[0],
+          };
+        }
       })
     );
 
-    massagedDataPromise
-      .then((massagedData) => {
-        res.status(200).json(massagedData);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    const massagedData = await massagedDataPromise;
+    res.status(200).json(massagedData);
   } catch (error) {
-    console.error("Error getting enquiries");
+    console.error("Error getting enquiries", error);
     res.status(500).json({ message: "Internal enquiries Server Error" });
   }
 };
-
 
 exports.getSingleEnquiry = async (req, res) => {
   try {
