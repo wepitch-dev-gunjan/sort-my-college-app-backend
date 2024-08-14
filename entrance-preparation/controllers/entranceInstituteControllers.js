@@ -512,7 +512,7 @@ exports.getInstitutesForUser = async (req, res) => {
 exports.getInstituteForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
-    const { user_id } = req; // Assuming user ID is available in the request
+    const { id } = req; // Assuming user ID is available in the request
 
     const institute = await EntranceInstitute.findOne({ _id: institute_id });
 
@@ -521,7 +521,9 @@ exports.getInstituteForUser = async (req, res) => {
     }
 
     // Check if the user_id exists in the followers array
-    const isFollowing = institute.followers.includes(user_id);
+    const isFollowing = institute.followers.includes(id);
+    console.log("Followers: ", institute.followers)
+    console.log("User ID: ", id)
 
     // Fetch courses for the institute
     const courses = await EntranceCourse.find({ institute: institute._id });
