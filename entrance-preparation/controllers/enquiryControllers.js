@@ -94,17 +94,39 @@ exports.addEnquiry = async (req, res) => {
 //       return res.status(404).json({ message: "Specified institute not found" });
 //     }
 
-//     const { date, status } = req.query;
+//     // const { date, status } = req.query;
 
-//     const filter = { enquired_to: institute_id };
-//     if (date) {
-//       filter.date = date;
-//     }
+//     // const filter = { enquired_to: institute_id };
+//     // if (date) {
+//     //   filter.date = date;
+//     // }
+//     // if (status) {
+//     //   filter.status = status;
+//     // }
+//     // const enquiries = await Enquiry.find(filter);
+  
+//     const { status, startDate, endDate } = req.query;
+//     let query = { enquired_to: institute_id };
 //     if (status) {
-//       filter.status = status;
+//       query.status = status;
+//     }
+//     if (startDate && endDate) {
+//       const start = new Date(startDate).toISOString();
+//       const endDateObject = new Date(endDate);
+//       const timeZoneOffset = endDateObject.getTimezoneOffset() * 60000; // Timezone offset in milliseconds
+//       endDateObject.setHours(23, 59, 59, 999);
+//       const adjustedEndDate = new Date(
+//         endDateObject.getTime() - timeZoneOffset
+//       );
+//       const end = adjustedEndDate.toISOString();
+
+//       query.createdAt = {
+//         $gte: start,
+//         $lte: end,
+//       };
 //     }
 
-//     const enquiries = await Enquiry.find(filter);
+//     const enquiries = await Enquiry.find(query);
 
 //     // const enquiries = await Enquiry.find({ enquired_to: institute_id });
 //     // console.log(enquiries);
@@ -142,52 +164,37 @@ exports.addEnquiry = async (req, res) => {
 //     res.status(500).json({ message: "Internal  enquiries Server Error" });
 //   }
 // };
-// get Engueries for Ep
+
 exports.getEnquiries = async (req, res) => {
   try {
-    console.log("Reached")
+    console.log("Reached");
     const { institute_id } = req;
     if (!institute_id) {
       return res.status(404).json({ message: "Specified institute not found" });
     }
 
-    // const { date, status } = req.query;
-
-    // const filter = { enquired_to: institute_id };
-    // if (date) {
-    //   filter.date = date;
-    // }
-    // if (status) {
-    //   filter.status = status;
-    // }
-    // const enquiries = await Enquiry.find(filter);
-
-  
     const { status, startDate, endDate } = req.query;
     let query = { enquired_to: institute_id };
+
     if (status) {
       query.status = status;
     }
+
     if (startDate && endDate) {
-      const start = new Date(startDate).toISOString();
-      const endDateObject = new Date(endDate);
-      const timeZoneOffset = endDateObject.getTimezoneOffset() * 60000; // Timezone offset in milliseconds
-      endDateObject.setHours(23, 59, 59, 999);
-      const adjustedEndDate = new Date(
-        endDateObject.getTime() - timeZoneOffset
-      );
-      const end = adjustedEndDate.toISOString();
+      // Parse startDate and endDate and normalize them
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
+
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
 
       query.createdAt = {
-        $gte: start,
-        $lte: end,
+        $gte: start.toISOString(),
+        $lte: end.toISOString(),
       };
     }
 
     const enquiries = await Enquiry.find(query);
-
-    // const enquiries = await Enquiry.find({ enquired_to: institute_id });
-    // console.log(enquiries);
 
     if (!enquiries) return res.status(201).send([]);
 
@@ -196,7 +203,7 @@ exports.getEnquiries = async (req, res) => {
         const { data } = await axios.get(
           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
         );
-        console.log("dataa,", data);
+        console.log("data,", data);
         return {
           _id: enquiry._id,
           name: data.name,
@@ -209,19 +216,17 @@ exports.getEnquiries = async (req, res) => {
 
     massagedDataPromise
       .then((massagedData) => {
-        // console.log(massagedData);
         res.status(200).json(massagedData);
       })
       .catch((error) => {
         console.error(error);
       });
-
-    // console.log(massagedData);
   } catch (error) {
     console.error("Error getting enquiries");
-    res.status(500).json({ message: "Internal  enquiries Server Error" });
+    res.status(500).json({ message: "Internal enquiries Server Error" });
   }
 };
+
 
 exports.getSingleEnquiry = async (req, res) => {
   try {
