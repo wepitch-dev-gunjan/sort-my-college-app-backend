@@ -86,6 +86,63 @@ exports.addEnquiry = async (req, res) => {
 };
 
 
+// exports.getEnquiries = async (req, res) => {
+//   try {
+//     console.log("Reached")
+//     const { institute_id } = req;
+//     if (!institute_id) {
+//       return res.status(404).json({ message: "Specified institute not found" });
+//     }
+
+//     const { date, status } = req.query;
+
+//     const filter = { enquired_to: institute_id };
+//     if (date) {
+//       filter.date = date;
+//     }
+//     if (status) {
+//       filter.status = status;
+//     }
+
+//     const enquiries = await Enquiry.find(filter);
+
+//     // const enquiries = await Enquiry.find({ enquired_to: institute_id });
+//     // console.log(enquiries);
+
+//     if (!enquiries) return res.status(201).send([]);
+
+//     const massagedDataPromise = Promise.all(
+//       enquiries.map(async (enquiry) => {
+//         const { data } = await axios.get(
+//           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//         );
+//         console.log("dataa,", data);
+//         return {
+//           _id: enquiry._id,
+//           name: data.name,
+//           phone_number: data.phone_number,
+//           status: enquiry.status,
+//           date: enquiry.date,
+//         };
+//       })
+//     );
+
+//     massagedDataPromise
+//       .then((massagedData) => {
+//         // console.log(massagedData);
+//         res.status(200).json(massagedData);
+//       })
+//       .catch((error) => {
+//         console.error(error);
+//       });
+
+//     // console.log(massagedData);
+//   } catch (error) {
+//     console.error("Error getting enquiries");
+//     res.status(500).json({ message: "Internal  enquiries Server Error" });
+//   }
+// };
+// get Engueries for Ep
 exports.getEnquiries = async (req, res) => {
   try {
     console.log("Reached")
@@ -94,17 +151,33 @@ exports.getEnquiries = async (req, res) => {
       return res.status(404).json({ message: "Specified institute not found" });
     }
 
-    const { date, status } = req.query;
+    // const { date, status } = req.query;
 
-    const filter = { enquired_to: institute_id };
-    if (date) {
-      filter.date = date;
-    }
+    // const filter = { enquired_to: institute_id };
+    // if (date) {
+    //   filter.date = date;
+    // }
+    // if (status) {
+    //   filter.status = status;
+    // }
+    // const enquiries = await Enquiry.find(filter);
+    const { status, startDate, endDate } = req.query;
+    let query = { enquired_to: institute_id };
     if (status) {
-      filter.status = status;
+      query.status = status;
+    }
+    if (startDate && endDate) {
+      const start = new Date(startDate).toISOString();
+      const endDateObject = new Date(endDate);
+      endDateObject.setHours(23, 59, 59, 999);
+      const end = endDateObject.toISOString();
+      query.createdAt = {
+        $gte: start,
+        $lte: end,
+      };
     }
 
-    const enquiries = await Enquiry.find(filter);
+    const enquiries = await Enquiry.find(query);
 
     // const enquiries = await Enquiry.find({ enquired_to: institute_id });
     // console.log(enquiries);
