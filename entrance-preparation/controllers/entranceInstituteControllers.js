@@ -599,6 +599,7 @@ exports.getInstituteForUser = async (req, res) => {
       follower_count: followerCount,
       about: institute.about,
       following: isFollowing, // Add the 'following' field to the response
+      direction_url: institute.direction_url,
     };
 
     res.status(200).json(instituteWithDetails);
