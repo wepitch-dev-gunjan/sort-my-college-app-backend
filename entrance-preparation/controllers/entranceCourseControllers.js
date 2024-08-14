@@ -131,6 +131,30 @@ exports.deleteCourse = async (req, res) => {
 };
 
 // user changes needed
+// exports.getCoursesForUser = async (req, res) => {
+//   try {
+//     const { institute_id } = req.params;
+//     const courses = await EntranceCourse.find({ institute: institute_id });
+
+//     if (!courses || courses.length === 0) {
+//       return res.status(200).json([]);
+//     }
+//     const massagedCourses = courses.map((course) => ({
+//       image: course.image,
+//       _id: course._id,
+//       name: course.name,
+//       type: course.type,
+//       acedemic_session: course.acedemic_session,
+//       course_fee: course.course_fee,
+//       course_duration_in_days: course.course_duration_in_days,
+//     }));
+//     res.status(200).json(massagedCourses);
+//   } catch (error) {
+//     console.log("Error Fetching Course", error);
+//     res.status(500).json({ message: "Internal sever error" });
+//   }
+// };
+
 exports.getCoursesForUser = async (req, res) => {
   try {
     const { institute_id } = req.params;
@@ -139,18 +163,35 @@ exports.getCoursesForUser = async (req, res) => {
     if (!courses || courses.length === 0) {
       return res.status(200).json([]);
     }
-    const massagedCourses = courses.map((course) => ({
-      image: course.image,
-      _id: course._id,
-      name: course.name,
-      type: course.type,
-      acedemic_session: course.acedemic_session,
-      course_fee: course.course_fee,
-      course_duration_in_days: course.course_duration_in_days,
-    }));
+
+    const massagedCourses = courses.map((course) => {
+      // Format academic session
+      const academicSession = course.academic_session
+        ? {
+            start_year: course.academic_session.start_year.getFullYear(),
+            end_year: course.academic_session.end_year.getFullYear(),
+          }
+        : null;
+
+      // Format course duration
+      const courseDuration = course.course_duration
+        ? `${course.course_duration} ${course.duration_unit}`
+        : null;
+
+      return {
+        image: course.image,
+        _id: course._id,
+        name: course.name,
+        type: course.type,
+        academic_session: academicSession,
+        course_fee: course.course_fee,
+        course_duration: courseDuration,
+      };
+    });
+
     res.status(200).json(massagedCourses);
   } catch (error) {
     console.log("Error Fetching Course", error);
-    res.status(500).json({ message: "Internal sever error" });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
