@@ -159,6 +159,7 @@ exports.getFeedbacks = async (req, res) => {
         return {
           ...feedback.toObject(), // Convert feedback to a plain object
           user_name: user.name,   // Add user name to feedback
+          profile_pic: user.profile_pic, 
         };
       })
     );
