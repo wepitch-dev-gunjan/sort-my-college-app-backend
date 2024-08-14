@@ -161,6 +161,8 @@ exports.getEnquiries = async (req, res) => {
     //   filter.status = status;
     // }
     // const enquiries = await Enquiry.find(filter);
+
+  
     const { status, startDate, endDate } = req.query;
     let query = { enquired_to: institute_id };
     if (status) {
@@ -169,8 +171,13 @@ exports.getEnquiries = async (req, res) => {
     if (startDate && endDate) {
       const start = new Date(startDate).toISOString();
       const endDateObject = new Date(endDate);
+      const timeZoneOffset = endDateObject.getTimezoneOffset() * 60000; // Timezone offset in milliseconds
       endDateObject.setHours(23, 59, 59, 999);
-      const end = endDateObject.toISOString();
+      const adjustedEndDate = new Date(
+        endDateObject.getTime() - timeZoneOffset
+      );
+      const end = adjustedEndDate.toISOString();
+
       query.createdAt = {
         $gte: start,
         $lte: end,
