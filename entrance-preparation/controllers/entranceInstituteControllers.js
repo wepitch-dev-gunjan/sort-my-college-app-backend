@@ -439,9 +439,7 @@ exports.getInstitutesForUser = async (req, res) => {
 
 //     // Calculate years of experience
 //     const currentYear = new Date().getFullYear();
-//     const establishedYear = new Date(
-//       institute.year_established_in
-//     ).getFullYear();
+//     const establishedYear = new Date(institute.year_established_in).getFullYear();
 //     const yearsOfExperience = currentYear - establishedYear;
 
 //     // Fetch feedbacks
@@ -466,7 +464,6 @@ exports.getInstitutesForUser = async (req, res) => {
 //             comment: feedback.comment,
 //             userName: data.name,
 //             profile_pic: data.profile_pic,
-            
 //           };
 //         } catch (error) {
 //           console.error(
@@ -485,7 +482,8 @@ exports.getInstitutesForUser = async (req, res) => {
 //       })
 //     );
 
-//     // Check if the user is following the institute
+//     // Calculate follower count
+//     const followerCount = institute.followers.length;
 
 //     // Prepare the response object
 //     const instituteWithDetails = {
@@ -500,6 +498,8 @@ exports.getInstitutesForUser = async (req, res) => {
 //       rating: rating,
 //       feedbacks: feedbackDetails,
 //       cover_image: institute.cover_image,
+//       follower_count: followerCount,
+//       about: institute.about, // Adding the 'about' field
 //     };
 
 //     res.status(200).json(instituteWithDetails);
@@ -508,7 +508,6 @@ exports.getInstitutesForUser = async (req, res) => {
 //     res.status(500).json({ message: "Internal Server Error" });
 //   }
 // };
-
 
 exports.getInstituteForUser = async (req, res) => {
   try {
@@ -520,6 +519,9 @@ exports.getInstituteForUser = async (req, res) => {
     if (!institute) {
       return res.status(404).json({ message: "Institute not found" });
     }
+
+    // Check if the user_id exists in the followers array
+    const isFollowing = institute.followers.includes(user_id);
 
     // Fetch courses for the institute
     const courses = await EntranceCourse.find({ institute: institute._id });
@@ -595,7 +597,8 @@ exports.getInstituteForUser = async (req, res) => {
       feedbacks: feedbackDetails,
       cover_image: institute.cover_image,
       follower_count: followerCount,
-      about: institute.about, // Adding the 'about' field
+      about: institute.about,
+      following: isFollowing, // Add the 'following' field to the response
     };
 
     res.status(200).json(instituteWithDetails);
@@ -604,7 +607,6 @@ exports.getInstituteForUser = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 
 exports.getInstituteEnquiryFormForUser = async (req, res) => {
