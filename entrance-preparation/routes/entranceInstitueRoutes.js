@@ -23,6 +23,7 @@ const {
   followInstitute,
   unfollowInstitute,
   editInstituteProfile,
+  editInstituteCoverPic,
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage");
 // ep panel routes
@@ -70,5 +71,11 @@ router.put(
   adminAuth,
   upload.single("image"),
   editInstituteProfile
+);
+router.put(
+  "/editinstitute/cover-photo/admin/:institute_id",
+  adminAuth,
+  upload.single("image"),
+  editInstituteCoverPic
 );
 module.exports = router;
