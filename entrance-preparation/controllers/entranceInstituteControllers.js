@@ -7,6 +7,7 @@ const {
 } = require("../helpers/instituteHelpers");
 const EntranceCourse = require("../models/EntranceCourse");
 const EntranceInstitute = require("../models/EntranceInstitute");
+const Enquiry = require("../models/Enquiry");
 const UserFeedbacks = require("../models/UserFeedbacks");
 const { uploadImage } = require("../services/cloudinary");
 const { BACKEND_URL } = process.env;
@@ -915,3 +916,36 @@ exports.editInstituteCoverPic = async (req, res) => {
   }
 };
 
+
+exports.getDashboardDataForEp = async (req, res) => {
+  try {
+    const { institute_id } = req;
+
+    // Fetch the institute to get followers
+    const institute = await EntranceInstitute.findOne({ _id: institute_id }).select('followers');
+    if (!institute) {
+      return res.status(404).json({ message: "Institute not found" });
+    }
+
+    // Get the number of followers
+    const followersCount = institute.followers.length;
+
+    // Fetch queries for the institute
+    const totalQueries = await Enquiry.countDocuments({ enquired_to: institute_id });
+    const notRepliedQueries = await Enquiry.countDocuments({ enquired_to: institute_id, status: 'Seen' });
+    const unseenQueries = await Enquiry.countDocuments({ enquired_to: institute_id, status: 'Unseen' });
+
+    // Construct the response
+    const dashboardData = {
+      followers: followersCount,
+      notRepliedQueries,
+      unseenQueries,
+      totalQueries,
+    };
+
+    res.status(200).json(dashboardData);
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

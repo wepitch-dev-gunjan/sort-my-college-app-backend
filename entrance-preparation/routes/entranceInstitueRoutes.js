@@ -24,6 +24,7 @@ const {
   unfollowInstitute,
   editInstituteProfile,
   editInstituteCoverPic,
+  getDashboardDataForEp,
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage");
 // ep panel routes
@@ -61,10 +62,12 @@ router.put(
   userAuth,
   unfollowInstitute
 );
+
 // router.get('/institute/user/:institute_id',userAuth, getInstituteForUser);
 
 // router.put('/institute/user/:institute_id/follow',userAuth, followInstitute);
 // router.put('/institute/user/:institute_id/unfollow',userAuth, unfollowInstitute);
+
 // edit institute image
 router.put(
   "/editinstitute/profile-pic/admin/:institute_id",
@@ -78,4 +81,8 @@ router.put(
   upload.single("image"),
   editInstituteCoverPic
 );
+
+// Dashboard data
+router.get("/dashboard-data", epAuth, getDashboardDataForEp);
+
 module.exports = router;
