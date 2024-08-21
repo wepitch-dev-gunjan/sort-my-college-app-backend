@@ -171,3 +171,49 @@ exports.getFeedbacks = async (req, res) => {
   }
 };
 
+exports.getReviewsForEp = async (req, res) => {
+  try {
+    const { institute_id } = req;
+    const { search = "" } = req.query;
+
+    // Convert the search term to lowercase for case-insensitive comparison
+    const lowerCaseSearch = search.toLowerCase();
+
+    // Fetch the reviews for the institute
+    const reviews = await UserFeedbacks.find({ feedback_to: institute_id });
+
+    // Fetch the reviewer details one by one
+    const reviewsWithUserDetails = [];
+    for (const review of reviews) {
+      try {
+        const { data: user } = await axios.get(`${BACKEND_URL}/user/ep/${review.feedback_from}`);
+
+        // Perform case-insensitive search across relevant fields with null/undefined checks
+        if (
+          (user.name && user.name.toLowerCase().includes(lowerCaseSearch)) ||
+          (review.comment && review.comment.toLowerCase().includes(lowerCaseSearch))
+        ) {
+          reviewsWithUserDetails.push({
+            _id: review._id,
+            rating: review.rating,
+            comment: review.comment,
+            user_name: user.name,
+            user_profile_pic: user.profile_pic,
+          });
+        }
+      } catch (err) {
+        console.error(`Failed to fetch details for user with ID: ${review.feedback_from}`, err);
+      }
+    }
+
+    if (!reviewsWithUserDetails.length) {
+      return res.status(404).json({ message: "No reviews found" });
+    }
+
+    res.status(200).json(reviewsWithUserDetails);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
