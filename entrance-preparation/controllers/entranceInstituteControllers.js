@@ -949,3 +949,63 @@ exports.getDashboardDataForEp = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+exports.getFollowersForEp = async (req, res) => {
+  try {
+    const { institute_id } = req;
+    const { search = "" } = req.query;
+
+    // Convert the search term to lowercase for case-insensitive comparison
+    const lowerCaseSearch = search.toLowerCase();
+
+    // Fetch the institute to get followers
+    const institute = await EntranceInstitute.findOne({ _id: institute_id }).select('followers');
+    if (!institute) {
+      return res.status(404).json({ message: "Institute not found" });
+    }
+
+    const followerIds = institute.followers;
+
+    // Fetch the follower details one by one
+    const followers = [];
+    for (const followerId of followerIds) {
+      try {
+        const { data: follower } = await axios.get(`${BACKEND_URL}/user/ep/${followerId}`);
+
+        // Perform case-insensitive search across all relevant fields
+        if (
+          follower &&
+          (
+            follower.name.toLowerCase().includes(lowerCaseSearch) ||
+            // follower.email.toLowerCase().includes(lowerCaseSearch) ||
+            follower.phone_number.toLowerCase().includes(lowerCaseSearch) ||
+            follower.education_level.toLowerCase().includes(lowerCaseSearch) ||
+            follower.gender.toLowerCase().includes(lowerCaseSearch)
+          )
+        ) {
+          followers.push({
+            _id: follower._id,
+            name: follower.name,
+            email: follower.email,
+            profile_pic: follower.profile_pic,
+            phone_number: follower.phone_number,
+            education_level: follower.education_level,
+            gender: follower.gender,
+          });
+        }
+      } catch (err) {
+        console.error(`Failed to fetch details for follower with ID: ${followerId}`, err);
+      }
+    }
+
+    if (!followers.length) {
+      return res.status(404).json({ message: "No followers found" });
+    }
+
+    res.status(200).json(followers);
+  } catch (error) {
+    console.error("Error fetching followers:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

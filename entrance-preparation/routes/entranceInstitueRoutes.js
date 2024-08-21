@@ -25,11 +25,15 @@ const {
   editInstituteProfile,
   editInstituteCoverPic,
   getDashboardDataForEp,
+  getFollowersForEp,
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage");
+
 // ep panel routes
 router.get("/institute", epAuth, getProfile);
 router.put("/institute", epAuth, editProfile);
+router.get("/followers", epAuth, getFollowersForEp);
+
 // cover Image
 router.post("/cover-image", epAuth, upload.single("image"), uploadCoverImage);
 // ProfilePic
