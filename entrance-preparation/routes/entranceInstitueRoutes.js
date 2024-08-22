@@ -89,4 +89,8 @@ router.put(
 // Dashboard data
 router.get("/dashboard-data", epAuth, getDashboardDataForEp);
 
+// Institute Reject & Verify 
+router.put("/:institute_id/verify", adminAuth, verifyInstitute);
+router.put("/:institute_id/reject", adminAuth, rejectInstitute);
+
 module.exports = router;

@@ -86,108 +86,6 @@ exports.editProfile = async (req, res) => {
   }
 };
 
-// admin panel controllers
-// exports.getInstitutesForAdmin = async (req, res) => {
-//   try {
-//     // Assuming you have some logic to authenticate the admin user and retrieve necessary information
-//     // You can customize this query according to your needs
-//     console.log("Request Query: ", req.query);
-//     const search = req.query;
-//     const queryObject = {};
-//     if(search) {
-//       queryObject.$or = [
-//         {name: { $regex: new RegExp(search, "i")}},
-//       ];
-//     }
-//     console.log("Query Object: ", queryObject)
-//     const institutes = await EntranceInstitute.find(queryObject);
-//     // console.log("Searched: ", institutes)
-//     if (!institutes || institutes.length === 0) {
-//       return res.status(404).json({ message: "No institutes found" });
-//     }
-
-//     const massagedInstitutes = institutes.map((institute) => ({
-//       _id: institute._id,
-//       name: institute.name,
-//       profile_pic: institute.profile_pic,
-//       email: institute.email,
-//       status: institute.status,
-//     }));
-
-//     // You can customize the response data structure as per your requirements
-//     res.status(200).json(massagedInstitutes);
-//   } catch (error) {
-//     console.error("Error fetching institutes:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
-
-
-// exports.getInstitutesForAdmin = async (req, res) => {
-//   try {
-//     console.log("Request Query: ", req.query);
-
-//     const search = req.query.search; // Directly access the search parameter
-//     console.log("Search Parameter: ", search);
-
-//     let queryObject = {};
-
-//     if (search) {
-//       const regex = new RegExp(search, "i");
-//       queryObject = {
-//         $or: [
-//           { name: { $regex: regex } },
-//           { registrant_full_name: { $regex: regex } },
-//           { registrant_contact_number: { $regex: regex } },
-//           { registrant_email: { $regex: regex } },
-//           { "address.building_number": { $regex: regex } },
-//           { "address.area": { $regex: regex } },
-//           { "address.city": { $regex: regex } },
-//           { "address.state": { $regex: regex } },
-//           { "address.pin_code": { $regex: regex } },
-//         ],
-//       };
-//       console.log(
-//         "Query Object: ",
-//         JSON.stringify(queryObject, (key, value) =>
-//           key === "$regex" ? value.toString() : value
-//         )
-//       );
-//     } else {
-//       console.log("Search parameter is empty");
-//     }
-
-//     const institutes = await EntranceInstitute.find(queryObject);
-
-//     if (search && (!institutes || institutes.length === 0)) {
-//       // If search input is present and no institutes found, do not return "No matches found"
-//       console.log(
-//         "No matches found for the search input, returning all institutes instead."
-//       );
-//       queryObject = {}; // Reset the queryObject to fetch all institutes
-//       institutes = await EntranceInstitute.find(queryObject);
-//     }
-
-//     if (!institutes || institutes.length === 0) {
-//       return res.status(404).json({ message: "No institutes found" });
-//     }
-
-//     const massagedInstitutes = institutes.map((institute) => ({
-//       _id: institute._id,
-//       name: institute.name,
-//       profile_pic: institute.profile_pic,
-//       email: institute.email,
-//       status: institute.status,
-//     }));
-
-//     res.status(200).json(massagedInstitutes);
-//   } catch (error) {
-//     console.error("Error fetching institutes:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 exports.getInstitutesForAdmin = async (req, res) => {
   try {
     console.log("Request Query: ", req.query);
@@ -414,101 +312,6 @@ exports.getInstitutesForUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-// exports.getInstituteForUser = async (req, res) => {
-//   try {
-//     const { institute_id } = req.params;
-//     const { user_id } = req; // Assuming user ID is available in the request
-
-//     const institute = await EntranceInstitute.findOne({ _id: institute_id });
-
-//     if (!institute) {
-//       return res.status(404).json({ message: "Institute not found" });
-//     }
-
-//     // Fetch courses for the institute
-//     const courses = await EntranceCourse.find({ institute: institute._id });
-
-//     const massagedCourses = courses.map((course) => ({
-//       _id: course._id,
-//       type: course.type,
-//       name: course.name,
-//       description: course.description,
-//       duration: course.duration,
-//       fees: course.fees,
-//     }));
-
-//     // Calculate years of experience
-//     const currentYear = new Date().getFullYear();
-//     const establishedYear = new Date(institute.year_established_in).getFullYear();
-//     const yearsOfExperience = currentYear - establishedYear;
-
-//     // Fetch feedbacks
-//     const feedbacks = await UserFeedbacks.find({ feedback_to: institute._id });
-
-//     // Calculate the rating
-//     const totalRating = feedbacks.reduce(
-//       (sum, feedback) => sum + feedback.rating,
-//       0
-//     );
-//     const rating = feedbacks.length ? totalRating / feedbacks.length : 0;
-
-//     // Fetch user details for each feedback
-//     const feedbackDetails = await Promise.all(
-//       feedbacks.map(async (feedback) => {
-//         try {
-//           const { data } = await axios.get(
-//             `${BACKEND_URL}/user/ep/${feedback.feedback_from}`
-//           );
-//           return {
-//             rating: feedback.rating,
-//             comment: feedback.comment,
-//             userName: data.name,
-//             profile_pic: data.profile_pic,
-//           };
-//         } catch (error) {
-//           console.error(
-//             `Error fetching user details for feedback ${feedback.feedback_from}:`,
-//             error
-//           );
-//           return {
-//             rating: feedback.rating,
-//             comment: feedback.comment,
-//             user: {
-//               name: "Unknown",
-//               profile_pic: "",
-//             },
-//           };
-//         }
-//       })
-//     );
-
-//     // Calculate follower count
-//     const followerCount = institute.followers.length;
-
-//     // Prepare the response object
-//     const instituteWithDetails = {
-//       _id: institute._id,
-//       name: institute.name,
-//       profile_pic: institute.profile_pic,
-//       address: institute.address,
-//       year_established_in: institute.year_established_in,
-//       years_of_experience: yearsOfExperience,
-//       institute_timings: institute.timings,
-//       courses: massagedCourses,
-//       rating: rating,
-//       feedbacks: feedbackDetails,
-//       cover_image: institute.cover_image,
-//       follower_count: followerCount,
-//       about: institute.about, // Adding the 'about' field
-//     };
-
-//     res.status(200).json(instituteWithDetails);
-//   } catch (error) {
-//     console.error("Error fetching institute for user: ", error);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
 
 exports.getInstituteForUser = async (req, res) => {
   try {
@@ -1007,5 +810,111 @@ exports.getFollowersForEp = async (req, res) => {
   } catch (error) {
     console.error("Error fetching followers:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+exports.verifyInstitute = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute)
+      return res.status(404).send({
+        error: "Institute not found",
+      });
+
+    if (institute.verified)
+      return res.status(400).send({
+        error: "Institute already verified",
+      });
+
+    institute.status = "APPROVED";
+    institute.verified = true;
+    await institute.save();
+    const { data } = await axios.post(
+      `${BACKEND_URL}/notification/institute/verify`,
+      {
+        to: institute.email,
+        username: institute.name,
+      }
+    );
+
+    res.status(200).send({
+      message: "Institute successfully verified",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.rejectInstitute = async (req, res) => {
+  try {
+    const { institute_id } = req.params;
+    const { reason } = req.body;
+
+    const institute = await EntranceInstitute.findOne({ _id: institute_id });
+    if (!institute)
+      return res.status(404).send({
+        error: "Institute not found",
+      });
+    if (institute.verified === "PENDING") {
+      institute.status = "REJECTED";
+      institute.verified = false;
+      await institute.save();
+
+      const { data } = await axios.post(
+        `${BACKEND_URL}/notification/institute/reject`,
+        {
+          to: institute.email,
+          username: institute.name,
+          reason,
+        }
+      );
+
+      return res.status(200).send({
+        message: "Institute successfully rejected",
+      });
+    }
+
+    if (institute.verified == "PENDING") {
+      institute.status = "REJECTED";
+      institute.verified = false;
+      await institute.save();
+
+      const { data } = await axios.post(
+        `${BACKEND_URL}/notification/institute/reject`,
+        {
+          to: institute.email,
+          username: institute.name,
+          reason,
+        }
+      );
+
+      res.status(200).send({
+        message: "Institute successfully rejected",
+      });
+    }
+
+    institute.status = "REJECTED";
+    institute.verified = false;
+    await institute.save();
+
+    const { data } = await axios.post(
+      `${BACKEND_URL}/notification/institute/reject`,
+      {
+        to: institute.email,
+        username: institute.name,
+        reason,
+      }
+    );
+
+    res.status(200).send({
+      message: "Institute successfully rejected",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };

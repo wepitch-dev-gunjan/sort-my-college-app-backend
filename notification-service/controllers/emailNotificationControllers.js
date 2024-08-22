@@ -1453,6 +1453,140 @@ exports.rejectCounsellorEmailNotification = async (req, res) => {
   }
 };
 
+exports.verifyInstituteEmailNotification = async (req, res) => {
+  try {
+    const { to, username } = req.body;
+    console.log(to, username);
+    const mailOptions = {
+      to,
+      subject: "SortMyCollege Institute Verification Approved",
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/10/cropped-SORTMYCOLLEGE-12-1.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          To,<br>
+                           ${username} <br><br>
+                           We hope this email finds you well.                                    
+                          <br><br>                          
+                          We are pleased to inform you that your verification request has been approved. You now have access to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
+                          and can start adding courses and connecting with students seeking career guidance.<br> <br>
+                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
+                          Best regards, <br />
+                          
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.rejectInstituteEmailNotification = async (req, res) => {
+  try {
+    const { to, reason, username } = req.body;
+    console.log(to, reason, username);
+    const mailOptions = {
+      to,
+      subject: "SortMyCollege Institute Verification Rejected",
+      html: `<body>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+        <tr>
+          <td style="box-sizing: border-box; padding: 25px; margin: 10px;">
+            <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+              <tr>
+                <td align="center" bgcolor="#ffffff">
+                  <table width="400" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://sortmycollege.com/">
+                          <img src="https://sortmycollege.com/wp-content/uploads/2023/10/cropped-SORTMYCOLLEGE-12-1.png" alt="" width="400" height="100" style="display: block;">
+                        </a>
+                      </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          To,<br>
+                           ${username} <br><br>
+                           We hope this email finds you well. <br>
+                           We regret to inform you that your verification request has been rejected.<br><br> 
+                          <b>Reason </b>: ${reason}               
+                          <br><br>                          
+                          Please log in to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
+                          to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
+                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
+                          Best regards, <br />
+                          
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          Team
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>    
+    `,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).send("Error sending email");
+      } else {
+        console.log("Email sent:", info.response);
+        res.send("Email sent successfully");
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+
+
 exports.generatedHelpNotification = (req, res) => {
   try {
     // Validate the request parameters

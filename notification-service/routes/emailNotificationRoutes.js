@@ -18,6 +18,8 @@ const {
   verifyCounsellorEmailNotification,
   rejectCounsellorEmailNotification,
   generatedHelpNotification,
+  verifyInstituteEmailNotification,
+  rejectInstituteEmailNotification,
 } = require("../controllers/emailNotificationControllers");
 const router = express.Router();
 
@@ -56,5 +58,9 @@ router.post(
 );
 router.post("/counsellor/verify", verifyCounsellorEmailNotification);
 router.post("/counsellor/reject", rejectCounsellorEmailNotification);
+
+router.post("/institute/verify", verifyInstituteEmailNotification);
+router.post("/institute/reject", rejectInstituteEmailNotification);
+
 
 module.exports = router;
