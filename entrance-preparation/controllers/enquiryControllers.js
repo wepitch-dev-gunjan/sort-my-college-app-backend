@@ -4,35 +4,39 @@ const User = require("../../user/models/User");
 const EntranceCourse = require("../models/EntranceCourse");
 const { default: mongoose } = require("mongoose");
 const { BACKEND_URL } = process.env;
+const moment = require('moment');
 
 // exports.addEnquiry = async (req, res) => {
 //   try {
 //     const { id } = req;
-//     const { enquired_to, courses, mode, preferred_time, message } = req.body;
+//     const { enquired_to, courses } = req.body;
 
-//     if (!enquired_to || !message)
+//     // Check for required fields
+//     if (!enquired_to) {
 //       return res.status(400).send({
 //         error: "required fields are not filled",
 //       });
-//     const currentDate = new Date();
+//     }
 
+//     const currentDate = new Date();
 //     const formattedDate = currentDate.toLocaleDateString("en-GB", {
 //       day: "2-digit",
 //       month: "2-digit",
 //       year: "numeric",
 //     });
 
+//     // Create the new enquiry object
 //     const newEnquiry = new Enquiry({
 //       enquirer: id,
 //       enquired_to,
-//       courses,
-//       mode,
-//       preferred_time,
-//       message,
+//       courses: courses || [], // If courses are not provided, default to an empty array
 //       date: formattedDate,
 //     });
 
+//     // Save the new enquiry
 //     await newEnquiry.save();
+
+//     // Respond with success message
 //     res.status(201).json({
 //       message: "Enquiry added successfully",
 //       data: newEnquiry,
@@ -42,8 +46,6 @@ const { BACKEND_URL } = process.env;
 //     res.status(500).json({ message: "Internal Server Error" });
 //   }
 // };
-
-// get Engueries for Ep
 
 exports.addEnquiry = async (req, res) => {
   try {
@@ -57,19 +59,21 @@ exports.addEnquiry = async (req, res) => {
       });
     }
 
+    // Get the current date in IST (Indian Standard Time) without the time
     const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    const indiaDate = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(currentDate);
 
     // Create the new enquiry object
     const newEnquiry = new Enquiry({
       enquirer: id,
       enquired_to,
       courses: courses || [], // If courses are not provided, default to an empty array
-      date: formattedDate,
+      date: indiaDate, // Only the date in dd/mm/yyyy format
     });
 
     // Save the new enquiry
@@ -87,94 +91,22 @@ exports.addEnquiry = async (req, res) => {
 };
 
 
+
 // exports.getEnquiries = async (req, res) => {
 //   try {
-//     console.log("Reached")
 //     const { institute_id } = req;
+
 //     if (!institute_id) {
 //       return res.status(404).json({ message: "Specified institute not found" });
 //     }
 
-//     // const { date, status } = req.query;
-
-//     // const filter = { enquired_to: institute_id };
-//     // if (date) {
-//     //   filter.date = date;
-//     // }
-//     // if (status) {
-//     //   filter.status = status;
-//     // }
-//     // const enquiries = await Enquiry.find(filter);
-  
-//     const { status, startDate, endDate } = req.query;
-//     let query = { enquired_to: institute_id };
-//     if (status) {
-//       query.status = status;
-//     }
-//     if (startDate && endDate) {
-//       const start = new Date(startDate).toISOString();
-//       const endDateObject = new Date(endDate);
-//       const timeZoneOffset = endDateObject.getTimezoneOffset() * 60000; // Timezone offset in milliseconds
-//       endDateObject.setHours(23, 59, 59, 999);
-//       const adjustedEndDate = new Date(
-//         endDateObject.getTime() - timeZoneOffset
-//       );
-//       const end = adjustedEndDate.toISOString();
-
-//       query.createdAt = {
-//         $gte: start,
-//         $lte: end,
-//       };
-//     }
-
-//     const enquiries = await Enquiry.find(query);
-
-//     // const enquiries = await Enquiry.find({ enquired_to: institute_id });
-//     // console.log(enquiries);
-
-//     if (!enquiries) return res.status(201).send([]);
-
-//     const massagedDataPromise = Promise.all(
-//       enquiries.map(async (enquiry) => {
-//         const { data } = await axios.get(
-//           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-//         );
-//         console.log("dataa,", data);
-//         return {
-//           _id: enquiry._id,
-//           name: data.name,
-//           phone_number: data.phone_number,
-//           status: enquiry.status,
-//           date: enquiry.date,
-//         };
-//       })
-//     );
-
-//     massagedDataPromise
-//       .then((massagedData) => {
-//         // console.log(massagedData);
-//         res.status(200).json(massagedData);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
-
-//     // console.log(massagedData);
-//   } catch (error) {
-//     console.error("Error getting enquiries");
-//     res.status(500).json({ message: "Internal  enquiries Server Error" });
-//   }
-// };
-
-// exports.getEnquiries = async (req, res) => {
-//   try {
-//     console.log("Reached");
-//     const { institute_id } = req;
-//     if (!institute_id) {
-//       return res.status(404).json({ message: "Specified institute not found" });
+//     // Validate institute_id
+//     if (!mongoose.Types.ObjectId.isValid(institute_id)) {
+//       return res.status(400).json({ message: "Invalid institute ID" });
 //     }
 
 //     const { status, startDate, endDate } = req.query;
+//     console.log("Start Date, End Date: ", startDate, endDate)
 //     let query = { enquired_to: institute_id };
 
 //     if (status) {
@@ -182,7 +114,6 @@ exports.addEnquiry = async (req, res) => {
 //     }
 
 //     if (startDate && endDate) {
-//       // Parse startDate and endDate and normalize them
 //       const start = new Date(startDate);
 //       start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
 
@@ -197,40 +128,49 @@ exports.addEnquiry = async (req, res) => {
 
 //     const enquiries = await Enquiry.find(query);
 
-//     if (!enquiries) return res.status(201).send([]);
+//     if (!enquiries || enquiries.length === 0) {
+//       return res.status(200).json([]);
+//     }
 
 //     const massagedDataPromise = Promise.all(
 //       enquiries.map(async (enquiry) => {
-//         const { data } = await axios.get(
-//           `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-//         );
-//         console.log("data,", data);
-//         return {
-//           _id: enquiry._id,
-//           name: data.name,
-//           phone_number: data.phone_number,
-//           status: enquiry.status,
-//           date: enquiry.date,
-//         };
+//         try {
+//           const { data } = await axios.get(
+//             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//           );
+//           return {
+//             _id: enquiry._id,
+//             name: data.name,
+//             phone_number: data.phone_number,
+//             status: enquiry.status,
+//             date: enquiry.createdAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+//           };
+//         } catch (err) {
+//           console.error(
+//             `Error fetching user data for enquiry ${enquiry._id}:`,
+//             err
+//           );
+//           return {
+//             _id: enquiry._id,
+//             name: "N/A",
+//             phone_number: "N/A",
+//             status: enquiry.status,
+//             date: enquiry.createdAt.toISOString().split("T")[0],
+//           };
+//         }
 //       })
 //     );
 
-//     massagedDataPromise
-//       .then((massagedData) => {
-//         res.status(200).json(massagedData);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//       });
+//     const massagedData = await massagedDataPromise;
+//     res.status(200).json(massagedData);
 //   } catch (error) {
-//     console.error("Error getting enquiries");
+//     console.error("Error getting enquiries", error);
 //     res.status(500).json({ message: "Internal enquiries Server Error" });
 //   }
 // };
 
 exports.getEnquiries = async (req, res) => {
   try {
-    console.log("Reached");
     const { institute_id } = req;
 
     if (!institute_id) {
@@ -243,23 +183,11 @@ exports.getEnquiries = async (req, res) => {
     }
 
     const { status, startDate, endDate } = req.query;
+    console.log("Start Date, End Date: ", startDate, endDate);
     let query = { enquired_to: institute_id };
 
     if (status) {
       query.status = status;
-    }
-
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
-
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
-
-      query.createdAt = {
-        $gte: start.toISOString(),
-        $lte: end.toISOString(),
-      };
     }
 
     const enquiries = await Enquiry.find(query);
@@ -268,19 +196,38 @@ exports.getEnquiries = async (req, res) => {
       return res.status(200).json([]);
     }
 
+    // Filter by the custom date field
+    const filteredEnquiries = enquiries.filter((enquiry) => {
+      const enquiryDate = moment(enquiry.date, "DD/MM/YYYY, HH:mm:ss");
+
+      let startMatch = true;
+      let endMatch = true;
+
+      if (startDate) {
+        const start = moment(startDate, "YYYY-MM-DD").startOf('day');
+        startMatch = enquiryDate.isSameOrAfter(start);
+      }
+
+      if (endDate) {
+        const end = moment(endDate, "YYYY-MM-DD").endOf('day');
+        endMatch = enquiryDate.isSameOrBefore(end);
+      }
+
+      return startMatch && endMatch;
+    });
+
     const massagedDataPromise = Promise.all(
-      enquiries.map(async (enquiry) => {
+      filteredEnquiries.map(async (enquiry) => {
         try {
           const { data } = await axios.get(
             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
           );
-          console.log("data,", data);
           return {
             _id: enquiry._id,
             name: data.name,
             phone_number: data.phone_number,
             status: enquiry.status,
-            date: enquiry.createdAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
+            date: enquiry.date, // Return the original `date` field
           };
         } catch (err) {
           console.error(
@@ -292,7 +239,7 @@ exports.getEnquiries = async (req, res) => {
             name: "N/A",
             phone_number: "N/A",
             status: enquiry.status,
-            date: enquiry.createdAt.toISOString().split("T")[0],
+            date: enquiry.date, // Return the original `date` field
           };
         }
       })
