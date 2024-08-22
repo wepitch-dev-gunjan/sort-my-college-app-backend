@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const Enquiry = require("../models/Enquiry");
 const User = require("../../user/models/User");
 const EntranceCourse = require("../models/EntranceCourse");
+const { default: mongoose } = require("mongoose");
 const { BACKEND_URL } = process.env;
 
 // exports.addEnquiry = async (req, res) => {
@@ -236,6 +237,11 @@ exports.getEnquiries = async (req, res) => {
       return res.status(404).json({ message: "Specified institute not found" });
     }
 
+    // Validate institute_id
+    if (!mongoose.Types.ObjectId.isValid(institute_id)) {
+      return res.status(400).json({ message: "Invalid institute ID" });
+    }
+
     const { status, startDate, endDate } = req.query;
     let query = { enquired_to: institute_id };
 
@@ -303,38 +309,57 @@ exports.getEnquiries = async (req, res) => {
 exports.getSingleEnquiry = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
+
+    // Validate enquiry_id
+    if (!mongoose.Types.ObjectId.isValid(enquiry_id)) {
+      return res.status(400).json({ message: "Invalid enquiry ID" });
+    }
+
     const enquiryData = await Enquiry.findById(enquiry_id.toString());
-    if (!enquiryData)
+    if (!enquiryData) {
       return res.status(404).send({ message: "No enquiry found with this ID" });
+    }
 
     if (enquiryData.status === "Unseen") enquiryData.status = "Seen";
     await enquiryData.save();
 
-    const userDataResponse = await axios.get(
-      `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
-    );
-    const userData = userDataResponse.data;
-    
-    const courseData = await EntranceCourse.findById(enquiryData.courses.toString());
-    if(!courseData){
-     return res.status(400).send("no course details found with this id ")
+    // Fetch user data
+    let userData = { name: "N/A", phone_number: "N/A" };
+    try {
+      const userDataResponse = await axios.get(
+        `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+      );
+      userData = userDataResponse.data || userData;
+    } catch (err) {
+      console.error(`Error fetching user data for enquiry ${enquiry_id}:`, err);
+    }
+
+    // Fetch course data
+    let courseData = { name: "N/A", type: "N/A" };
+    if (mongoose.Types.ObjectId.isValid(enquiryData.courses.toString())) {
+      try {
+        const fetchedCourseData = await EntranceCourse.findById(enquiryData.courses.toString());
+        courseData = fetchedCourseData || courseData;
+      } catch (err) {
+        console.error(`Error fetching course data for enquiry ${enquiry_id}:`, err);
+      }
     }
 
     const responseData = {
       _id: enquiryData._id,
       enquirer: {
-        _id: userData._id,
-        name: userData.name,
-        phone_number: userData.phone_number,
+        _id: userData._id || "N/A",
+        name: userData.name || "N/A",
+        phone_number: userData.phone_number || "N/A",
       },
       course: {
-        _id: courseData._id,
-        name: courseData.name,
-        type: courseData.type,
+        _id: courseData._id || "N/A",
+        name: courseData.name || "N/A",
+        type: courseData.type || "N/A",
       },
-      message: enquiryData.message,
-      status: enquiryData.status,
-      date: enquiryData.date,
+      message: enquiryData.message || "N/A",
+      status: enquiryData.status || "N/A",
+      date: enquiryData.createdAt ? enquiryData.createdAt.toISOString().split("T")[0] : "N/A", // Format date as YYYY-MM-DD
     };
 
     res.status(200).send(responseData);
