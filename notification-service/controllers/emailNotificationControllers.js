@@ -1553,7 +1553,7 @@ exports.rejectInstituteEmailNotification = async (req, res) => {
                           Please log in to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
                           to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
                           If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
-                          Best regards, <br />
+                          Best Regards, <br />
                           
                           <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
                           Team
