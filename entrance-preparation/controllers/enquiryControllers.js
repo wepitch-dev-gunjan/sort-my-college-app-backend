@@ -47,6 +47,49 @@ const moment = require('moment');
 //   }
 // };
 
+// exports.addEnquiry = async (req, res) => {
+//   try {
+//     const { id } = req;
+//     const { enquired_to, courses } = req.body;
+
+//     // Check for required fields
+//     if (!enquired_to) {
+//       return res.status(400).send({
+//         error: "required fields are not filled",
+//       });
+//     }
+
+//     // Get the current date in IST (Indian Standard Time) without the time
+//     const currentDate = new Date();
+//     const indiaDate = new Intl.DateTimeFormat('en-GB', {
+//       timeZone: 'Asia/Kolkata',
+//       day: '2-digit',
+//       month: '2-digit',
+//       year: 'numeric',
+//     }).format(currentDate);
+
+//     // Create the new enquiry object
+//     const newEnquiry = new Enquiry({
+//       enquirer: id,
+//       enquired_to,
+//       courses: courses || [], // If courses are not provided, default to an empty array
+//       date: indiaDate, // Only the date in dd/mm/yyyy format
+//     });
+
+//     // Save the new enquiry
+//     await newEnquiry.save();
+
+//     // Respond with success message
+//     res.status(201).json({
+//       message: "Enquiry added successfully",
+//       data: newEnquiry,
+//     });
+//   } catch (error) {
+//     console.error("Error adding Enquiry:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 exports.addEnquiry = async (req, res) => {
   try {
     const { id } = req;
@@ -59,7 +102,7 @@ exports.addEnquiry = async (req, res) => {
       });
     }
 
-    // Get the current date in IST (Indian Standard Time) without the time
+    // Get the current date and time in IST (Indian Standard Time)
     const currentDate = new Date();
     const indiaDate = new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Kolkata',
@@ -67,6 +110,24 @@ exports.addEnquiry = async (req, res) => {
       month: '2-digit',
       year: 'numeric',
     }).format(currentDate);
+
+    // Check if the user has made an enquiry to the same institute in the last 24 hours
+    const lastEnquiry = await Enquiry.findOne({
+      enquirer: id,
+      enquired_to,
+    }).sort({ createdAt: -1 }); // Sort by most recent enquiry
+
+    if (lastEnquiry) {
+      const lastEnquiryTime = new Date(lastEnquiry.createdAt);
+      const timeDifference = currentDate - lastEnquiryTime;
+      const hoursDifference = timeDifference / (1000 * 60 * 60);
+
+      if (hoursDifference < 24) {
+        return res.status(403).json({
+          message: `You can only make a new enquiry to this institute 24 hours after your last enquiry. Please try again later.`,
+        });
+      }
+    }
 
     // Create the new enquiry object
     const newEnquiry = new Enquiry({
@@ -89,85 +150,6 @@ exports.addEnquiry = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
-
-// exports.getEnquiries = async (req, res) => {
-//   try {
-//     const { institute_id } = req;
-
-//     if (!institute_id) {
-//       return res.status(404).json({ message: "Specified institute not found" });
-//     }
-
-//     // Validate institute_id
-//     if (!mongoose.Types.ObjectId.isValid(institute_id)) {
-//       return res.status(400).json({ message: "Invalid institute ID" });
-//     }
-
-//     const { status, startDate, endDate } = req.query;
-//     console.log("Start Date, End Date: ", startDate, endDate)
-//     let query = { enquired_to: institute_id };
-
-//     if (status) {
-//       query.status = status;
-//     }
-
-//     if (startDate && endDate) {
-//       const start = new Date(startDate);
-//       start.setHours(0, 0, 0, 0); // Set time to 00:00:00.000
-
-//       const end = new Date(endDate);
-//       end.setHours(23, 59, 59, 999); // Set time to 23:59:59.999
-
-//       query.createdAt = {
-//         $gte: start.toISOString(),
-//         $lte: end.toISOString(),
-//       };
-//     }
-
-//     const enquiries = await Enquiry.find(query);
-
-//     if (!enquiries || enquiries.length === 0) {
-//       return res.status(200).json([]);
-//     }
-
-//     const massagedDataPromise = Promise.all(
-//       enquiries.map(async (enquiry) => {
-//         try {
-//           const { data } = await axios.get(
-//             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-//           );
-//           return {
-//             _id: enquiry._id,
-//             name: data.name,
-//             phone_number: data.phone_number,
-//             status: enquiry.status,
-//             date: enquiry.createdAt.toISOString().split("T")[0], // Format date as YYYY-MM-DD
-//           };
-//         } catch (err) {
-//           console.error(
-//             `Error fetching user data for enquiry ${enquiry._id}:`,
-//             err
-//           );
-//           return {
-//             _id: enquiry._id,
-//             name: "N/A",
-//             phone_number: "N/A",
-//             status: enquiry.status,
-//             date: enquiry.createdAt.toISOString().split("T")[0],
-//           };
-//         }
-//       })
-//     );
-
-//     const massagedData = await massagedDataPromise;
-//     res.status(200).json(massagedData);
-//   } catch (error) {
-//     console.error("Error getting enquiries", error);
-//     res.status(500).json({ message: "Internal enquiries Server Error" });
-//   }
-// };
 
 exports.getEnquiries = async (req, res) => {
   try {
