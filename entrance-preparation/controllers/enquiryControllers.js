@@ -434,7 +434,7 @@ exports.getEnquiriesForAdmin = async (req, res) => {
     }
 
     // Query for enquiries
-    const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject });
+    const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject }).sort({ createdAt: -1 });
 
     if (!enquiries.length) return res.status(201).send([]);
 
@@ -610,7 +610,8 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
       };
     }
 
-    const enquiries = await Enquiry.find(query);
+    //const enquiries = await Enquiry.find(query);
+    const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
 
     if (!enquiries.length) {
       return res.status(200).send([]);
