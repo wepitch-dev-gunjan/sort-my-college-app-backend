@@ -172,7 +172,7 @@ exports.getEnquiries = async (req, res) => {
       query.status = status;
     }
 
-    const enquiries = await Enquiry.find(query);
+    const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
 
     if (!enquiries || enquiries.length === 0) {
       return res.status(200).json([]);
@@ -479,41 +479,114 @@ exports.getEnquiriesForAdmin = async (req, res) => {
 
 
 // getSingleEnquiryForAdmin
-exports.getSingleEnquiryForAdmin = async (req,res) => {
-try {
- const { enquiry_id} =req.params;
- const dataEnquiry = await Enquiry.findById(enquiry_id);
- if(!dataEnquiry) 
- return res.status(404).send({message : "No Enquiry Found"});
- const getUserData = await axios.get(`${BACKEND_URL}/user/users-for-admin/${dataEnquiry.enquirer}`
- );
- const userData = getUserData.data
- const courseData = await EntranceCourse.findById(dataEnquiry.courses.toString());
- if(!courseData) {
-  return res.status(400).send("no Course Found")
- }
- const fetchData = {
-  id: dataEnquiry.id,
-  enquirer: {
-_id: userData._id,
-name: userData.name,
-phone_number: userData.phone_number,
-  },
-  course: {
-   _id: courseData._id,
-   name: courseData.name,
-   phone_number: courseData.phone_number
-  },
-  message: dataEnquiry.message,
-  status: dataEnquiry.status ,
-  date: dataEnquiry.date,
- }
- res.status(200).send(fetchData)
-} catch (error) {
- console.log(error)
- res.status(500).json({message : "Internal Server Error"});
-}
-}
+
+// exports.getSingleEnquiryForAdmin = async (req,res) => {
+// try {
+//  const { enquiry_id} =req.params;
+//  const dataEnquiry = await Enquiry.findById(enquiry_id);
+
+//  if(!dataEnquiry) 
+//  return res.status(404).send({message : "No Enquiry Found"});
+//  const getUserData = await axios.get(`${BACKEND_URL}/user/users-for-admin/${dataEnquiry.enquirer}`
+//  );
+//  const userData = getUserData.data
+//  const courseData = await EntranceCourse.findById(dataEnquiry.courses.toString());
+//  if(!courseData) {
+//   return res.status(400).send("no Course Found")
+//  }
+//  const fetchData = {
+//   id: dataEnquiry.id,
+//   enquirer: {
+// _id: userData._id,
+// name: userData.name,
+// phone_number: userData.phone_number,
+//   },
+//   course: {
+//    _id: courseData._id,
+//    name: courseData.name,
+//    phone_number: courseData.phone_number
+//   },
+//   message: dataEnquiry.message,
+//   status: dataEnquiry.status ,
+//   date: dataEnquiry.date,
+//  }
+//  res.status(200).send(fetchData)
+// } catch (error) {
+//  console.log(error)
+//  res.status(500).json({message : "Internal Server Error"});
+// }
+// }
+
+exports.getSingleEnquiryForAdmin = async (req, res) => {
+  try {
+    const { enquiry_id } = req.params;
+
+    // Validate enquiry_id
+    if (!mongoose.Types.ObjectId.isValid(enquiry_id)) {
+      return res.status(400).json({ message: "Invalid enquiry ID" });
+    }
+
+    const enquiryData = await Enquiry.findById(enquiry_id.toString());
+    if (!enquiryData) {
+      return res.status(404).send({ message: "No enquiry found with this ID" });
+    }
+
+    if (enquiryData.status === "Unseen") enquiryData.status = "Seen";
+    await enquiryData.save();
+
+    // Fetch user data
+    let userData = { name: "N/A", phone_number: "N/A" };
+    try {
+      const userDataResponse = await axios.get(
+        `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+      );
+      userData = userDataResponse.data || userData;
+    } catch (err) {
+      console.error(`Error fetching user data for enquiry ${enquiry_id}:`, err);
+    }
+
+    // Fetch course data
+    let courseData = { name: "N/A", type: "N/A" };
+    if (mongoose.Types.ObjectId.isValid(enquiryData.courses.toString())) {
+      try {
+        const fetchedCourseData = await EntranceCourse.findById(
+          enquiryData.courses.toString()
+        );
+        courseData = fetchedCourseData || courseData;
+      } catch (err) {
+        console.error(
+          `Error fetching course data for enquiry ${enquiry_id}:`,
+          err
+        );
+      }
+    }
+
+    const responseData = {
+      _id: enquiryData._id,
+      enquirer: {
+        _id: userData._id || "N/A",
+        name: userData.name || "N/A",
+        phone_number: userData.phone_number || "N/A",
+      },
+      course: {
+        _id: courseData._id || "N/A",
+        name: courseData.name || "N/A",
+        type: courseData.type || "N/A",
+      },
+      message: enquiryData.message || "N/A",
+      status: enquiryData.status || "N/A",
+      date: enquiryData.createdAt
+        ? enquiryData.createdAt.toISOString().split("T")[0]
+        : "N/A", // Format date as YYYY-MM-DD
+    };
+
+    res.status(200).send(responseData);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
+
 
 
 // change status For Admin
@@ -590,6 +663,71 @@ exports.changeStatus = async (req, res) => {
 //  }
 // };
 
+// exports.getAllEnquiriesForAdmin = async (req, res) => {
+//   try {
+//     const { status, startDate, endDate } = req.query;
+
+//     // Construct the query object
+//     let query = {};
+//     if (status) {
+//       query.status = status;
+//     }
+//     if (startDate && endDate) {
+//       const start = new Date(startDate).toISOString();
+//       const endDateObject = new Date(endDate);
+//       endDateObject.setHours(23, 59, 59, 999);
+//       const end = endDateObject.toISOString();
+//       query.createdAt = {
+//         $gte: start,
+//         $lte: end,
+//       };
+//     }
+
+//     //const enquiries = await Enquiry.find(query);
+//     const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
+
+//     if (!enquiries.length) {
+//       return res.status(200).send([]);
+//     }
+
+//     const massagedDataPromise = Promise.all(
+//       enquiries.map(async (enquiry) => {
+//         try {
+//           const { data } = await axios.get(
+//             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//           );
+//           const createdAtTime = new Date(
+//             enquiry.createdAt
+//           ).toLocaleTimeString();
+//           return {
+//             _id: enquiry._id,
+//             name: data.name,
+//             phone_number: data.phone_number,
+//             status: enquiry.status,
+//             date: enquiry.date,
+//             createdAt: createdAtTime,
+//           };
+//         } catch (error) {
+//           console.error(
+//             `Error fetching user details for enquiry ${enquiry._id}:`,
+//             error
+//           );
+//           return null;
+//         }
+//       })
+//     );
+
+//     const massagedData = await massagedDataPromise;
+//     const validData = massagedData.filter((item) => item !== null);
+
+//     res.status(200).json(validData);
+//   } catch (error) {
+//     console.error("Error getting enquiries:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+
 exports.getAllEnquiriesForAdmin = async (req, res) => {
   try {
     const { status, startDate, endDate } = req.query;
@@ -610,7 +748,7 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
       };
     }
 
-    //const enquiries = await Enquiry.find(query);
+    // const enquiries = await Enquiry.find(query);
     const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
 
     if (!enquiries.length) {
@@ -623,9 +761,17 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
           const { data } = await axios.get(
             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
           );
-          const createdAtTime = new Date(
-            enquiry.createdAt
-          ).toLocaleTimeString();
+
+          // Convert createdAt to IST
+          const createdAtDate = new Date(enquiry.createdAt);
+          const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
+          const istTime = new Date(createdAtDate.getTime() + offset + 19800000); // IST offset is +5:30 from GMT
+          const createdAtTime = istTime.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+
           return {
             _id: enquiry._id,
             name: data.name,
