@@ -542,7 +542,18 @@ exports.getEnquiriesForAdmin = async (req, res) => {
           const { data } = await axios.get(
             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
           );
-          const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
+          //const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
+          // Convert createdAt to IST
+           const createdAtDate = new Date(enquiry.createdAt);
+           const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
+           const istTime = new Date(
+             createdAtDate.getTime() + offset + 19800000
+           ); // IST offset is +5:30 from GMT
+           const createdAtTime = istTime.toLocaleTimeString("en-US", {
+             hour: "2-digit",
+             minute: "2-digit",
+             second: "2-digit",
+           });
           return {
             _id: enquiry._id,
             name: data.name,
