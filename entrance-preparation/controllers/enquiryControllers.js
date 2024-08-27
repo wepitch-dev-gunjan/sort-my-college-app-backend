@@ -5,6 +5,7 @@ const EntranceCourse = require("../models/EntranceCourse");
 const { default: mongoose } = require("mongoose");
 const { BACKEND_URL } = process.env;
 const moment = require('moment');
+const EntranceInstitute = require("../models/EntranceInstitute");
 
 // exports.addEnquiry = async (req, res) => {
 //   try {
@@ -625,6 +626,76 @@ exports.getEnquiriesForAdmin = async (req, res) => {
 // }
 // }
 
+// exports.getSingleEnquiryForAdmin = async (req, res) => {
+//   try {
+//     const { enquiry_id } = req.params;
+
+//     // Validate enquiry_id
+//     if (!mongoose.Types.ObjectId.isValid(enquiry_id)) {
+//       return res.status(400).json({ message: "Invalid enquiry ID" });
+//     }
+
+//     const enquiryData = await Enquiry.findById(enquiry_id.toString());
+//     if (!enquiryData) {
+//       return res.status(404).send({ message: "No enquiry found with this ID" });
+//     }
+
+//     if (enquiryData.status === "Unseen") enquiryData.status = "Seen";
+//     await enquiryData.save();
+
+//     // Fetch user data
+//     let userData = { name: "N/A", phone_number: "N/A" };
+//     try {
+//       const userDataResponse = await axios.get(
+//         `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+//       );
+//       userData = userDataResponse.data || userData;
+//     } catch (err) {
+//       console.error(`Error fetching user data for enquiry ${enquiry_id}:`, err);
+//     }
+
+//     // Fetch course data
+//     let courseData = { name: "N/A", type: "N/A" };
+//     if (mongoose.Types.ObjectId.isValid(enquiryData.courses.toString())) {
+//       try {
+//         const fetchedCourseData = await EntranceCourse.findById(
+//           enquiryData.courses.toString()
+//         );
+//         courseData = fetchedCourseData || courseData;
+//       } catch (err) {
+//         console.error(
+//           `Error fetching course data for enquiry ${enquiry_id}:`,
+//           err
+//         );
+//       }
+//     }
+
+//     const responseData = {
+//       _id: enquiryData._id,
+//       enquirer: {
+//         _id: userData._id || "N/A",
+//         name: userData.name || "N/A",
+//         phone_number: userData.phone_number || "N/A",
+//       },
+//       course: {
+//         _id: courseData._id || "N/A",
+//         name: courseData.name || "N/A",
+//         type: courseData.type || "N/A",
+//       },
+//       message: enquiryData.message || "N/A",
+//       status: enquiryData.status || "N/A",
+//       date: enquiryData.createdAt
+//         ? enquiryData.createdAt.toISOString().split("T")[0]
+//         : "N/A", // Format date as YYYY-MM-DD
+//     };
+
+//     res.status(200).send(responseData);
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// };
+
 exports.getSingleEnquiryForAdmin = async (req, res) => {
   try {
     const { enquiry_id } = req.params;
@@ -638,27 +709,31 @@ exports.getSingleEnquiryForAdmin = async (req, res) => {
     if (!enquiryData) {
       return res.status(404).send({ message: "No enquiry found with this ID" });
     }
+    console.log("Enquiry data: ", enquiryData)
 
-    if (enquiryData.status === "Unseen") enquiryData.status = "Seen";
-    await enquiryData.save();
+    // Update status if "Unseen"
+    if (enquiryData.status === "Unseen") {
+      enquiryData.status = "Seen";
+      await enquiryData.save();
+    }
 
     // Fetch user data
     let userData = { name: "N/A", phone_number: "N/A" };
     try {
       const userDataResponse = await axios.get(
-        `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+        `${process.env.BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
       );
       userData = userDataResponse.data || userData;
     } catch (err) {
       console.error(`Error fetching user data for enquiry ${enquiry_id}:`, err);
     }
 
-    // Fetch course data
+    // Fetch course data (if any)
     let courseData = { name: "N/A", type: "N/A" };
-    if (mongoose.Types.ObjectId.isValid(enquiryData.courses.toString())) {
+    if (enquiryData.courses && enquiryData.courses.length > 0) {
       try {
         const fetchedCourseData = await EntranceCourse.findById(
-          enquiryData.courses.toString()
+          enquiryData.courses[0] // Assuming the first course is the primary one
         );
         courseData = fetchedCourseData || courseData;
       } catch (err) {
@@ -669,7 +744,34 @@ exports.getSingleEnquiryForAdmin = async (req, res) => {
       }
     }
 
-    const responseData = {
+    // Fetch institute data
+    let instituteData = { name: "N/A" };
+    if (
+      enquiryData.enquired_to &&
+      mongoose.Types.ObjectId.isValid(enquiryData.enquired_to.toString())
+    ) {
+      try {
+        console.log("Ins Id:", enquiryData.enquired_to.toString());
+        const fetchedInstituteData = await EntranceInstitute.findById(
+          enquiryData.enquired_to.toString()
+        );
+        console.log("Fetched institute: ", fetchedInstituteData)
+        if (fetchedInstituteData) {
+          instituteData = {
+            _id: fetchedInstituteData._id,
+            name: fetchedInstituteData.name,
+          };
+        }
+      } catch (err) {
+        console.error(
+          `Error fetching institute data for enquiry ${enquiry_id}:`,
+          err
+        );
+      }
+    }
+
+    // Debugging log to verify data
+    console.log("Final Response Data:", {
       _id: enquiryData._id,
       enquirer: {
         _id: userData._id || "N/A",
@@ -681,20 +783,46 @@ exports.getSingleEnquiryForAdmin = async (req, res) => {
         name: courseData.name || "N/A",
         type: courseData.type || "N/A",
       },
+      institute: {
+        _id: instituteData._id || "N/A",
+        name: instituteData.name || "N/A",
+      },
       message: enquiryData.message || "N/A",
       status: enquiryData.status || "N/A",
       date: enquiryData.createdAt
         ? enquiryData.createdAt.toISOString().split("T")[0]
         : "N/A", // Format date as YYYY-MM-DD
-    };
+    });
 
-    res.status(200).send(responseData);
+    res.status(200).send({
+      _id: enquiryData._id,
+      enquirer: {
+        _id: userData._id || "N/A",
+        name: userData.name || "N/A",
+        phone_number: userData.phone_number || "N/A",
+      },
+      course: {
+        _id: courseData._id || "N/A",
+        name: courseData.name || "N/A",
+        type: courseData.type || "N/A",
+      },
+      institute: {
+        _id: instituteData._id || "N/A",
+        name: instituteData.name || "N/A",
+      },
+      message: enquiryData.message || "N/A",
+      status: enquiryData.status || "N/A",
+      date: enquiryData.createdAt
+        ? enquiryData.createdAt.toISOString().split("T")[0]
+        : "N/A", // Format date as YYYY-MM-DD
+    });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({ message: "Internal server error" });
+    console.error("Server Error:", error);
+    res
+      .status(500)
+      .send({ message: "Internal server error", error: error.message });
   }
 };
-
 
 
 // change status For Admin
