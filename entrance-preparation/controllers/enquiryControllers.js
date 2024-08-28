@@ -396,52 +396,52 @@ exports.getSingleEnquiry = async (req, res) => {
   }
 };
 
-exports.EnquiryStatusChangeToReplies = async (req, res) => {
-  try {
-    const { enquiry_id } = req.params;
+// exports.EnquiryStatusChangeToReplies = async (req, res) => {
+//   try {
+//     const { enquiry_id } = req.params;
 
-    const enquiryData = await Enquiry.findById(enquiry_id.toString());
-    if (!enquiryData)
-      return res.status(404).send({ message: "No enquiry found with this ID" });
+//     const enquiryData = await Enquiry.findById(enquiry_id.toString());
+//     if (!enquiryData)
+//       return res.status(404).send({ message: "No enquiry found with this ID" });
 
-    if (enquiryData.status === "Unseen")
-      return res.status(400).send({
-        error: "Enquiry is not seen",
-      });
+//     if (enquiryData.status === "Unseen")
+//       return res.status(400).send({
+//         error: "Enquiry is not seen",
+//       });
 
-    if (enquiryData.status === "Seen") enquiryData.status = "Replied";
-    await enquiryData.save();
+//     if (enquiryData.status === "Seen") enquiryData.status = "Replied";
+//     await enquiryData.save();
 
-    const userDataResponse = await axios.get(
-      `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
-    );
-    const userData = userDataResponse.data;
+//     const userDataResponse = await axios.get(
+//       `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+//     );
+//     const userData = userDataResponse.data;
 
-    const courseData = await EntranceCourse.findById(enquiryData.courses);
+//     const courseData = await EntranceCourse.findById(enquiryData.courses);
 
-    const responseData = {
-      _id: enquiryData._id,
-      enquirer: {
-        _id: userData._id,
-        name: userData.name,
-        phone_number: userData.phone_number,
-      },
-      course: {
-        _id: courseData._id,
-        name: courseData.name,
-        type: courseData.type,
-      },
-      message: enquiryData.message,
-      status: enquiryData.status,
-      date: enquiryData.date,
-    };
+//     const responseData = {
+//       _id: enquiryData._id,
+//       enquirer: {
+//         _id: userData._id,
+//         name: userData.name,
+//         phone_number: userData.phone_number,
+//       },
+//       course: {
+//         _id: courseData._id,
+//         name: courseData.name,
+//         type: courseData.type,
+//       },
+//       message: enquiryData.message,
+//       status: enquiryData.status,
+//       date: enquiryData.date,
+//     };
 
-    res.status(200).send(responseData);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send({ message: "Internal server error" });
-  }
-};
+//     res.status(200).send(responseData);
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// };
 
 
 // get Enqueries for Admin
@@ -496,6 +496,107 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
 //    res.status(500).json({ message: "Internal  enquiries Server Error" });
 //  }
 // };
+
+// exports.EnquiryStatusChangeToReplies = async (req, res) => {
+//   try {
+//     const { enquiry_id } = req.params;
+//     const { status } = req.body; // Get the status from the request body
+
+//     const enquiryData = await Enquiry.findById(enquiry_id.toString());
+//     if (!enquiryData)
+//       return res.status(404).send({ message: "No enquiry found with this ID" });
+
+//     // Validate the incoming status
+//     if (status !== "Replied" && status !== "Not Replied") {
+//       return res.status(400).send({ error: "Invalid status" });
+//     }
+
+//     // Set the status based on the incoming value
+//     enquiryData.status = status;
+//     await enquiryData.save();
+
+//     const userDataResponse = await axios.get(
+//       `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+//     );
+//     const userData = userDataResponse.data;
+
+//     const courseData = await EntranceCourse.findById(enquiryData.courses);
+
+//     const responseData = {
+//       _id: enquiryData._id,
+//       enquirer: {
+//         _id: userData._id,
+//         name: userData.name,
+//         phone_number: userData.phone_number,
+//       },
+//       course: {
+//         _id: courseData._id,
+//         name: courseData.name,
+//         type: courseData.type,
+//       },
+//       message: enquiryData.message,
+//       status: enquiryData.status,
+//       date: enquiryData.date,
+//     };
+
+//     res.status(200).send(responseData);
+//   } catch (error) {
+//     console.error("Error:", error);
+//     res.status(500).send({ message: "Internal server error" });
+//   }
+// };
+
+
+exports.EnquiryStatusChangeToReplies = async (req, res) => {
+  try {
+    const { enquiry_id } = req.params;
+    const { status } = req.body;
+
+    // Validate the status
+    if (status !== "Replied" && status !== "Not Replied") {
+      return res.status(400).send({ error: "Invalid status" });
+    }
+
+    // Find and update the enquiry
+    const enquiryData = await Enquiry.findById(enquiry_id.toString());
+    if (!enquiryData) {
+      return res.status(404).send({ message: "No enquiry found with this ID" });
+    }
+
+    enquiryData.status = status;
+    await enquiryData.save();
+
+    // Fetch related user and course data
+    const userDataResponse = await axios.get(
+      `${BACKEND_URL}/user/users-for-admin/${enquiryData.enquirer}`
+    );
+    const userData = userDataResponse.data;
+
+    const courseData = await EntranceCourse.findById(enquiryData.courses);
+
+    const responseData = {
+      _id: enquiryData._id,
+      enquirer: {
+        _id: userData._id,
+        name: userData.name,
+        phone_number: userData.phone_number,
+      },
+      course: {
+        _id: courseData._id,
+        name: courseData.name,
+        type: courseData.type,
+      },
+      message: enquiryData.message,
+      status: enquiryData.status,
+      date: enquiryData.date,
+    };
+
+    res.status(200).send(responseData);
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).send({ message: "Internal server error" });
+  }
+};
 
 
 exports.getEnquiriesForAdmin = async (req, res) => {
