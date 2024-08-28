@@ -931,19 +931,27 @@ exports.getSingleEnquiryForAdmin = async (req, res) => {
 exports.changeStatus = async (req, res) => {
  try {
    const { enquiry_id } = req.params;
+   const { status } = req.body;
+
+   // Validate the status
+   if (status !== "Replied" && status !== "Not Replied") {
+     return res.status(400).send({ error: "Invalid status" });
+   }
 
    const enquiryData = await Enquiry.findById(enquiry_id.toString());
    if (!enquiryData)
      return res.status(404).send({ message: "No enquiry found with this ID" });
 
-   if (enquiryData.status === "Unseen") {
-     enquiryData.status = "Seen";
-   } else if (enquiryData.status === "Seen") {
-     enquiryData.status = enquiryData.status === "Replied" ? "Unseen" : "Replied";
-   } else if (enquiryData.status === "Replied") {
-     enquiryData.status = enquiryData.status === "Seen" ? "Unseen" : "Seen";
-   }
+  //  if (enquiryData.status === "Unseen") {
+  //    enquiryData.status = "Seen";
+  //  } else if (enquiryData.status === "Seen") {
+  //    enquiryData.status =
+  //      enquiryData.status === "Replied" ? "Unseen" : "Replied";
+  //  } else if (enquiryData.status === "Replied") {
+  //    enquiryData.status = enquiryData.status === "Seen" ? "Unseen" : "Seen";
+  //  }
 
+  enquiryData.status = status;
    await enquiryData.save();
 
    const responseData = {
