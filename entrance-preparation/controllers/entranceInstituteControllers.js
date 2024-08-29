@@ -813,10 +813,91 @@ exports.getDashboardDataForEp = async (req, res) => {
 //   }
 // };
 
+// exports.getFollowersForEp = async (req, res) => {
+//   try {
+//     const { institute_id } = req;
+//     const { search = "" } = req.query;
+
+//     // Convert the search term to lowercase for case-insensitive comparison
+//     const lowerCaseSearch = search.toLowerCase();
+
+//     // Fetch the institute to get followers
+//     const institute = await EntranceInstitute.findOne({
+//       _id: institute_id,
+//     }).select("followers");
+//     if (!institute) {
+//       return res.status(404).json({ message: "Institute not found" });
+//     }
+
+//     const followerIds = institute.followers;
+
+//     // Check if there are no followers
+//     if (!followerIds.length) {
+//       return res.status(404).json({ message: "No followers found" });
+//     }
+
+//     // Fetch the follower details one by one
+//     const followers = [];
+//     for (const followerId of followerIds) {
+//       try {
+//         const { data: follower } = await axios.get(
+//           `${BACKEND_URL}/user/ep/${followerId}`
+//         );
+
+//         // Perform case-insensitive search across all relevant fields
+//         if (
+//           follower &&
+//           (follower.name.toLowerCase().includes(lowerCaseSearch) ||
+//             // follower.email.toLowerCase().includes(lowerCaseSearch) ||
+//             follower.phone_number.toLowerCase().includes(lowerCaseSearch) ||
+//             follower.education_level.toLowerCase().includes(lowerCaseSearch) ||
+//             follower.gender.toLowerCase().includes(lowerCaseSearch))
+//         ) {
+//           followers.push({
+//             _id: follower._id,
+//             name: follower.name,
+//             email: follower.email,
+//             profile_pic: follower.profile_pic,
+//             phone_number: follower.phone_number,
+//             education_level: follower.education_level,
+//             gender: follower.gender,
+//             created_at: follower.created_at
+//               ? new Date(follower.created_at).toISOString()
+//               : null, // Ensure valid date
+//             updated_at: follower.updated_at
+//               ? new Date(follower.updated_at).toISOString()
+//               : null,
+//           });
+//         }
+//       } catch (err) {
+//         console.error(
+//           `Failed to fetch details for follower with ID: ${followerId}`,
+//           err
+//         );
+//       }
+//     }
+
+//     if (!followers.length) {
+//       return res
+//         .status(404)
+//         .json({ message: "No followers matched the search criteria" });
+//     }
+
+//     res.status(200).json(followers);
+//   } catch (error) {
+//     console.error("Error fetching followers:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
 exports.getFollowersForEp = async (req, res) => {
   try {
     const { institute_id } = req;
     const { search = "" } = req.query;
+
+    console.log(
+      `Fetching followers for institute_id: ${institute_id}, search term: ${search}`
+    ); // Log the initial request details
 
     // Convert the search term to lowercase for case-insensitive comparison
     const lowerCaseSearch = search.toLowerCase();
@@ -825,7 +906,9 @@ exports.getFollowersForEp = async (req, res) => {
     const institute = await EntranceInstitute.findOne({
       _id: institute_id,
     }).select("followers");
+
     if (!institute) {
+      console.error("Institute not found for institute_id:", institute_id); // Log if institute is not found
       return res.status(404).json({ message: "Institute not found" });
     }
 
@@ -833,6 +916,7 @@ exports.getFollowersForEp = async (req, res) => {
 
     // Check if there are no followers
     if (!followerIds.length) {
+      console.warn(`No followers found for institute_id: ${institute_id}`); // Warn if no followers
       return res.status(404).json({ message: "No followers found" });
     }
 
@@ -840,15 +924,18 @@ exports.getFollowersForEp = async (req, res) => {
     const followers = [];
     for (const followerId of followerIds) {
       try {
+        console.log(`Fetching data for follower ID: ${followerId}`); // Log each follower fetch attempt
         const { data: follower } = await axios.get(
           `${BACKEND_URL}/user/ep/${followerId}`
         );
+
+        // Log the follower data
+        console.log("Fetched Follower Data:", follower);
 
         // Perform case-insensitive search across all relevant fields
         if (
           follower &&
           (follower.name.toLowerCase().includes(lowerCaseSearch) ||
-            // follower.email.toLowerCase().includes(lowerCaseSearch) ||
             follower.phone_number.toLowerCase().includes(lowerCaseSearch) ||
             follower.education_level.toLowerCase().includes(lowerCaseSearch) ||
             follower.gender.toLowerCase().includes(lowerCaseSearch))
@@ -861,6 +948,8 @@ exports.getFollowersForEp = async (req, res) => {
             phone_number: follower.phone_number,
             education_level: follower.education_level,
             gender: follower.gender,
+            createdAt: follower.createdAt, // Include creation time
+            updatedAt: follower.updatedAt, // Include update time
           });
         }
       } catch (err) {
@@ -871,12 +960,15 @@ exports.getFollowersForEp = async (req, res) => {
       }
     }
 
+    // Check if any followers matched the search criteria
     if (!followers.length) {
+      console.warn("No followers matched the search criteria");
       return res
         .status(404)
         .json({ message: "No followers matched the search criteria" });
     }
 
+    // Respond with the followers data
     res.status(200).json(followers);
   } catch (error) {
     console.error("Error fetching followers:", error);
