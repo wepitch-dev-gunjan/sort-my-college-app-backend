@@ -735,7 +735,7 @@ exports.getDashboardDataForEp = async (req, res) => {
 
     // Fetch queries for the institute
     const totalQueries = await Enquiry.countDocuments({ enquired_to: institute_id });
-    const notRepliedQueries = await Enquiry.countDocuments({ enquired_to: institute_id, status: 'Seen' });
+    const notRepliedQueries = await Enquiry.countDocuments({ enquired_to: institute_id, status: 'Not Replied' });
     const unseenQueries = await Enquiry.countDocuments({ enquired_to: institute_id, status: 'Unseen' });
 
     // Construct the response
