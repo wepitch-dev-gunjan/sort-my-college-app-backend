@@ -1108,6 +1108,7 @@ exports.changeStatus = async (req, res) => {
 //  }
 // };
 
+
 // exports.getAllEnquiriesForAdmin = async (req, res) => {
 //   try {
 //     const { status, startDate, endDate } = req.query;
@@ -1128,7 +1129,7 @@ exports.changeStatus = async (req, res) => {
 //       };
 //     }
 
-//     //const enquiries = await Enquiry.find(query);
+//     // const enquiries = await Enquiry.find(query);
 //     const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
 
 //     if (!enquiries.length) {
@@ -1141,9 +1142,17 @@ exports.changeStatus = async (req, res) => {
 //           const { data } = await axios.get(
 //             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
 //           );
-//           const createdAtTime = new Date(
-//             enquiry.createdAt
-//           ).toLocaleTimeString();
+
+//           // Convert createdAt to IST
+//           const createdAtDate = new Date(enquiry.createdAt);
+//           const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
+//           const istTime = new Date(createdAtDate.getTime() + offset + 19800000); // IST offset is +5:30 from GMT
+//           const createdAtTime = istTime.toLocaleTimeString("en-US", {
+//             hour: "2-digit",
+//             minute: "2-digit",
+//             second: "2-digit",
+//           });
+
 //           return {
 //             _id: enquiry._id,
 //             name: data.name,
@@ -1171,8 +1180,6 @@ exports.changeStatus = async (req, res) => {
 //     res.status(500).json({ message: "Internal Server Error" });
 //   }
 // };
-
-
 exports.getAllEnquiriesForAdmin = async (req, res) => {
   try {
     const { status, startDate, endDate } = req.query;
@@ -1193,19 +1200,23 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
       };
     }
 
-    // const enquiries = await Enquiry.find(query);
+    // Fetch enquiries
     const enquiries = await Enquiry.find(query).sort({ createdAt: -1 });
 
     if (!enquiries.length) {
       return res.status(200).send([]);
     }
 
+    // Fetch user and institute data for each enquiry
     const massagedDataPromise = Promise.all(
       enquiries.map(async (enquiry) => {
         try {
-          const { data } = await axios.get(
-            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-          );
+          const [userData, instituteData] = await Promise.all([
+            axios.get(
+              `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+            ),
+            EntranceInstitute.findById(enquiry.enquired_to).select("name"), // Fetch institute name
+          ]);
 
           // Convert createdAt to IST
           const createdAtDate = new Date(enquiry.createdAt);
@@ -1219,15 +1230,16 @@ exports.getAllEnquiriesForAdmin = async (req, res) => {
 
           return {
             _id: enquiry._id,
-            name: data.name,
-            phone_number: data.phone_number,
+            name: userData.data.name,
+            phone_number: userData.data.phone_number,
             status: enquiry.status,
             date: enquiry.date,
             createdAt: createdAtTime,
+            instituteName: instituteData.name, // Include institute name
           };
         } catch (error) {
           console.error(
-            `Error fetching user details for enquiry ${enquiry._id}:`,
+            `Error fetching data for enquiry ${enquiry._id}:`,
             error
           );
           return null;
