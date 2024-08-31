@@ -86,60 +86,129 @@ exports.editProfile = async (req, res) => {
   }
 };
 
+// exports.getInstitutesForAdmin = async (req, res) => {
+//   try {
+//     console.log("Request Query: ", req.query);
+
+//     const search = req.query.search && req.query.search.trim(); // Directly access the search parameter and trim whitespace
+//     console.log("Search Parameter: ", search);
+
+//     let queryObject = {};
+
+//     if (search) {
+//       const regex = new RegExp(search, "i");
+//       queryObject = {
+//         $or: [
+//           { name: { $regex: regex } },
+//           { registrant_full_name: { $regex: regex } },
+//           { registrant_contact_number: { $regex: regex } },
+//           { registrant_email: { $regex: regex } },
+//           { "address.building_number": { $regex: regex } },
+//           { "address.area": { $regex: regex } },
+//           { "address.city": { $regex: regex } },
+//           { "address.state": { $regex: regex } },
+//           { "address.pin_code": { $regex: regex } },
+//         ],
+//       };
+//       console.log(
+//         "Query Object: ",
+//         JSON.stringify(queryObject, (key, value) =>
+//           key === "$regex" ? value.toString() : value
+//         )
+//       );
+//     } else {
+//       console.log("Search parameter is empty or only whitespace");
+//     }
+//      let institutes = await EntranceInstitute.find(queryObject).sort({
+//        createdAt: -1, 
+//      });
+
+//     //let institutes = await EntranceInstitute.find(queryObject);
+
+//     if (search && (!institutes || institutes.length === 0)) {
+//       // If search input is present and no institutes found, do not return "No matches found"
+//       console.log(
+//         "No matches found for the search input, returning all institutes instead."
+//       );
+//       // queryObject = {}; // Reset the queryObject to fetch all institutes
+//       // institutes = await EntranceInstitute.find(queryObject);
+//       queryObject = {}; 
+//       institutes = await EntranceInstitute.find(queryObject).sort({
+//         createdAt: -1, 
+//       });
+//     }
+
+//     if (!institutes || institutes.length === 0) {
+//       return res.status(404).json({ message: "No institutes found" });
+//     }
+
+//     const massagedInstitutes = institutes.map((institute) => ({
+//       _id: institute._id,
+//       name: institute.name,
+//       profile_pic: institute.profile_pic,
+//       email: institute.email,
+//       status: institute.status,
+//     }));
+
+//     res.status(200).json(massagedInstitutes);
+//   } catch (error) {
+//     console.error("Error fetching institutes:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
 exports.getInstitutesForAdmin = async (req, res) => {
   try {
     console.log("Request Query: ", req.query);
 
-    const search = req.query.search && req.query.search.trim(); // Directly access the search parameter and trim whitespace
-    console.log("Search Parameter: ", search);
+    const search = req.query.search ? req.query.search.trim() : ""; // Access and trim search parameter
+    const status = req.query.status ? req.query.status.trim() : ""; // Access and trim status parameter
 
     let queryObject = {};
 
+    // Add search filter to queryObject if provided
     if (search) {
       const regex = new RegExp(search, "i");
-      queryObject = {
-        $or: [
-          { name: { $regex: regex } },
-          { registrant_full_name: { $regex: regex } },
-          { registrant_contact_number: { $regex: regex } },
-          { registrant_email: { $regex: regex } },
-          { "address.building_number": { $regex: regex } },
-          { "address.area": { $regex: regex } },
-          { "address.city": { $regex: regex } },
-          { "address.state": { $regex: regex } },
-          { "address.pin_code": { $regex: regex } },
-        ],
-      };
-      console.log(
-        "Query Object: ",
-        JSON.stringify(queryObject, (key, value) =>
-          key === "$regex" ? value.toString() : value
-        )
-      );
+      queryObject.$or = [
+        { name: { $regex: regex } },
+        { registrant_full_name: { $regex: regex } },
+        { registrant_contact_number: { $regex: regex } },
+        { registrant_email: { $regex: regex } },
+        { "address.building_number": { $regex: regex } },
+        { "address.area": { $regex: regex } },
+        { "address.city": { $regex: regex } },
+        { "address.state": { $regex: regex } },
+        { "address.pin_code": { $regex: regex } },
+      ];
+      console.log("Query Object with Search: ", JSON.stringify(queryObject));
     } else {
       console.log("Search parameter is empty or only whitespace");
     }
-     let institutes = await EntranceInstitute.find(queryObject).sort({
-       createdAt: -1, 
-     });
 
-    //let institutes = await EntranceInstitute.find(queryObject);
+    // Add status filter to queryObject if provided
+    if (status) {
+      queryObject.status = status;
+      console.log("Query Object with Status: ", JSON.stringify(queryObject));
+    }
 
-    if (search && (!institutes || institutes.length === 0)) {
-      // If search input is present and no institutes found, do not return "No matches found"
+    let institutes = await EntranceInstitute.find(queryObject).sort({
+      createdAt: -1,
+    });
+
+    // If search input is present and no institutes found, return all institutes
+    if (search && institutes.length === 0) {
       console.log(
         "No matches found for the search input, returning all institutes instead."
       );
-      // queryObject = {}; // Reset the queryObject to fetch all institutes
-      // institutes = await EntranceInstitute.find(queryObject);
-      queryObject = {}; 
+      queryObject = {}; // Reset queryObject to fetch all institutes
       institutes = await EntranceInstitute.find(queryObject).sort({
-        createdAt: -1, 
+        createdAt: -1,
       });
     }
 
-    if (!institutes || institutes.length === 0) {
-      return res.status(404).json({ message: "No institutes found" });
+    // Return an empty array if no institutes are found
+    if (institutes.length === 0) {
+      return res.status(200).json([]); // Return empty array with 200 status
     }
 
     const massagedInstitutes = institutes.map((institute) => ({
@@ -156,7 +225,6 @@ exports.getInstitutesForAdmin = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 
 exports.getInstituteForAdmin = async (req, res) => {
@@ -686,11 +754,44 @@ exports.editInstituteProfile = async (req, res) => {
   }
 };
 
+// exports.editInstituteCoverPic = async (req, res) => {
+//   try {
+//     const { file } = req;
+//     const { institute_id } = req.params;
+//     console.log("Cover Pic: ", file)
+
+//     if (!file) {
+//       return res.status(400).send({
+//         error: "File can't be empty",
+//       });
+//     }
+
+//     const institute = await EntranceInstitute.findById(institute_id);
+
+//     if (!institute) {
+//       return res.status(404).send({ error: "Institute not found" });
+//     }
+
+//     const fileName = `institute-cover-pic-${Date.now()}.jpeg`;
+//     const folderName = "institute-cover-pics";
+
+//     institute.cover_image = await uploadImage(file.buffer, fileName, folderName);
+//     await institute.save();
+
+//     res.status(200).send({
+//       message: "Cover pic uploaded successfully",
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
 exports.editInstituteCoverPic = async (req, res) => {
   try {
     const { file } = req;
     const { institute_id } = req.params;
-    console.log("Cover Pic: ", file)
+
+    console.log("Cover Pic: ", file);
 
     if (!file) {
       return res.status(400).send({
@@ -704,10 +805,18 @@ exports.editInstituteCoverPic = async (req, res) => {
       return res.status(404).send({ error: "Institute not found" });
     }
 
+    // Generate a unique file name for the cover picture
     const fileName = `institute-cover-pic-${Date.now()}.jpeg`;
     const folderName = "institute-cover-pics";
 
-    institute.cover_image = await uploadImage(file.buffer, fileName, folderName);
+    // Upload the cover picture and get the URL
+    institute.cover_image = await uploadImage(
+      file.buffer,
+      fileName,
+      folderName
+    );
+
+    // Save the updated institute document
     await institute.save();
 
     res.status(200).send({
