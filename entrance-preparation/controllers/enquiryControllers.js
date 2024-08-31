@@ -599,93 +599,94 @@ exports.EnquiryStatusChangeToReplies = async (req, res) => {
 };
 
 
-exports.getEnquiriesForAdmin = async (req, res) => {
-  try {
-    const { search, status, startDate, endDate } = req.query;
-    const queryObject = {};
+// exports.getEnquiriesForAdmin = async (req, res) => {
+//   try {
+//     const { search, status, startDate, endDate } = req.query;
+//     const queryObject = {};
 
-    // Handle status query
-    if (status) {
-      queryObject.status = status;
-    }
+//     // Handle status query
+//     if (status) {
+//       queryObject.status = status;
+//     }
 
-    const { institute_id } = req.params;
-    console.log("Institute: ", institute_id);
+//     const { institute_id } = req.params;
+//     console.log("Institute: ", institute_id);
 
-    if (!institute_id) {
-      return res.status(404).json({ message: "Specified institute not found" });
-    }
-    if (startDate && endDate) {
-      const start = new Date(startDate).toISOString();
-      const endDateObject = new Date(endDate);
-      endDateObject.setHours(23, 59, 59, 999); 
-      const end = endDateObject.toISOString();
-      queryObject.createdAt = {
-        $gte: start,
-        $lte: end,
-      };
-    }
+//     if (!institute_id) {
+//       return res.status(404).json({ message: "Specified institute not found" });
+//     }
+//     if (startDate && endDate) {
+//       const start = new Date(startDate).toISOString();
+//       const endDateObject = new Date(endDate);
+//       endDateObject.setHours(23, 59, 59, 999); 
+//       const end = endDateObject.toISOString();
+//       queryObject.createdAt = {
+//         $gte: start,
+//         $lte: end,
+//       };
+//     }
 
 
-    // Handle search query (example: searching in name field)
-    if (search) {
-      queryObject.name = { $regex: search, $options: 'i' };
-    }
+//     // Handle search query (example: searching in name field)
+//     if (search) {
+//       queryObject.name = { $regex: search, $options: 'i' };
+//     }
 
-    // Query for enquiries
-    const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject }).sort({ createdAt: -1 });
+//     // Query for enquiries
+//     const enquiries = await Enquiry.find({ enquired_to: institute_id, ...queryObject }).sort({ createdAt: -1 });
 
-    if (!enquiries.length) return res.status(201).send([]);
+//     if (!enquiries.length) return res.status(201).send([]);
 
-    // Process enquiries to fetch user data
-    const massagedDataPromise = Promise.all(
-      enquiries.map(async (enquiry) => {
-        try {
-          const { data } = await axios.get(
-            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-          );
-          //const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
-          // Convert createdAt to IST
-           const createdAtDate = new Date(enquiry.createdAt);
-           const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
-           const istTime = new Date(
-             createdAtDate.getTime() + offset + 19800000
-           ); // IST offset is +5:30 from GMT
-           const createdAtTime = istTime.toLocaleTimeString("en-US", {
-             hour: "2-digit",
-             minute: "2-digit",
-             second: "2-digit",
-           });
-          return {
-            _id: enquiry._id,
-            name: data.name,
-            phone_number: data.phone_number,
-            status: enquiry.status,
-            date: enquiry.date,
-            createdAt: createdAtTime,
-          };
-        } catch (error) {
-          console.error(`Error fetching user data for enquiry ${enquiry._id}: `, error);
-          return null; // Handle cases where user data fetch fails
-        }
-      })
-    );
+//     // Process enquiries to fetch user data
+//     const massagedDataPromise = Promise.all(
+//       enquiries.map(async (enquiry) => {
+//         try {
+//           const { data } = await axios.get(
+//             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+//           );
+//           //const createdAtTime = new Date(enquiry.createdAt).toLocaleTimeString();
+//           // Convert createdAt to IST
+//            const createdAtDate = new Date(enquiry.createdAt);
+//            const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
+//            const istTime = new Date(
+//              createdAtDate.getTime() + offset + 19800000
+//            ); // IST offset is +5:30 from GMT
+//            const createdAtTime = istTime.toLocaleTimeString("en-US", {
+//              hour: "2-digit",
+//              minute: "2-digit",
+//              second: "2-digit",
+//            });
+//           return {
+//             _id: enquiry._id,
+            
+//             name: data.name,
+//             phone_number: data.phone_number,
+//             status: enquiry.status,
+//             date: enquiry.date,
+//             createdAt: createdAtTime,
+//           };
+//         } catch (error) {
+//           console.error(`Error fetching user data for enquiry ${enquiry._id}: `, error);
+//           return null; // Handle cases where user data fetch fails
+//         }
+//       })
+//     );
 
-    massagedDataPromise
-      .then((massagedData) => {
-        // Filter out null results from failed fetches
-        const filteredData = massagedData.filter(item => item !== null);
-        res.status(200).json(filteredData);
-      })
-      .catch((error) => {
-        console.error("Error processing enquiries: ", error);
-        res.status(500).json({ message: "Internal server error while processing enquiries" });
-      });
-  } catch (error) {
-    console.error("Error getting enquiries!!", error);
-    res.status(500).json({ message: "Internal enquiries server error" });
-  }
-};
+//     massagedDataPromise
+//       .then((massagedData) => {
+//         // Filter out null results from failed fetches
+//         const filteredData = massagedData.filter(item => item !== null);
+//         res.status(200).json(filteredData);
+//       })
+//       .catch((error) => {
+//         console.error("Error processing enquiries: ", error);
+//         res.status(500).json({ message: "Internal server error while processing enquiries" });
+//       });
+//   } catch (error) {
+//     console.error("Error getting enquiries!!", error);
+//     res.status(500).json({ message: "Internal enquiries server error" });
+//   }
+// };
 
 
 // getSingleEnquiryForAdmin
@@ -796,6 +797,105 @@ exports.getEnquiriesForAdmin = async (req, res) => {
 //     res.status(500).send({ message: "Internal server error" });
 //   }
 // };
+exports.getEnquiriesForAdmin = async (req, res) => {
+  try {
+    const { search, status, startDate, endDate } = req.query;
+    const queryObject = {};
+
+    // Handle status query
+    if (status) {
+      queryObject.status = status;
+    }
+
+    const { institute_id } = req.params;
+    console.log("Institute: ", institute_id);
+
+    if (!institute_id) {
+      return res.status(404).json({ message: "Specified institute not found" });
+    }
+    if (startDate && endDate) {
+      const start = new Date(startDate).toISOString();
+      const endDateObject = new Date(endDate);
+      endDateObject.setHours(23, 59, 59, 999);
+      const end = endDateObject.toISOString();
+      queryObject.createdAt = {
+        $gte: start,
+        $lte: end,
+      };
+    }
+
+    // Handle search query (example: searching in name field)
+    if (search) {
+      queryObject.name = { $regex: search, $options: "i" };
+    }
+
+    // Query for enquiries
+    const enquiries = await Enquiry.find({
+      enquired_to: institute_id,
+      ...queryObject,
+    }).sort({ createdAt: -1 });
+
+    if (!enquiries.length) return res.status(201).send([]);
+
+    // Fetch institute names and user data
+    const massagedDataPromise = Promise.all(
+      enquiries.map(async (enquiry) => {
+        try {
+          const [userData, instituteData] = await Promise.all([
+            axios.get(
+              `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
+            ),
+            EntranceInstitute.findById(enquiry.enquired_to).select("name"), // Fetch institute name
+          ]);
+
+          // Convert createdAt to IST
+          const createdAtDate = new Date(enquiry.createdAt);
+          const offset = createdAtDate.getTimezoneOffset() * 60000; // offset in milliseconds
+          const istTime = new Date(createdAtDate.getTime() + offset + 19800000); // IST offset is +5:30 from GMT
+          const createdAtTime = istTime.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+
+          return {
+            _id: enquiry._id,
+            name: userData.data.name,
+            phone_number: userData.data.phone_number,
+            status: enquiry.status,
+            date: enquiry.date,
+            createdAt: createdAtTime,
+            instituteName: instituteData.name, // Add the institute name
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching data for enquiry ${enquiry._id}: `,
+            error
+          );
+          return null; // Handle cases where data fetch fails
+        }
+      })
+    );
+
+    massagedDataPromise
+      .then((massagedData) => {
+        // Filter out null results from failed fetches
+        const filteredData = massagedData.filter((item) => item !== null);
+        res.status(200).json(filteredData);
+      })
+      .catch((error) => {
+        console.error("Error processing enquiries: ", error);
+        res
+          .status(500)
+          .json({
+            message: "Internal server error while processing enquiries",
+          });
+      });
+  } catch (error) {
+    console.error("Error getting enquiries!!", error);
+    res.status(500).json({ message: "Internal enquiries server error" });
+  }
+};
 
 exports.getSingleEnquiryForAdmin = async (req, res) => {
   try {
