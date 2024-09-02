@@ -196,7 +196,7 @@ exports.getSingleUser = async (req, res) => {
     const user = await User.findOne({ _id: user_id });
     console.log(user);
     if (!user) {
-      return res.status(404).json({ error: "No user found with this ID" });
+      return res.status(404).json({ error: "No user found with this ID!!" });
     }
 
     res.status(200).send(user);
