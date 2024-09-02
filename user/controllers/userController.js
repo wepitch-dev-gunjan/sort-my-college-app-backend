@@ -212,7 +212,7 @@ exports.getUserForEp = async (req, res) => {
     const user = await User.findById({ _id: user_id });
 
     if (!user) {
-      return res.status(400).send({ error: "User not found" });
+      return res.status(400).send({ error: "User not found!" });
     }
 
     res.status(200).send(user);
