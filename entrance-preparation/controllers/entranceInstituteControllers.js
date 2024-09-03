@@ -786,17 +786,61 @@ exports.editInstituteProfile = async (req, res) => {
 //     res.status(500).send({ error: "Internal Server Error" });
 //   }
 // };
+// exports.editInstituteCoverPic = async (req, res) => {
+//   try {
+//     const { file } = req;
+//     const { institute_id } = req.params;
+
+//     console.log("Cover Pic: ", institute_id);
+
+//     if (!file) {
+//       return res.status(400).send({
+//         error: "File can't be empty",
+//       });
+//     }
+
+//     const institute = await EntranceInstitute.findById(institute_id);
+
+//     if (!institute) {
+//       return res.status(404).send({ error: "Institute not found" });
+//     }
+
+//     // Generate a unique file name for the cover picture
+//     const fileName = `institute-cover-pic-${Date.now()}.jpeg`;
+//     const folderName = "institute-cover-pics";
+
+//     // Upload the cover picture and get the URL
+//     institute.cover_image = await uploadImage(
+//       file.buffer,
+//       fileName,
+//       folderName
+//     );
+
+//     // Save the updated institute document
+//     await institute.save();
+
+//     res.status(200).send({
+//       message: "Cover pic uploaded successfully",
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
+
 exports.editInstituteCoverPic = async (req, res) => {
   try {
     const { file } = req;
     const { institute_id } = req.params;
 
-    console.log("Cover Pic: ", file);
+    console.log("Received institute_id:", institute_id); 
+
+    if (!institute_id) {
+      return res.status(400).send({ error: "Institute ID is required" });
+    }
 
     if (!file) {
-      return res.status(400).send({
-        error: "File can't be empty",
-      });
+      return res.status(400).send({ error: "File can't be empty" });
     }
 
     const institute = await EntranceInstitute.findById(institute_id);
@@ -810,20 +854,60 @@ exports.editInstituteCoverPic = async (req, res) => {
     const folderName = "institute-cover-pics";
 
     // Upload the cover picture and get the URL
-    institute.cover_image = await uploadImage(
-      file.buffer,
-      fileName,
-      folderName
-    );
+    const coverImageUrl = await uploadImage(file.buffer, fileName, folderName);
+    if (!coverImageUrl) {
+      return res.status(500).send({ error: "Failed to upload cover image" });
+    }
 
-    // Save the updated institute document
+    // Update the institute document with the cover image URL
+    institute.cover_image = coverImageUrl;
     await institute.save();
 
-    res.status(200).send({
-      message: "Cover pic uploaded successfully",
-    });
+    res.status(200).send({ message: "Cover pic uploaded successfully" });
   } catch (error) {
-    console.log(error);
+    console.log("Error:", error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+exports.changeInstituteCoverPhoto = async (req, res) => {
+  try {
+    const { file } = req;
+    const { institute_id } = req.params;
+
+    console.log("Received institute_id:", institute_id);
+
+    if (!institute_id) {
+      return res.status(400).send({ error: "Institute ID is required" });
+    }
+
+    if (!file) {
+      return res.status(400).send({ error: "File can't be empty" });
+    }
+
+    const institute = await EntranceInstitute.findById(institute_id);
+
+    if (!institute) {
+      return res.status(404).send({ error: "Institute not found" });
+    }
+
+    // Generate a unique file name for the cover picture
+    const fileName = `institute-cover-pic-${Date.now()}.jpeg`;
+    const folderName = "institute-cover-pics";
+
+    // Upload the cover picture and get the URL
+    const coverImageUrl = await uploadImage(file.buffer, fileName, folderName);
+    if (!coverImageUrl) {
+      return res.status(500).send({ error: "Failed to upload cover image" });
+    }
+
+    // Update the institute document with the cover image URL
+    institute.cover_image = coverImageUrl;
+    await institute.save();
+
+    res.status(200).send({ message: "Cover pic uploaded successfully" });
+  } catch (error) {
+    console.log("Error:", error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 };

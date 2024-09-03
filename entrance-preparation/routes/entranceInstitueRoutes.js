@@ -26,6 +26,7 @@ const {
   editInstituteCoverPic,
   getDashboardDataForEp,
   getFollowersForEp,
+  changeInstituteCoverPhoto,
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage");
 
@@ -84,6 +85,15 @@ router.put(
   adminAuth,
   upload.single("image"),
   editInstituteCoverPic
+);
+
+
+// New route for changing the cover photo
+router.put(
+  "/institute/:institute_id/cover-photo",
+  adminAuth,
+  upload.single("image"),
+  changeInstituteCoverPhoto
 );
 
 // Dashboard data
