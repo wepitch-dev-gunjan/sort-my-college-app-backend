@@ -61,44 +61,6 @@ exports.editBooking = async (req, res) => {
 };
 
 // thiss 
-// exports.getBookings = async (req, res) => {
-//   try {
-//     const { user_id } = req;
-//     const { past, today, upcoming } = req.query;
-
-//     const startOfDay = new Date();
-//     startOfDay.setUTCHours(0, 0, 0, 0);
-
-//     const endOfDay = new Date();
-//     endOfDay.setUTCHours(23, 59, 59, 999);
-
-//     let filter = {};
-//     if (past || today || upcoming) {
-//       if (past) {
-//         filter = { "booking_data.session_date": { $lt: new Date(startOfDay) } };
-//       }
-//       if (today) {
-//         filter = {
-//           "booking_data.session_date": {
-//             $gte: new Date(startOfDay.toISOString()),
-//             $lte: new Date(endOfDay.toISOString()),
-//           },
-//         };
-//       }
-//       if (upcoming) {
-//         filter = { "booking_data.session_date": { $gt: new Date(endOfDay) } };
-//       }
-//     }
-//     filter = { ...filter, user: user_id };
-
-//     const bookings = await Booking.find(filter).sort({ date: -1 });
-//     res.status(200).send(bookings);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
-
 exports.getBookings = async (req, res) => {
   try {
     const { user_id } = req;
@@ -130,33 +92,14 @@ exports.getBookings = async (req, res) => {
     filter = { ...filter, user: user_id };
 
     const bookings = await Booking.find(filter).sort({ date: -1 });
-
-    const updatedBookings = bookings.map((booking) => {
-      const { session_date, session_time } = booking.booking_data;
-
-      // Calculate the session start time
-      const sessionStartTime = new Date(session_date);
-      sessionStartTime.setUTCHours(0, 0, 0, 0); // reset time to 00:00
-      sessionStartTime.setUTCMinutes(session_time); // add session_time in minutes
-
-      // Get current time
-      const currentTime = new Date();
-
-      // Calculate if can join within 10 minutes before session start
-      const canJoin = currentTime >= new Date(sessionStartTime - 10 * 60 * 1000) && currentTime < sessionStartTime;
-
-      return {
-        ...booking.toObject(), // convert Mongoose document to plain JavaScript object
-        can_join: canJoin,
-      };
-    });
-
-    res.status(200).send(updatedBookings);
+    res.status(200).send(bookings);
   } catch (error) {
     console.log(error);
-    res.status(500).send({ error: "Internal Server Error!" });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+
 
 
 
