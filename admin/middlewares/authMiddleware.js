@@ -52,7 +52,15 @@ exports.permissionAuth = async (req, res) => {
     res.status(500).send({ error: 'Internal Server Error' });
   }
 };
-
+exports.paymentReadCheck = async (req, res, next) => {
+  try {
+    req.permission = "payment_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
 exports.counsellorOrUserAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
@@ -391,70 +399,20 @@ exports.bannersWriteAuth = async (req, res, next) => {
     });
   }
 };
-exports.helpReadAuth = async (req, res, next) => {
-  try {
-    const { permissions } = req;
-    if (permissions.includes("help_read")) next();
-    else
-      res.status(403).send({
-        error: "Unauthorized access",
-      });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      error: "Internal server error",
-    });
-  }
-};
-exports.helpWriteAuth = async (req, res, next) => {
-  try {
-    const { permissions } = req;
-    if (permissions.includes("help_write")) next();
-    else
-      res.status(403).send({
-        error: "Unauthorized access",
-      });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      error: "Internal server error",
-    });
-  }
-};
-exports.adminReadAuth = async (req, res, next) => {
-  try {
-    const { permissions } = req;
-    if (permissions.includes("admin_read")) next();
-    else
-      res.status(403).send({
-        error: "Unauthorized access",
-      });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      error: "Internal server error",
-    });
-  }
-};
-exports.adminWriteAuth = async (req, res, next) => {
-  try {
-    const { permissions } = req;
-    if (permissions.includes("admin_write")) next();
-    else
-      res.status(403).send({
-        error: "Unauthorized access",
-      });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      error: "Internal server error",
-    });
-  }
-};
 
+// permissions
 exports.paymentReadCheck = async (req, res, next) => {
   try {
     req.permission = "payment_read";
+    next()
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: 'Internal Server Error' });
+  }
+};
+exports.paymentWriteCheck = async (req, res, next) => {
+  try {
+    req.permission = "payment_write";
     next()
   } catch (error) {
     console.log(error);
