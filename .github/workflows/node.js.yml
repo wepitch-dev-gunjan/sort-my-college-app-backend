@@ -10,18 +10,18 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Fix file ownership
+        run: sudo chown -R $(whoami):$(whoami) /home/ec2-user/actions-runner/_work/sort-my-college-app-backend
+
+      - name: Set correct permissions
+        run: sudo chmod -R u+rwx /home/ec2-user/actions-runner/_work/sort-my-college-app-backend
+
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           clean: true
-
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.x
-
-      - name: Set permissions for working directory
-        run: sudo chown -R $USER:$USER /home/ec2-user/actions-runner/_work
+          persist-credentials: false
 
       # Install PM2
       - name: Install PM2
