@@ -1459,7 +1459,7 @@ exports.verifyInstituteEmailNotification = async (req, res) => {
     console.log(to, username);
     const mailOptions = {
       to,
-      subject: "SortMyCollege Institute Verification Approved",
+      subject: "SortMyCollege Institute Verification Request Approved",
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -1478,19 +1478,31 @@ exports.verifyInstituteEmailNotification = async (req, res) => {
                     
                     <tr>
                       <td>
+                        // <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                        //   To,<br>
+                        //    ${username} <br><br>
+                        //    We hope this email finds you well.                                    
+                        //   <br><br>                          
+                        //   We are pleased to inform you that your verification request has been approved. You now have access to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
+                        //   and can start adding courses and connecting with students seeking career guidance.<br> <br>
+                        //   If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
+                        //   Best regards, <br />
+                          
+                        //   <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                        //   Team
+                        // </p>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
                           To,<br>
-                           ${username} <br><br>
-                           We hope this email finds you well.                                    
-                          <br><br>                          
-                          We are pleased to inform you that your verification request has been approved. You now have access to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
-                          and can start adding courses and connecting with students seeking career guidance.<br> <br>
-                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
-                          Best regards, <br />
-                          
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                          ${username} <br><br>
+                          We hope this email finds you well.<br><br>
+                          We are pleased to inform you that your profile verification request has been approved.<br><br>
+                          You now have access to the <a href="https://your-institute-dashboard-link.com" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Institute Dashboard</a>, and you can start updating courses offered, faculties, key features, and the announcement section.<br><br>
+                          If you have any questions or need further assistance, please feel free to email us at <a href="mailto:support@sortmycollege.com" style="color: #1f0a68; font-weight: 700; text-decoration: none;">support@sortmycollege.com</a>.<br><br>
+                          Best regards,<br />
+                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a><br />
                           Team
-                        </p>
+                      </p>
+                      
                       </td>
                     </tr>
                   </table>
@@ -1524,7 +1536,7 @@ exports.rejectInstituteEmailNotification = async (req, res) => {
     console.log(to, reason, username);
     const mailOptions = {
       to,
-      subject: "SortMyCollege Institute Verification Rejected",
+      subject: "SortMyCollege Institute Verification Request Rejected",
       html: `<body>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse;">
         <tr>
@@ -1543,21 +1555,34 @@ exports.rejectInstituteEmailNotification = async (req, res) => {
                     
                     <tr>
                       <td>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                          To,<br>
-                           ${username} <br><br>
-                           We hope this email finds you well. <br>
-                           We regret to inform you that your verification request has been rejected.<br><br> 
-                          <b>Reason </b>: ${reason}               
-                          <br><br>                          
-                          Please log in to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
-                          to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
-                          If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
-                          Best Regards, <br />
+                        // <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                        //   To,<br>
+                        //    ${username} <br><br>
+                        //    We hope this email finds you well. <br>
+                        //    We regret to inform you that your verification request has been rejected.<br><br> 
+                        //   <b>Reason </b>: ${reason}               
+                        //   <br><br>                          
+                        //   Please log in to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
+                        //   to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
+                        //   If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
+                        //   Best Regards, <br />
                           
-                          <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                          Team
+                        //   <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
+                        //   Team
+                        // </p>
+                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                            To,<br>
+                            ${username} <br><br>
+                            We hope this email finds you well.<br><br>
+                            We regret to inform you that your profile verification request has been rejected.<br><br>
+                            Reason: ${reason}<br><br>
+                            Kindly log in to the <a href="https://your-institute-dashboard-link.com" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Institute Dashboard</a> to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br><br>
+                            If you have any questions or need further assistance, please feel free to email us at <a href="mailto:support@sortmycollege.com" style="color: #1f0a68; font-weight: 700; text-decoration: none;">support@sortmycollege.com</a>.<br><br>
+                            Best regards,<br />
+                            <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a><br />
+                            Team
                         </p>
+
                       </td>
                     </tr>
                   </table>
