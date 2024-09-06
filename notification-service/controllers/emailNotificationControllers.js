@@ -1478,19 +1478,6 @@ exports.verifyInstituteEmailNotification = async (req, res) => {
                     
                     <tr>
                       <td>
-                        // <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                        //   To,<br>
-                        //    ${username} <br><br>
-                        //    We hope this email finds you well.                                    
-                        //   <br><br>                          
-                        //   We are pleased to inform you that your verification request has been approved. You now have access to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
-                        //   and can start adding courses and connecting with students seeking career guidance.<br> <br>
-                        //   If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
-                        //   Best regards, <br />
-                          
-                        //   <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                        //   Team
-                        // </p>
                         <p style="font-size: 2vh; font-family: Georgia; color: black;">
                           To,<br>
                           ${username} <br><br>
@@ -1555,22 +1542,7 @@ exports.rejectInstituteEmailNotification = async (req, res) => {
                     
                     <tr>
                       <td>
-                        // <p style="font-size: 2vh; font-family: Georgia; color: black;">
-                        //   To,<br>
-                        //    ${username} <br><br>
-                        //    We hope this email finds you well. <br>
-                        //    We regret to inform you that your verification request has been rejected.<br><br> 
-                        //   <b>Reason </b>: ${reason}               
-                        //   <br><br>                          
-                        //   Please log in to the <a href="https://ep.sortmycollegeapp.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">Entrance Preparation Portal</a>
-                        //   to review the details and make the necessary updates to your profile. We encourage you to complete all required sections to facilitate a smooth verification process.<br> <br>
-                        //   If you have any questions or need further assistance, please feel free to email us at support@sortmycollege.com. <br><br>
-                        //   Best Regards, <br />
-                          
-                        //   <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a>
-                        //   Team
-                        // </p>
-                        <p style="font-size: 2vh; font-family: Georgia; color: black;">
+                          <p style="font-size: 2vh; font-family: Georgia; color: black;">
                             To,<br>
                             ${username} <br><br>
                             We hope this email finds you well.<br><br>
@@ -1581,7 +1553,7 @@ exports.rejectInstituteEmailNotification = async (req, res) => {
                             Best regards,<br />
                             <a href="https://sortmycollege.com/" style="color: #1f0a68; font-weight: 700; text-decoration: none;">SortMyCollege</a><br />
                             Team
-                        </p>
+                         </p>
 
                       </td>
                     </tr>
