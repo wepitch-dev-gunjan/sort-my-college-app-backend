@@ -910,6 +910,7 @@ exports.getLatestSessions = async (req, res) => {
     sessions.push(
       ...(await Session.find({
         session_date: { $gte: resetDate },
+        session_type: "group",
       })
         .sort({ createdAt: -1 })
         .limit(5))
