@@ -981,16 +981,13 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getLatestSessions = async (req, res) => {
   try {
+    // Get current date and time in IST
     const currentDate = new Date();
     const hours = currentDate.getHours() * 60 + 60;
     const minutes = currentDate.getMinutes();
-    console.log(currentDate.getDate(), hours / 60, minutes);
-
-    // Create a new date object for the current time
-    let now = new Date();
 
     // Get the current time in milliseconds
-    let currentTime = now.getTime();
+    let currentTime = currentDate.getTime();
 
     // Calculate the IST offset in milliseconds (IST is UTC+5:30)
     let istOffset = 5.5 * 60 * 60 * 1000;
@@ -1004,36 +1001,38 @@ exports.getLatestSessions = async (req, res) => {
     // Adjust the IST date back by the IST offset to get the correct date in local time
     istDate = new Date(istDate.getTime() - istOffset);
 
-    console.log("IST Date: " + istDate);
-
+    // Calculate the session time in minutes
     const sessionTime = hours + minutes;
+
+    // Create a date object for the reset date
     const resetDate = new Date(currentDate);
     resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
 
+    // Initialize sessions array
     let sessions = [];
-    // Push the results of the first query into the sessions array
+
+    // Fetch sessions scheduled for today and in the future
     sessions.push(
       ...(await Session.find({
         session_date: { $eq: istDate },
         session_time: { $gte: sessionTime },
+        session_type: "Group", // Filter to include only group sessions
       }))
     );
 
+    // Fetch sessions scheduled from tomorrow onward
     currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
     currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
     currentDate.setDate(currentDate.getDate() + 1); // Add one day
 
-    // Push the results of the second query into the sessions array
     sessions.push(
       ...(await Session.find({
         session_date: { $gte: resetDate },
+        session_type: "Group", // Filter to include only group sessions
       })
         .sort({ createdAt: -1 })
         .limit(5))
     );
-
-    // Filter out personal sessions (Add your criteria for filtering personal sessions here)
-    sessions = sessions.filter((session) => !session.isPersonal); // Assuming `isPersonal` is a field that marks a session as personal
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -1070,7 +1069,7 @@ exports.getLatestSessions = async (req, res) => {
             if (dayDiff <= 7 && dayDiff > 0) {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
-              session_massaged_date = sessionDate.toDateString().slice(4);
+              session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
               session.session_time = sessionTimeIntoString(
                 session.session_time
               );
@@ -1099,6 +1098,8 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 exports.isSessionAboutToStart = async (req, res) => {
   try {
