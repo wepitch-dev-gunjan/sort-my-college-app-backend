@@ -981,51 +981,43 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getLatestSessions = async (req, res) => {
   try {
-    const currentDate = new Date();
-    const hours = currentDate.getHours() * 60 + 60;
-    const minutes = currentDate.getMinutes();
-    console.log(currentDate.getDate(), hours / 60, minutes);
+    // Get current time and date in IST
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    const currentISTTime = new Date(now.getTime() + istOffset);
 
-    // Create a new date object for IST time
-    let now = new Date();
-    let currentTime = now.getTime();
-    let istOffset = 5.5 * 60 * 60 * 1000;
-    let istDate = new Date(currentTime + istOffset);
-    istDate.setUTCHours(0, 0, 0, 0);
-    istDate = new Date(istDate.getTime() - istOffset);
-    console.log("IST Date: " + istDate);
+    // Set IST Date to midnight
+    let istDateMidnight = new Date(currentISTTime);
+    istDateMidnight.setHours(0, 0, 0, 0); // Midnight IST
+    console.log("IST Date at Midnight: " + istDateMidnight);
 
-    const sessionTime = hours + minutes;
-
-    const resetDate = new Date(currentDate);
-    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
+    // Calculate current session time in minutes since midnight
+    const sessionTime =
+      currentISTTime.getHours() * 60 + currentISTTime.getMinutes();
 
     let sessions = [];
 
-    // Push the results of the first query into the sessions array (only group sessions)
+    // Find sessions for today in IST time, only group sessions
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: istDate },
+        session_date: { $eq: istDateMidnight },
         session_time: { $gte: sessionTime },
-        session_type: "group", // Filter only group sessions
+        session_type: "group", // Only group sessions
       }))
     );
 
-    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-    currentDate.setDate(currentDate.getDate() + 1); // Add one day
-
-    // Push the results of the second query into the sessions array (only group sessions)
+    // Fetch upcoming sessions from midnight onwards, only group sessions
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: resetDate },
-        session_type: "group", // Filter only group sessions
+        session_date: { $gte: istDateMidnight },
+        session_type: "group", // Only group sessions
       })
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 }) // Sort by creation time to get the latest sessions
         .limit(5))
     );
 
     let total_available_slots = 0;
+
     if (sessions.length > 0) {
       const daysOfWeek = [
         "Sunday",
@@ -1036,16 +1028,18 @@ exports.getLatestSessions = async (req, res) => {
         "Friday",
         "Saturday",
       ];
+
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
             _id: session.session_counsellor,
           });
+
           total_available_slots += session.session_available_slots;
           const sessionDate = new Date(session.session_date);
           let session_massaged_date = "";
 
-          const today = new Date();
+          const today = new Date(now);
           const tomorrow = new Date(today);
           tomorrow.setDate(today.getDate() + 1);
 
@@ -1060,19 +1054,17 @@ exports.getLatestSessions = async (req, res) => {
             if (dayDiff <= 7 && dayDiff > 0) {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
-              session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-              session.session_time = sessionTimeIntoString(
-                session.session_time
-              );
+              session_massaged_date = sessionDate.toDateString().slice(4); // Trim day name
             }
           }
+
           return {
             counsellor_id: counsellor._id,
             session_id: session._id,
             counsellor_profile_pic: counsellor.profile_pic,
             counsellor_name: counsellor.name,
             counsellor_designation: counsellor.designation,
-            session_time: session.session_time,
+            session_time: sessionTimeIntoString(session.session_time),
             session_date: session_massaged_date,
             session_fee: session.session_fee,
             session_topic: session.session_topic,
@@ -1080,6 +1072,7 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
+
       res.status(200).json(massagedSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
