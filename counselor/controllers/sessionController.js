@@ -1101,6 +1101,42 @@ exports.getLatestSessions = async (req, res) => {
 
 
 
+// exports.isSessionAboutToStart = async (req, res) => {
+//   try {
+//     const { session_id } = req.params;
+
+//     const session = await Session.findById(session_id);
+
+//     if (!session) {
+//       return res.status(404).json({ error: "Session not found" });
+//     }
+
+//     const sessionTimeMinutes = session.session_time;
+
+//     // Get the current time in IST
+//     const currentTime = new Date();
+//     const currentTimeIST = new Date(
+//       currentTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+//     );
+
+//     const sessionTimeEpoch = new Date(currentTimeIST);
+//     sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
+//     sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
+//     sessionTimeEpoch.setSeconds(0);
+//     sessionTimeEpoch.setMilliseconds(0);
+
+//     const threshold = 10 * 60 * 1000;
+
+//     const isAboutToStart =
+//       Math.abs(sessionTimeEpoch - currentTimeIST) <= threshold;
+
+//     res.status(200).json({ isAboutToStart });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.isSessionAboutToStart = async (req, res) => {
   try {
     const { session_id } = req.params;
@@ -1111,7 +1147,8 @@ exports.isSessionAboutToStart = async (req, res) => {
       return res.status(404).json({ error: "Session not found" });
     }
 
-    const sessionTimeMinutes = session.session_time;
+    const sessionTimeMinutes = session.session_time; // Time of session start in minutes from midnight
+    const sessionDuration = session.session_duration; // Duration of the session in minutes
 
     // Get the current time in IST
     const currentTime = new Date();
@@ -1119,16 +1156,29 @@ exports.isSessionAboutToStart = async (req, res) => {
       currentTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
     );
 
+    // Calculate session start time in IST
     const sessionTimeEpoch = new Date(currentTimeIST);
     sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
     sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
     sessionTimeEpoch.setSeconds(0);
     sessionTimeEpoch.setMilliseconds(0);
 
-    const threshold = 10 * 60 * 1000;
+    // Calculate session end time in IST
+    const sessionEndEpoch = new Date(sessionTimeEpoch);
+    sessionEndEpoch.setMinutes(sessionEndEpoch.getMinutes() + sessionDuration);
 
+    // Define the threshold (10 minutes before session start)
+    const thresholdBeforeStart = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+    // Calculate the time 10 minutes before session start
+    const timeBeforeSessionStart = new Date(
+      sessionTimeEpoch - thresholdBeforeStart
+    );
+
+    // Check if the current time is between 10 minutes before session start and session end time
     const isAboutToStart =
-      Math.abs(sessionTimeEpoch - currentTimeIST) <= threshold;
+      currentTimeIST >= timeBeforeSessionStart &&
+      currentTimeIST <= sessionEndEpoch;
 
     res.status(200).json({ isAboutToStart });
   } catch (error) {
