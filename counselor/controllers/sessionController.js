@@ -669,16 +669,20 @@ exports.bookSession = async (req, res) => {
       `${session.session_date} ${session.session_time}`
     );
 
-    // Check if the session is being booked within 29 minutes of its start time
+    // Check if the current time is within 29 minutes before the session start time
     const currentTime = new Date();
     const timeDifference = (sessionDateTime - currentTime) / (1000 * 60); // Difference in minutes
 
     if (timeDifference <= 29) {
+      // If within 29 minutes, disable booking by setting session status to "Disabled" or similar
+      session.session_status = "Disabled";
+      await session.save();
+
       return res
         .status(400)
         .json({
           message:
-            "Session cannot be booked within 30 minutes of its start time.",
+            "Session booking is disabled 30 minutes before the start time.",
         });
     }
 
