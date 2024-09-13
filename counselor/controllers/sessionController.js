@@ -1398,7 +1398,7 @@ exports.getLatestSessions = async (req, res) => {
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ createdAt: -1 })
-        .limit(5))
+        .limit(10))
     );
 
     let total_available_slots = 0;
