@@ -1456,7 +1456,7 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
-      res.status(200).json(massagedSessions.slice(0, 5));
+      res.status(200).json(massagedSessions.slice(0, 10));
     } else {
       res.status(200).json([]);
     }
