@@ -1391,7 +1391,7 @@ exports.getLatestSessions = async (req, res) => {
         session_date: { $gte: tomorrow },
         session_type: "Group", // Filter to include only group sessions
       })
-        .sort({ createdAt: -1 })
+        .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
         .limit(5))
     );
 
