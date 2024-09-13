@@ -1524,7 +1524,7 @@ exports.getLatestSessions = async (req, res) => {
 
     // Get the current time for session end comparison
     const currentTimeInMillis = Date.now() + istOffset;
-    const cutoffTimeInMillis = currentTimeInMillis - 60 * 60 * 1000; // 60 minutes ago
+    const cutoffTimeInMillis = currentTimeInMillis + 60 * 60 * 1000; // 60 minutes ago
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
