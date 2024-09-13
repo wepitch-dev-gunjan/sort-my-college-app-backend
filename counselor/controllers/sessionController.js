@@ -1396,7 +1396,11 @@ exports.getLatestSessions = async (req, res) => {
     );
 
     // Get the current time for session end comparison
+    // const currentTimeInMillis = Date.now() + istOffset;
     const currentTimeInMillis = Date.now() + istOffset;
+    const oneHourInMillis = 3600000; // 1 hour in milliseconds
+    const futureTimeInMillis = currentTimeInMillis + oneHourInMillis;
+
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -1421,7 +1425,7 @@ exports.getLatestSessions = async (req, res) => {
           );
 
           // Skip the session if it has ended
-          if (sessionEnd < (currentTimeInMillis - 60 * 60 * 1000)) {
+          if (sessionEnd < futureTimeInMillis) {
             return null;
           }
 
