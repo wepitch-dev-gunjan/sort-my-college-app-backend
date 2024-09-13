@@ -1391,8 +1391,15 @@ exports.getLatestSessions = async (req, res) => {
     // Fetch sessions scheduled for today and in the future
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: istDate },
-        session_time: { $gte: sessionTime },
+        $or: [
+          {
+            session_date: { $eq: istDate },
+            session_time: { $gte: sessionTime },
+          },
+          {
+            session_date: { $gt: istDate },
+          },
+        ],
         session_type: "Group", // Filter to include only group sessions
       }))
     );
@@ -1434,7 +1441,10 @@ exports.getLatestSessions = async (req, res) => {
           );
 
           // Skip the session if it has ended
-          if (sessionEnd < currentTimeInMillis) {
+          if (
+            sessionEnd < currentTimeInMillis &&
+            session.session_date.getTime() === istDate.getTime()
+          ) {
             return null;
           }
 
