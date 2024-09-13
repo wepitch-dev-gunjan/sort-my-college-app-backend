@@ -1382,31 +1382,22 @@ exports.getLatestSessions = async (req, res) => {
     const resetDate = new Date(currentDate);
     resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
 
-    // Initialize sessions array
-    let sessions = [];
-
     // Fetch sessions scheduled for today and in the future
-    sessions.push(
-      ...(await Session.find({
-        session_date: { $eq: localIstDate },
-        session_time: { $gte: sessionTime },
-        session_type: "Group", // Filter to include only group sessions
-      }))
-    );
-
-    // Fetch sessions scheduled from tomorrow onward
-    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-    currentDate.setDate(currentDate.getDate() + 1); // Add one day
-
-    sessions.push(
-      ...(await Session.find({
-        session_date: { $gte: resetDate },
-        session_type: "Group", // Filter to include only group sessions
-      })
-        .sort({ session_date: 1, session_time: 1 }) // Sort by date and time
-        .limit(5))
-    );
+    let sessions = await Session.find({
+      $or: [
+        {
+          session_date: { $eq: localIstDate },
+          session_time: { $gte: sessionTime },
+          session_type: "Group",
+        },
+        {
+          session_date: { $gte: resetDate },
+          session_type: "Group",
+        },
+      ],
+    })
+      .sort({ session_date: 1, session_time: 1 }) // Sort by date and time
+      .limit(5);
 
     // Filter out sessions that have already ended
     const filteredSessions = sessions.filter((session) => {
@@ -1428,7 +1419,6 @@ exports.getLatestSessions = async (req, res) => {
         "Friday",
         "Saturday",
       ];
-
       const massagedSessions = await Promise.all(
         filteredSessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
@@ -1454,9 +1444,6 @@ exports.getLatestSessions = async (req, res) => {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-              session.session_time = sessionTimeIntoString(
-                session.session_time
-              );
             }
           }
           return {
