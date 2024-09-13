@@ -208,6 +208,162 @@ exports.getSession = async (req, res) => {
 };
 
 // POST
+// exports.addSession = async (req, res) => {
+//   try {
+//     // Extract data from the request body
+//     const { counsellor_id, refresh_token } = req;
+//     const {
+//       session_topic,
+//       session_date,
+//       session_time,
+//       session_duration,
+//       session_type,
+//       session_fee,
+//       session_available_slots: session_slots,
+//     } = req.body;
+
+//     // Check if any of the required fields are missing
+//     if (
+//       !session_date ||
+//       !session_time ||
+//       !session_duration ||
+//       !session_type ||
+//       !session_fee
+//     ) {
+//       return res.status(400).send({ error: "Missing required fields" });
+//     }
+
+//     // Parse session_date and session_duration to Date objects
+//     const parsedSessionDate = new Date(session_date);
+//     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
+//     const parsedSessionDuration = parseInt(session_duration, 10);
+
+//     // Check if session_date is a valid date and session_duration is a positive number
+//     if (
+//       isNaN(parsedSessionDate) ||
+//       isNaN(parsedSessionDuration) ||
+//       parsedSessionDuration <= 0
+//     ) {
+//       return res
+//         .status(400)
+//         .send({ error: "Invalid session_date or session_duration" });
+//     }
+
+//     // Ensure session_date is not in the past
+//     if (parsedSessionDate < new Date().setHours(0, 0, 0, 0)) {
+//       return res
+//         .status(400)
+//         .send({ error: "Session date cannot be in the past" });
+//     }
+
+//     const currentTime = new Date();
+//     const sessionDateTime = getSessionDateTime(
+//       parsedSessionDate,
+//       parsedSessionTime
+//     );
+//     if (
+//       sessionDateTime < new Date(currentTime.getTime() + 24 * 60 * 60 * 1000)
+//     ) {
+//       return res.status(400).send({
+//         error: "Session must be scheduled at least 24 hours in advance",
+//       });
+//     }
+
+//     // Check if a session is already there at the mentioned time and validate the 30-minute gap
+//     const lowerTimeLimit = parsedSessionTime;
+//     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
+
+//     const existingSessions = await Session.find({
+//       session_counsellor: counsellor_id,
+//       session_date: parsedSessionDate,
+//     });
+
+//     for (let session of existingSessions) {
+//       const existingSessionStart = session.session_time;
+//       const existingSessionEnd =
+//         session.session_time + session.session_duration;
+
+//       // Check for overlapping session or within 30-minute buffer
+//       if (
+//         (lowerTimeLimit < existingSessionEnd &&
+//           upperTimeLimit > existingSessionStart) ||
+//         (lowerTimeLimit < existingSessionEnd + 30 &&
+//           lowerTimeLimit >= existingSessionEnd)
+//       ) {
+//         return res.status(400).send({
+//           error:
+//             "A session already exists at this date and time or within the 30-minute buffer period",
+//         });
+//       }
+//     }
+
+//     // Calculate start and end DateTimes for the meeting
+//     const startDateTime = getSessionDateTime(
+//       parsedSessionDate,
+//       parsedSessionTime
+//     );
+//     const endDateTime = getSessionDateTime(
+//       parsedSessionDate,
+//       parsedSessionTime + parsedSessionDuration
+//     );
+
+//     // Create Google Calendar event and get the meeting details
+//     const meetingDetails = await createMeeting(
+//       startDateTime,
+//       endDateTime,
+//       refresh_token
+//     );
+
+//     const newSession = new Session({
+//       session_topic,
+//       session_counsellor: counsellor_id,
+//       session_time: parsedSessionTime,
+//       session_date: parsedSessionDate,
+//       session_duration: parsedSessionDuration,
+//       session_type,
+//       session_fee,
+//       session_slots: session_type === "Personal" ? 1 : session_slots,
+//       session_link: meetingDetails.data.hangoutLink,
+//     });
+
+//     // Save the new session to the database
+//     const createdSession = await newSession.save();
+
+//     res
+//       .status(200)
+//       .send({ message: "Session successfully added", session: createdSession });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send({ error: "Internal server error" });
+//   }
+//   // Utility Functions
+//   function sessionTimeIntoMinutes(timeStr) {
+//     // Implement the function to convert time string (e.g., "14:30") to minutes since midnight
+//     const [hours, minutes] = timeStr.split(":").map(Number);
+//     return hours * 60 + minutes;
+//   }
+
+//   function getSessionDateTime(date, timeInMinutes) {
+//     // Implement the function to combine date and timeInMinutes into a DateTime object
+//     const dateTime = new Date(date);
+//     dateTime.setMinutes(dateTime.getMinutes() + timeInMinutes);
+//     return dateTime;
+//   }
+
+//   // async function createMeeting(startDateTime, endDateTime, refreshToken) {
+//   //   // Implement the function to create a Google Calendar event using the provided parameters
+//   //   // This should return the meeting details including the hangout link
+//   //   // Example:
+//   //   // const event = {
+//   //   //   summary: 'Counselling Session',
+//   //   //   start: { dateTime: startDateTime },
+//   //   //   end: { dateTime: endDateTime },
+//   //   //   // ... other event details ...
+//   //   // };
+//   //   // const meetingDetails = await googleCalendarClient.createEvent(event, refreshToken);
+//   //   // return meetingDetails;
+//   // }
+// };
 exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
@@ -254,19 +410,6 @@ exports.addSession = async (req, res) => {
       return res
         .status(400)
         .send({ error: "Session date cannot be in the past" });
-    }
-
-    const currentTime = new Date();
-    const sessionDateTime = getSessionDateTime(
-      parsedSessionDate,
-      parsedSessionTime
-    );
-    if (
-      sessionDateTime < new Date(currentTime.getTime() + 24 * 60 * 60 * 1000)
-    ) {
-      return res.status(400).send({
-        error: "Session must be scheduled at least 24 hours in advance",
-      });
     }
 
     // Check if a session is already there at the mentioned time and validate the 30-minute gap
