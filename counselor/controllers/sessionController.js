@@ -1358,33 +1358,18 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getLatestSessions = async (req, res) => {
   try {
-    // Get current date and time in IST
+    // Get the current date and time in IST
     const currentDate = new Date();
-    const hours = currentDate.getHours() * 60 + 60;
-    const minutes = currentDate.getMinutes();
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    const istDate = new Date(currentDate.getTime() + istOffset);
 
-    // Get the current time in milliseconds
-    let currentTime = currentDate.getTime();
-
-    // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-    let istOffset = 5.5 * 60 * 60 * 1000;
-
-    // Create a new date object for IST time
-    let istDate = new Date(currentTime + istOffset);
-
-    // Set the IST date hours, minutes, seconds, and milliseconds to 0
+    // Normalize IST date to start of the day
     istDate.setUTCHours(0, 0, 0, 0);
 
-    // Adjust the IST date back by the IST offset to get the correct date in local time
-    istDate = new Date(istDate.getTime() - istOffset);
-
-    // Calculate the session time in minutes
-    const sessionTime = hours + minutes;
-    const sessionTimeLimit = sessionTime + 60; // 60 minutes buffer
-
-    // Create a date object for the reset date
-    const resetDate = new Date(currentDate);
-    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
+    // Calculate the session time in minutes from IST
+    const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
+    const sessionTime =
+      currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
 
     // Initialize sessions array
     let sessions = [];
@@ -1392,27 +1377,18 @@ exports.getLatestSessions = async (req, res) => {
     // Fetch sessions scheduled for today and in the future
     sessions.push(
       ...(await Session.find({
-        $or: [
-          {
-            session_date: { $eq: istDate },
-            session_time: { $gte: sessionTime },
-          },
-          {
-            session_date: { $gt: istDate },
-          },
-        ],
+        session_date: { $eq: istDate },
+        session_time: { $gte: sessionTime },
         session_type: "Group", // Filter to include only group sessions
       }))
     );
 
     // Fetch sessions scheduled from tomorrow onward
-    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-    currentDate.setDate(currentDate.getDate() + 1); // Add one day
-
+    const tomorrow = new Date(istDate);
+    tomorrow.setDate(tomorrow.getDate() + 1);
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: resetDate },
+        session_date: { $gte: tomorrow },
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ createdAt: -1 })
@@ -1420,7 +1396,7 @@ exports.getLatestSessions = async (req, res) => {
     );
 
     // Get the current time for session end comparison
-    const currentTimeInMillis = Date.now();
+    const currentTimeInMillis = Date.now() + istOffset;
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -1435,20 +1411,17 @@ exports.getLatestSessions = async (req, res) => {
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate the session start and end times
+          // Calculate session start and end times in milliseconds
           const sessionStart = new Date(session.session_date);
-          const sessionStartTime =
-            sessionStart.getTime() + session.session_time * 60 * 1000;
+          sessionStart.setMinutes(
+            sessionStart.getMinutes() + session.session_time
+          );
           const sessionEnd = new Date(
             sessionStart.getTime() + session.session_duration * 60 * 1000
           );
 
-          // Skip the session if it has ended or exceeds the time limit
-          if (
-            sessionEnd < currentTimeInMillis ||
-            sessionStartTime >
-              currentTimeInMillis + sessionTimeLimit * 60 * 1000
-          ) {
+          // Skip the session if it has ended
+          if (sessionEnd < currentTimeInMillis) {
             return null;
           }
 
@@ -1480,7 +1453,6 @@ exports.getLatestSessions = async (req, res) => {
               );
             }
           }
-
           return {
             counsellor_id: counsellor._id,
             session_id: session._id,
@@ -1496,7 +1468,7 @@ exports.getLatestSessions = async (req, res) => {
         })
       );
 
-      // Filter out any null values (i.e., sessions that have ended or exceeded the time limit)
+      // Filter out any null values (i.e., sessions that have ended)
       const filteredSessions = massagedSessions.filter(
         (session) => session !== null
       );
