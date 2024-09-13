@@ -1399,7 +1399,7 @@ exports.getLatestSessions = async (req, res) => {
     // const currentTimeInMillis = Date.now() + istOffset;
     const currentTimeInMillis = Date.now() + istOffset;
     const oneHourInMillis = 3600000; // 1 hour in milliseconds
-    const futureTimeInMillis = currentTimeInMillis + oneHourInMillis;
+    const futureTimeInMillis = currentTimeInMillis - oneHourInMillis;
 
 
     let total_available_slots = 0;
