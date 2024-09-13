@@ -555,22 +555,139 @@ exports.bookSessionValidation = async (req, res) => {
   }
 };
 
+// exports.bookSession = async (req, res) => {
+//   try {
+//     const { phone_number, id } = req;
+//     const user = await User.findOne({ _id: id });
+
+//     const { session_id } = req.params;
+
+//     let session = await Session.findOne({ _id: session_id });
+
+//     const counsellor = await Counsellor.findOne({
+//       _id: session.session_counsellor,
+//     });
+
+//     const sessionDateTime = new Date(
+//       `${session.session_date} ${session.session_time}`
+//     );
+//     const nextSessionDateTime = new Date(`${counsellor.next_session_time}`);
+
+//     // Compare session times and update next_session_time if needed
+//     if (sessionDateTime > nextSessionDateTime) {
+//       counsellor.next_session_time = sessionDateTime;
+//     }
+//     session.session_users.push(id);
+//     session.session_available_slots--;
+
+//     session.session_status = "Booked";
+
+//     // Save the updated session and counselor data
+//     await session.save();
+
+//     counsellor.reward_points += 5;
+//     await counsellor.save();
+
+//     // Ensure session.session_date is a Date object
+//     const bookingData = {
+//       ...session._doc,
+//       session_date: new Date(session.session_date),
+//     };
+
+//     try {
+//       await axios.post(`${BACKEND_URL}/user/booking`, {
+//         booked_by: id,
+//         booked_entity: counsellor,
+//         booking_type: "Counsellor",
+//         booking_data: bookingData,
+//       });
+//     } catch (error) {
+//       console.log(error.message);
+//     }
+
+//     // send email notification to user
+//     if (user.email) {
+//       await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
+//         to: user.email,
+//         date: session.session_date,
+//         time: session.session_time,
+//         counsellor: counsellor.name,
+//         sessiontype: session.session_type,
+//         duration: session.session_duration,
+//         payment: session.session_fee,
+//       });
+//     }
+
+//     // send email notification to counsellor
+//     try {
+//       await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
+//         to: counsellor.email,
+//         date: session.session_date,
+//         time: session.session_time,
+//         client: user.name,
+//         sessiontype: session.session_type,
+//         duration: session.session_duration,
+//         payment: session.session_fee,
+//         username: counsellor.name,
+//         session_topic: session.session_topic,
+//         link: session.session_link,
+//         subject: "New Counselling Session Booked",
+//       });
+//     } catch (err) {
+//       console.log(err);
+//     }
+
+//     // send in app notification to counsellor
+//     const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
+//       user_id: counsellor._id,
+//       title: "New Booking",
+//       message: `${user.name} booked a ${session.session_type} session`,
+//     });
+
+//     // Respond with a success message
+//     res.status(201).json({ message: "Counseling session booked successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal booking Server Error" });
+//   }
+// };
+
+// PUT
+
 exports.bookSession = async (req, res) => {
   try {
     const { phone_number, id } = req;
     const user = await User.findOne({ _id: id });
-
     const { session_id } = req.params;
 
     let session = await Session.findOne({ _id: session_id });
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
 
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
+    if (!counsellor) {
+      return res.status(404).json({ error: "Counsellor not found" });
+    }
 
     const sessionDateTime = new Date(
       `${session.session_date} ${session.session_time}`
     );
+
+    // Check if the booking is made at least 30 minutes before the session starts
+    const currentTime = new Date();
+    const timeDifference = (sessionDateTime - currentTime) / (1000 * 60); // Difference in minutes
+
+    if (timeDifference < 30) {
+      return res
+        .status(400)
+        .json({
+          error: "Sessions must be booked at least 30 minutes in advance",
+        });
+    }
+
     const nextSessionDateTime = new Date(`${counsellor.next_session_time}`);
 
     // Compare session times and update next_session_time if needed
@@ -605,7 +722,7 @@ exports.bookSession = async (req, res) => {
       console.log(error.message);
     }
 
-    // send email notification to user
+    // Send email notification to user
     if (user.email) {
       await axios.post(`${BACKEND_URL}/notification/user/sessionbooked`, {
         to: user.email,
@@ -618,7 +735,7 @@ exports.bookSession = async (req, res) => {
       });
     }
 
-    // send email notification to counsellor
+    // Send email notification to counsellor
     try {
       await axios.post(`${BACKEND_URL}/notification/counsellor/sessionbooked`, {
         to: counsellor.email,
@@ -637,8 +754,8 @@ exports.bookSession = async (req, res) => {
       console.log(err);
     }
 
-    // send in app notification to counsellor
-    const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
+    // Send in-app notification to counsellor
+    await axios.post(`${BACKEND_URL}/notification/in-app`, {
       user_id: counsellor._id,
       title: "New Booking",
       message: `${user.name} booked a ${session.session_type} session`,
@@ -652,7 +769,6 @@ exports.bookSession = async (req, res) => {
   }
 };
 
-// PUT
 exports.updateSession = async (req, res) => {
   try {
     // Extract data from the request body
