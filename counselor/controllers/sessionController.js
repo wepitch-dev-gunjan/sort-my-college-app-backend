@@ -1456,6 +1456,7 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
+      // Change here to return up to 10 sessions
       res.status(200).json(massagedSessions.slice(0, 10));
     } else {
       res.status(200).json([]);
@@ -1465,6 +1466,7 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 
