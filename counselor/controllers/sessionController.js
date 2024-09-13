@@ -1488,13 +1488,9 @@ exports.getLatestSessions = async (req, res) => {
     // Get the current date and time in IST
     const currentDate = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    const istDate = new Date(currentDate.getTime() + istOffset);
-
-    // Normalize IST date to start of the day
-    istDate.setUTCHours(0, 0, 0, 0);
+    const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
 
     // Calculate the session time in minutes from IST
-    const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
     const sessionTime =
       currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
 
@@ -1504,18 +1500,18 @@ exports.getLatestSessions = async (req, res) => {
     // Fetch sessions scheduled for today and in the future
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: istDate },
+        session_date: { $eq: currentDate.toISOString().split("T")[0] },
         session_time: { $gte: sessionTime },
         session_type: "Group", // Filter to include only group sessions
       }))
     );
 
     // Fetch sessions scheduled from tomorrow onward
-    const tomorrow = new Date(istDate);
+    const tomorrow = new Date(currentDate);
     tomorrow.setDate(tomorrow.getDate() + 1);
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: tomorrow },
+        session_date: { $gte: tomorrow.toISOString().split("T")[0] },
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
@@ -1524,7 +1520,6 @@ exports.getLatestSessions = async (req, res) => {
 
     // Get the current time for session end comparison
     const currentTimeInMillis = Date.now() + istOffset;
-    const cutoffTimeInMillis = currentTimeInMillis + 60 * 60 * 1000; // 60 minutes ago
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -1539,17 +1534,19 @@ exports.getLatestSessions = async (req, res) => {
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate session start and end times in milliseconds
+          // Calculate session start time
           const sessionStart = new Date(session.session_date);
-          sessionStart.setMinutes(
-            sessionStart.getMinutes() + session.session_time
+          const sessionStartTime = new Date(
+            sessionStart.getTime() + session.session_time * 60 * 1000
           );
-          const sessionEnd = new Date(
-            sessionStart.getTime() + session.session_duration * 60 * 1000
+
+          // Calculate session end time (assuming duration is in minutes)
+          const sessionEndTime = new Date(
+            sessionStartTime.getTime() + session.session_duration * 60 * 1000
           );
 
           // Skip the session if it has ended more than 60 minutes ago
-          if (sessionEnd < cutoffTimeInMillis) {
+          if (currentTimeInMillis > sessionEndTime.getTime() + 60 * 60 * 1000) {
             return null;
           }
 
