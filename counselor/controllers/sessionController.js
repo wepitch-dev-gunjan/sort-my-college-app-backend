@@ -1359,39 +1359,53 @@ exports.getLatestSessions = async (req, res) => {
   try {
     // Get current date and time in IST
     const currentDate = new Date();
-    const currentMinutes =
-      currentDate.getHours() * 60 + currentDate.getMinutes(); // Convert current time to minutes
+    const hours = currentDate.getHours() * 60;
+    const minutes = currentDate.getMinutes();
 
     // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-    let istOffset = 5.5 * 60 * 60 * 1000;
+    const istOffset = 5.5 * 60 * 60 * 1000;
 
     // Create a new date object for IST time
-    let istDate = new Date(currentDate.getTime() + istOffset);
+    const istDate = new Date(currentDate.getTime() + istOffset);
     istDate.setUTCHours(0, 0, 0, 0); // Set IST date to midnight
 
-    // Adjust the IST date back by the IST offset to get the correct date in local time
-    istDate = new Date(istDate.getTime() - istOffset);
+    // Adjust IST date back by the IST offset to get the correct date in local time
+    const localResetDate = new Date(istDate.getTime() - istOffset);
+
+    // Calculate the current session time in minutes
+    const currentTimeInMinutes = hours + minutes;
 
     // Initialize sessions array
     let sessions = [];
 
-    // Fetch sessions scheduled for today and in the future, and whose end time has not passed
-    sessions.push(
-      ...(await Session.find({
-        $or: [
-          {
-            session_date: { $eq: istDate }, // Today's sessions
-            session_time: { $gte: currentMinutes }, // Current or future time
-          },
-          {
-            session_date: { $gt: istDate }, // Future dates
-          },
-        ],
-        session_type: "Group", // Filter to include only group sessions
-      })
-        .sort({ session_date: 1, session_time: 1 }) // Sort by date and time
-        .limit(5))
-    );
+    // Fetch sessions scheduled for today and in the future
+    const todaySessions = await Session.find({
+      session_date: { $eq: istDate },
+      session_time: { $gte: currentTimeInMinutes },
+      session_type: "Group", // Filter to include only group sessions
+    });
+
+    // Filter out sessions where the session end time has already passed
+    const validTodaySessions = todaySessions.filter((session) => {
+      const sessionEndTime = session.session_time + session.session_duration;
+      return sessionEndTime > currentTimeInMinutes;
+    });
+
+    sessions.push(...validTodaySessions);
+
+    // Fetch sessions scheduled from tomorrow onward
+    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
+    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
+    currentDate.setDate(currentDate.getDate() + 1); // Add one day
+
+    const futureSessions = await Session.find({
+      session_date: { $gte: localResetDate },
+      session_type: "Group", // Filter to include only group sessions
+    })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    sessions.push(...futureSessions);
 
     let total_available_slots = 0;
     if (sessions.length > 0) {
@@ -1404,6 +1418,7 @@ exports.getLatestSessions = async (req, res) => {
         "Friday",
         "Saturday",
       ];
+
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
