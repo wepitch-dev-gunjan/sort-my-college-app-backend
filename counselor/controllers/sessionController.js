@@ -1380,6 +1380,7 @@ exports.getLatestSessions = async (req, res) => {
 
     // Calculate the session time in minutes
     const sessionTime = hours + minutes;
+    const sessionTimeLimit = sessionTime + 60; // 60 minutes buffer
 
     // Create a date object for the reset date
     const resetDate = new Date(currentDate);
@@ -1434,16 +1435,19 @@ exports.getLatestSessions = async (req, res) => {
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate the end time of the session
+          // Calculate the session start and end times
           const sessionStart = new Date(session.session_date);
+          const sessionStartTime =
+            sessionStart.getTime() + session.session_time * 60 * 1000;
           const sessionEnd = new Date(
             sessionStart.getTime() + session.session_duration * 60 * 1000
           );
 
-          // Skip the session if it has ended
+          // Skip the session if it has ended or exceeds the time limit
           if (
-            sessionEnd < currentTimeInMillis &&
-            session.session_date.getTime() === istDate.getTime()
+            sessionEnd < currentTimeInMillis ||
+            sessionStartTime >
+              currentTimeInMillis + sessionTimeLimit * 60 * 1000
           ) {
             return null;
           }
@@ -1492,7 +1496,7 @@ exports.getLatestSessions = async (req, res) => {
         })
       );
 
-      // Filter out any null values (i.e., sessions that have ended)
+      // Filter out any null values (i.e., sessions that have ended or exceeded the time limit)
       const filteredSessions = massagedSessions.filter(
         (session) => session !== null
       );
