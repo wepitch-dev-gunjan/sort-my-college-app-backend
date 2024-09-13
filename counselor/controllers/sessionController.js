@@ -1355,43 +1355,38 @@ exports.getCheckoutDetails = async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // };
+
 exports.getLatestSessions = async (req, res) => {
   try {
     // Get current date and time in IST
     const currentDate = new Date();
-    const hours = currentDate.getHours() * 60 + 60;
+    const hours = currentDate.getHours();
     const minutes = currentDate.getMinutes();
+    const currentTimeInMinutes = hours * 60 + minutes;
 
-    // Get the current time in milliseconds
-    let currentTime = currentDate.getTime();
+    // Minimum session time (1 hour from now)
+    const minSessionTime = currentTimeInMinutes + 60;
 
-    // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-    let istOffset = 5.5 * 60 * 60 * 1000;
+    // Calculate IST offset in milliseconds (IST is UTC+5:30)
+    const istOffset = 5.5 * 60 * 60 * 1000;
 
     // Create a new date object for IST time
-    let istDate = new Date(currentTime + istOffset);
+    let istDate = new Date(currentDate.getTime() + istOffset);
 
-    // Set the IST date hours, minutes, seconds, and milliseconds to 0
+    // Set IST date to midnight
     istDate.setUTCHours(0, 0, 0, 0);
 
-    // Adjust the IST date back by the IST offset to get the correct date in local time
+    // Adjust the IST date back to get the correct date in local time
     istDate = new Date(istDate.getTime() - istOffset);
-
-    // Calculate the session time in minutes
-    const sessionTime = hours + minutes;
-
-    // Create a date object for the reset date
-    const resetDate = new Date(currentDate);
-    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
 
     // Initialize sessions array
     let sessions = [];
 
-    // Fetch sessions scheduled for today and in the future
+    // Fetch sessions scheduled for today with timing 1 hour more than now
     sessions.push(
       ...(await Session.find({
         session_date: { $eq: istDate },
-        session_time: { $gte: sessionTime },
+        session_time: { $gte: minSessionTime }, // Ensure session time is at least 1 hour from now
         session_type: "Group", // Filter to include only group sessions
       }))
     );
@@ -1403,8 +1398,7 @@ exports.getLatestSessions = async (req, res) => {
 
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: resetDate },
-        session_time: { $gte: sessionTime }, // Ensure sessions are not in the past
+        session_date: { $gte: currentDate },
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ createdAt: -1 })
