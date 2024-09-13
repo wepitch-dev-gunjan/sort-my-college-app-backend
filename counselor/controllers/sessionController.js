@@ -653,38 +653,32 @@ exports.bookSessionValidation = async (req, res) => {
 // };
 
 // PUT
-
 exports.bookSession = async (req, res) => {
   try {
     const { phone_number, id } = req;
     const user = await User.findOne({ _id: id });
+
     const { session_id } = req.params;
 
     let session = await Session.findOne({ _id: session_id });
-    if (!session) {
-      return res.status(404).json({ error: "Session not found" });
-    }
-
     const counsellor = await Counsellor.findOne({
       _id: session.session_counsellor,
     });
-    if (!counsellor) {
-      return res.status(404).json({ error: "Counsellor not found" });
-    }
 
     const sessionDateTime = new Date(
       `${session.session_date} ${session.session_time}`
     );
 
-    // Check if the booking is made at least 30 minutes before the session starts
+    // Check if the session is being booked within 29 minutes of its start time
     const currentTime = new Date();
     const timeDifference = (sessionDateTime - currentTime) / (1000 * 60); // Difference in minutes
 
-    if (timeDifference < 30) {
+    if (timeDifference <= 29) {
       return res
         .status(400)
         .json({
-          error: "Sessions must be booked at least 30 minutes in advance",
+          message:
+            "Session cannot be booked within 30 minutes of its start time.",
         });
     }
 
@@ -694,9 +688,9 @@ exports.bookSession = async (req, res) => {
     if (sessionDateTime > nextSessionDateTime) {
       counsellor.next_session_time = sessionDateTime;
     }
+
     session.session_users.push(id);
     session.session_available_slots--;
-
     session.session_status = "Booked";
 
     // Save the updated session and counselor data
@@ -755,7 +749,7 @@ exports.bookSession = async (req, res) => {
     }
 
     // Send in-app notification to counsellor
-    await axios.post(`${BACKEND_URL}/notification/in-app`, {
+    const response = await axios.post(`${BACKEND_URL}/notification/in-app`, {
       user_id: counsellor._id,
       title: "New Booking",
       message: `${user.name} booked a ${session.session_type} session`,
