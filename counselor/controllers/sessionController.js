@@ -1358,26 +1358,22 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getLatestSessions = async (req, res) => {
   try {
-    // Get current date and time in IST
+    // Get the current date and time in IST
     const currentDate = new Date();
-    const hours = currentDate.getHours();
-    const minutes = currentDate.getMinutes();
-    const currentTimeInMinutes = hours * 60 + minutes;
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+    const istCurrentDate = new Date(currentDate.getTime() + istOffset); // Convert to IST
 
-    // Minimum session time (1 hour from now)
+    // Calculate the current time in minutes from midnight in IST
+    const currentHours = istCurrentDate.getHours();
+    const currentMinutes = istCurrentDate.getMinutes();
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+    // Calculate the minimum session time (1 hour from now in IST)
     const minSessionTime = currentTimeInMinutes + 60;
 
-    // Calculate IST offset in milliseconds (IST is UTC+5:30)
-    const istOffset = 5.5 * 60 * 60 * 1000;
-
-    // Create a new date object for IST time
-    let istDate = new Date(currentDate.getTime() + istOffset);
-
-    // Set IST date to midnight
-    istDate.setUTCHours(0, 0, 0, 0);
-
-    // Adjust the IST date back to get the correct date in local time
-    istDate = new Date(istDate.getTime() - istOffset);
+    // Set IST date to midnight for today's date
+    let istMidnightDate = new Date(istCurrentDate);
+    istMidnightDate.setHours(0, 0, 0, 0); // Set to midnight IST
 
     // Initialize sessions array
     let sessions = [];
@@ -1385,20 +1381,20 @@ exports.getLatestSessions = async (req, res) => {
     // Fetch sessions scheduled for today with timing 1 hour more than now
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: istDate },
+        session_date: { $eq: istMidnightDate }, // Match today's date in IST
         session_time: { $gte: minSessionTime }, // Ensure session time is at least 1 hour from now
         session_type: "Group", // Filter to include only group sessions
       }))
     );
 
     // Fetch sessions scheduled from tomorrow onward
-    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-    currentDate.setDate(currentDate.getDate() + 1); // Add one day
+    const tomorrowDate = new Date(istCurrentDate);
+    tomorrowDate.setHours(0, 0, 0, 0); // Set to midnight IST
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1); // Move to the next day
 
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: currentDate },
+        session_date: { $gte: tomorrowDate },
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ createdAt: -1 })
@@ -1469,6 +1465,8 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 
 
