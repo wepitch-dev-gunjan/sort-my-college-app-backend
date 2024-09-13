@@ -1360,56 +1360,51 @@ exports.getLatestSessions = async (req, res) => {
   try {
     // Get current date and time in IST
     const currentDate = new Date();
-    const hours = currentDate.getHours() * 60 + currentDate.getMinutes();
-    const currentTime = currentDate.getTime();
-
-    // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-    const istOffset = 5.5 * 60 * 60 * 1000;
-
-    // Create a new date object for IST time
-    const istDate = new Date(currentTime + istOffset);
+    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+    let istDate = new Date(currentDate.getTime() + istOffset);
 
     // Set the IST date hours, minutes, seconds, and milliseconds to 0
     istDate.setUTCHours(0, 0, 0, 0);
 
-    // Adjust the IST date back by the IST offset to get the correct date in local time
-    const localIstDate = new Date(istDate.getTime() - istOffset);
-
     // Calculate the session time in minutes
-    const sessionTime = hours;
+    const hours = currentDate.getHours() * 60;
+    const minutes = currentDate.getMinutes();
+    const sessionTime = hours + minutes;
 
     // Create a date object for the reset date
     const resetDate = new Date(currentDate);
     resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
 
-    // Fetch sessions scheduled for today and in the future
-    let sessions = await Session.find({
-      $or: [
-        {
-          session_date: { $eq: localIstDate },
-          session_time: { $gte: sessionTime },
-          session_type: "Group",
-        },
-        {
-          session_date: { $gte: resetDate },
-          session_type: "Group",
-        },
-      ],
-    })
-      .sort({ session_date: 1, session_time: 1 }) // Sort by date and time
-      .limit(5);
+    // Initialize sessions array
+    let sessions = [];
 
-    // Filter out sessions that have already ended
-    const filteredSessions = sessions.filter((session) => {
-      const sessionEndTime = new Date(session.session_date);
-      sessionEndTime.setMinutes(
-        sessionEndTime.getMinutes() + session.session_duration
-      );
-      return sessionEndTime > currentDate;
-    });
+    // Fetch sessions scheduled for today and in the future
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $eq: istDate },
+        session_time: { $gte: sessionTime },
+        session_type: "Group", // Filter to include only group sessions
+        end_time: { $gte: currentDate }, // Exclude sessions that have ended
+      }))
+    );
+
+    // Fetch sessions scheduled from tomorrow onward
+    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
+    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
+    currentDate.setDate(currentDate.getDate() + 1); // Add one day
+
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $gte: resetDate },
+        session_type: "Group", // Filter to include only group sessions
+        end_time: { $gte: currentDate }, // Exclude sessions that have ended
+      })
+        .sort({ createdAt: -1 })
+        .limit(5))
+    );
 
     let total_available_slots = 0;
-    if (filteredSessions.length > 0) {
+    if (sessions.length > 0) {
       const daysOfWeek = [
         "Sunday",
         "Monday",
@@ -1420,7 +1415,7 @@ exports.getLatestSessions = async (req, res) => {
         "Saturday",
       ];
       const massagedSessions = await Promise.all(
-        filteredSessions.map(async (session) => {
+        sessions.map(async (session) => {
           const counsellor = await Counsellor.findOne({
             _id: session.session_counsellor,
           });
@@ -1444,6 +1439,9 @@ exports.getLatestSessions = async (req, res) => {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
+              session.session_time = sessionTimeIntoString(
+                session.session_time
+              );
             }
           }
           return {
@@ -1469,6 +1467,7 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 // exports.isSessionAboutToStart = async (req, res) => {
