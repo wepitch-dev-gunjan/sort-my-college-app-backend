@@ -1599,37 +1599,53 @@ exports.getCheckoutDetails = async (req, res) => {
 
 exports.getLatestSessions = async (req, res) => {
   try {
-    // Get the current date and time in IST
+    // Get current date and time in IST
     const currentDate = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    const istDate = new Date(currentDate.getTime() + istOffset);
+    const hours = currentDate.getHours() * 60 + 60;
+    const minutes = currentDate.getMinutes();
 
-    // Normalize IST date to start of the day
+    // Get the current time in milliseconds
+    let currentTime = currentDate.getTime();
+
+    // Calculate the IST offset in milliseconds (IST is UTC+5:30)
+    let istOffset = 5.5 * 60 * 60 * 1000;
+
+    // Create a new date object for IST time
+    let istDate = new Date(currentTime + istOffset);
+
+    // Set the IST date hours, minutes, seconds, and milliseconds to 0
     istDate.setUTCHours(0, 0, 0, 0);
 
-    // Calculate the session time in minutes from IST
-    const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
-    const sessionTime =
-      currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
+    // Adjust the IST date back by the IST offset to get the correct date in local time
+    istDate = new Date(istDate.getTime() - istOffset);
+
+    // Calculate the session time in minutes
+    const sessionTime = hours + minutes;
+
+    // Create a date object for the reset date
+    const resetDate = new Date(currentDate);
+    resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
 
     // Initialize sessions array
     let sessions = [];
 
-    // Fetch sessions scheduled for today and in the future
+    // Fetch sessions scheduled for today and in the future, sorted by session_date and session_time in ascending order
     sessions.push(
       ...(await Session.find({
         session_date: { $eq: istDate },
         session_time: { $gte: sessionTime },
         session_type: "Group", // Filter to include only group sessions
-      }))
+      }).sort({ session_date: 1, session_time: 1 })) // Sort by date and time in ascending order
     );
 
     // Fetch sessions scheduled from tomorrow onward
-    const tomorrow = new Date(istDate);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
+    currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
+    currentDate.setDate(currentDate.getDate() + 1); // Add one day
+
     sessions.push(
       ...(await Session.find({
-        session_date: { $gte: tomorrow },
+        session_date: { $gte: resetDate },
         session_type: "Group", // Filter to include only group sessions
       })
         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
@@ -1649,12 +1665,6 @@ exports.getLatestSessions = async (req, res) => {
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate session start time in milliseconds
-          const sessionStart = new Date(session.session_date);
-          sessionStart.setMinutes(
-            sessionStart.getMinutes() + session.session_time
-          );
-
           const counsellor = await Counsellor.findOne({
             _id: session.session_counsellor,
           });
@@ -1697,7 +1707,6 @@ exports.getLatestSessions = async (req, res) => {
           };
         })
       );
-
       res.status(200).json(massagedSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
@@ -1707,7 +1716,6 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 
 
