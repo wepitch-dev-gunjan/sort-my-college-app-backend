@@ -1636,9 +1636,6 @@ exports.getLatestSessions = async (req, res) => {
         .limit(5))
     );
 
-    // Get the current time for session end comparison
-    const currentTimeInMillis = Date.now() + istOffset;
-
     let total_available_slots = 0;
     if (sessions.length > 0) {
       const daysOfWeek = [
@@ -1652,21 +1649,11 @@ exports.getLatestSessions = async (req, res) => {
       ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate session start and end times in milliseconds
+          // Calculate session start time in milliseconds
           const sessionStart = new Date(session.session_date);
           sessionStart.setMinutes(
             sessionStart.getMinutes() + session.session_time
           );
-
-          // Extend visibility duration by 90 minutes after session start
-          const sessionExpiry = new Date(
-            sessionStart.getTime() + 60 * 60 * 1000 // Extend visibility to 90 minutes
-          );
-
-          // Skip the session if it is more than 90 minutes past the start time
-          if (sessionExpiry < currentTimeInMillis) {
-            return null;
-          }
 
           const counsellor = await Counsellor.findOne({
             _id: session.session_counsellor,
@@ -1711,12 +1698,7 @@ exports.getLatestSessions = async (req, res) => {
         })
       );
 
-      // Filter out any null values (i.e., sessions that have expired 90 min after start time)
-      const filteredSessions = massagedSessions.filter(
-        (session) => session !== null
-      );
-
-      res.status(200).json(filteredSessions.slice(0, 5));
+      res.status(200).json(massagedSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
     }
@@ -1725,6 +1707,7 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 
