@@ -1658,12 +1658,12 @@ exports.getLatestSessions = async (req, res) => {
             sessionStart.getMinutes() + session.session_time
           );
 
-          // Add 60 minutes to the session start time to set session expiry
+          // Extend visibility duration by 90 minutes after session start
           const sessionExpiry = new Date(
-            sessionStart.getTime() + 60 * 60 * 1000
+            sessionStart.getTime() + 60 * 60 * 1000 // Extend visibility to 90 minutes
           );
 
-          // Skip the session if it is more than 60 minutes past the start time
+          // Skip the session if it is more than 90 minutes past the start time
           if (sessionExpiry < currentTimeInMillis) {
             return null;
           }
@@ -1711,7 +1711,7 @@ exports.getLatestSessions = async (req, res) => {
         })
       );
 
-      // Filter out any null values (i.e., sessions that have ended or expired 60 min after start time)
+      // Filter out any null values (i.e., sessions that have expired 90 min after start time)
       const filteredSessions = massagedSessions.filter(
         (session) => session !== null
       );
