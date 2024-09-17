@@ -207,10 +207,10 @@ exports.clearOutstandingbalance = async (req, res) => {
       amount_due: { $gt: 0 },
     });
 
-    if (paymentsToUpdate.length <= 0)
-      return res.status(400).send({
-        error: "There is no payment to update",
-      });
+    // if (paymentsToUpdate.length <= 0)
+    //   return res.status(400).send({
+    //     error: "There is no payment to update",
+    //   });
 
     for (const payment of paymentsToUpdate) {
       payment.amount_paid = payment.amount_due;
