@@ -311,7 +311,7 @@ exports.incomeofcounsellor = async (req, res) => {
 
     const result = await Payment.aggregate([
       { $match: { payment_to: counsellor_id } },
-      { $group: { _id: "$payment_to", totalIncome: { $sum: "$amount_due" } } },
+      { $group: { _id: "$payment_to", totalIncome: { $sum: "$fees_amount" } } },
     ]);
 
     const totalIncome = result.length > 0 ? result[0].totalIncome : 0;
