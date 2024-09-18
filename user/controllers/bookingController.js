@@ -61,85 +61,44 @@ exports.editBooking = async (req, res) => {
 };
 
 // thiss 
-// exports.getBookings = async (req, res) => {
-//   try {
-//     const { user_id } = req;
-//     const { past, today, upcoming } = req.query;
-
-//     const startOfDay = new Date();
-//     startOfDay.setUTCHours(0, 0, 0, 0);
-
-//     const endOfDay = new Date();
-//     endOfDay.setUTCHours(23, 59, 59, 999);
-
-//     let filter = {};
-//     if (past || today || upcoming) {
-//       if (past) {
-//         filter = { "booking_data.session_date": { $lt: new Date(startOfDay) } };
-//       }
-//       if (today) {
-//         filter = {
-//           "booking_data.session_date": {
-//             $gte: new Date(startOfDay.toISOString()),
-//             $lte: new Date(endOfDay.toISOString()),
-//           },
-//         };
-//       }
-//       if (upcoming) {
-//         filter = { "booking_data.session_date": { $gt: new Date(endOfDay) } };
-//       }
-//     }
-//     filter = { ...filter, user: user_id };
-
-//     const bookings = await Booking.find(filter).sort({ date: -1 });
-//     res.status(200).send(bookings);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error!!" });
-//   }
-// };
-
 exports.getBookings = async (req, res) => {
   try {
     const { user_id } = req;
     const { past, today, upcoming } = req.query;
 
     const startOfDay = new Date();
-    startOfDay.setUTCHours(0, 0, 0, 0); // Start of today in UTC
+    startOfDay.setUTCHours(0, 0, 0, 0);
 
     const endOfDay = new Date();
-    endOfDay.setUTCHours(23, 59, 59, 999); // End of today in UTC
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
-    let filter = { user: user_id }; // Start with user filter
+    let filter = {};
+    if (past || today || upcoming) {
+      if (past) {
+        filter = { "booking_data.session_date": { $lt: new Date(startOfDay) } };
+      }
+      if (today) {
+        filter = {
+          "booking_data.session_date": {
+            $gte: new Date(startOfDay.toISOString()),
+            $lte: new Date(endOfDay.toISOString()),
+          },
+        };
+      }
+      if (upcoming) {
+        filter = { "booking_data.session_date": { $gt: new Date(endOfDay) } };
+      }
+    }
+    filter = { ...filter, user: user_id };
 
-    if (past) {
-      filter = { ...filter, "booking_data.session_date": { $lt: startOfDay } };
-    }
-    if (today) {
-      filter = {
-        ...filter,
-        "booking_data.session_date": {
-          $gte: startOfDay,
-          $lte: endOfDay,
-        },
-      };
-    }
-    if (upcoming) {
-      filter = {
-        ...filter,
-        "booking_data.session_date": { $gt: endOfDay },
-      };
-    }
-
-    const bookings = await Booking.find(filter).sort({
-      "booking_data.session_date": -1,
-    });
+    const bookings = await Booking.find(filter).sort({ date: -1 });
     res.status(200).send(bookings);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error!!" });
   }
 };
+
 
 
 
