@@ -105,31 +105,35 @@ exports.getBookings = async (req, res) => {
     const { past, today, upcoming } = req.query;
 
     const startOfDay = new Date();
-    startOfDay.setUTCHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0); // Start of today in UTC
 
     const endOfDay = new Date();
-    endOfDay.setUTCHours(23, 59, 59, 999);
+    endOfDay.setUTCHours(23, 59, 59, 999); // End of today in UTC
 
-    let filter = {};
-    if (past || today || upcoming) {
-      if (past) {
-        filter = { "booking_data.session_date": { $lt: startOfDay } };
-      }
-      if (today) {
-        filter = {
-          "booking_data.session_date": {
-            $gte: startOfDay,
-            $lte: endOfDay,
-          },
-        };
-      }
-      if (upcoming) {
-        filter = { "booking_data.session_date": { $gt: endOfDay } };
-      }
+    let filter = { user: user_id }; // Start with user filter
+
+    if (past) {
+      filter = { ...filter, "booking_data.session_date": { $lt: startOfDay } };
     }
-    filter = { ...filter, user: user_id };
+    if (today) {
+      filter = {
+        ...filter,
+        "booking_data.session_date": {
+          $gte: startOfDay,
+          $lte: endOfDay,
+        },
+      };
+    }
+    if (upcoming) {
+      filter = {
+        ...filter,
+        "booking_data.session_date": { $gt: endOfDay },
+      };
+    }
 
-    const bookings = await Booking.find(filter).sort({ date: -1 });
+    const bookings = await Booking.find(filter).sort({
+      "booking_data.session_date": -1,
+    });
     res.status(200).send(bookings);
   } catch (error) {
     console.log(error);
