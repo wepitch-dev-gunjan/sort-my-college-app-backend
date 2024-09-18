@@ -228,38 +228,6 @@ exports.clearOutstandingbalance = async (req, res) => {
   }
 };
 
-// exports.paymentForCounsellor = async (req, res) => {
-//   const { counsellor_id } = req;
-
-//   try {
-//     const payments = await Payment.find({ payment_to: counsellor_id });
-
-//     if (payments.length === 0) return res.status(200).send([]);
-//     const massagedData = payments.map((payment) => ({
-//       _id: payment._id,
-//       payment_to: payment.payment_to,
-//       payment_from: payment.payment_from,
-//       order_id: payment.order_id,
-//       amount: payment.amount,
-//       amount_due: payment.amount_due,
-//       amount_paid: payment.amount_paid,
-//       currency: payment.currency,
-//       created_at: payment.created_at,
-//       entity: payment.entity,
-//       name: payment.name,
-//       email: payment.email,
-//       phone_no: payment.phone_no,
-//       description: payment.description,
-//       status: payment.status,
-//       session_type: payment.session_type,
-//     }));
-//     res.status(200).send(massagedData);
-//   } catch (error) {
-//     console.error("Error fetching payment details:", error);
-//     throw error;
-//   }
-// };
-
 exports.paymentForCounsellor = async (req, res) => {
   const { counsellor_id } = req;
 
@@ -267,40 +235,28 @@ exports.paymentForCounsellor = async (req, res) => {
     const payments = await Payment.find({ payment_to: counsellor_id });
 
     if (payments.length === 0) return res.status(200).send([]);
-
-    const massagedData = payments.map((payment) => {
-      // Calculate taxes
-      const gst = payment.amount * 0.18;
-      const convenienceCharge = payment.amount * 0.025;
-      const totalTax = gst + convenienceCharge;
-
-      return {
-        _id: payment._id,
-        payment_to: payment.payment_to,
-        payment_from: payment.payment_from,
-        order_id: payment.order_id,
-        amount: payment.amount,
-        amount_due: payment.amount_due,
-        amount_paid: payment.amount_paid,
-        currency: payment.currency,
-        created_at: payment.created_at,
-        entity: payment.entity,
-        name: payment.name,
-        email: payment.email,
-        phone_no: payment.phone_no,
-        description: payment.description,
-        status: payment.status,
-        session_type: payment.session_type,
-        total_tax: totalTax, // Add total_tax to the response
-      };
-    });
-
+    const massagedData = payments.map((payment) => ({
+      _id: payment._id,
+      payment_to: payment.payment_to,
+      payment_from: payment.payment_from,
+      order_id: payment.order_id,
+      amount: payment.amount,
+      amount_due: payment.amount_due,
+      amount_paid: payment.amount_paid,
+      currency: payment.currency,
+      created_at: payment.created_at,
+      entity: payment.entity,
+      name: payment.name,
+      email: payment.email,
+      phone_no: payment.phone_no,
+      description: payment.description,
+      status: payment.status,
+      session_type: payment.session_type,
+    }));
     res.status(200).send(massagedData);
   } catch (error) {
     console.error("Error fetching payment details:", error);
-    res
-      .status(500)
-      .send({ error: "An error occurred while fetching payment details." });
+    throw error;
   }
 };
 
