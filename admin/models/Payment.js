@@ -13,12 +13,6 @@ const paymentSchema = new Schema(
         return this.amount;
       },
     },
-    fees_amount: {
-      type: Number,
-      default: function () {
-        return this.amount;
-      },
-    },
     amount_paid: { type: Number, default: 0 },
     currency: { type: String, required: true },
     created_at: { type: Date, required: true },
