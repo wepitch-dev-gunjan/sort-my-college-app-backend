@@ -299,19 +299,52 @@ exports.paymentForCounsellor = async (req, res) => {
   }
 };
 
+// exports.incomeofcounsellor = async (req, res) => {
+//   try {
+//     const { counsellor_id } = req.params; // Assuming the counselor ID is passed as a URL parameter
+//     console.log(counsellor_id);
+
+//     // Check if counselorId is a valid ObjectId
+//     if (!counsellor_id) {
+//       return res.status(400).json({ error: "Invalid counselor ID" });
+//     }
+
+//     const result = await Payment.aggregate([
+//       { $match: { payment_to: counsellor_id } },
+//       { $group: { _id: "$payment_to", totalIncome: { $sum: "$amount_due" } } },
+//     ]);
+
+//     const totalIncome = result.length > 0 ? result[0].totalIncome : 0;
+
+//     res.json({ counsellor_id, totalIncome });
+//   } catch (error) {
+//     console.error(error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while calculating total income" });
+//   }
+// };
+
 exports.incomeofcounsellor = async (req, res) => {
   try {
     const { counsellor_id } = req.params; // Assuming the counselor ID is passed as a URL parameter
     console.log(counsellor_id);
 
-    // Check if counselorId is a valid ObjectId
+    // Check if counselorId is a valid ObjectId (optional, but recommended)
     if (!counsellor_id) {
       return res.status(400).json({ error: "Invalid counselor ID" });
     }
 
     const result = await Payment.aggregate([
       { $match: { payment_to: counsellor_id } },
-      { $group: { _id: "$payment_to", totalIncome: { $sum: "$amount_due" } } },
+      {
+        $group: {
+          _id: "$payment_to",
+          totalIncome: {
+            $sum: { $divide: ["$amount", 1.23] }, // Divide 'amount' by 1.23 before summing
+          },
+        },
+      },
     ]);
 
     const totalIncome = result.length > 0 ? result[0].totalIncome : 0;
