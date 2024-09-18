@@ -260,49 +260,6 @@ exports.clearOutstandingbalance = async (req, res) => {
 //   }
 // };
 
-// exports.paymentForCounsellor = async (req, res) => {
-//   const { counsellor_id } = req;
-
-//   try {
-//     const payments = await Payment.find({ payment_to: counsellor_id });
-
-//     if (payments.length === 0) return res.status(200).send([]);
-
-//     const massagedData = payments.map((payment) => {
-//       // Calculate total tax amount
-//       const totalTax = (payment.gst || 0) + (payment.convenience_charges || 0);
-
-//       // Calculate amount excluding tax
-//       const amountWithoutTax = payment.amount - totalTax;
-
-//       return {
-//         _id: payment._id,
-//         payment_to: payment.payment_to,
-//         payment_from: payment.payment_from,
-//         order_id: payment.order_id,
-//         amount: payment.amount,
-//         amount_due: payment.amount_due,
-//         amount_paid: payment.amount_paid,
-//         currency: payment.currency,
-//         created_at: payment.created_at,
-//         entity: payment.entity,
-//         name: payment.name,
-//         email: payment.email,
-//         phone_no: payment.phone_no,
-//         description: payment.description,
-//         status: payment.status,
-//         session_type: payment.session_type,
-//         amount_without_tax: amountWithoutTax, // Added field for amount excluding tax
-//       };
-//     });
-
-//     res.status(200).send(massagedData);
-//   } catch (error) {
-//     console.error("Error fetching payment details:", error);
-//     res.status(500).send({ error: "Internal server error" });
-//   }
-// };
-
 exports.paymentForCounsellor = async (req, res) => {
   const { counsellor_id } = req;
 
@@ -312,11 +269,10 @@ exports.paymentForCounsellor = async (req, res) => {
     if (payments.length === 0) return res.status(200).send([]);
 
     const massagedData = payments.map((payment) => {
-      // Calculate total tax amount
-      const totalTax = (payment.gst || 0) + (payment.convenience_charges || 0);
-
-      // Calculate amount excluding tax using 'amount' field
-      const amountWithoutTax = payment.amount - totalTax;
+      // Calculate taxes
+      const gst = payment.amount * 0.18;
+      const convenienceCharge = payment.amount * 0.025;
+      const totalTax = gst + convenienceCharge;
 
       return {
         _id: payment._id,
@@ -324,7 +280,7 @@ exports.paymentForCounsellor = async (req, res) => {
         payment_from: payment.payment_from,
         order_id: payment.order_id,
         amount: payment.amount,
-        amount_due: payment.amount_due, // This might still be useful for reference
+        amount_due: payment.amount_due,
         amount_paid: payment.amount_paid,
         currency: payment.currency,
         created_at: payment.created_at,
@@ -335,14 +291,16 @@ exports.paymentForCounsellor = async (req, res) => {
         description: payment.description,
         status: payment.status,
         session_type: payment.session_type,
-        amount_without_tax: amountWithoutTax, // Added field for amount excluding tax
+        total_tax: totalTax, // Add total_tax to the response
       };
     });
 
     res.status(200).send(massagedData);
   } catch (error) {
     console.error("Error fetching payment details:", error);
-    res.status(500).send({ error: "Internal server error" });
+    res
+      .status(500)
+      .send({ error: "An error occurred while fetching payment details." });
   }
 };
 
