@@ -252,6 +252,7 @@ exports.paymentForCounsellor = async (req, res) => {
       description: payment.description,
       status: payment.status,
       session_type: payment.session_type,
+      fees_amount: payment.fees_amount,
     }));
     res.status(200).send(massagedData);
   } catch (error) {
