@@ -270,9 +270,13 @@ exports.getDashboardData = async (req, res) => {
 
     const totalPayment = await Payment.aggregate([
       {
+        // $group: {
+        //   _id: null,
+        //   totalAmountDue: { $sum: "$amount_due" },
+        // },
         $group: {
           _id: null,
-          totalAmountDue: { $sum: "$amount_due" },
+          totalAmountDue: { $sum: "$amount" },
         },
       },
     ]);
