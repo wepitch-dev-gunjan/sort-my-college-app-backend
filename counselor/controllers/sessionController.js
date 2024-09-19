@@ -1476,62 +1476,184 @@ exports.getCheckoutDetails = async (req, res) => {
 //   }
 // };
 
+// exports.getLatestSessions = async (req, res) => {
+//   try {
+//     // Get the current date and time in IST
+//     const currentDate = new Date();
+//     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
+//     const istDate = new Date(currentDate.getTime() + istOffset);
+
+//     // Normalize IST date to start of the day
+//     istDate.setUTCHours(0, 0, 0, 0);
+
+//     // Calculate the session time in minutes from IST
+//     const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
+//     const sessionTime =
+//       currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
+
+//     // Initialize sessions array
+//     let sessions = [];
+
+//     // Fetch sessions scheduled for today and in the future
+//     sessions.push(
+//       ...(await Session.find({
+//         session_date: { $eq: istDate },
+//         session_time: { $gte: sessionTime },
+//         session_type: "Group", // Filter to include only group sessions
+//       }))
+//     );
+
+//     // Fetch sessions scheduled from tomorrow onward
+//     const tomorrow = new Date(istDate);
+//     tomorrow.setDate(tomorrow.getDate() + 1);
+//     sessions.push(
+//       ...(await Session.find({
+//         session_date: { $gte: tomorrow },
+//         session_type: "Group", // Filter to include only group sessions
+//       })
+//         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
+//         .limit(5))
+//     );
+
+//     // Get the current time for session end comparison
+//     const currentTimeInMillis = Date.now() + istOffset;
+
+//     let total_available_slots = 0;
+//     if (sessions.length > 0) {
+//       const daysOfWeek = [
+//         "Sunday",
+//         "Monday",
+//         "Tuesday",
+//         "Wednesday",
+//         "Thursday",
+//         "Friday",
+//         "Saturday",
+//       ];
+//       const massagedSessions = await Promise.all(
+//         sessions.map(async (session) => {
+//           // Calculate session start and end times in milliseconds
+//           const sessionStart = new Date(session.session_date);
+//           sessionStart.setMinutes(
+//             sessionStart.getMinutes() + session.session_time
+//           );
+//           const sessionEnd = new Date(
+//             sessionStart.getTime() + session.session_duration * 60 * 1000
+//           );
+
+//           // Skip the session if it has ended
+//           if (sessionEnd < currentTimeInMillis) {
+//             return null;
+//           }
+
+//           const counsellor = await Counsellor.findOne({
+//             _id: session.session_counsellor,
+//           });
+//           total_available_slots += session.session_available_slots;
+//           const sessionDate = new Date(session.session_date);
+//           let session_massaged_date = "";
+
+//           const today = new Date();
+//           const tomorrow = new Date(today);
+//           tomorrow.setDate(today.getDate() + 1);
+
+//           if (sessionDate.toDateString() === today.toDateString()) {
+//             session_massaged_date = "today";
+//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
+//             session_massaged_date = "tomorrow";
+//           } else {
+//             const dayDiff = Math.ceil(
+//               (sessionDate - today) / (1000 * 3600 * 24)
+//             );
+//             if (dayDiff <= 7 && dayDiff > 0) {
+//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
+//             } else {
+//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
+//               session.session_time = sessionTimeIntoString(
+//                 session.session_time
+//               );
+//             }
+//           }
+
+//           // Adding session_starting_date
+//           const session_starting_date = sessionStart.toISOString();
+
+//           return {
+//             counsellor_id: counsellor._id,
+//             session_id: session._id,
+//             counsellor_profile_pic: counsellor.profile_pic,
+//             counsellor_name: counsellor.name,
+//             counsellor_designation: counsellor.designation,
+//             session_time: session.session_time,
+//             session_date: session_massaged_date,
+//             session_fee: session.session_fee,
+//             session_topic: session.session_topic,
+//             session_duration: session.session_duration,
+//             session_starting_date, // Newly added field
+//           };
+//         })
+//       );
+
+//       // Filter out any null values (i.e., sessions that have ended)
+//       const filteredSessions = massagedSessions.filter(
+//         (session) => session !== null
+//       );
+
+//       res.status(200).json(filteredSessions.slice(0, 5));
+//     } else {
+//       res.status(200).json([]);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.getLatestSessions = async (req, res) => {
   try {
-    // Get the current date and time in IST
-    const currentDate = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-    const istDate = new Date(currentDate.getTime() + istOffset);
+    const istDate = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
+    const currentDate = new Date(istDate);
 
     // Normalize IST date to start of the day
-    istDate.setUTCHours(0, 0, 0, 0);
+    currentDate.setUTCHours(0, 0, 0, 0);
 
-    // Calculate the session time in minutes from IST
-    const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
-    const sessionTime =
-      currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
+    // Calculate current time in minutes (IST)
+    const currentTimeInIST = new Date().toLocaleTimeString("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+    });
+    const [hours, minutes] = currentTimeInIST.split(":").map(Number);
+    const sessionTime = hours * 60 + minutes;
 
-    // Initialize sessions array
+    // Fetch sessions for today and future dates
     let sessions = [];
-
-    // Fetch sessions scheduled for today and in the future
     sessions.push(
       ...(await Session.find({
-        session_date: { $eq: istDate },
+        session_date: { $eq: currentDate },
         session_time: { $gte: sessionTime },
-        session_type: "Group", // Filter to include only group sessions
+        session_type: "Group",
       }))
     );
 
-    // Fetch sessions scheduled from tomorrow onward
-    const tomorrow = new Date(istDate);
+    // Fetch sessions scheduled from tomorrow onwards
+    const tomorrow = new Date(currentDate);
     tomorrow.setDate(tomorrow.getDate() + 1);
     sessions.push(
       ...(await Session.find({
         session_date: { $gte: tomorrow },
-        session_type: "Group", // Filter to include only group sessions
+        session_type: "Group",
       })
-        .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
+        .sort({ session_date: 1, session_time: 1 })
         .limit(5))
     );
 
-    // Get the current time for session end comparison
-    const currentTimeInMillis = Date.now() + istOffset;
-
+    const currentTimeInMillis = Date.now();
     let total_available_slots = 0;
+
     if (sessions.length > 0) {
-      const daysOfWeek = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
       const massagedSessions = await Promise.all(
         sessions.map(async (session) => {
-          // Calculate session start and end times in milliseconds
           const sessionStart = new Date(session.session_date);
           sessionStart.setMinutes(
             sessionStart.getMinutes() + session.session_time
@@ -1540,18 +1662,140 @@ exports.getLatestSessions = async (req, res) => {
             sessionStart.getTime() + session.session_duration * 60 * 1000
           );
 
-          // Skip the session if it has ended
           if (sessionEnd < currentTimeInMillis) {
             return null;
           }
 
-          const counsellor = await Counsellor.findOne({
-            _id: session.session_counsellor,
-          });
+          const counsellor = await Counsellor.findById(session.session_counsellor);
+
+          // Only include sessions if the counsellor is verified
+          if (!counsellor || !counsellor.verified) {
+            return null;
+          }
+
           total_available_slots += session.session_available_slots;
+
+          // Session date formatting logic
           const sessionDate = new Date(session.session_date);
           let session_massaged_date = "";
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1);
 
+          if (sessionDate.toDateString() === today.toDateString()) {
+            session_massaged_date = "today";
+          } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
+            session_massaged_date = "tomorrow";
+          } else {
+            const dayDiff = Math.ceil((sessionDate - today) / (1000 * 3600 * 24));
+            if (dayDiff <= 7 && dayDiff > 0) {
+              session_massaged_date = daysOfWeek[sessionDate.getDay()];
+            } else {
+              session_massaged_date = sessionDate.toDateString().slice(4);
+            }
+          }
+
+          const session_starting_date = sessionStart.toISOString();
+
+          return {
+            counsellor_id: counsellor._id,
+            session_id: session._id,
+            counsellor_profile_pic: counsellor.profile_pic,
+            counsellor_name: counsellor.name,
+            counsellor_designation: counsellor.designation,
+            session_time: sessionTimeIntoString(session.session_time),
+            session_date: session_massaged_date,
+            session_fee: session.session_fee,
+            session_topic: session.session_topic,
+            session_duration: session.session_duration,
+            session_starting_date,
+          };
+        })
+      );
+
+      const filteredSessions = massagedSessions.filter((session) => session !== null);
+      res.status(200).json(filteredSessions.slice(0, 5));
+    } else {
+      res.status(200).json([]);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getLatestSessions = async (req, res) => {
+  try {
+    const istDate = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
+    const currentDate = new Date(istDate);
+
+    // Normalize IST date to start of the day
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    // Calculate current time in minutes (IST)
+    const currentTimeInIST = new Date().toLocaleTimeString("en-US", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+    });
+    const [hours, minutes] = currentTimeInIST.split(":").map(Number);
+    const sessionTime = hours * 60 + minutes;
+
+    // Fetch sessions for today and future dates
+    let sessions = [];
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $eq: currentDate },
+        session_time: { $gte: sessionTime },
+        session_type: "Group",
+      }))
+    );
+
+    // Fetch sessions scheduled from tomorrow onwards
+    const tomorrow = new Date(currentDate);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    sessions.push(
+      ...(await Session.find({
+        session_date: { $gte: tomorrow },
+        session_type: "Group",
+      })
+        .sort({ session_date: 1, session_time: 1 })
+        .limit(5))
+    );
+
+    const currentTimeInMillis = Date.now();
+    let total_available_slots = 0;
+
+    if (sessions.length > 0) {
+      const massagedSessions = await Promise.all(
+        sessions.map(async (session) => {
+          const sessionStart = new Date(session.session_date);
+          sessionStart.setMinutes(
+            sessionStart.getMinutes() + session.session_time
+          );
+          const sessionEnd = new Date(
+            sessionStart.getTime() + session.session_duration * 60 * 1000
+          );
+
+          if (sessionEnd < currentTimeInMillis) {
+            return null;
+          }
+
+          const counsellor = await Counsellor.findById(
+            session.session_counsellor
+          );
+
+          // Only include sessions if the counsellor is verified
+          if (!counsellor || !counsellor.verified) {
+            return null;
+          }
+
+          total_available_slots += session.session_available_slots;
+
+          // Session date formatting logic
+          const sessionDate = new Date(session.session_date);
+          let session_massaged_date = "";
           const today = new Date();
           const tomorrow = new Date(today);
           tomorrow.setDate(today.getDate() + 1);
@@ -1567,14 +1811,10 @@ exports.getLatestSessions = async (req, res) => {
             if (dayDiff <= 7 && dayDiff > 0) {
               session_massaged_date = daysOfWeek[sessionDate.getDay()];
             } else {
-              session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-              session.session_time = sessionTimeIntoString(
-                session.session_time
-              );
+              session_massaged_date = sessionDate.toDateString().slice(4);
             }
           }
 
-          // Adding session_starting_date
           const session_starting_date = sessionStart.toISOString();
 
           return {
@@ -1583,21 +1823,19 @@ exports.getLatestSessions = async (req, res) => {
             counsellor_profile_pic: counsellor.profile_pic,
             counsellor_name: counsellor.name,
             counsellor_designation: counsellor.designation,
-            session_time: session.session_time,
+            session_time: sessionTimeIntoString(session.session_time),
             session_date: session_massaged_date,
             session_fee: session.session_fee,
             session_topic: session.session_topic,
             session_duration: session.session_duration,
-            session_starting_date, // Newly added field
+            session_starting_date,
           };
         })
       );
 
-      // Filter out any null values (i.e., sessions that have ended)
       const filteredSessions = massagedSessions.filter(
         (session) => session !== null
       );
-
       res.status(200).json(filteredSessions.slice(0, 5));
     } else {
       res.status(200).json([]);
@@ -1607,7 +1845,6 @@ exports.getLatestSessions = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 
 // exports.isSessionAboutToStart = async (req, res) => {
