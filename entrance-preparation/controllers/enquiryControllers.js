@@ -913,10 +913,10 @@ exports.getSingleEnquiryForAdmin = async (req, res) => {
     console.log("Enquiry data: ", enquiryData)
 
     // Update status if "Unseen"
-    if (enquiryData.status === "Unseen") {
-      enquiryData.status = "Seen";
-      await enquiryData.save();
-    }
+    // if (enquiryData.status === "Unseen") {
+    //   enquiryData.status = "Seen";
+    //   await enquiryData.save();
+    // }
 
     // Fetch user data
     let userData = { name: "N/A", phone_number: "N/A" };
