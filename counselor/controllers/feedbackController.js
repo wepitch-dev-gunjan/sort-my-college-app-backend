@@ -25,6 +25,10 @@ exports.createFeedback = async (req, res) => {
       });
     }
 
+    const defaultProfilePic =
+      "https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp";
+    const profilePic = user.profile_pic || defaultProfilePic;
+
     const counsellor = await Counsellor.findOne({ _id: counsellor_id });
 
     if (!counsellor) {
@@ -47,7 +51,7 @@ exports.createFeedback = async (req, res) => {
       feedback_from: user._id,
       feedback_to: counsellor_id,
       user_name: user.name,
-      profile_pic: user.profile_pic,
+      profile_pic: profilePic,
       rating,
       message,
     });
