@@ -10,8 +10,8 @@ const feedbackSchema = new Schema(
     },
     profile_pic: {
       type: String,
-      default:
-        "https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp",
+      // default:
+      //   "https://cdn.iconscout.com/icon/free/png-256/free-avatar-370-456322.png?f=webp",
     },
     user_name: {
       type: String,
