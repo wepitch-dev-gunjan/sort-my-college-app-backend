@@ -7,11 +7,16 @@ const {
   getAccommodation,
   editAccommodation,
   deleteAccommodation,
+  updateAccommodationStatus,
 } = require("../controllers/accommodationController");
 const { upload } =require("../middlewares/uploadImage");
 // routes for admin
 router.get("/accommodation", adminAuth, getAccommodations);
 router.get("/accommodation/:accomodation_id", adminAuth, getAccommodation);
+router.put(
+  "/accommodation/:accommodation_id/status",
+  updateAccommodationStatus
+);
 // add Accommodation
 router.post("/accommodation", adminAuth, upload.fields([
   { name: 'images', maxCount: 10 },

@@ -69,6 +69,12 @@ const accommodationSchema = new Schema(
     house_rules: [String],
     gate_opening_time: String,
     gate_closing_time: String,
+
+    status: {
+      type: String,
+      enum: ["Pending", "Rejected", "Approved"],
+      default: "Pending",
+    },
   },
   {
     timestamps: true,

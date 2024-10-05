@@ -148,6 +148,45 @@ exports.getAccommodation = async (req, res) => {
   }
 };
 
+exports.updateAccommodationStatus = async (req, res) => {
+  try {
+    const { accommodation_id } = req.params; // Get accommodation ID from the URL params
+    const { status } = req.body; // Get the new status from the request body
+
+    // Validate accommodation ID
+    if (!accommodation_id) {
+      return res.status(400).json({ error: "Accommodation ID is required" });
+    }
+
+    // Validate the new status
+    const allowedStatuses = ["Pending", "Rejected", "Approved"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    // Find the accommodation by ID and update the status
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(
+      accommodation_id,
+      { status }, // Update the status field
+      { new: true } // Return the updated document
+    );
+
+    // If accommodation is not found
+    if (!updatedAccommodation) {
+      return res.status(404).json({ error: "Accommodation not found" });
+    }
+
+    // Return the updated accommodation
+    return res.status(200).json({
+      message: "Status updated successfully",
+      accommodation: updatedAccommodation,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 exports.editAccommodation = async (req, res) => {
   try {
     const { accomodation_id } = req.params;
