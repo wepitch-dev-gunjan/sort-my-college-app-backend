@@ -509,6 +509,8 @@ exports.getSession = async (req, res) => {
 //   // }
 // };
 
+const moment = require("moment-timezone");
+
 exports.addSession = async (req, res) => {
   try {
     // Extract data from the request body
@@ -534,12 +536,12 @@ exports.addSession = async (req, res) => {
       return res.status(400).send({ error: "Missing required fields" });
     }
 
-    // Parse session_date and session_duration to Date objects
-    const parsedSessionDate = convertToIST(new Date(session_date));
+    // Parse session_date and session_duration to Date objects in IST
+    const parsedSessionDate = moment.tz(session_date, "Asia/Kolkata").toDate();
     const parsedSessionTime = sessionTimeIntoMinutes(session_time);
     const parsedSessionDuration = parseInt(session_duration, 10);
 
-    // Check if session_date is a valid date and session_duration is a positive number
+    // Check if session_date is valid and session_duration is positive
     if (
       isNaN(parsedSessionDate) ||
       isNaN(parsedSessionDuration) ||
@@ -550,14 +552,16 @@ exports.addSession = async (req, res) => {
         .send({ error: "Invalid session_date or session_duration" });
     }
 
-    // Ensure session_date is not in the past
-    if (parsedSessionDate < new Date().setHours(0, 0, 0, 0)) {
+    // Ensure session_date is not in the past (IST)
+    if (
+      parsedSessionDate < moment().tz("Asia/Kolkata").startOf("day").toDate()
+    ) {
       return res
         .status(400)
         .send({ error: "Session date cannot be in the past" });
     }
 
-    // Check if a session is already there at the mentioned time and validate the 30-minute gap
+    // Check if a session already exists at the mentioned time and validate 30-minute gap
     const lowerTimeLimit = parsedSessionTime;
     const upperTimeLimit = parsedSessionTime + parsedSessionDuration;
 
@@ -586,11 +590,11 @@ exports.addSession = async (req, res) => {
     }
 
     // Calculate start and end DateTimes for the meeting in IST
-    const startDateTime = getSessionDateTimeIST(
+    const startDateTime = getSessionDateTime(
       parsedSessionDate,
       parsedSessionTime
     );
-    const endDateTime = getSessionDateTimeIST(
+    const endDateTime = getSessionDateTime(
       parsedSessionDate,
       parsedSessionTime + parsedSessionDuration
     );
@@ -632,25 +636,12 @@ exports.addSession = async (req, res) => {
     return hours * 60 + minutes;
   }
 
-  function getSessionDateTimeIST(date, timeInMinutes) {
-    // Combine date and timeInMinutes into a DateTime object in IST
+  function getSessionDateTime(date, timeInMinutes) {
+    // Combine date and timeInMinutes into a DateTime object
     const dateTime = new Date(date);
     dateTime.setMinutes(dateTime.getMinutes() + timeInMinutes);
-
-    // Convert the dateTime to IST (UTC + 5:30)
-    return convertToIST(dateTime);
+    return dateTime;
   }
-
-  function convertToIST(date) {
-    // Convert to IST by adding the IST offset (UTC + 5:30)
-    const istOffset = 5 * 60 + 30; // in minutes
-    const istDate = new Date(date.getTime() + istOffset * 60 * 1000);
-    return istDate;
-  }
-
-  // async function createMeeting(startDateTime, endDateTime, refreshToken) {
-  //   // Create a Google Calendar event using the provided parameters
-  // }
 };
 
 
