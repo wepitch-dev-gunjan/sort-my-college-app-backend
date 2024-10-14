@@ -1,4 +1,5 @@
 const AccommodationEnquiry = require("../models/AccommodationEnquiry");
+const moment = require("moment");
 
 exports.addEnquiry = async (req, res) => {
   try {
@@ -15,7 +16,6 @@ exports.addEnquiry = async (req, res) => {
       enquirer: id,
       preferred_time,
       enquired_to,
-      enquiryStatus,
     });
 
     // Save the new enquiry
@@ -30,43 +30,168 @@ exports.addEnquiry = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+
+
+// exports.getEnquiries = async (req, res) => {
+//   try {
+//     const { id } = req;
+//     const { status, startDate, endDate, accommodationName } = req.query;
+//     console.log("Name: ", accommodationName);
+    
+
+//     const query = { enquirer: id };
+
+//     // Validate and apply filters based on provided parameters
+//     if (status) {
+//       query.enquiryStatus = status;
+//     }
+
+//     if (startDate && endDate) {
+//       // Ensure the date includes time and is valid
+//       if (
+//         !moment(startDate, moment.ISO_8601).isValid() ||
+//         !moment(endDate, moment.ISO_8601).isValid()
+//       ) {
+//         return res.status(400).json({
+//           message: "Invalid date format. Please use a valid ISO 8601 date.",
+//         });
+//       }
+//       query.createdAt = {
+//         $gte: new Date(startDate), // Date object with time
+//         $lte: new Date(endDate), // Date object with time
+//       };
+//     }
+
+//     // Assuming accommodationName is a string and you want to match it with multiple accommodation names
+//     if (accommodationName) {
+//       const accommodationNames = accommodationName.split(","); // Split input string into array
+//       const accommodationFilters = accommodationNames.map((name) => ({
+//         "enquired_to.name": { $regex: name.trim(), $options: "i" },
+//       }));
+
+//       // Combine filters using $or to apply them
+//       query.$or = accommodationFilters;
+//     }
+
+//     console.log("Final Query:", query);
+
+//     const enquiries = await AccommodationEnquiry.find(query)
+//       .populate("enquired_to", "name")
+//       .select("createdAt preferred_time status enquiryStatus enquired_to");
+
+//     const formattedEnquiries = enquiries.map((enquiry) => ({
+//       id: enquiry._id,
+//       accommodationName: enquiry.enquired_to.name,
+//       createdAt: moment(enquiry.createdAt).format("YYYY-MM-DD HH:mm:ss"), // Include date and time
+//       preferredDate: moment(enquiry.preferred_time).format(
+//         "YYYY-MM-DD HH:mm:ss"
+//       ), // Include date and time
+//       status: enquiry.enquiryStatus,
+//     }));
+
+//     res.status(200).json({
+//       message: "Enquiries retrieved successfully",
+//       data: formattedEnquiries,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching enquiries:", error);
+//     res.status(500).json({
+//       message: "Error fetching enquiries",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 exports.getEnquiries = async (req, res) => {
   try {
-    const { accommodation_id } = req;
-    if (!accommodation_id) {
-      return res
-        .status(404)
-        .json({ message: "Specified accommodation not found" });
-    }
-    const enquiries = AccommodationEnquiry.findById({
-      enquired_to: accommodation_id,
-    });
-    if (!enquiries) return res.status(201).send([]);
-    const massagedDataPromise = Promise.all(
-      enquiries.map(async (enquiry) => {
-        const { data } = await axios.get(
-          `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer.toString()}`
-        );
-        return {
-          _id: enquiry._id,
-          name: data.name,
-          phone_number: data.phone_number,
-          status: enquiry.status,
-          date: enquiry.date,
-        };
-      })
-    );
+    const { id } = req;
+    const { status, startDate, endDate, accommodationName } = req.query;
+    console.log("Name: ", accommodationName);
 
-    massagedDataPromise
-      .then((massagedData) => {
-        res.status(200).json(massagedData);
-      })
-      .catch((error) => {
-        console.error(error);
+    const query = { enquirer: id };
+
+    // Validate and apply filters based on provided parameters
+    if (status) {
+      query.enquiryStatus = status;
+    }
+
+    if (startDate && endDate) {
+      // Ensure the date includes time and is valid
+      if (
+        !moment(startDate, moment.ISO_8601).isValid() ||
+        !moment(endDate, moment.ISO_8601).isValid()
+      ) {
+        return res.status(400).json({
+          message: "Invalid date format. Please use a valid ISO 8601 date.",
+        });
+      }
+      query.createdAt = {
+        $gte: new Date(startDate), // Date object with time
+        $lte: new Date(endDate), // Date object with time
+      };
+    }
+
+    console.log("Final Query before fetching enquiries:", query);
+
+    // Fetch enquiries based on the constructed query
+    const enquiries = await AccommodationEnquiry.find(query)
+      .populate("enquired_to", "name")
+      .select("createdAt preferred_time status enquiryStatus enquired_to");
+
+    // Format the retrieved enquiries
+    const formattedEnquiries = enquiries.map((enquiry) => ({
+      id: enquiry._id,
+      accommodationName: enquiry.enquired_to.name,
+      createdAt: moment(enquiry.createdAt).format("YYYY-MM-DD HH:mm:ss"), // Include date and time
+      preferredDate: moment(enquiry.preferred_time).format(
+        "YYYY-MM-DD HH:mm:ss"
+      ), // Include date and time
+      status: enquiry.enquiryStatus,
+    }));
+
+    // Apply accommodation name search after formatting
+    if (accommodationName) {
+      const accommodationNames = accommodationName
+        .split(",")
+        .map((name) => name.trim());
+      // Filter formatted enquiries based on accommodation names
+      const filteredEnquiries = formattedEnquiries.filter((enquiry) =>
+        accommodationNames.some(
+          (name) => enquiry.accommodationName.match(new RegExp(name, "i")) // Case-insensitive match
+        )
+      );
+
+      if (filteredEnquiries.length === 0) {
+        return res.status(200).json({
+          message: "No enquiries found for the provided accommodation names.",
+          data: [],
+        });
+      }
+
+      // Set the response to the filtered enquiries
+      res.status(200).json({
+        message: "Enquiries retrieved successfully",
+        data: filteredEnquiries,
       });
-    res.staus(201).send(enquiries);
-  } catch (error) {}
+    } else {
+      // If no accommodation names are provided, return all formatted enquiries
+      res.status(200).json({
+        message: "Enquiries retrieved successfully",
+        data: formattedEnquiries,
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching enquiries:", error);
+    res.status(500).json({
+      message: "Error fetching enquiries",
+      error: error.message,
+    });
+  }
 };
+
 
 exports.deleteEnquiryForAdmin = async (req, res) => {
   try {
