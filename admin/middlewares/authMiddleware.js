@@ -12,7 +12,7 @@ exports.adminAuth = async (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No token found, authorization denied" });
+        .json({ error: "No token found, authorization denied1" });
     }
 
     // Verify the token using your secret key
@@ -67,7 +67,7 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No token found, authorization denied" });
+        .json({ error: "No token found, authorization denied2" });
     }
     // Verify the token using your secret key
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Update JWT_SECRET to use process.env
@@ -118,7 +118,7 @@ exports.userAuth = async (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No token found, authorization denied" });
+        .json({ error: "No token found, authorization denied3" });
     }
 
     // Verify the token using your secret key
@@ -149,7 +149,7 @@ exports.counsellorAuth = async (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No token found, authorization denied" });
+        .json({ error: "No token found, authorization denied4" });
     }
 
     // Verify the token using your secret key
@@ -187,7 +187,7 @@ exports.epAuth = async (req, res, next) => {
     if (!token) {
       return res
         .status(401)
-        .json({ error: "No token found, authorization denied" });
+        .json({ error: "No token found, authorization denied5" });
     }
 
     // Verify the token using your secret key

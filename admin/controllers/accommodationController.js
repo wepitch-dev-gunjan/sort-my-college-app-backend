@@ -1,6 +1,7 @@
 const {
   uploadImage,
 } = require("../../entrance-preparation/services/cloudinary");
+
 const Accommodation = require("../models/Accommodation");
 
 exports.addAccommodation = async (req, res) => {
@@ -256,3 +257,21 @@ exports.deleteAccommodation = async (req, res) => {
     .status(200)
     .send({ message: "Accommodation Deleted successfully" });
 };
+
+exports.getAccommodationForUser = async (req, res) => {
+  try {
+    // Exclude the owner's information using select method
+    const accommodations = await Accommodation.find({}).select("-owner"); // Exclude the 'owner' field
+    if (!accommodations || accommodations.length === 0) {
+      return res.status(200).send([]); // Return an empty array if no accommodations found
+    }
+    return res.status(200).send(accommodations); // Return the accommodations without owner info
+  } catch (error) {
+    console.log(error); // Log any errors that occur
+    return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
+  }
+};
+
+
+
+
