@@ -11,7 +11,7 @@ const {
   
 } = require("../controllers/accommodationController");
 const { upload } =require("../middlewares/uploadImage");
-const { getEnquiries, addEnquiry } = require("../controllers/accommodationEnquiry");
+
 
 // routes for admin
 router.get("/accommodation", adminAuth, getAccommodations);
@@ -30,14 +30,6 @@ router.post("/accommodation", adminAuth, upload.fields([
   console.log('Body:', req.body);
   next();
 }, addAccommodation);
-
-//post enquries
-router.post("/accommodation/:accommodation_id/enquiry", adminAuth, addEnquiry);
-//get enquries
-router.get("/accommodation/:accommodation_id/enquiries", adminAuth,
-  getEnquiries
-);
-
 
 router.put("/accommodation/:accomodation_id", adminAuth,upload.fields([
  { name: 'images', maxCount: 10 },
