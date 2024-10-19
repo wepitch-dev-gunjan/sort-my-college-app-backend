@@ -257,7 +257,8 @@ exports.addWebinar = async (req, res) => {
 
     // Make a POST request to Zoom API to create a meeting
     const { data } = await axios.post(
-      `https://api.zoom.us/v2/users/me/meetings`,
+      // `https://api.zoom.us/v2/users/me/meetings`,
+      `https://api.zoom.us/v2/users/me/webinars`,
       {
         topic: webinar_title, // Use webinar_title as the topic
         type: 2, // Scheduled meeting
