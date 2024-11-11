@@ -221,3 +221,19 @@ exports.getUserForEp = async (req, res) => {
     res.status(500).send({ error: "Internal  Server Error" });
   }
 };
+
+exports.getUserForAdmin = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const user = await User.findById({ _id: user_id });
+
+    if (!user) {
+      return res.status(400).send({ error: "User not found!" });
+    }
+
+    res.status(200).send(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal  Server Error" });
+  }
+};

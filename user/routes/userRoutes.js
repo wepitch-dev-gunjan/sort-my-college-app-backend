@@ -10,6 +10,7 @@ const {
   getUsersForAdmin,
   getSingleUser,
   getUserForEp,
+  getUserForAdmin,
 } = require("../controllers/userController");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
@@ -25,6 +26,7 @@ router.put("/", userAuth, upload.single("profile_pic"), editUser);
 router.put("/register", userAuth, register);
 //user for ep
 router.get("/ep/:user_id", getUserForEp);
+router.get("/admin/:user_id", getUserForAdmin);
 
 // admin routes
 router.get("/users", findOneUser);

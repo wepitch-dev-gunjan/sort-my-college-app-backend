@@ -114,7 +114,9 @@ exports.counsellorOrUserAuth = async (req, res, next) => {
 
 exports.userAuth = async (req, res, next) => {
   try {
+    console.log("Reaching");
     const token = req.header("Authorization");
+    console.log("Token: ", token);
     if (!token) {
       return res
         .status(401)
@@ -123,6 +125,7 @@ exports.userAuth = async (req, res, next) => {
 
     // Verify the token using your secret key
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("Decoded id: ", decoded.user_id);
 
     const user = await User.findOne({ _id: decoded.user_id });
     console.log(user);
@@ -134,6 +137,41 @@ exports.userAuth = async (req, res, next) => {
     req.email = decoded.email;
     req.phoneNo = decoded.phoneNo;
     req.user_id = decoded.user_id;
+
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.userAuthNew = async (req, res, next) => {
+  try {
+    const token = req.header("Authorization");
+    if (!token) {
+      return res
+        .status(401)
+        .json({ error: "No token found, authorization denied" });
+    }
+
+    // Verify the token using your secret key
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const userResponse = await axios.get(`${BACKEND_URL}/user/users`, {
+      params: {
+        user_id: decoded.user_id,
+      },
+    });
+
+    const user = userResponse.data; // Access user data from the response
+
+    if (!user) {
+      return res.status(401).json({ error: "User not authorized" });
+    }
+
+    req.email = user.email;
+    req.phone_number = decoded.phone_number;
+    req.id = user._id;
 
     next();
   } catch (error) {
