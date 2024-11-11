@@ -3,6 +3,7 @@ const moment = require("moment");
 const axios = require("axios");
 const Accommodation = require("../models/Accommodation");
 const { BACKEND_URL } = process.env;
+const nodemailer = require("nodemailer");
 
 // exports.addEnquiry = async (req, res) => {
 //   try {
@@ -234,7 +235,54 @@ exports.getAccommodationEnquiries = async (req, res) => {
   }
 };
 
+exports.sendEnquiryToOwner = async (req, res) => {
+  try {
+    const { enquiry_id, accommodation_id } = req.body;
 
+    // Fetch the enquiry details
+    const enquiry = await AccommodationEnquiry.findById(enquiry_id);
+    if (!enquiry) {
+      return res.status(404).json({ error: "Enquiry not found!" });
+    }
+
+    // Fetch the accommodation details
+    const accommodation = await Accommodation.findById(accommodation_id);
+    if (!accommodation || !accommodation.owner?.email) {
+      return res.status(404).json({ error: "Accommodation or owner email not found!" });
+    }
+
+    // Prepare email content
+    const emailContent = `
+      <h2>New Enquiry for Your Accommodation</h2>
+      <p><strong>Accommodation Name:</strong> ${accommodation.name}</p>
+      <p><strong>Enquirer Name:</strong> ${enquiry.enquirerDetails?.full_name || "N/A"}</p>
+      <p><strong>Enquiry Message:</strong> ${enquiry.message?.[0] || "No message"}</p>
+      <p><strong>Preferred Time:</strong> ${enquiry.preferred_time?.[0] || "N/A"}</p>
+    `;
+
+    // Configure nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: "Gmail", // or another email service provider
+      auth: {
+        user: "sortmycollege.mail@gmail.com", // Replace with your email
+        pass: "Sortmycollege@123!", // Replace with your email password
+      },
+    });
+
+    // Send email
+    await transporter.sendMail({
+      from: "sortmycollege.mail@gmail.com",
+      to: accommodation.owner.email,
+      subject: "New Enquiry for Your Accommodation",
+      html: emailContent,
+    });
+
+    res.status(200).json({ message: "Enquiry sent to owner's email successfully!" });
+  } catch (error) {
+    console.error("Error sending enquiry:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 
 
