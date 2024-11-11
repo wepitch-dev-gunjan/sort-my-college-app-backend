@@ -146,14 +146,38 @@ exports.addEnquiry = async (req, res) => {
 
 exports.getAccommodationEnquiries = async (req, res) => {
   try {
-    const { accommodation_id } = req.query;
+    const { accommodation_id, status, fromDate, toDate, accommodationName, search } = req.query;
 
-    // Define the query conditionally based on accommodation_id
-    const query = accommodation_id
-      ? { enquired_to: accommodation_id }
-      : {};
+    // Initialize query object
+    const query = {};
 
-    // Fetch the enquiries based on the query
+    // Apply accommodation_id filter if provided
+    if (accommodation_id) {
+      query.enquired_to = accommodation_id;
+    }
+
+    // Apply status filter if provided
+    if (status) {
+      query.enquiryStatus = status;
+    }
+
+    // Apply date range filter if provided
+    if (fromDate || toDate) {
+      query.createdAt = {};
+      if (fromDate) query.createdAt.$gte = new Date(fromDate);
+      if (toDate) query.createdAt.$lte = new Date(toDate);
+    }
+
+    // Apply accommodation name filter if provided
+    if (accommodationName) {
+      const accommodations = await Accommodation.find({
+        name: { $regex: accommodationName, $options: "i" },
+      }).select("_id");
+      const accommodationIds = accommodations.map((acc) => acc._id);
+      query.enquired_to = { $in: accommodationIds };
+    }
+
+    // Fetch the enquiries based on the constructed query
     const enquiries = await AccommodationEnquiry.find(query)
       .populate("enquired_to", "name location") // populate fields from Accommodation model
       .exec();
@@ -176,15 +200,41 @@ exports.getAccommodationEnquiries = async (req, res) => {
       })
     );
 
+    // Apply search filter on the final result set
+    let filteredEnquiries = enrichedEnquiries;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredEnquiries = enrichedEnquiries.filter((enquiry) => {
+        const enquirerName = enquiry.enquirerDetails?.name?.toLowerCase() || "";
+        const accommodationName = enquiry.enquired_to?.name?.toLowerCase() || "";
+        const enquiryStatus = enquiry.enquiryStatus?.toLowerCase() || "";
+        const preferredTime = enquiry.preferred_time?.[0]
+          ? new Date(enquiry.preferred_time[0]).toLocaleString().toLowerCase()
+          : "";
+        const createdAt = new Date(enquiry.createdAt).toLocaleString().toLowerCase();
+
+        return (
+          enquirerName.includes(searchLower) ||
+          accommodationName.includes(searchLower) ||
+          enquiryStatus.includes(searchLower) ||
+          preferredTime.includes(searchLower) ||
+          createdAt.includes(searchLower)
+        );
+      });
+    }
+
     res.status(200).json({
       message: "Enquiries fetched successfully",
-      data: enrichedEnquiries,
+      data: filteredEnquiries,
     });
   } catch (error) {
     console.error("Error fetching enquiries:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+
 
 
 
