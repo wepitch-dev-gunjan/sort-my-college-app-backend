@@ -1,5 +1,7 @@
 const AccommodationEnquiry = require("../models/AccommodationEnquiry");
 const moment = require("moment");
+const axios = require("axios");
+const { BACKEND_URL } = process.env;
 
 // exports.addEnquiry = async (req, res) => {
 //   try {
@@ -142,6 +144,51 @@ exports.addEnquiry = async (req, res) => {
   }
 };
 
+exports.getAccommodationEnquiries = async (req, res) => {
+  try {
+    const { accommodation_id } = req.query;
+
+    // Define the query conditionally based on accommodation_id
+    const query = accommodation_id
+      ? { enquired_to: accommodation_id }
+      : {};
+
+    // Fetch the enquiries based on the query
+    const enquiries = await AccommodationEnquiry.find(query)
+      .populate("enquired_to", "name location") // populate fields from Accommodation model
+      .exec();
+
+    // Fetch user details for each enquiry
+    const enrichedEnquiries = await Promise.all(
+      enquiries.map(async (enquiry) => {
+        try {
+          const userResponse = await axios.get(
+            `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer}`
+          );
+          return {
+            ...enquiry._doc,
+            enquirerDetails: userResponse.data, // Add user details to each enquiry
+          };
+        } catch (error) {
+          console.error(`Error fetching user data for enquiry ${enquiry._id}:`, error);
+          return { ...enquiry._doc, enquirerDetails: null };
+        }
+      })
+    );
+
+    res.status(200).json({
+      message: "Enquiries fetched successfully",
+      data: enrichedEnquiries,
+    });
+  } catch (error) {
+    console.error("Error fetching enquiries:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 exports.getEnquiries = async (req, res) => {
   try {
