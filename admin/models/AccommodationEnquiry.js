@@ -7,6 +7,7 @@ const accommodationEnquirySchema = new Schema(
       ref: "User",
     },
     preferred_time: [String],
+    message: [String],
     enquired_to: {
       type: Schema.Types.ObjectId,
       ref: "Accommodation",

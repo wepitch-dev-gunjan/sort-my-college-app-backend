@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { adminAuth } = require("../middlewares/authMiddleware");
+const { adminAuth, userAuth, userAuthNew } = require("../middlewares/authMiddleware");
 const { getEnquiries, addEnquiry } = require("../controllers/accommodationEnquiryController");
 
 //post enquries
-router.post("/accommodation/:accommodation_id/enquiry", adminAuth, addEnquiry);
+router.post("/accommodation/:accommodation_id/enquiry", userAuthNew, addEnquiry);
 //get enquries
 router.get("/accommodation/:accommodation_id/enquiries", adminAuth,
   getEnquiries

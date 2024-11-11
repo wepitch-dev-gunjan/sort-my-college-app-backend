@@ -1,35 +1,36 @@
 const AccommodationEnquiry = require("../models/AccommodationEnquiry");
 const moment = require("moment");
 
-exports.addEnquiry = async (req, res) => {
-  try {
-    const { id } = req;
-    const { preferred_time, enquired_to } = req.body;
+// exports.addEnquiry = async (req, res) => {
+//   try {
+//     const { id } = req;
+//     const { preferred_time, message, enquired_to } = req.body;
 
-    if (!enquired_to || !preferred_time || !preferred_time.length) {
-      return res.status(400).send({
-        error: "required fields are not filled",
-      });
-    }
+//     if (!enquired_to || !preferred_time || !preferred_time.length) {
+//       return res.status(400).send({
+//         error: "required fields are not filled",
+//       });
+//     }
 
-    const newEnquiry = new AccommodationEnquiry({
-      enquirer: id,
-      preferred_time,
-      enquired_to,
-    });
+//     const newEnquiry = new AccommodationEnquiry({
+//       enquirer: id,
+//       preferred_time,
+//       enquired_to,
 
-    // Save the new enquiry
-    await newEnquiry.save();
+//     });
 
-    res.status(201).json({
-      message: "Enquiry added successfully",
-      data: newEnquiry,
-    });
-  } catch (error) {
-    console.error("Error adding Enquiry:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+//     // Save the new enquiry
+//     await newEnquiry.save();
+
+//     res.status(201).json({
+//       message: "Enquiry added successfully",
+//       data: newEnquiry,
+//     });
+//   } catch (error) {
+//     console.error("Error adding Enquiry:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 
 
@@ -103,6 +104,43 @@ exports.addEnquiry = async (req, res) => {
 //     });
 //   }
 // };
+
+exports.addEnquiry = async (req, res) => {
+  try {
+    const { id } = req;
+    const { preferred_time, message, enquired_to } = req.body;
+
+    // Check for required fields
+    if (!enquired_to || !preferred_time || !preferred_time.length) {
+      return res.status(400).send({
+        error: "required fields are not filled",
+      });
+    }
+
+    // Create the new enquiry object
+    const newEnquiry = new AccommodationEnquiry({
+      enquirer: id,
+      preferred_time,
+      enquired_to,
+    });
+
+    // Add message to the enquiry if it is provided
+    if (message && message.length) {
+      newEnquiry.message = message;
+    }
+
+    // Save the new enquiry
+    await newEnquiry.save();
+
+    res.status(201).json({
+      message: "Enquiry added successfully",
+      data: newEnquiry,
+    });
+  } catch (error) {
+    console.error("Error adding Enquiry:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 
 exports.getEnquiries = async (req, res) => {
