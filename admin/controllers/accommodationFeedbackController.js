@@ -63,3 +63,51 @@ exports.createAccommodationFeedback = async (req, res) => {
       });
     }
   };
+
+  exports.getAccommodationFeedbacks = async (req, res) => {
+    try {
+      const { page = 1, limit = 10 } = req.query;
+      const { accommodation_id } = req.params;
+      const pageNumber = parseInt(page, 10);
+      const limitNumber = parseInt(limit, 10);
+  
+      if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber < 1 || limitNumber < 1) {
+        return res.status(400).json({ error: "Invalid page or limit parameters." });
+      }
+  
+      const accommodation = await Accommodation.findOne({ _id: accommodation_id });
+      if (!accommodation) {
+        return res.status(404).json({ error: "Accommodation not found" });
+      }
+  
+      const skip = (pageNumber - 1) * limitNumber;
+      const query = { feedback_to: accommodation_id };
+  
+      const feedbacks = await AccommodationFeedback.find(query)
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limitNumber)
+        .exec();
+  
+      const totalFeedbacks = await AccommodationFeedback.countDocuments(query);
+      const totalPages = Math.ceil(totalFeedbacks / limitNumber);
+  
+      // Fetch user details for each feedback
+      const feedbacksWithUser = await Promise.all(
+        feedbacks.map(async (feedback) => {
+          const userUrl = `${BACKEND_URL}/user/admin/${feedback.feedback_from}`;
+          const { data: user } = await axios.get(userUrl);
+          return {
+            ...feedback.toObject(), // Convert feedback to a plain object
+            user_name: user.name,   // Add user name to feedback
+            profile_pic: user.profile_pic, 
+          };
+        })
+      );
+  
+      res.status(200).json({ feedbacks: feedbacksWithUser, totalPages, currentPage: pageNumber });
+    } catch (error) {
+      console.error("Error fetching feedbacks:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
