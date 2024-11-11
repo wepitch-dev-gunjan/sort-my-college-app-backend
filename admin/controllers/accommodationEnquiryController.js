@@ -1,6 +1,7 @@
 const AccommodationEnquiry = require("../models/AccommodationEnquiry");
 const moment = require("moment");
 const axios = require("axios");
+const Accommodation = require("../models/Accommodation");
 const { BACKEND_URL } = process.env;
 
 // exports.addEnquiry = async (req, res) => {
@@ -147,7 +148,7 @@ exports.addEnquiry = async (req, res) => {
 exports.getAccommodationEnquiries = async (req, res) => {
   try {
     const { accommodation_id, status, fromDate, toDate, accommodationName, search } = req.query;
-
+    console.log("Accommodation name, search: ", accommodationName, search);
     // Initialize query object
     const query = {};
 
