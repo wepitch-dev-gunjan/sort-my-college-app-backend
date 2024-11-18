@@ -148,8 +148,21 @@ exports.addEnquiry = async (req, res) => {
 
 exports.getAccommodationEnquiries = async (req, res) => {
   try {
-    const { accommodation_id, status, fromDate, toDate, accommodationName, search } = req.query;
-    console.log("Accommodation name, search: ", accommodationName, search);
+    const {
+      accommodation_id,
+      status,
+      fromDate,
+      toDate,
+      preferredFromDate,
+      preferredToDate,
+      accommodationName,
+      search,
+      phone, // New parameter for phone number filtering
+    } = req.query;
+
+    console.log("Preferred time range: ", preferredFromDate, preferredToDate);
+    console.log("Phone: ", phone);
+
     // Initialize query object
     const query = {};
 
@@ -163,12 +176,26 @@ exports.getAccommodationEnquiries = async (req, res) => {
       query.enquiryStatus = status;
     }
 
-    // Apply date range filter if provided
+    // Apply createdAt date range filter if provided
     if (fromDate || toDate) {
       query.createdAt = {};
       if (fromDate) query.createdAt.$gte = new Date(fromDate);
       if (toDate) query.createdAt.$lte = new Date(toDate);
     }
+
+    if (preferredFromDate || preferredToDate) {
+      query.preferred_time = {
+        $elemMatch: {
+          ...(isValidDate(preferredFromDate) && { $gte: new Date(preferredFromDate) }),
+          ...(isValidDate(preferredToDate) && { $lte: new Date(preferredToDate) }),
+        },
+      };
+    }
+    
+    
+
+    
+    
 
     // Apply accommodation name filter if provided
     if (accommodationName) {
@@ -179,21 +206,33 @@ exports.getAccommodationEnquiries = async (req, res) => {
       query.enquired_to = { $in: accommodationIds };
     }
 
-    // Fetch the enquiries based on the constructed query
+    console.log("Final Query Object:", query);
+
+    // Fetch enquiries based on query
     const enquiries = await AccommodationEnquiry.find(query)
-      .populate("enquired_to", "name location") // populate fields from Accommodation model
+      .populate("enquired_to", "name location")
       .exec();
 
-    // Fetch user details for each enquiry
+    console.log("Enquiries: ", enquiries);
+
+    // Fetch user details and filter by phone number
     const enrichedEnquiries = await Promise.all(
       enquiries.map(async (enquiry) => {
         try {
           const userResponse = await axios.get(
             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer}`
           );
+
+          const enquirerDetails = userResponse.data;
+
+          // Filter by phone if provided
+          if (phone && enquirerDetails.phone_number !== phone) {
+            return null; // Skip this entry if phone does not match
+          }
+
           return {
             ...enquiry._doc,
-            enquirerDetails: userResponse.data, // Add user details to each enquiry
+            enquirerDetails,
           };
         } catch (error) {
           console.error(`Error fetching user data for enquiry ${enquiry._id}:`, error);
@@ -202,11 +241,13 @@ exports.getAccommodationEnquiries = async (req, res) => {
       })
     );
 
+    // Filter out nulls (entries that did not match phone filter)
+    const filteredEnquiries = enrichedEnquiries.filter(Boolean);
+
     // Apply search filter on the final result set
-    let filteredEnquiries = enrichedEnquiries;
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredEnquiries = enrichedEnquiries.filter((enquiry) => {
+      filteredEnquiries = filteredEnquiries.filter((enquiry) => {
         const enquirerName = enquiry.enquirerDetails?.name?.toLowerCase() || "";
         const accommodationName = enquiry.enquired_to?.name?.toLowerCase() || "";
         const enquiryStatus = enquiry.enquiryStatus?.toLowerCase() || "";
@@ -234,6 +275,101 @@ exports.getAccommodationEnquiries = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+
+
+
+
+
+// exports.getAccommodationEnquiries = async (req, res) => {
+//   try {
+//     const { accommodation_id, status, fromDate, toDate, accommodationName, search } = req.query;
+//     console.log("Accommodation name, search: ", accommodationName, search);
+//     // Initialize query object
+//     const query = {};
+
+//     // Apply accommodation_id filter if provided
+//     if (accommodation_id) {
+//       query.enquired_to = accommodation_id;
+//     }
+
+//     // Apply status filter if provided
+//     if (status) {
+//       query.enquiryStatus = status;
+//     }
+
+//     // Apply date range filter if provided
+//     if (fromDate || toDate) {
+//       query.createdAt = {};
+//       if (fromDate) query.createdAt.$gte = new Date(fromDate);
+//       if (toDate) query.createdAt.$lte = new Date(toDate);
+//     }
+
+//     // Apply accommodation name filter if provided
+//     if (accommodationName) {
+//       const accommodations = await Accommodation.find({
+//         name: { $regex: accommodationName, $options: "i" },
+//       }).select("_id");
+//       const accommodationIds = accommodations.map((acc) => acc._id);
+//       query.enquired_to = { $in: accommodationIds };
+//     }
+
+//     // Fetch the enquiries based on the constructed query
+//     const enquiries = await AccommodationEnquiry.find(query)
+//       .populate("enquired_to", "name location") // populate fields from Accommodation model
+//       .exec();
+
+//     // Fetch user details for each enquiry
+//     const enrichedEnquiries = await Promise.all(
+//       enquiries.map(async (enquiry) => {
+//         try {
+//           const userResponse = await axios.get(
+//             `${BACKEND_URL}/user/users-for-admin/${enquiry.enquirer}`
+//           );
+//           return {
+//             ...enquiry._doc,
+//             enquirerDetails: userResponse.data, // Add user details to each enquiry
+//           };
+//         } catch (error) {
+//           console.error(`Error fetching user data for enquiry ${enquiry._id}:`, error);
+//           return { ...enquiry._doc, enquirerDetails: null };
+//         }
+//       })
+//     );
+
+//     // Apply search filter on the final result set
+//     let filteredEnquiries = enrichedEnquiries;
+//     if (search) {
+//       const searchLower = search.toLowerCase();
+//       filteredEnquiries = enrichedEnquiries.filter((enquiry) => {
+//         const enquirerName = enquiry.enquirerDetails?.name?.toLowerCase() || "";
+//         const accommodationName = enquiry.enquired_to?.name?.toLowerCase() || "";
+//         const enquiryStatus = enquiry.enquiryStatus?.toLowerCase() || "";
+//         const preferredTime = enquiry.preferred_time?.[0]
+//           ? new Date(enquiry.preferred_time[0]).toLocaleString().toLowerCase()
+//           : "";
+//         const createdAt = new Date(enquiry.createdAt).toLocaleString().toLowerCase();
+
+//         return (
+//           enquirerName.includes(searchLower) ||
+//           accommodationName.includes(searchLower) ||
+//           enquiryStatus.includes(searchLower) ||
+//           preferredTime.includes(searchLower) ||
+//           createdAt.includes(searchLower)
+//         );
+//       });
+//     }
+
+//     res.status(200).json({
+//       message: "Enquiries fetched successfully",
+//       data: filteredEnquiries,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching enquiries:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 exports.sendEnquiryToOwner = async (req, res) => {
   try {
