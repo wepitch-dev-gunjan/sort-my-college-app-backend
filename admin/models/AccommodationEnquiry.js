@@ -14,7 +14,7 @@ const accommodationEnquirySchema = new Schema(
     },
     enquiryStatus: {
       type: String,
-      enum: ["Unseen", "Pending", "Sent"],
+      enum: ["Unseen", "Pending", "Sent", "Visited", "Not Visited"],
       default: "Unseen",
     },
   },

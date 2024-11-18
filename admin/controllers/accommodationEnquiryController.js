@@ -278,10 +278,6 @@ exports.getAccommodationEnquiries = async (req, res) => {
 
 
 
-
-
-
-
 // exports.getAccommodationEnquiries = async (req, res) => {
 //   try {
 //     const { accommodation_id, status, fromDate, toDate, accommodationName, search } = req.query;
@@ -421,7 +417,37 @@ exports.sendEnquiryToOwner = async (req, res) => {
 };
 
 
+exports.updateEnquiryStatus = async (req, res) => {
+  try {
+    const { id } = req.params; // Enquiry ID from the URL
+    const { status } = req.body; // New status from the request body
 
+    // Validate the status value
+    const validStatuses = ["Unseen", "Pending", "Sent", "Visited", "Not Visited"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    // Find and update the enquiry
+    const updatedEnquiry = await AccommodationEnquiry.findByIdAndUpdate(
+      id,
+      { enquiryStatus: status },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedEnquiry) {
+      return res.status(404).json({ message: "Enquiry not found" });
+    }
+
+    res.status(200).json({
+      message: "Enquiry status updated successfully",
+      data: updatedEnquiry,
+    });
+  } catch (error) {
+    console.error("Error updating enquiry status:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
