@@ -8,7 +8,8 @@ const {
   editAccommodation,
   deleteAccommodation,
   updateAccommodationStatus,
-getAccommodationForUser 
+getAccommodationForUser, 
+getCitiesForAccommodation
 } = require("../controllers/accommodationController");
 const { upload } =require("../middlewares/uploadImage");
 
@@ -48,5 +49,7 @@ router.delete(
 );
 
 router.get("/accommodation/user/getallaccommodation", getAccommodationForUser);
+
+router.get("/accommodation/user/get-cities", getCitiesForAccommodation);
 
 module.exports = router;

@@ -273,5 +273,24 @@ exports.getAccommodationForUser = async (req, res) => {
 };
 
 
+// API to get unique city names for accommodations
+exports.getCitiesForAccommodation = async (req, res) => {
+  try {
+    // Fetching all unique city names from the address field
+    const cities = await Accommodation.distinct('address.city');
+    
+    // If cities are found, send them as response
+    if (cities.length > 0) {
+      res.status(200).json({ cities });
+    } else {
+      res.status(404).json({ message: "No cities found" });
+    }
+  } catch (error) {
+    console.error("Error fetching cities:", error);
+    res.status(500).json({ message: "Failed to fetch cities" });
+  }
+};
+
+
 
 
