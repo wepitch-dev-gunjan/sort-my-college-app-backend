@@ -9,7 +9,8 @@ const {
   deleteAccommodation,
   updateAccommodationStatus,
 getAccommodationForUser, 
-getCitiesForAccommodation
+getCitiesForAccommodation,
+getNearbyCollegesForAccommodation
 } = require("../controllers/accommodationController");
 const { upload } =require("../middlewares/uploadImage");
 
@@ -51,5 +52,6 @@ router.delete(
 router.get("/accommodation/user/getallaccommodation", getAccommodationForUser);
 
 router.get("/accommodation/user/get-cities", getCitiesForAccommodation);
+router.get("/accommodation/user/get-nearby-colleges", getNearbyCollegesForAccommodation);
 
 module.exports = router;
