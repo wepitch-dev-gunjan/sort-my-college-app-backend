@@ -261,7 +261,7 @@ exports.deleteAccommodation = async (req, res) => {
 exports.getAccommodationForUser = async (req, res) => {
   try {
     // Exclude the owner's information using select method
-    const accommodations = await Accommodation.find({}).select("-owner"); // Exclude the 'owner' field
+    const accommodations = await Accommodation.find({ status: "Approved" }).select("-owner"); // Exclude the 'owner' field
     if (!accommodations || accommodations.length === 0) {
       return res.status(200).send([]); // Return an empty array if no accommodations found
     }
