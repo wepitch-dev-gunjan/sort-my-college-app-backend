@@ -39,6 +39,7 @@ router.get("/auth/google/callback", async (req, res) => {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+    console.log("Token: ", tokens)
 
     const counsellorInfo = await google
       .oauth2("v2")

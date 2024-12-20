@@ -122,6 +122,7 @@ exports.getAccommodations = async (req, res) => {
     if (!accommodations || accommodations.length === 0) {
       return res.status(200).send([]);
     }
+    console.log("here")
     return res.status(200).send(accommodations);
   } catch (error) {
     console.log(error);
@@ -258,19 +259,83 @@ exports.deleteAccommodation = async (req, res) => {
     .send({ message: "Accommodation Deleted successfully" });
 };
 
+
 exports.getAccommodationForUser = async (req, res) => {
   try {
-    // Exclude the owner's information using select method
-    const accommodations = await Accommodation.find({ status: "Approved" }).select("-owner"); // Exclude the 'owner' field
+    // Extract filters from the request query
+    const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.query;
+
+    // Create a query object
+    const query = { status: "Approved" };
+
+    // Apply city filter if provided (multi-select)
+    if (city) {
+      query["address.city"] = { $in: Array.isArray(city) ? city : [city] };
+    }
+
+    // Apply gender filter if provided (multi-select)
+    if (gender) {
+      query["recommended_for"] = { $in: Array.isArray(gender) ? gender : [gender] };
+    }
+
+    // Apply nearby college filter if provided (multi-select)
+    if (nearbyCollege) {
+      query["nearby_locations.colleges"] = { $in: Array.isArray(nearbyCollege) ? nearbyCollege : [nearbyCollege] };
+    }
+
+    // Apply filters on rooms
+    if (occupancyType || minBudget || maxBudget) {
+      query["rooms"] = {
+        $elemMatch: {},
+      };
+
+      // Filter for occupancy type
+      if (occupancyType) {
+        query["rooms"].$elemMatch.sharing_type = { $in: Array.isArray(occupancyType) ? occupancyType : [occupancyType] };
+      }
+
+      // Filter for budget
+      if (minBudget || maxBudget) {
+        query["rooms"].$elemMatch.monthly_charge = {};
+        if (minBudget) {
+          query["rooms"].$elemMatch.monthly_charge.$gte = parseInt(minBudget);
+        }
+        if (maxBudget) {
+          query["rooms"].$elemMatch.monthly_charge.$lte = parseInt(maxBudget);
+        }
+      }
+    }
+
+    // Fetch accommodations based on filters
+    const accommodations = await Accommodation.find(query).select("-owner");
+
+    // Check if accommodations are found
     if (!accommodations || accommodations.length === 0) {
       return res.status(200).send([]); // Return an empty array if no accommodations found
     }
-    return res.status(200).send(accommodations); // Return the accommodations without owner info
+
+    return res.status(200).send(accommodations); // Return the filtered accommodations
   } catch (error) {
-    console.log(error); // Log any errors that occur
+    console.error(error); // Log any errors that occur
     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
   }
 };
+
+
+
+// exports.getAccommodationForUser = async (req, res) => {
+//   try {
+//     // Exclude the owner's information using select method
+//     const accommodations = await Accommodation.find({ status: "Approved" }).select("-owner"); // Exclude the 'owner' field
+//     if (!accommodations || accommodations.length === 0) {
+//       return res.status(200).send([]); // Return an empty array if no accommodations found
+//     }
+//     return res.status(200).send(accommodations); // Return the accommodations without owner info
+//   } catch (error) {
+//     console.log(error); // Log any errors that occur
+//     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
+//   }
+// };
 
 
 // API to get unique city names for accommodations
