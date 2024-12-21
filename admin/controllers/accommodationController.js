@@ -263,7 +263,7 @@ exports.deleteAccommodation = async (req, res) => {
 exports.getAccommodationForUser = async (req, res) => {
   try {
     // Extract filters from the request query
-    const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.query;
+    const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.body;
 
     // Create a query object
     const query = { status: "Approved" };
