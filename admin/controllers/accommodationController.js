@@ -381,8 +381,8 @@ exports.getAccommodationsForUser = async (req, res) => {
         },
         images: acc.images[0], // Return first image only
         monthly_charge: minimumMonthlyCharge,
-        rating: acc.rating,
-        review_count: acc.reviews?.length || 0, // Assuming `reviews` is an array (if it exists)
+        rating: acc.rating.toString(),
+        review_count: (acc.reviews?.length || 0).toString(), // Assuming `reviews` is an array (if it exists)
       };
     });
 
