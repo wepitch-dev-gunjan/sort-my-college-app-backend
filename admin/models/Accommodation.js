@@ -64,6 +64,10 @@ const accommodationSchema = new Schema(
       type: Number,
       default: 0,
     },
+    reviews_count: {
+      type: Number,
+      default: 0
+    },
 
     common_area_amenities: [String],
     house_rules: [String],
