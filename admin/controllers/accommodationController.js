@@ -191,6 +191,25 @@ exports.getAccommodationForAdmin = async (req, res) => {
     return res.status(500).send({ error: "Internal Server Error" });
   }
 };
+exports.getAccommodationForUser = async (req, res) => {
+  try {
+    const { accomodation_id } = req.params;
+    if (!accomodation_id) {
+      return res.status(400).send({ error: "Accommodation ID is required" });
+    }
+
+    const accommodation = await Accommodation.findById(accomodation_id);
+    // console.log(accommodation);
+    if (!accommodation) {
+      return res.status(404).send({ error: "Accommodation not found" });
+    }
+
+    return res.status(200).send(accommodation);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
 
 exports.updateAccommodationStatus = async (req, res) => {
   try {

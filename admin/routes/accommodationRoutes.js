@@ -10,7 +10,8 @@ const {
   updateAccommodationStatus,
   getAccommodationsForUser,
   getCitiesForAccommodation,
-  getNearbyCollegesForAccommodation
+  getNearbyCollegesForAccommodation,
+  getAccommodationForUser
 } = require("../controllers/accommodationController");
 const { upload } = require("../middlewares/uploadImage");
 
@@ -51,6 +52,7 @@ router.delete(
 );
 
 router.get("/accommodation/user/getallaccommodations", getAccommodationsForUser);
+router.get("/accommodation/user/getAccomodation/:accomodation_id", getAccommodationForUser);
 
 router.get("/accommodation/user/get-cities", getCitiesForAccommodation);
 router.get("/accommodation/user/get-nearby-colleges", getNearbyCollegesForAccommodation);
