@@ -67,11 +67,10 @@ exports.getWebinarsForUser = async (req, res) => {
       currentDate.setUTCHours(0, 0, 0, 0);
 
       const dateDifference = getDateDifference(webinarDate, currentDate);
-      const webinar_date = webinarDateModifier(webinar.webinar_date);
       const registered = webinar.registered_participants.some(
         (participant) => participant._id === user_id
       );
-      console.log(registered);
+      const webinar_date = webinarDateModifier(webinar.webinar_date);
 
       const earlyJoinTime = new Date(webinar.webinar_date);
       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
@@ -92,7 +91,7 @@ exports.getWebinarsForUser = async (req, res) => {
         speaker_profile: webinar.speaker_profile,
         webinar_starting_in_days: dateDifference,
         registered,
-        can_join: canJoin,
+        can_join: canJoin
       };
     });
 
@@ -445,13 +444,22 @@ exports.getSingleWebinarForUser = async (req, res) => {
     const dateDifference = getDateDifference(webinarDate, currentDate);
 
     const registered = webinar.registered_participants.includes(user_id);
+    const webinar_date = webinarDateModifier(webinar.webinar_date);
+
+    const earlyJoinTime = new Date(webinar.webinar_date);
+    earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+
+    // Check if the user can join the webinar
+    const now = new Date();
+    now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
+    const canJoin = now >= earlyJoinTime;
 
     const massagedWebinar = {
       _id: webinar._id,
       webinar_title: webinar.webinar_title,
       webinar_details: webinar.webinar_details,
       what_will_you_learn: webinar.what_will_you_learn,
-      webinar_date: webinar.webinar_date,
+      webinar_date,
       speaker_profile: webinar.speaker_profile,
       webinar_by: webinar.webinar_by,
       webinar_image: webinar.webinar_image,
@@ -462,6 +470,7 @@ exports.getSingleWebinarForUser = async (req, res) => {
       attended_participants: webinar.attended_participants,
       webinar_starting_in_day: dateDifference,
       registered,
+      can_join: canJoin
     };
 
     res.status(200).send(massagedWebinar);
