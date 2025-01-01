@@ -116,7 +116,49 @@ exports.addAccommodation = async (req, res) => {
   }
 };
 
-exports.getAccommodations = async (req, res) => {
+// exports.getAccommodationsForUser = async (req, res) => {
+//   try {
+//     // Fetch only required fields from the database
+//     const accommodations = await Accommodation.find({}, {
+//       address: 1,
+//       images: { $arrayElemAt: ["$images", 0] }, // Only the first image
+//       name: 1,
+//       rooms: 1,
+//       rating: 1,
+//       _id: 1,
+//     });
+
+//     // Check if accommodations are found
+//     if (!accommodations || accommodations.length === 0) {
+//       return res.status(200).send([]);
+//     }
+
+//     // Transform the result to include only required fields
+//     const response = accommodations.map((accommodation) => {
+//       // Find the minimum monthly charge
+//       const minMonthlyCharge = accommodation.rooms.reduce((min, room) => {
+//         return room.monthly_charge < min ? room.monthly_charge : min;
+//       }, Infinity);
+
+//       return {
+//         address: accommodation.address,
+//         _id: accommodation._id,
+//         images: accommodation.images, // Cloudinary image URL
+//         name: accommodation.name,
+//         monthly_charge: minMonthlyCharge || 0, // Minimum monthly charge
+//         rating: accommodation.rating || 0,
+//         review_count: 2, // Mock review count
+//       };
+//     });
+
+//     return res.status(200).send(response);
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
+
+exports.getAccommodationsForAdmin = async (req, res) => {
   try {
     const accommodations = await Accommodation.find({});
     if (!accommodations || accommodations.length === 0) {
@@ -130,7 +172,7 @@ exports.getAccommodations = async (req, res) => {
   }
 };
 
-exports.getAccommodation = async (req, res) => {
+exports.getAccommodationForAdmin = async (req, res) => {
   try {
     const { accomodation_id } = req.params;
     if (!accomodation_id) {
@@ -194,38 +236,38 @@ exports.editAccommodation = async (req, res) => {
     const { accomodation_id } = req.params;
     const updates = req.body;
 
- 
+
 
     if (!accomodation_id) {
       return res.status(400).send({ error: "Accommodation ID is required" });
     }
-// edit files
- if (req.files) {
-  if (req.files.aadhar_card) {
-    const file = req.files.aadhar_card[0];
-    const fileName = `aadhar-card-${Date.now()}.png`;
-    const folderName = `aadhar_cards`;
-    updates['owner.aadhar_card'] = await uploadImage(file.buffer, fileName, folderName);
-  }
+    // edit files
+    if (req.files) {
+      if (req.files.aadhar_card) {
+        const file = req.files.aadhar_card[0];
+        const fileName = `aadhar-card-${Date.now()}.png`;
+        const folderName = `aadhar_cards`;
+        updates['owner.aadhar_card'] = await uploadImage(file.buffer, fileName, folderName);
+      }
 
-  if (req.files.pan_card) {
-    const file = req.files.pan_card[0];
-    const fileName = `pan-card-${Date.now()}.png`;
-    const folderName = `pan_cards`;
-    updates['owner.pan_card'] = await uploadImage(file.buffer, fileName, folderName);
-  }
+      if (req.files.pan_card) {
+        const file = req.files.pan_card[0];
+        const fileName = `pan-card-${Date.now()}.png`;
+        const folderName = `pan_cards`;
+        updates['owner.pan_card'] = await uploadImage(file.buffer, fileName, folderName);
+      }
 
-  if (req.files.images) {
-    let images = [];
-    for (const file of req.files.images) {
-      const fileName = `acc-image-${Date.now()}.png`;
-      const folderName = `accommodation_images`;
-      const imagePath = await uploadImage(file.buffer, fileName, folderName);
-      images.push(imagePath);
+      if (req.files.images) {
+        let images = [];
+        for (const file of req.files.images) {
+          const fileName = `acc-image-${Date.now()}.png`;
+          const folderName = `accommodation_images`;
+          const imagePath = await uploadImage(file.buffer, fileName, folderName);
+          images.push(imagePath);
+        }
+        updates.images = images;
+      }
     }
-    updates.images = images;
-  }
-}
     const updatedAccommodation = await Accommodation.findByIdAndUpdate(
       accomodation_id,
       updates,
@@ -260,11 +302,10 @@ exports.deleteAccommodation = async (req, res) => {
 };
 
 
-exports.getAccommodationForUser = async (req, res) => {
+exports.getAccommodationsForUser = async (req, res) => {
   try {
     // Extract filters from the request query
     const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.body;
-
     // Create a query object
     const query = { status: "Approved" };
 
@@ -307,43 +348,43 @@ exports.getAccommodationForUser = async (req, res) => {
     }
 
     // Fetch accommodations based on filters
-    const accommodations = await Accommodation.find(query).select("-owner");
+    const accommodations = await Accommodation.find(query);
+
+    // Transform accommodations to return required fields only
+    const transformedAccommodations = accommodations.map((acc) => {
+      const minimumMonthlyCharge = Math.min(...acc.rooms.map((room) => room.monthly_charge));
+      return {
+        _id: acc._id,
+        name: acc.name,
+        address: {
+          area: acc.address.area,
+          city: acc.address.city,
+        },
+        images: acc.images[0], // Return first image only
+        monthly_charge: minimumMonthlyCharge,
+        rating: acc.rating,
+        review_count: acc.reviews?.length || 0, // Assuming `reviews` is an array (if it exists)
+      };
+    });
 
     // Check if accommodations are found
-    if (!accommodations || accommodations.length === 0) {
+    if (!transformedAccommodations || transformedAccommodations.length === 0) {
       return res.status(200).send([]); // Return an empty array if no accommodations found
     }
 
-    return res.status(200).send(accommodations); // Return the filtered accommodations
+    return res.status(200).send(transformedAccommodations); // Return the filtered accommodations
   } catch (error) {
     console.error(error); // Log any errors that occur
     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
   }
 };
 
-
-
-// exports.getAccommodationForUser = async (req, res) => {
-//   try {
-//     // Exclude the owner's information using select method
-//     const accommodations = await Accommodation.find({ status: "Approved" }).select("-owner"); // Exclude the 'owner' field
-//     if (!accommodations || accommodations.length === 0) {
-//       return res.status(200).send([]); // Return an empty array if no accommodations found
-//     }
-//     return res.status(200).send(accommodations); // Return the accommodations without owner info
-//   } catch (error) {
-//     console.log(error); // Log any errors that occur
-//     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
-//   }
-// };
-
-
 // API to get unique city names for accommodations
 exports.getCitiesForAccommodation = async (req, res) => {
   try {
     // Fetching all unique city names from the address field
     const cities = await Accommodation.distinct('address.city');
-    
+
     // If cities are found, send them as response
     if (cities.length > 0) {
       res.status(200).json({ cities });
@@ -364,7 +405,7 @@ exports.getNearbyCollegesForAccommodation = async (req, res) => {
       { $group: { _id: "$nearby_locations.colleges" } }, // Group by college name to get unique entries
       { $project: { _id: 0, college: "$_id" } } // Format the response to return only the college names
     ]);
-    
+
     // If colleges are found, send them as response
     if (colleges.length > 0) {
       res.status(200).json({ colleges: colleges.map(college => college.college) });

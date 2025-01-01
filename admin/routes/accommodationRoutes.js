@@ -2,26 +2,27 @@ const express = require("express");
 const router = express.Router();
 const { adminAuth, userAuth } = require("../middlewares/authMiddleware");
 const {
-  getAccommodations,
+  getAccommodationsForAdmin,
   addAccommodation,
-  getAccommodation,
+  getAccommodationForAdmin,
   editAccommodation,
   deleteAccommodation,
   updateAccommodationStatus,
-getAccommodationForUser, 
-getCitiesForAccommodation,
-getNearbyCollegesForAccommodation
+  getAccommodationsForUser,
+  getCitiesForAccommodation,
+  getNearbyCollegesForAccommodation
 } = require("../controllers/accommodationController");
-const { upload } =require("../middlewares/uploadImage");
+const { upload } = require("../middlewares/uploadImage");
 
 
 // routes for admin
-router.get("/accommodation", adminAuth, getAccommodations);
-router.get("/accommodation/:accomodation_id", adminAuth, getAccommodation);
+router.get("/accommodation", adminAuth, getAccommodationsForAdmin);
+router.get("/accommodation/:accomodation_id", adminAuth, getAccommodationForAdmin);
 router.put(
   "/accommodation/:accommodation_id/status",
   updateAccommodationStatus
 );
+
 // add Accommodation
 router.post("/accommodation", adminAuth, upload.fields([
   { name: 'images', maxCount: 10 },
@@ -34,13 +35,13 @@ router.post("/accommodation", adminAuth, upload.fields([
 }, addAccommodation);
 
 router.put("/accommodation/:accomodation_id", adminAuth, upload.fields([
- { name: 'images', maxCount: 10 },
- { name: 'aadhar_card', maxCount: 1 },
- { name: 'pan_card', maxCount: 1 }
+  { name: 'images', maxCount: 10 },
+  { name: 'aadhar_card', maxCount: 1 },
+  { name: 'pan_card', maxCount: 1 }
 ]), (req, res, next) => {
- console.log('Files:', req.files);
- console.log('Body:', req.body);
- next();
+  console.log('Files:', req.files);
+  console.log('Body:', req.body);
+  next();
 }, editAccommodation);
 
 router.delete(
@@ -49,7 +50,7 @@ router.delete(
   deleteAccommodation
 );
 
-router.get("/accommodation/user/getallaccommodation", getAccommodationForUser);
+router.get("/accommodation/user/getallaccommodations", getAccommodationsForUser);
 
 router.get("/accommodation/user/get-cities", getCitiesForAccommodation);
 router.get("/accommodation/user/get-nearby-colleges", getNearbyCollegesForAccommodation);
