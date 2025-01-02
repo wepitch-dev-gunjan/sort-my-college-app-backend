@@ -470,6 +470,7 @@ exports.getSingleWebinarForUser = async (req, res) => {
       attended_participants: webinar.attended_participants,
       webinar_starting_in_day: dateDifference,
       registered,
+      registered_date: webinar.webinar_date,
       can_join: canJoin
     };
 
