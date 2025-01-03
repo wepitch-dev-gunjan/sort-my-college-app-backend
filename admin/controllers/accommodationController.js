@@ -325,7 +325,6 @@ exports.getAccommodationsForUser = async (req, res) => {
   try {
     // Extract filters from the request query
     const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.body;
-    // Create a query object
     const query = { status: "Approved" };
 
     // Apply city filter if provided (multi-select)
@@ -369,9 +368,21 @@ exports.getAccommodationsForUser = async (req, res) => {
     // Fetch accommodations based on filters
     const accommodations = await Accommodation.find(query);
 
-    // Transform accommodations to return required fields only
+    // Transform accommodations to filter valid rooms and return required fields only
     const transformedAccommodations = accommodations.map((acc) => {
-      const minimumMonthlyCharge = Math.min(...acc.rooms.map((room) => room.monthly_charge));
+      // Filter valid rooms within the budget
+      const validRooms = acc.rooms.filter((room) => {
+        const isWithinBudget =
+          (!minBudget || room.monthly_charge >= parseInt(minBudget)) &&
+          (!maxBudget || room.monthly_charge <= parseInt(maxBudget));
+        return isWithinBudget;
+      });
+
+      if (validRooms.length === 0) return null; // Skip accommodations with no valid rooms
+
+      // Calculate the minimum monthly charge from valid rooms
+      const minimumMonthlyCharge = Math.min(...validRooms.map((room) => room.monthly_charge));
+
       return {
         _id: acc._id,
         name: acc.name,
@@ -382,21 +393,102 @@ exports.getAccommodationsForUser = async (req, res) => {
         images: acc.images[0], // Return first image only
         monthly_charge: minimumMonthlyCharge,
         rating: acc.rating.toString(),
-        review_count: (acc.reviews_count || 0).toString(), // Assuming `reviews` is an array (if it exists)
+        review_count: (acc.reviews_count || 0).toString(),
       };
     });
 
-    // Check if accommodations are found
-    if (!transformedAccommodations || transformedAccommodations.length === 0) {
+    // Remove null entries (accommodations with no valid rooms)
+    const filteredAccommodations = transformedAccommodations.filter((item) => item !== null);
+
+    if (filteredAccommodations.length === 0) {
       return res.status(200).send([]); // Return an empty array if no accommodations found
     }
 
-    return res.status(200).send(transformedAccommodations); // Return the filtered accommodations
+    return res.status(200).send(filteredAccommodations);
   } catch (error) {
     console.error(error); // Log any errors that occur
     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
   }
 };
+
+
+
+// exports.getAccommodationsForUser = async (req, res) => {
+//   try {
+//     // Extract filters from the request query
+//     const { city, gender, occupancyType, minBudget, maxBudget, nearbyCollege } = req.body;
+//     // Create a query object
+//     const query = { status: "Approved" };
+
+//     // Apply city filter if provided (multi-select)
+//     if (city) {
+//       query["address.city"] = { $in: Array.isArray(city) ? city : [city] };
+//     }
+
+//     // Apply gender filter if provided (multi-select)
+//     if (gender) {
+//       query["recommended_for"] = { $in: Array.isArray(gender) ? gender : [gender] };
+//     }
+
+//     // Apply nearby college filter if provided (multi-select)
+//     if (nearbyCollege) {
+//       query["nearby_locations.colleges"] = { $in: Array.isArray(nearbyCollege) ? nearbyCollege : [nearbyCollege] };
+//     }
+
+//     // Apply filters on rooms
+//     if (occupancyType || minBudget || maxBudget) {
+//       query["rooms"] = {
+//         $elemMatch: {},
+//       };
+
+//       // Filter for occupancy type
+//       if (occupancyType) {
+//         query["rooms"].$elemMatch.sharing_type = { $in: Array.isArray(occupancyType) ? occupancyType : [occupancyType] };
+//       }
+
+//       // Filter for budget
+//       if (minBudget || maxBudget) {
+//         query["rooms"].$elemMatch.monthly_charge = {};
+//         if (minBudget) {
+//           query["rooms"].$elemMatch.monthly_charge.$gte = parseInt(minBudget);
+//         }
+//         if (maxBudget) {
+//           query["rooms"].$elemMatch.monthly_charge.$lte = parseInt(maxBudget);
+//         }
+//       }
+//     }
+
+//     // Fetch accommodations based on filters
+//     const accommodations = await Accommodation.find(query);
+
+//     // Transform accommodations to return required fields only
+//     const transformedAccommodations = accommodations.map((acc) => {
+//       const minimumMonthlyCharge = Math.min(...acc.rooms.map((room) => room.monthly_charge));
+//       return {
+//         _id: acc._id,
+//         name: acc.name,
+//         address: {
+//           area: acc.address.area,
+//           city: acc.address.city,
+//         },
+//         images: acc.images[0], // Return first image only
+//         monthly_charge: minimumMonthlyCharge,
+//         rating: acc.rating.toString(),
+//         review_count: (acc.reviews_count || 0).toString(), // Assuming `reviews` is an array (if it exists)
+//       };
+//     });
+
+//     // Check if accommodations are found
+//     if (!transformedAccommodations || transformedAccommodations.length === 0) {
+//       return res.status(200).send([]); // Return an empty array if no accommodations found
+//     }
+
+//     return res.status(200).send(transformedAccommodations); // Return the filtered accommodations
+//   } catch (error) {
+//     console.error(error); // Log any errors that occur
+//     return res.status(500).send({ error: "Internal Server Error" }); // Return an error response
+//   }
+// };
 
 // API to get unique city names for accommodations
 exports.getCitiesForAccommodation = async (req, res) => {
