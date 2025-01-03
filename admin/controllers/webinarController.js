@@ -443,7 +443,11 @@ exports.getSingleWebinarForUser = async (req, res) => {
 
     const dateDifference = getDateDifference(webinarDate, currentDate);
 
-    const registered = webinar.registered_participants.includes(user_id);
+    // const registered = webinar.registered_participants.includes(user_id);
+  const registered = webinar.registered_participants.some(
+  (participant) => participant._id === user_id
+);
+
     const webinar_date = webinarDateModifier(webinar.webinar_date);
 
     const earlyJoinTime = new Date(webinar.webinar_date);
