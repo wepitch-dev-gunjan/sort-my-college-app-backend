@@ -9,6 +9,89 @@ require("dotenv").config();
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:9000";
 // const BACKEND_URL = process.env.BACKEND_URL || 'http://192.168.0.36:9000'
 
+// exports.generateOtpByPhone = async (req, res) => {
+//   try {
+//     const { phone_number, name } = req.body;
+
+//     if (phone_number == "917297827346") {
+//       return res.status(200).send({
+//         message: 'you are administrator, your otp is "1234"',
+//       });
+//     }
+
+//     if (!phone_number)
+//       return res.status(400).send({ error: "Phone number is required" });
+
+//     const user = await User.findOne({ phone_number });
+
+//     // Generate a random 4-digit OTP
+//     const otp = Math.floor(1000 + Math.random() * 9000).toString();
+
+//     // Hash the OTP using SHA-256 for storage
+//     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+//     const expirationTime = new Date();
+//     expirationTime.setMinutes(expirationTime.getMinutes() + 2);
+
+//     let otpObj = await Otp.findOne({ phone_number });
+
+//     if (otpObj) {
+//       otpObj.expiresAt = expirationTime;
+//       otpObj.hashedOtp = hashedOtp;
+//       otpObj.attempts = 0;
+//     } else {
+//       otpObj = new Otp({
+//         phone_number,
+//         hashedOtp,
+//         expiresAt: expirationTime,
+//       });
+//     }
+
+//     await otpObj.save();
+
+//     // const { data } = await axios.post(
+//     //   `${BACKEND_URL}/notification/sms-notification/sendSMS`,
+//     //   {
+//     //     to: phone_number,
+//     //     message: `OTP for login is : ${otp}`,
+//     //   }
+//     // );
+
+
+
+// const { data } = await axios.post(
+//   "https://control.msg91.com/api/v5/flow",
+//   {
+//     template_id: "67a07fcfd6fc055b974acc73",
+//     realTimeResponse: "1",
+//     recipients: [
+//       {
+//         mobiles: `${phone_number}`,
+//         var: `${otp}`,
+//       },
+//     ],
+//   },
+//   {
+//     headers: {
+//       authkey: process.env.MG91_AUTH_KEY, // Your MSG91 Auth Key
+//       accept: "application/json",
+//       "content-type": "application/json",
+//     },
+//   }
+// );
+
+//     console.log(data);
+//     // Send the OTP to the client (avoid logging it)
+//     res.status(200).send({
+//       message: data.status,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal server error" });
+//   }
+// };
+
+
 exports.generateOtpByPhone = async (req, res) => {
   try {
     const { phone_number, name } = req.body;
@@ -24,10 +107,7 @@ exports.generateOtpByPhone = async (req, res) => {
 
     const user = await User.findOne({ phone_number });
 
-    // Generate a random 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
-    // Hash the OTP using SHA-256 for storage
     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
     const expirationTime = new Date();
@@ -49,47 +129,44 @@ exports.generateOtpByPhone = async (req, res) => {
 
     await otpObj.save();
 
-    // const { data } = await axios.post(
-    //   `${BACKEND_URL}/notification/sms-notification/sendSMS`,
-    //   {
-    //     to: phone_number,
-    //     message: `OTP for login is : ${otp}`,
-    //   }
-    // );
+    // Ensure the phone number format is correct
+    const formattedPhoneNumber = phone_number.startsWith("+91") ? phone_number : `+91${phone_number}`;
 
+    console.log("Sending OTP to:", formattedPhoneNumber);
+    console.log("Generated OTP:", otp);
 
-
-const { data } = await axios.post(
-  "https://control.msg91.com/api/v5/flow",
-  {
-    template_id: "67a07fcfd6fc055b974acc73",
-    realTimeResponse: "1",
-    recipients: [
+    const { data } = await axios.post(
+      "https://control.msg91.com/api/v5/flow",
       {
-        mobiles: `${phone_number}`,
-        var: `${otp}`,
+        template_id: "67a07fcfd6fc055b974acc73",
+        realTimeResponse: "1",
+        recipients: [
+          {
+            mobiles: formattedPhoneNumber,
+            var1: otp, // Ensure 'var1' matches template variable
+          },
+        ],
       },
-    ],
-  },
-  {
-    headers: {
-      authkey: process.env.MG91_AUTH_KEY, // Your MSG91 Auth Key
-      accept: "application/json",
-      "content-type": "application/json",
-    },
-  }
-);
+      {
+        headers: {
+          authkey: process.env.MG91_AUTH_KEY,
+          accept: "application/json",
+          "content-type": "application/json",
+        },
+      }
+    );
 
-    console.log(data);
-    // Send the OTP to the client (avoid logging it)
+    console.log("MSG91 API Response:", data);
+
     res.status(200).send({
-      message: data.status,
+      message: data.status || "OTP sent successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.log("Error sending OTP:", error.response ? error.response.data : error);
     res.status(500).send({ error: "Internal server error" });
   }
 };
+
 
 exports.verifyOtpByPhoneForRegistration = async (req, res) => {
   try {
