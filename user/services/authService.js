@@ -57,7 +57,7 @@ exports.generateOtpByPhone = async (req, res) => {
     //   }
     // );
 
-const axios = require("axios");
+
 
 const { data } = await axios.post(
   "https://control.msg91.com/api/v5/flow",
