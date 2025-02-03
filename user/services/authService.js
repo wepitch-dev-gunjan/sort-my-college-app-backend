@@ -143,7 +143,7 @@ exports.generateOtpByPhone = async (req, res) => {
         recipients: [
           {
             mobiles: formattedPhoneNumber,
-            var1: otp, // Ensure 'var1' matches template variable
+            var: otp, // Ensure 'var1' matches template variable
           },
         ],
       },
