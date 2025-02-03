@@ -149,7 +149,7 @@ exports.generateOtpByPhone = async (req, res) => {
       },
       {
         headers: {
-          authkey: "412601ACT9trmD658bf858P1",
+          authkey: process.env.MG91_AUTH_KEY,
           accept: "application/json",
           "content-type": "application/json",
         },
