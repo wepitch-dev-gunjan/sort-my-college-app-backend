@@ -49,13 +49,37 @@ exports.generateOtpByPhone = async (req, res) => {
 
     await otpObj.save();
 
-    const { data } = await axios.post(
-      `${BACKEND_URL}/notification/sms-notification/sendSMS`,
+    // const { data } = await axios.post(
+    //   `${BACKEND_URL}/notification/sms-notification/sendSMS`,
+    //   {
+    //     to: phone_number,
+    //     message: `OTP for login is : ${otp}`,
+    //   }
+    // );
+
+const axios = require("axios");
+
+const { data } = await axios.post(
+  "https://control.msg91.com/api/v5/flow",
+  {
+    template_id: "67a07fcfd6fc055b974acc73",
+    realTimeResponse: "1",
+    recipients: [
       {
-        to: phone_number,
-        message: `OTP for login is : ${otp}`,
-      }
-    );
+        mobiles: `${phone_number}`,
+        var: `${otp}`,
+      },
+    ],
+  },
+  {
+    headers: {
+      authkey: process.env.MG91_AUTH_KEY, // Your MSG91 Auth Key
+      accept: "application/json",
+      "content-type": "application/json",
+    },
+  }
+);
+
     console.log(data);
     // Send the OTP to the client (avoid logging it)
     res.status(200).send({
