@@ -130,7 +130,7 @@ exports.generateOtpByPhone = async (req, res) => {
     await otpObj.save();
 
     // Ensure the phone number format is correct
-    const formattedPhoneNumber = phone_number.startsWith("+91") ? phone_number : `+91${phone_number}`;
+    const formattedPhoneNumber = phone_number.startsWith("91") ? phone_number : `91${phone_number}`;
 
     console.log("Sending OTP to:", formattedPhoneNumber);
     console.log("Generated OTP:", otp);
