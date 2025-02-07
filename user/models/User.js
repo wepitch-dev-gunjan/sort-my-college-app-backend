@@ -27,7 +27,7 @@ const userSchema = new Schema(
     },
     profile_pic: {
       type: String,
-      default: "https://shorturl.at/war0c",
+      default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
     },
     education_level: {
       type: String,
