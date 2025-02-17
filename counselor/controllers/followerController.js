@@ -204,24 +204,33 @@ exports.getUserForCounsellor = async (req, res) => {
 exports.getFollowingList = async (req, res) => {
   try {
     const { user_id } = req.params;
+    console.log("Requested user_id:", user_id);
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
     }
 
+    // Fetch following users with required fields
     const followingList = await Follower.find({ followed_by: user_id })
-      .populate("followed_to", "name")
-      .select("followed_to")
+      .select("followed_to") // Directly fetch name
       .lean();
 
+    if (!followingList.length) {
+      console.log("No following found for user:", user_id);
+      return res.status(200).json([]);
+    }
+
+    // Format response
     const result = followingList.map(item => ({
-      id: item.followed_to?._id || null,
-      name: item.followed_to?.name || "Unknown"
+      id: item.followed_to,
+      // name: item.follower_name || "Unknown" // Fix: Use follower_name directly
     }));
 
+    console.log("Following List:", result);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in getFollowingList:", error);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
 
