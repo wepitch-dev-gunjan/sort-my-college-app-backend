@@ -199,3 +199,29 @@ exports.getUserForCounsellor = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+
+exports.getFollowingList = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const followingList = await Follower.find({ followed_by: user_id })
+      .populate("followed_to", "name")
+      .select("followed_to")
+      .lean();
+
+    const result = followingList.map(item => ({
+      id: item.followed_to?._id || null,
+      name: item.followed_to?.name || "Unknown"
+    }));
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
