@@ -5,7 +5,7 @@ const {
   unfollowCounsellor,
   getFollowers,
   getFollowingCounsellorsForUser,
-  getUserForCounsellor,
+  getUserForCounsellor,getFollowingList,
 } = require("../controllers/followerController");
 const router = express.Router();
 
@@ -18,6 +18,8 @@ router.get(
   getFollowingCounsellorsForUser
 );
 
+
+router.get("/following/:user_id", getFollowingList);
 // counsellor routes
 router.get("/follower/followers", counsellorAuth, getFollowers);
 router.get("/follower/user/:user_id", counsellorAuth, getUserForCounsellor);
