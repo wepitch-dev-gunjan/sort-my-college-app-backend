@@ -19,7 +19,7 @@ router.get(
 );
 
 
-router.get("/user/following", userAuth, getFollowingList);
+router.get("/user/following/counsellors", userAuth, getFollowedCounsellors);
 // counsellor routes
 router.get("/follower/followers", counsellorAuth, getFollowers);
 router.get("/follower/user/:user_id", counsellorAuth, getUserForCounsellor);

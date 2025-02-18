@@ -203,7 +203,7 @@ exports.getUserForCounsellor = async (req, res) => {
 
 
 
-exports.getFollowingList = async (req, res) => {
+exports.getFollowedCounsellors = async (req, res) => {
   try {
     const userId = req.id;  // Get the user ID from the request object set by userAuth middleware
     console.log("Requested User ID:", userId);
