@@ -201,29 +201,30 @@ exports.getUserForCounsellor = async (req, res) => {
 };
 
 
+
+
 exports.getFollowingList = async (req, res) => {
   try {
-    const { user_id } = req.params;
-    console.log("Requested user_id:", user_id);
+    const userId = req.id;  // Get the user ID from the request object set by userAuth middleware
+    console.log("Requested User ID:", userId);
 
-    if (!user_id) {
+    if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
 
-    // Fetch following users with required fields
-    const followingList = await Follower.find({ followed_by: user_id })
-      .select("followed_to") // Directly fetch name
+    // Fetch the following list using userId
+    const followingList = await Follower.find({ followed_by: userId })
+      .select("followed_to") // Fetch the followed_to field (the users that the current user follows)
       .lean();
 
     if (!followingList.length) {
-      console.log("No following found for user:", user_id);
+      console.log("No following found for user:", userId);
       return res.status(200).json([]);
     }
 
-    // Format response
+    // Format the response
     const result = followingList.map(item => ({
       id: item.followed_to,
-      // name: item.follower_name || "Unknown" // Fix: Use follower_name directly
     }));
 
     console.log("Following List:", result);
@@ -233,4 +234,5 @@ exports.getFollowingList = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
+
 
