@@ -5,7 +5,7 @@ const {
   unfollowCounsellor,
   getFollowers,
   getFollowingCounsellorsForUser,
-  getUserForCounsellor,getFollowingList,
+  getUserForCounsellor,getFollowedCounsellors,
 } = require("../controllers/followerController");
 const router = express.Router();
 
