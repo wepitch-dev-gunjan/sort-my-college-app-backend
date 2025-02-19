@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  postNotification,
+  postNotification,sendNotificationToTopic
 } = require("../controllers/pushNotificationControllers");
 const router = express.Router();
 
@@ -9,5 +9,8 @@ router.post("/counsellor/", postNotification);
 
 // USER NOTIFICATIONS
 router.post("/user/", postNotification);
+
+
+router.post("/send-notification-to-topic", sendNotificationToTopic);
 
 module.exports = router;
