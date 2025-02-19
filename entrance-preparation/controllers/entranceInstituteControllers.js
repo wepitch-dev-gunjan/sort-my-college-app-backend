@@ -50,7 +50,7 @@ exports.editProfile = async (req, res) => {
 
       if (
         convertTo24HourFormat(timing.start_time) >
-          convertTo24HourFormat(timing.end_time) &&
+        convertTo24HourFormat(timing.end_time) &&
         convertTo24HourFormat(timing.end_time) !== 0
       )
         return res.status(400).send({
@@ -369,7 +369,7 @@ exports.getInstitutesForUser = async (req, res) => {
           institute_timings: institute.timings,
           courses: massagedCourses,
           rating: rating,
-          cover_image:institute.cover_image,
+          cover_image: institute.cover_image,
         };
       })
     );
@@ -833,7 +833,7 @@ exports.editInstituteCoverPic = async (req, res) => {
     const { file } = req;
     const { institute_id } = req.params;
 
-    console.log("Received institute_id:", institute_id); 
+    console.log("Received institute_id:", institute_id);
 
     if (!institute_id) {
       return res.status(400).send({ error: "Institute ID is required" });
@@ -1272,5 +1272,27 @@ exports.rejectInstitute = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+
+exports.getFollowedInstitutes = async (req, res) => {
+  try {
+    const userId = req.params.userId; // Get userId from URL params
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Find all institutes where followers array includes the userId
+    const institutes = await EntranceInstitute.find({ followers: userId }).select("_id");
+
+    // Extract only institute IDs from the result
+    const followedInstituteIds = institutes.map(inst => inst._id);
+
+    return res.status(200).json({ followedInstituteIds });
+  } catch (error) {
+    console.error("Error fetching followed institutes:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };

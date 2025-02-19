@@ -26,7 +26,7 @@ const {
   editInstituteCoverPic,
   getDashboardDataForEp,
   getFollowersForEp,
-  changeInstituteCoverPhoto,
+  changeInstituteCoverPhoto, getFollowedInstitutes
 } = require("../controllers/entranceInstituteControllers");
 const upload = require("../middlewares/uploadImage");
 
@@ -102,5 +102,8 @@ router.get("/dashboard-data", epAuth, getDashboardDataForEp);
 // Institute Reject & Verify 
 router.put("/:institute_id/verify", adminAuth, verifyInstitute);
 router.put("/:institute_id/reject", adminAuth, rejectInstitute);
+
+// router.get("/user/following/institutes", userAuth, getFollowedInstitutes);
+router.get("/user/:userId/following/institutes", getFollowedInstitutes);
 
 module.exports = router;

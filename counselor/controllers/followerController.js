@@ -201,38 +201,39 @@ exports.getUserForCounsellor = async (req, res) => {
 };
 
 
-
-
-exports.getFollowedCounsellors = async (req, res) => {
+exports.getUserFollowedData = async (req, res) => {
   try {
-    const userId = req.id;  // Get the user ID from the request object set by userAuth middleware
+    const userId = req.id;
     console.log("Requested User ID:", userId);
 
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Fetch the following list using userId
-    const followingList = await Follower.find({ followed_by: userId })
-      .select("followed_to") // Fetch the followed_to field (the users that the current user follows)
-      .lean();
+    // **Parallel API Calls for Better Performance**
+    const [instituteResponse, followingList] = await Promise.all([
+      axios.get(`${BACKEND_URL}/ep/user/${userId}/following/institutes`).catch((err) => {
+        console.error("Error fetching institutes:", err.message);
+        return { data: { followedInstituteIds: [] } }; // **Fallback Empty Array**
+      }),
+      Follower.find({ followed_by: userId }).select("followed_to").lean(),
+    ]);
 
-    if (!followingList.length) {
-      console.log("No following found for user:", userId);
-      return res.status(200).json([]);
-    }
+    // Extract Data
+    const followedInstituteIds = instituteResponse.data.followedInstituteIds || [];
+    const followedCounsellorIds = followingList.map(item => item.followed_to);
 
-    // Format the response
-    const result = followingList.map(item => ({
-      id: item.followed_to,
-    }));
+    // **Final Response**
+    const response = {
+      followedInstituteIds,
+      followedCounsellorIds,
+    };
 
-    console.log("Following List:", result);
-    res.status(200).json(result);
+    console.log("Final Merged Response:", response);
+    return res.status(200).json(response);
   } catch (error) {
-    console.error("Error in getFollowingList:", error);
-    res.status(500).json({ error: "Internal Server Error", details: error.message });
+    console.error("Error in getFollowedCounsellors:", error);
+    return res.status(500).json({ message: "Internal Server Error", details: error.message });
   }
 };
-
 
