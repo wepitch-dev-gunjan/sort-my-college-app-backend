@@ -50,7 +50,7 @@ jobs:
           echo "${{ secrets.USER_SECRETS }}" > user/.env
           echo "${{ secrets.EP_SECRETS }}" > entrance-preparation/.env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
-          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" > notification-service/firebaseServiceKey.json
+          echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
 
       # Start Node.js applications using PM2
       - name: Start Node.js applications
