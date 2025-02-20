@@ -304,7 +304,7 @@ exports.getTrendingWebinars = async (req, res) => {
 // };
 
 
-const axios = require("axios");
+
 
 exports.addWebinar = async (req, res) => {
   try {
