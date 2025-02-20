@@ -376,7 +376,7 @@ exports.addWebinar = async (req, res) => {
     const notificationData = {
       topic: "smc_users", // Change topic as per requirement
       title: "New Webinar Added!",
-      body: `Join ${webinar_title} by ${webinar_by} on ${webinar_date}`,
+      body: `${webinar_title} by ${webinar_by} on ${webinar_date}`,
       type: "webinar",
       id: webinar._id.toString(),
       imageUrl: webinar_image,
