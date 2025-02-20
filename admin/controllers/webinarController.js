@@ -213,6 +213,99 @@ exports.getTrendingWebinars = async (req, res) => {
   }
 };
 
+// exports.addWebinar = async (req, res) => {
+//   try {
+//     const {
+//       webinar_title,
+//       webinar_by,
+//       webinar_details,
+//       what_will_you_learn,
+//       webinar_date,
+//       webinar_time,
+//       speaker_profile,
+//       webinar_total_slots,
+//     } = req.body;
+//     const { file } = req;
+
+//     if (!file)
+//       return res.status(404).send({
+//         error: "Image file is required",
+//       });
+
+//     if (!webinar_title)
+//       return res.status(400).send({
+//         error: "Title is required",
+//       });
+//     if (!webinar_date)
+//       return res.status(400).send({
+//         error: "Date is required",
+//       });
+//     if (!webinar_by)
+//       return res.status(400).send({
+//         error: "Webinar host is required",
+//       });
+
+//     console.log(webinar_time);
+
+//     const [year, month, day] = webinar_date.split("-"); // Split webinar_date into year, month, and day
+//     const [hours, minutes] = webinar_time.split(":"); // Split webinar_time into hours and minutes
+
+//     const combinedDateTime = new Date(
+//       Date.UTC(year, month - 1, day, hours, minutes)
+//     );
+
+//     // Make a POST request to Zoom API to create a meeting
+//     const { data } = await axios.post(
+//       // `https://api.zoom.us/v2/users/me/meetings`,
+//       `https://api.zoom.us/v2/users/me/webinars`,
+//       {
+//         topic: webinar_title, // Use webinar_title as the topic
+//         type: 2, // Scheduled meeting
+//         start_time: combinedDateTime.toISOString(), // Start time of the meeting
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${await getZoomAccessToken()}`, // Get Zoom access token
+//         },
+//       }
+//     );
+//     const fileName = `webinar-image-${Date.now()}.jpeg`;
+//     const folderName = "webinar-images";
+
+//     const webinar_image = await uploadImage(file.buffer, fileName, folderName);
+
+//     // Create a new instance of the Webinar model
+//     const webinar = new Webinar({
+//       webinar_title,
+//       webinar_details,
+//       what_will_you_learn,
+//       webinar_date: combinedDateTime,
+//       speaker_profile,
+//       webinar_by,
+//       webinar_image,
+//       webinar_total_slots,
+//       webinar_start_url: data.start_url,
+//       webinar_join_url: data.join_url,
+//       webinar_password: data.password,
+//       registered_participants: [],
+//       attended_participants: [],
+//     });
+
+//     // Save the webinar to the database
+//     await webinar.save();
+
+//     // Respond with the created webinar data
+//     res.status(200).send(webinar);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
+
+
+const axios = require("axios");
+
 exports.addWebinar = async (req, res) => {
   try {
     const {
@@ -228,54 +321,39 @@ exports.addWebinar = async (req, res) => {
     const { file } = req;
 
     if (!file)
-      return res.status(404).send({
-        error: "Image file is required",
-      });
-
+      return res.status(404).send({ error: "Image file is required" });
     if (!webinar_title)
-      return res.status(400).send({
-        error: "Title is required",
-      });
+      return res.status(400).send({ error: "Title is required" });
     if (!webinar_date)
-      return res.status(400).send({
-        error: "Date is required",
-      });
+      return res.status(400).send({ error: "Date is required" });
     if (!webinar_by)
-      return res.status(400).send({
-        error: "Webinar host is required",
-      });
+      return res.status(400).send({ error: "Webinar host is required" });
 
     console.log(webinar_time);
 
-    const [year, month, day] = webinar_date.split("-"); // Split webinar_date into year, month, and day
-    const [hours, minutes] = webinar_time.split(":"); // Split webinar_time into hours and minutes
+    const [year, month, day] = webinar_date.split("-");
+    const [hours, minutes] = webinar_time.split(":");
+    const combinedDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
-    const combinedDateTime = new Date(
-      Date.UTC(year, month - 1, day, hours, minutes)
-    );
-
-    // Make a POST request to Zoom API to create a meeting
     const { data } = await axios.post(
-      // `https://api.zoom.us/v2/users/me/meetings`,
       `https://api.zoom.us/v2/users/me/webinars`,
       {
-        topic: webinar_title, // Use webinar_title as the topic
-        type: 2, // Scheduled meeting
-        start_time: combinedDateTime.toISOString(), // Start time of the meeting
+        topic: webinar_title,
+        type: 2,
+        start_time: combinedDateTime.toISOString(),
       },
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${await getZoomAccessToken()}`, // Get Zoom access token
+          Authorization: `Bearer ${await getZoomAccessToken()}`,
         },
       }
     );
+
     const fileName = `webinar-image-${Date.now()}.jpeg`;
     const folderName = "webinar-images";
-
     const webinar_image = await uploadImage(file.buffer, fileName, folderName);
 
-    // Create a new instance of the Webinar model
     const webinar = new Webinar({
       webinar_title,
       webinar_details,
@@ -292,16 +370,27 @@ exports.addWebinar = async (req, res) => {
       attended_participants: [],
     });
 
-    // Save the webinar to the database
     await webinar.save();
 
-    // Respond with the created webinar data
+    // Send notification to topic using Axios
+    const notificationData = {
+      topic: "smc_users", // Change topic as per requirement
+      title: "New Webinar Added!",
+      body: `Join ${webinar_title} by ${webinar_by} on ${webinar_date}`,
+      type: "webinar",
+      id: webinar._id.toString(),
+      imageUrl: webinar_image,
+    };
+
+    await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+
     res.status(200).send(webinar);
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
 
 exports.editWebinar = async (req, res) => {
   try {
