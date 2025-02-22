@@ -1,5 +1,4 @@
 const notifier = require("node-notifier");
-// const path = require('path');
 const admin = require('../services/firebaseConfig');
 
 exports.sendNotificationToTopic = async (req, res) => {
