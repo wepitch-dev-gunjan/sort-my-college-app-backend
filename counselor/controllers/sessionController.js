@@ -625,17 +625,23 @@ exports.addSession = async (req, res) => {
     });
 
     // Save the new session to the database
-    const createdSession = await newSession.save();3
+    const createdSession = await newSession.save();
 
-    
+    // Fetch counsellor details
+    const counsellor = await Counsellor.findById(counsellor_id);
+
+    // Extract counsellor name or fallback to "Unknown Counsellor"
+    const counsellor_name = counsellor ? counsellor.name : "Unknown Counsellor";
+
+
 
     // **Send notification to the counsellor**
     const notificationData = {
       topic: `counsellor_${counsellor_id}`, // Dynamic topic for each counsellor
-      title: "New Session Added!",
+      title: `New ${session_type} Session Added by ${counsellor_name}"`,
       body: `${session_topic} scheduled on ${session_date} at ${session_time}`,
       type: "session",
-      id: createdSession._id.toString(),
+      id: counsellor_id.toString(),
 
     };
 
