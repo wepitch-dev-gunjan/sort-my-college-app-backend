@@ -625,7 +625,9 @@ exports.addSession = async (req, res) => {
     });
 
     // Save the new session to the database
-    const createdSession = await newSession.save();
+    const createdSession = await newSession.save();3
+
+    
 
     // **Send notification to the counsellor**
     const notificationData = {
