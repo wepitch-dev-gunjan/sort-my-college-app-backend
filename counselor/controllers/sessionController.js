@@ -627,6 +627,21 @@ exports.addSession = async (req, res) => {
     // Save the new session to the database
     const createdSession = await newSession.save();
 
+    // **Send notification to the counsellor**
+    const notificationData = {
+      topic: `counsellor_${counsellor_id}`, // Dynamic topic for each counsellor
+      title: "New Session Added!",
+      body: `${session_topic} scheduled on ${session_date} at ${session_time}`,
+      type: "session",
+      id: createdSession._id.toString(),
+
+    };
+
+    await axios.post(
+      "https://www.sortmycollegeapp.com/notification/send-notification-to-topic",
+      notificationData
+    );
+
     res
       .status(200)
       .send({ message: "Session successfully added", session: createdSession });
@@ -1519,7 +1534,7 @@ exports.getCheckoutDetails = async (req, res) => {
 //     const currentDate = new Date();
 //     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
 //     const istDate = new Date(currentDate.getTime() + istOffset);
-    
+
 //     // Normalize IST date to start of the day
 //     istDate.setUTCHours(0, 0, 0, 0);
 
