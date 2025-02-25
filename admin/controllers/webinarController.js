@@ -155,15 +155,72 @@ exports.getMyWebinars = async (req, res) => {
   }
 };
 
+// exports.getTrendingWebinars = async (req, res) => {
+//   try {
+//     const { user_id } = req;
+
+//     const currentDate = new Date();
+//     currentDate.setHours(0, 0, 0, 0);
+
+//     const endOfDay = new Date(currentDate);
+//     endOfDay.setHours(23, 59, 59, 999);
+
+//     const webinars = await Webinar.find().sort({ webinar_date: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
+//     if (!webinars || webinars.length === 0) return res.status(200).send([]);
+
+//     const massagedWebinars = webinars.map((webinar) => {
+//       const webinarDate = new Date(webinar.webinar_date);
+//       const timeString = webinarDate.toISOString().split("T")[1].slice(0, 5);
+//       const webinar_time = convertTo12HourFormat(timeString);
+
+//       webinarDate.setUTCHours(0, 0, 0, 0);
+
+//       const currentDate = new Date();
+//       currentDate.setUTCHours(0, 0, 0, 0);
+
+//       const dateDifference = getDateDifference(webinarDate, currentDate);
+//       const webinar_date = webinarDateModifier(webinar.webinar_date);
+//       const registered = webinar.registered_participants.some(
+//         (participant) => participant._id === user_id
+//       );
+//       const earlyJoinTime = new Date(webinar.webinar_date);
+//       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
+
+//       // Check if the user can join the webinar
+//       const now = new Date();
+//       now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
+//       const canJoin = now >= earlyJoinTime;
+//       return {
+//         id: webinar._id,
+//         webinar_image: webinar.webinar_image,
+//         webinar_title: webinar.webinar_title,
+//         webinar_date,
+//         webinar_time,
+//         registered_date: webinar.webinar_date,
+//         webinar_join_url: webinar.webinar_join_url,
+//         webinar_by: webinar.webinar_by,
+//         speaker_profile: webinar.speaker_profile,
+//         webinar_starting_in_days: dateDifference,
+//         registered,
+//         canJoin,
+//       };
+//     });
+
+//     res.status(200).send(massagedWebinars);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal Server Error" });
+//   }
+// };
+
+
+
+
 exports.getTrendingWebinars = async (req, res) => {
   try {
     const { user_id } = req;
-
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(currentDate);
-    endOfDay.setHours(23, 59, 59, 999);
 
     const webinars = await Webinar.find().sort({ webinar_date: -1 }).limit(5); // Sort by webinar date in descending order and limit to 5 webinars
     if (!webinars || webinars.length === 0) return res.status(200).send([]);
@@ -174,7 +231,6 @@ exports.getTrendingWebinars = async (req, res) => {
       const webinar_time = convertTo12HourFormat(timeString);
 
       webinarDate.setUTCHours(0, 0, 0, 0);
-
       const currentDate = new Date();
       currentDate.setUTCHours(0, 0, 0, 0);
 
@@ -183,13 +239,37 @@ exports.getTrendingWebinars = async (req, res) => {
       const registered = webinar.registered_participants.some(
         (participant) => participant._id === user_id
       );
+
+      // Calculate early join time
       const earlyJoinTime = new Date(webinar.webinar_date);
       earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
 
-      // Check if the user can join the webinar
+      // Check if user can join the webinar
       const now = new Date();
       now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
       const canJoin = now >= earlyJoinTime;
+
+      // If canJoin is true, send a notification
+      if (canJoin) {
+        const notificationData = {
+          topic: "smc_users",
+          title: "Hurry up! Your Webinar is about to start",
+          body: `The webinar "${webinar.webinar_title}" by ${webinar.webinar_by} is starting in 10 minutes! Get ready to join now.`,
+          type: "webinar",
+          id: webinar._id.toString(),
+          imageUrl: webinar.webinar_image,
+        };
+
+        axios
+          .post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData)
+          .then((response) => {
+            console.log("Notification sent successfully:", response.data);
+          })
+          .catch((error) => {
+            console.error("Error sending notification:", error);
+          });
+      }
+
       return {
         id: webinar._id,
         webinar_image: webinar.webinar_image,
@@ -212,6 +292,7 @@ exports.getTrendingWebinars = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
 
 // exports.addWebinar = async (req, res) => {
 //   try {
