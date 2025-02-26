@@ -52,16 +52,6 @@ jobs:
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
 
-  # 🛠 Debugging Step: Save only USER_SECRETS to Artifact
-      - name: Save USER_SECRETS to Debug File
-        run: echo "USER_SECRETS=${{ secrets.USER_SECRETS }}" > user_secrets.txt
-
-      - name: Upload USER_SECRETS File (Debug Only)
-        uses: actions/upload-artifact@v4
-        with:
-          name: user-secrets-debug
-          path: user_secrets.txt
-          retention-days: 1  # Artifact will be deleted after 1 day
 
       # Start Node.js applications using PM2
       - name: Start Node.js applications
