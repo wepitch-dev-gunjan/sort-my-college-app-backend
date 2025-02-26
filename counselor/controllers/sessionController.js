@@ -638,7 +638,7 @@ exports.addSession = async (req, res) => {
     // **Send notification to the counsellor**
     const notificationData = {
       topic: `counsellor_${counsellor_id}`, // Dynamic topic for each counsellor
-      title: `New ${session_type} Session Added by ${counsellor_name}"`,
+      title: `New ${session_type} Session Added by ${counsellor_name}`,
       body: `${session_topic} scheduled on ${session_date} at ${session_time}`,
       type: "session",
       id: counsellor_id.toString(),

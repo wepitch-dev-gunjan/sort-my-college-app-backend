@@ -7,6 +7,9 @@ const { JWT_SECRET } = process.env;
 require("dotenv").config();
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:9000";
+const MSG91_API_URL = process.env.MSG91_API_URL;
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY;
+const MSG91_TEMPLATE_KEY = process.env.MSG91_TEMPLATE_KEY;
 // const BACKEND_URL = process.env.BACKEND_URL || 'http://192.168.0.36:9000'
 
 // exports.generateOtpByPhone = async (req, res) => {
@@ -136,9 +139,9 @@ exports.generateOtpByPhone = async (req, res) => {
     console.log("Generated OTP:", otp);
 
     const { data } = await axios.post(
-      "https://control.msg91.com/api/v5/flow",
+      MSG91_API_URL,
       {
-        template_id: "67a07fcfd6fc055b974acc73",
+        template_id: MSG91_TEMPLATE_KEY,
         realTimeResponse: "1",
         recipients: [
           {
@@ -149,7 +152,7 @@ exports.generateOtpByPhone = async (req, res) => {
       },
       {
         headers: {
-          authkey: "412601ACT9trmD658bf858P1",
+          authkey: MSG91_AUTH_KEY,
           accept: "application/json",
           "content-type": "application/json",
         },
