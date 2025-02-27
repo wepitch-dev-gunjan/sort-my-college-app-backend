@@ -13,6 +13,9 @@ const User = require("../dbQueries/user/iidex");
 require("dotenv").config();
 const EARLY_JOIN_MINUTES = 10;
 
+
+const { BACKEND_URL } = process.env;
+
 exports.getWebinarsForAdmin = async (req, res) => {
   try {
     const webinars = await Webinar.find().sort({ createdAt: -1 });
@@ -382,7 +385,7 @@ exports.addWebinar = async (req, res) => {
       imageUrl: webinar_image,
     };
 
-    await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+    await axios.post(`${BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
 
     res.status(200).send(webinar);
   } catch (error) {

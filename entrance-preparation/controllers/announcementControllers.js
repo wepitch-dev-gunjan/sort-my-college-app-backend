@@ -117,7 +117,7 @@ exports.addAnnouncements = async (req, res) => {
     };
 
     await axios.post(
-      "https://www.sortmycollegeapp.com/notification/send-notification-to-topic",
+      `${BACKEND_URL}/notification/send-notification-to-topic`,
       notificationData
     );
 
