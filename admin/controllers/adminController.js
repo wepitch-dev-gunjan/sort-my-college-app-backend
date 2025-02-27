@@ -1,6 +1,6 @@
 const Admin = require("../models/Admin");
 const User = require("../../user/models/User.js");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 const Counsellor = require("../../counselor/models/Counsellor.js");
 const { default: axios } = require("axios");
