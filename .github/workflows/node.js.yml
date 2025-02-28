@@ -1,3 +1,93 @@
+# name: Node.js CI
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   build:
+#     runs-on: self-hosted
+
+#     steps:
+#       - name: Fix file ownership
+#         run: sudo chown -R $(whoami):$(whoami) /home/ec2-user/actions-runner/_work/sort-my-college-app-backend
+
+#       - name: Set correct permissions
+#         run: sudo chmod -R u+rwx /home/ec2-user/actions-runner/_work/sort-my-college-app-backend
+
+#       # Checkout code
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           clean: true
+#           persist-credentials: false
+
+#       # Install PM2
+#       - name: Install PM2
+#         run: sudo npm install pm2 -g
+
+#       # Stop all instances of PM2
+#       - name: Stop all instances of PM2
+#         run: sudo pm2 delete all || true
+
+#       # Install project dependencies
+#       - name: Install dependencies
+#         run: |
+#           npm ci --prefix counselor
+#           npm ci --prefix admin
+#           npm ci --prefix notification-service
+#           npm ci --prefix user
+#           npm ci --prefix entrance-preparation
+#           npm ci --prefix api-gateway
+
+#       # Create environment variables for each service
+#       - name: Create environment variables
+#         run: |
+#           echo "${{ secrets.COUNSELLOR_SECRETS }}" > counselor/.env
+#           echo "${{ secrets.ADMIN_SECRETS }}" > admin/.env
+#           echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > notification-service/.env
+#           echo "${{ secrets.USER_SECRETS }}" > user/.env
+#           echo "${{ secrets.EP_SECRETS }}" > entrance-preparation/.env
+#           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
+#           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
+# # # 🛠 Debugging Step: Save only ADMIN_SECRETS to Artifact
+# #       - name: Save ADMIN_SECRETS to Debug File
+# #         run: echo "ADMIN_SECRETS=${{ secrets.ADMIN_SECRETS }}" > admin_secrets.txt
+
+# #       - name: Upload ADMIN_SECRETS File (Debug Only)
+# #         uses: actions/upload-artifact@v4
+# #         with:
+# #           name: admin-secrets-debug
+# #           path: admin_secrets.txt
+# #           retention-days: 1  # Artifact will be deleted after 1 day
+
+#       # Start Node.js applications using PM2
+#       - name: Start Node.js applications
+#         run: |
+#           # Change directory to each service and start the server with PM2
+#           cd counselor
+#           sudo pm2 start server.js --name="counsellor" -f
+
+#           cd ../admin
+#           sudo pm2 start server.js --name="admin" -f
+
+#           cd ../notification-service
+#           sudo pm2 start server.js --name="notification-service" -f
+
+#           cd ../user
+#           sudo pm2 start server.js --name="user" -f
+
+#           cd ../entrance-preparation
+#           sudo pm2 start server.js --name="entrance-preparation" -f
+
+#           cd ../api-gateway
+#           sudo pm2 start server.js --name="api-gateway" -f
+
+#       - name: Restart all Node.js applications
+#         run: sudo pm2 restart all
+
+
 name: Node.js CI
 
 on:
@@ -23,13 +113,9 @@ jobs:
           clean: true
           persist-credentials: false
 
-      # Install PM2
+      # Install PM2 (if not installed)
       - name: Install PM2
         run: sudo npm install pm2 -g
-
-      # Stop all instances of PM2
-      - name: Stop all instances of PM2
-        run: sudo pm2 delete all || true
 
       # Install project dependencies
       - name: Install dependencies
@@ -51,38 +137,17 @@ jobs:
           echo "${{ secrets.EP_SECRETS }}" > entrance-preparation/.env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
-# # 🛠 Debugging Step: Save only ADMIN_SECRETS to Artifact
-#       - name: Save ADMIN_SECRETS to Debug File
-#         run: echo "ADMIN_SECRETS=${{ secrets.ADMIN_SECRETS }}" > admin_secrets.txt
 
-#       - name: Upload ADMIN_SECRETS File (Debug Only)
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: admin-secrets-debug
-#           path: admin_secrets.txt
-#           retention-days: 1  # Artifact will be deleted after 1 day
-
-      # Start Node.js applications using PM2
-      - name: Start Node.js applications
+      # Start or Reload Node.js applications using PM2 (Zero Downtime)
+      - name: Start or Reload Node.js applications
         run: |
-          # Change directory to each service and start the server with PM2
-          cd counselor
-          sudo pm2 start server.js --name="counsellor" -f
-
-          cd ../admin
-          sudo pm2 start server.js --name="admin" -f
-
-          cd ../notification-service
-          sudo pm2 start server.js --name="notification-service" -f
-
-          cd ../user
-          sudo pm2 start server.js --name="user" -f
-
-          cd ../entrance-preparation
-          sudo pm2 start server.js --name="entrance-preparation" -f
-
-          cd ../api-gateway
-          sudo pm2 start server.js --name="api-gateway" -f
-
-      - name: Restart all Node.js applications
-        run: sudo pm2 restart all
+          # Start services if not already running, otherwise reload them
+          for service in counselor admin notification-service user entrance-preparation api-gateway; do
+            cd $service
+            if pm2 list | grep -q $service; then
+              sudo pm2 reload $service --update-env
+            else
+              sudo pm2 start server.js --name="$service" -f
+            fi
+            cd ..
+          done

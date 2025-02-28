@@ -324,8 +324,8 @@ cron.schedule("* * * * *", async () => {
 
     let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
 
-    console.log("📅 Current IST Time:", currentTimeIST.toISOString().replace("Z", "+00:00"));
-    console.log("📅 Checking webinars starting at:", notificationTimeFormatted);
+    // console.log("📅 Current IST Time:", currentTimeIST.toISOString().replace("Z", "+00:00"));
+    // console.log("📅 Checking webinars starting at:", notificationTimeFormatted);
 
     // ✅ Step 5: Convert into Date Object for MongoDB Query
     const notificationTimeMongo = new Date(notificationTimeFormatted);
@@ -353,7 +353,7 @@ cron.schedule("* * * * *", async () => {
 
       // ✅ Send Notification using Axios
       await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
-      console.log(`📢 Notification sent for Webinar: ${webinar.webinar_title} at ${webinar.webinar_date} id ${webinar._id}`);
+      // console.log(`📢 Notification sent for Webinar: ${webinar.webinar_title} at ${webinar.webinar_date}`);
     }
   } catch (error) {
     console.error("❌ Error in sending webinar notifications:", error.message);
