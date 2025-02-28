@@ -1,4 +1,5 @@
 const { KJUR } = require("jsrsasign");
+const cron = require("node-cron");
 const {
   getZoomAccessToken,
   webinarDateModifier,
@@ -216,98 +217,6 @@ exports.getTrendingWebinars = async (req, res) => {
   }
 };
 
-// exports.addWebinar = async (req, res) => {
-//   try {
-//     const {
-//       webinar_title,
-//       webinar_by,
-//       webinar_details,
-//       what_will_you_learn,
-//       webinar_date,
-//       webinar_time,
-//       speaker_profile,
-//       webinar_total_slots,
-//     } = req.body;
-//     const { file } = req;
-
-//     if (!file)
-//       return res.status(404).send({
-//         error: "Image file is required",
-//       });
-
-//     if (!webinar_title)
-//       return res.status(400).send({
-//         error: "Title is required",
-//       });
-//     if (!webinar_date)
-//       return res.status(400).send({
-//         error: "Date is required",
-//       });
-//     if (!webinar_by)
-//       return res.status(400).send({
-//         error: "Webinar host is required",
-//       });
-
-//     console.log(webinar_time);
-
-//     const [year, month, day] = webinar_date.split("-"); // Split webinar_date into year, month, and day
-//     const [hours, minutes] = webinar_time.split(":"); // Split webinar_time into hours and minutes
-
-//     const combinedDateTime = new Date(
-//       Date.UTC(year, month - 1, day, hours, minutes)
-//     );
-
-//     // Make a POST request to Zoom API to create a meeting
-//     const { data } = await axios.post(
-//       // `https://api.zoom.us/v2/users/me/meetings`,
-//       `https://api.zoom.us/v2/users/me/webinars`,
-//       {
-//         topic: webinar_title, // Use webinar_title as the topic
-//         type: 2, // Scheduled meeting
-//         start_time: combinedDateTime.toISOString(), // Start time of the meeting
-//       },
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${await getZoomAccessToken()}`, // Get Zoom access token
-//         },
-//       }
-//     );
-//     const fileName = `webinar-image-${Date.now()}.jpeg`;
-//     const folderName = "webinar-images";
-
-//     const webinar_image = await uploadImage(file.buffer, fileName, folderName);
-
-//     // Create a new instance of the Webinar model
-//     const webinar = new Webinar({
-//       webinar_title,
-//       webinar_details,
-//       what_will_you_learn,
-//       webinar_date: combinedDateTime,
-//       speaker_profile,
-//       webinar_by,
-//       webinar_image,
-//       webinar_total_slots,
-//       webinar_start_url: data.start_url,
-//       webinar_join_url: data.join_url,
-//       webinar_password: data.password,
-//       registered_participants: [],
-//       attended_participants: [],
-//     });
-
-//     // Save the webinar to the database
-//     await webinar.save();
-
-//     // Respond with the created webinar data
-//     res.status(200).send(webinar);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
-
-
-
 
 exports.addWebinar = async (req, res) => {
   try {
@@ -322,6 +231,8 @@ exports.addWebinar = async (req, res) => {
       webinar_total_slots,
     } = req.body;
     const { file } = req;
+
+    console.log("//======================", webinar_date);
 
     if (!file)
       return res.status(404).send({ error: "Image file is required" });
@@ -393,6 +304,65 @@ exports.addWebinar = async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 };
+
+cron.schedule("* * * * *", async () => {
+  try {
+    console.log("🔍 Checking for upcoming webinars...");
+
+    // ✅ Step 1: Get the current UTC time
+    let currentTimeUTC = new Date();
+
+    // ✅ Step 2: Convert UTC to UTC+5:30 (IST)
+    let currentTimeIST = new Date(currentTimeUTC.getTime() + (5 * 60 + 30) * 60 * 1000);
+
+    // ✅ Step 3: Set seconds & milliseconds to 000 for exact format match
+    currentTimeIST.setSeconds(0, 0);
+
+    // ✅ Step 4: Subtract 10 minutes to get exact notification time
+    let notificationTimeIST = new Date(currentTimeIST.getTime() + 10 * 60 * 1000);
+    notificationTimeIST.setSeconds(0, 0); // Ensure same format
+
+    let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
+
+    console.log("📅 Current IST Time:", currentTimeIST.toISOString().replace("Z", "+00:00"));
+    console.log("📅 Checking webinars starting at:", notificationTimeFormatted);
+
+    // ✅ Step 5: Convert into Date Object for MongoDB Query
+    const notificationTimeMongo = new Date(notificationTimeFormatted);
+
+    // ✅ Step 6: Find webinars that start exactly 10 minutes later
+    const webinars = await Webinar.find({
+      webinar_date: notificationTimeMongo,  // ✅ Find exact match
+    });
+
+    if (webinars.length === 0) {
+      console.log("✅ No webinars need notification at this time.");
+      return;
+    }
+
+    // ✅ Step 7: Send notifications for webinars
+    for (const webinar of webinars) {
+      const notificationData = {
+        topic: "smc_users",
+        title: "Webinar Starting Soon! 🎙",
+        body: `${webinar.webinar_title} by ${webinar.webinar_by} is starting in 10 minutes.`,
+        type: "webinar",
+        id: webinar._id.toString(),
+        imageUrl: webinar.webinar_image,
+      };
+
+      // ✅ Send Notification using Axios
+      await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
+      console.log(`📢 Notification sent for Webinar: ${webinar.webinar_title} at ${webinar.webinar_date} id ${webinar._id}`);
+    }
+  } catch (error) {
+    console.error("❌ Error in sending webinar notifications:", error.message);
+  }
+});
+
+
+
+
 
 
 exports.editWebinar = async (req, res) => {
