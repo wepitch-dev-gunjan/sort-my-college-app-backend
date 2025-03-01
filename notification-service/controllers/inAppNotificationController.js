@@ -1,33 +1,84 @@
 const Notification = require("../models/Notification");
+const { uploadImage, deleteImage } = require("../services/cloudinary");
+const axios = require("axios");
+
+// exports.createNotification = async (req, res) => {
+//   try {
+//     const { user_id, title, message } = req.body;
+
+//     if (!title || !message) {
+//       return res
+//         .status(400)
+//         .json({ error: "Title and message are required fields." });
+//     }
+
+//     const newNotification = new Notification({
+//       user_id,
+//       title,
+//       message,
+//     });
+
+//     // Save the notification to the database
+//     await newNotification.save();
+
+//     return res.status(201).json({
+//       message: "Notification created successfully.",
+//       notification: newNotification,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 
 exports.createNotification = async (req, res) => {
   try {
-    const { user_id, title, message } = req.body;
+    const { title, message } = req.body;
+    const { file } = req; // Multer se aane wala file object
 
     if (!title || !message) {
-      return res
-        .status(400)
-        .json({ error: "Title and message are required fields." });
+      return res.status(400).json({ error: "Title and message are required fields." });
+    }
+
+    let imageUrl = null;
+
+    if (file) {
+      const fileName = `notification-image-${Date.now()}.jpeg`;
+      const folderName = "notification-images";
+      imageUrl = await uploadImage(file.buffer, fileName, folderName);
     }
 
     const newNotification = new Notification({
-      user_id,
       title,
       message,
+      image: imageUrl || null,
     });
 
-    // Save the notification to the database
     await newNotification.save();
 
+    const notificationData = {
+      topic: "smc_users",
+      title: title,
+      body: message,
+      type: "global",
+      imageUrl: imageUrl || undefined,
+    };
+
+    await axios.post(`${process.env.BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
+
     return res.status(201).json({
-      message: "Notification created successfully.",
+      message: "Notification created & sent successfully.",
       notification: newNotification,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating notification:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
 
 exports.getNotifications = async (req, res) => {
   try {

@@ -4,8 +4,8 @@ const admin = require('../services/firebaseConfig');
 exports.sendNotificationToTopic = async (req, res) => {
   const { topic, title, body, type, id, imageUrl } = req.body;
 
-  if (!topic || !title || !body || !type || !id) {
-    return res.status(400).json({ error: "Topic, title, body, type, id & imageUrl are required" });
+  if (!topic || !title || !body) {
+    return res.status(400).json({ error: "Topic, title, & body are required" });
   }
 
   let message = {
