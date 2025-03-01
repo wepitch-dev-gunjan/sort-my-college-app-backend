@@ -62,10 +62,11 @@ exports.createNotification = async (req, res) => {
       title: title,
       body: message,
       type: "global",
+      id: "1",
       imageUrl: imageUrl || undefined,
     };
 
-    await axios.post(`${process.env.BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
+    await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
 
     return res.status(201).json({
       message: "Notification created & sent successfully.",
