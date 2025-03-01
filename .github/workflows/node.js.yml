@@ -47,6 +47,18 @@ jobs:
           echo "${{ secrets.EP_SECRETS }}" > entrance-preparation/.env
           echo "${{ secrets.API_GATEWAY_SECRETS }}" > api-gateway/.env
           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
+ 
+ # 🛠 **Debugging Step: Save NOTIFICATION_SERVICE_SECRETS to Artifact**
+      - name: Save NOTIFICATION_SERVICE_SECRETS to Debug File
+        run: echo "${{ secrets.NOTIFICATION_SERVICE_SECRETS }}" > notification_secrets.txt
+
+      - name: Upload NOTIFICATION_SERVICE_SECRETS File (Debug Only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: notification-service-secrets-debug
+          path: notification_secrets.txt
+          retention-days: 1  # Artifact will be deleted after 1 day
+
 
       # Start or Reload Node.js applications using PM2 (Zero Downtime)
       - name: Start or Reload Node.js applications
