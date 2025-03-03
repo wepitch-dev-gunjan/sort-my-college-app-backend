@@ -26,8 +26,8 @@ exports.createOrder = async (req, res) => {
         console.error(err);
         return res.status(501).send(err.message);
       }
-      // order.key = process.env.RAZORPAY_KEY_ID;
-      order.key = "rzp_test_ZCooGIpAmuf2kS";
+      order.key = process.env.RAZORPAY_KEY_ID;
+      // order.key = "rzp_test_ZCooGIpAmuf2kS";
       order.name = name;
       order.email = email;
       order.phone_no = phone_no;
@@ -269,7 +269,7 @@ exports.paymentForCounsellor = async (req, res) => {
     if (payments.length === 0) return res.status(200).send([]);
 
     const massagedData = payments.map((payment) => {
-      const fees_amount = (payment.amount/1.23);
+      const fees_amount = (payment.amount / 1.23);
 
       return {
         _id: payment._id,
@@ -288,7 +288,7 @@ exports.paymentForCounsellor = async (req, res) => {
         description: payment.description,
         status: payment.status,
         session_type: payment.session_type,
-        fees_amount: fees_amount, 
+        fees_amount: fees_amount,
       };
     });
 
