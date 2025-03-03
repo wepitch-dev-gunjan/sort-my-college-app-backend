@@ -79,8 +79,6 @@ exports.createNotification = async (req, res) => {
 };
 
 
-
-
 exports.getNotifications = async (req, res) => {
   try {
     const { user_id, page = 1, limit = 10 } = req.query;

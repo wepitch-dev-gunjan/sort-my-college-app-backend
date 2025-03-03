@@ -29,6 +29,8 @@ const { JWT_SECRET } = process.env;
 //     res.status(500).json({ error: 'Internal Server Error' });
 //   }
 // };
+
+
 exports.userAuth = async (req, res, next) => {
   try {
     const token = req.header("Authorization");

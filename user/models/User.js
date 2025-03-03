@@ -1,5 +1,51 @@
 const { Schema, model } = require("mongoose");
 
+// const userSchema = new Schema(
+//   {
+//     email: {
+//       type: String,
+//       unique: true,
+//       sparse: true,
+//     },
+//     phone_number: {
+//       type: String,
+//       unique: true,
+//       sparse: true,
+//     },
+//     name: {
+//       type: String,
+//     },
+//     gender: {
+//       type: String,
+//       enum: ["Male", "Female", "Other"],
+//     },
+//     date_of_birth: {
+//       type: String,
+//     },
+//     location: {
+//       city: String,
+//     },
+//     profile_pic: {
+//       type: String,
+//       default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+//     },
+//     education_level: {
+//       type: String,
+//       enum: ["Student", "College", "Graduated"],
+//       default: "Student",
+//     },
+//     verified: {
+//       type: Boolean,
+//       default: false,
+//     },
+//   },
+//   {
+//     timestamps: true,
+//     strict: false,
+//   }
+// );
+
+
 const userSchema = new Schema(
   {
     email: {
@@ -27,7 +73,8 @@ const userSchema = new Schema(
     },
     profile_pic: {
       type: String,
-      default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+      default:
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
     },
     education_level: {
       type: String,
@@ -38,12 +85,19 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    fcm_token: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
     strict: false,
   }
 );
+
+
+
 
 // Custom validation to check uniqueness for non-null values
 userSchema.path("phone_number").validate(async function (value) {

@@ -101,7 +101,8 @@ exports.generateOtpByPhone = async (req, res) => {
 
     if (phone_number == "917297827346") {
       return res.status(200).send({
-        message: 'you are administrator, your otp is "1234"',
+        message: 'you are administrator, your otp is "1234"',///////////
+
       });
     }
 
@@ -256,9 +257,77 @@ exports.verifyOtpByPhoneForRegistration = async (req, res) => {
   }
 };
 
+// exports.verifyOtpByPhoneForLogIn = async (req, res) => {
+//   try {
+//     const { phone_number, otp, name } = req.body;
+
+//     if (phone_number == "917297827346" && otp == "1234") {
+//       let user = await User.findOne({ phone_number });
+
+//       if (!user) {
+//         return res.status(400).send({
+//           error: "User not registered. Please register first.",
+//         });
+//       }
+
+//       const { _id } = user;
+//       const token = jwt.sign({ user_id: _id, phone_number }, JWT_SECRET);
+
+//       return res.status(200).send({
+//         message: "OTP verified successfully",
+//         already_registered: true,
+//         token,
+//       });
+//     }
+
+//     let otpObj = await Otp.findOne({ phone_number });
+
+//     if (!otpObj)
+//       return res.status(404).send({ error: "Phone number not found" });
+
+//     if (otpObj.attempts >= 3 || new Date() > otpObj.expiresAt) {
+//       return res.status(401).send({ error: "Invalid OTP token" });
+//     }
+
+//     const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
+
+//     if (hashedOtp !== otpObj.hashedOtp) {
+//       otpObj.attempts++;
+//       await otpObj.save();
+//       return res.status(401).send({ error: "Invalid OTP token" });
+//     }
+
+//     let user = await User.findOne({ phone_number });
+
+//     if (!user) {
+//       return res.status(400).send({
+//         error: "User not registered. Please register first.",
+//       });
+//     }
+
+//     if (user && name) {
+//       user.name = name;
+//       await user.save();
+//     }
+
+//     const { _id } = user;
+//     const token = jwt.sign({ user_id: _id, phone_number }, JWT_SECRET);
+
+//     res.status(200).send({
+//       message: "OTP verified successfully",
+//       already_registered: true,
+//       token,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: "Internal server error" });
+//   }
+// };
+
+
 exports.verifyOtpByPhoneForLogIn = async (req, res) => {
   try {
-    const { phone_number, otp, name } = req.body;
+    const { phone_number, otp, name, fcm_token } = req.body;
 
     if (phone_number == "917297827346" && otp == "1234") {
       let user = await User.findOne({ phone_number });
@@ -269,6 +338,12 @@ exports.verifyOtpByPhoneForLogIn = async (req, res) => {
         });
       }
 
+      // Save the FCM token
+      if (fcm_token) {
+        user.fcm_token = fcm_token;
+        await user.save();
+      }
+
       const { _id } = user;
       const token = jwt.sign({ user_id: _id, phone_number }, JWT_SECRET);
 
@@ -276,6 +351,7 @@ exports.verifyOtpByPhoneForLogIn = async (req, res) => {
         message: "OTP verified successfully",
         already_registered: true,
         token,
+        fcm_token: user.fcm_token,
       });
     }
 
@@ -306,8 +382,14 @@ exports.verifyOtpByPhoneForLogIn = async (req, res) => {
 
     if (user && name) {
       user.name = name;
-      await user.save();
     }
+
+    // Save the FCM token
+    if (fcm_token) {
+      user.fcm_token = fcm_token;
+    }
+
+    await user.save();
 
     const { _id } = user;
     const token = jwt.sign({ user_id: _id, phone_number }, JWT_SECRET);
@@ -316,12 +398,14 @@ exports.verifyOtpByPhoneForLogIn = async (req, res) => {
       message: "OTP verified successfully",
       already_registered: true,
       token,
+      fcm_token: user.fcm_token,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal server error" });
   }
 };
+
 
 exports.generateOtpByEmail = async (req, res) => {
   try {

@@ -100,9 +100,6 @@ exports.getBookings = async (req, res) => {
 };
 
 
-
-
-
 exports.getBooking = async (req, res) => {
   try {
     const { booking_id } = req.params;
