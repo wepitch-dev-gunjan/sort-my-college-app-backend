@@ -26,8 +26,8 @@ exports.createOrder = async (req, res) => {
         console.error(err);
         return res.status(501).send(err.message);
       }
-      // order.key = process.env.RAZORPAY_KEY_ID;
-      order.key = "rzp_test_ZCooGIpAmuf2kS";
+      order.key = process.env.RAZORPAY_KEY_ID;
+      // order.key = "rzp_test_ZCooGIpAmuf2kS";
       order.name = name;
       order.email = email;
       order.phone_no = phone_no;
