@@ -916,14 +916,45 @@ exports.bookSession = async (req, res) => {
       console.log(err);
     }
 
-    
+
 
     // **Send Push Notification to User using FCM Token**
+    // if (user.fcm_token) {
+    //   const notificationData = {
+    //     token: user.fcm_token, // **FCM token**
+    //     title: "Session Booked Successfully!",
+    //     body: `Your ${session.session_type} session with ${counsellor.name} on ${session.session_date} at ${session.session_time} is confirmed.`,
+    //     type: "session_booking",
+    //     id: session._id.toString(),
+    //   };
+
+    //   try {
+    //     await axios.post(`${BACKEND_URL}/notification/send-notification-to-token`, notificationData);
+    //   } catch (err) {
+    //     console.log("FCM Notification Error:", err.message);
+    //   }
+    // }
     if (user.fcm_token) {
+      const sessionDate = new Date(session.session_date);
+
+      // Format date as "Wed, Mar 05, 2025"
+      const formattedDate = sessionDate.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      });
+
+      // Convert `session.session_time` (minutes) to HH:MM AM/PM
+      const hours = Math.floor(session.session_time / 60);
+      const minutes = session.session_time % 60;
+      const formattedTime = new Date(0, 0, 0, hours, minutes)
+        .toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
       const notificationData = {
         token: user.fcm_token, // **FCM token**
         title: "Session Booked Successfully!",
-        body: `Your ${session.session_type} session with ${counsellor.name} on ${session.session_date} at ${session.session_time} is confirmed.`,
+        body: `Your ${session.session_type} session with ${counsellor.name} on ${formattedDate} at ${formattedTime} is confirmed.`,
         type: "session_booking",
         id: session._id.toString(),
       };
@@ -934,6 +965,7 @@ exports.bookSession = async (req, res) => {
         console.log("FCM Notification Error:", err.message);
       }
     }
+
 
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully" });
