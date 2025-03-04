@@ -916,24 +916,8 @@ exports.bookSession = async (req, res) => {
       console.log(err);
     }
 
-
-
     // **Send Push Notification to User using FCM Token**
-    // if (user.fcm_token) {
-    //   const notificationData = {
-    //     token: user.fcm_token, // **FCM token**
-    //     title: "Session Booked Successfully!",
-    //     body: `Your ${session.session_type} session with ${counsellor.name} on ${session.session_date} at ${session.session_time} is confirmed.`,
-    //     type: "session_booking",
-    //     id: session._id.toString(),
-    //   };
 
-    //   try {
-    //     await axios.post(`${BACKEND_URL}/notification/send-notification-to-token`, notificationData);
-    //   } catch (err) {
-    //     console.log("FCM Notification Error:", err.message);
-    //   }
-    // }
     if (user.fcm_token) {
       const sessionDate = new Date(session.session_date);
 
@@ -968,7 +952,7 @@ exports.bookSession = async (req, res) => {
 
 
     // Respond with a success message
-    res.status(201).json({ message: "Counseling session booked successfully" });
+    res.status(201).json({ message: "Counseling session booked successfully", session_date: session.session_date });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal booking Server Error" });
