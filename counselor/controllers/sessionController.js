@@ -916,12 +916,7 @@ exports.bookSession = async (req, res) => {
       console.log(err);
     }
 
-    // // Send in-app notification to counsellor
-    // await axios.post(`${BACKEND_URL}/notification/in-app`, {
-    //   user_id: counsellor._id,
-    //   title: "New Booking",
-    //   message: `${user.name} booked a ${session.session_type} session`,
-    // });
+    
 
     // **Send Push Notification to User using FCM Token**
     if (user.fcm_token) {
