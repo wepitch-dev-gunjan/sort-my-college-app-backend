@@ -1,6 +1,9 @@
 const notifier = require("node-notifier");
 const admin = require('../services/firebaseConfig');
 
+
+
+
 exports.sendNotificationToTopic = async (req, res) => {
   const { topic, title, body, type, id, imageUrl } = req.body;
 
@@ -44,6 +47,37 @@ exports.sendNotificationToTopic = async (req, res) => {
 };
 
 
+exports.sendNotificationToToken = async (req, res) => {
+  const { token, title, body, type, id } = req.body;
+
+  if (!token || !title || !body || !type || !id) {
+    return res.status(400).json({ error: "Token, title, body, type & id are required" });
+  }
+
+  let message = {
+    notification: {
+      title: title,
+      body: body
+    },
+    data: {
+      type: type,
+      id: id
+    },
+    token: token
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    console.log("Notification sent successfully:", response);
+    res.status(200).json({ message: "Notification sent successfully", response });
+  } catch (error) {
+    console.error("Error sending notification:", error.message);
+    res.status(500).json({ error: "Error sending notification", details: error.message });
+  }
+};
+
+
+
 exports.postNotification = (req, res) => {
   try {
     const { title, user, sender, message } = req.body;
@@ -74,3 +108,6 @@ exports.postNotification = (req, res) => {
     res.send({ error: "Internal server error" });
   }
 };
+
+
+

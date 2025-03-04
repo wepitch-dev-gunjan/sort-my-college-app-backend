@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  postNotification,sendNotificationToTopic
+  postNotification, sendNotificationToTopic, sendNotificationToToken
 } = require("../controllers/pushNotificationControllers");
 const router = express.Router();
 
@@ -12,5 +12,6 @@ router.post("/user/", postNotification);
 
 // SEND NOTIFICATION WITH FIREBASE
 router.post("/send-notification-to-topic", sendNotificationToTopic);
+router.post("/send-notification-to-token", sendNotificationToToken);
 
 module.exports = router;
