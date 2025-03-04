@@ -950,7 +950,6 @@ exports.bookSession = async (req, res) => {
       }
     }
 
-
     // Respond with a success message
     res.status(201).json({ message: "Counseling session booked successfully", session_date: session.session_date });
   } catch (error) {
