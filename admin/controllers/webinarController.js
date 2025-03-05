@@ -286,11 +286,11 @@ exports.addWebinar = async (req, res) => {
 
     await webinar.save();
 
-    // Send notification to topic using Axios
+
 
     const formattedDate = new Date(webinar_date).toLocaleDateString("en-GB"); // "dd/mm/yyyy" format
     const formattedDateWithHyphens = formattedDate.replace(/\//g, "-"); // "dd-mm-yyyy" format
-
+    // Send notification to topic using Axios
     const notificationData = {
       topic: "smc_users",
       title: "New Webinar Added!",
@@ -299,15 +299,6 @@ exports.addWebinar = async (req, res) => {
       id: webinar._id.toString(),
       imageUrl: webinar_image,
     };
-
-    // const notificationData = {
-    //   topic: "smc_users", // Change topic as per requirement
-    //   title: "New Webinar Added!",
-    //   body: `${webinar_title} by ${webinar_by} on ${webinar_date}`,
-    //   type: "webinar",
-    //   id: webinar._id.toString(),
-    //   imageUrl: webinar_image,
-    // };
 
     await axios.post(`${BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
 
@@ -337,9 +328,6 @@ cron.schedule("* * * * *", async () => {
 
     let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
 
-    // console.log("📅 Current IST Time:", currentTimeIST.toISOString().replace("Z", "+00:00"));
-    // console.log("📅 Checking webinars starting at:", notificationTimeFormatted);
-
     // ✅ Step 5: Convert into Date Object for MongoDB Query
     const notificationTimeMongo = new Date(notificationTimeFormatted);
 
@@ -366,7 +354,7 @@ cron.schedule("* * * * *", async () => {
 
       // ✅ Send Notification using Axios
       await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
-      // console.log(`📢 Notification sent for Webinar: ${webinar.webinar_title} at ${webinar.webinar_date}`);
+
     }
   } catch (error) {
     console.error("❌ Error in sending webinar notifications:", error.message);
