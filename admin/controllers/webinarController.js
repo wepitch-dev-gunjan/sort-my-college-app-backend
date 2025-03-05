@@ -286,10 +286,9 @@ exports.addWebinar = async (req, res) => {
 
     await webinar.save();
 
+    const formattedDate = new Date(webinar_date).toLocaleDateString("en-GB");
+    const formattedDateWithHyphens = formattedDate.replace(/\//g, "-");
 
-
-    const formattedDate = new Date(webinar_date).toLocaleDateString("en-GB"); // "dd/mm/yyyy" format
-    const formattedDateWithHyphens = formattedDate.replace(/\//g, "-"); // "dd-mm-yyyy" format
     // Send notification to topic using Axios
     const notificationData = {
       topic: "smc_users",
@@ -360,11 +359,6 @@ cron.schedule("* * * * *", async () => {
     console.error("❌ Error in sending webinar notifications:", error.message);
   }
 });
-
-
-
-
-
 
 exports.editWebinar = async (req, res) => {
   try {
