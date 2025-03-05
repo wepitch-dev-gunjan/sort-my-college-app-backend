@@ -2338,3 +2338,111 @@ exports.isSessionAboutToStart = async (req, res) => {
   }
 };
 
+
+
+
+
+// cron.schedule("* * * * *", async () => {
+//   try {
+//     const now = new Date();
+//     const nowHours = now.getHours();
+//     const nowMinutes = now.getMinutes();
+
+//     console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
+
+//     const todayDate = now.toISOString().split("T")[0] + "T00:00:00.000+00:00";
+//     console.log("Cron Job Started - Checking for sessions on:", todayDate);
+
+//     // 🔹 आज के सभी booked sessions को लाना
+//     const sessions = await Session.find({
+//       session_date: todayDate,
+//       session_status: "Booked",
+//     });
+
+//     console.log("Total sessions found for today:", sessions.length);
+
+//     for (const session of sessions) {
+//       console.log("Processing session:", session._id);
+
+//       // 🟢 session_time को सही समय में बदलना
+//       const sessionHours = Math.floor(session.session_time / 60);
+//       const sessionMinutes = session.session_time % 60;
+
+//       console.log(`📌 Session Time: ${sessionHours}:${sessionMinutes}`);
+
+//       // 🔴 Difference निकालना (Minutes में)
+//       const diff =
+//         (sessionHours * 60 + sessionMinutes) - (nowHours * 60 + nowMinutes);
+
+//       console.log(`⏳ Session starts in ${diff} minutes`);
+
+//       if (diff === 10) {
+//         console.log("🚀 Session will start in 10 minutes:", session.session_topic);
+
+//         const userIds = session.session_users;
+//         console.log("👥 Users to Notify:", userIds);
+
+//         // 🔥 Users ke FCM tokens ek saath fetch karo
+//         const users = await User.find({ _id: { $in: userIds.map(id => new mongoose.Types.ObjectId(id)) } }, "fcm_token");
+
+//         console.log("Users Response Type:", typeof users);
+//         console.log("Users Response:", users);
+//         const fcmTokens = users.map(user => user.fcm_token).filter(Boolean);
+
+//         console.log("📲 FCM Tokens Found:", fcmTokens);
+//       }
+//     }
+//   } catch (error) {
+//     console.error("❌ Error in cron job fetching FCM tokens:", error);
+//   }
+// });
+
+
+// cron.schedule("* * * * *", async () => {
+//   try {
+//     const now = new Date();
+//     const nowHours = now.getHours();
+//     const nowMinutes = now.getMinutes();
+
+//     console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
+
+//     const todayDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+//     console.log("Cron Job Started - Checking for sessions on:", todayDate);
+
+//     // 🔹 आज के सभी booked sessions को लाना
+//     const sessions = await Session.find({
+//       session_date: todayDate,
+//       session_status: "Booked",
+//     });
+
+//     console.log("Total sessions found for today:", sessions.length);
+
+//     for (const session of sessions) {
+//       console.log("Processing session:", session._id);
+
+//       // 🟢 session_time पहले से ही minutes में है
+//       const sessionTotalMinutes = session.session_time;
+//       const nowTotalMinutes = nowHours * 60 + nowMinutes;
+
+//       const diff = sessionTotalMinutes - nowTotalMinutes;
+//       console.log(`⏳ Session starts in ${diff} minutes`);
+
+//       if (diff === 10) {
+//         console.log("🚀 Session will start in 10 minutes:", session.session_topic);
+
+//         const userIds = session.session_users;
+//         console.log("👥 Users to Notify:", userIds);
+
+//         // 🔥 Users ke FCM tokens ek saath fetch karo
+//         const users = await User.find({ _id: { $in: userIds } }, "fcm_token");
+//         console.log("Users Response Type:", typeof users);
+//         console.log("Users Response:", users);
+//         const fcmTokens = users.map(user => user.fcm_token).filter(Boolean);
+
+//         console.log("📲 FCM Tokens Found:", fcmTokens);
+//       }
+//     }
+//   } catch (error) {
+//     console.error("❌ Error in cron job fetching FCM tokens:", error);
+//   }
+// });

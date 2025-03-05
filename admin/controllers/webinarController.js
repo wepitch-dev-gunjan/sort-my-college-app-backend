@@ -287,14 +287,27 @@ exports.addWebinar = async (req, res) => {
     await webinar.save();
 
     // Send notification to topic using Axios
+
+    const formattedDate = new Date(webinar_date).toLocaleDateString("en-GB"); // "dd/mm/yyyy" format
+    const formattedDateWithHyphens = formattedDate.replace(/\//g, "-"); // "dd-mm-yyyy" format
+
     const notificationData = {
-      topic: "smc_users", // Change topic as per requirement
+      topic: "smc_users",
       title: "New Webinar Added!",
-      body: `${webinar_title} by ${webinar_by} on ${webinar_date}`,
+      body: `${webinar_title} by ${webinar_by} on ${formattedDateWithHyphens}`,
       type: "webinar",
       id: webinar._id.toString(),
       imageUrl: webinar_image,
     };
+
+    // const notificationData = {
+    //   topic: "smc_users", // Change topic as per requirement
+    //   title: "New Webinar Added!",
+    //   body: `${webinar_title} by ${webinar_by} on ${webinar_date}`,
+    //   type: "webinar",
+    //   id: webinar._id.toString(),
+    //   imageUrl: webinar_image,
+    // };
 
     await axios.post(`${BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
 
