@@ -2,37 +2,37 @@ const Notification = require("../models/Notification");
 const { uploadImage, deleteImage } = require("../services/cloudinary");
 const axios = require("axios");
 
-// exports.createNotification = async (req, res) => {
-//   try {
-//     const { user_id, title, message } = req.body;
-
-//     if (!title || !message) {
-//       return res
-//         .status(400)
-//         .json({ error: "Title and message are required fields." });
-//     }
-
-//     const newNotification = new Notification({
-//       user_id,
-//       title,
-//       message,
-//     });
-
-//     // Save the notification to the database
-//     await newNotification.save();
-
-//     return res.status(201).json({
-//       message: "Notification created successfully.",
-//       notification: newNotification,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-
 exports.createNotification = async (req, res) => {
+  try {
+    const { user_id, title, message } = req.body;
+
+    if (!title || !message) {
+      return res
+        .status(400)
+        .json({ error: "Title and message are required fields." });
+    }
+
+    const newNotification = new Notification({
+      user_id,
+      title,
+      message,
+    });
+
+    // Save the notification to the database
+    await newNotification.save();
+
+    return res.status(201).json({
+      message: "Notification created successfully.",
+      notification: newNotification,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+exports.sendNotificationToAllUsers = async (req, res) => {
   try {
     const { title, message } = req.body;
     const { file } = req; // Multer se aane wala file object

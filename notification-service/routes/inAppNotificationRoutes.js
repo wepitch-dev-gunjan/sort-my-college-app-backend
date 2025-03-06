@@ -4,12 +4,13 @@ const {
   getNotifications,
   getNotification,
   readNotification,
-  deleteNotifications,
+  deleteNotifications, sendNotificationToAllUsers
 } = require("../controllers/inAppNotificationController");
 const upload = require("../middlewares/upload_image");
 const router = express.Router();
 
-router.post("/create-notification", upload.single("image"), createNotification);
+router.post("/create-notification", createNotification);
+router.post("/send-notification-all-users", upload.single("image"), sendNotificationToAllUsers);
 router.get("/in-app", getNotifications);
 router.get("/in-app/:notification_id", getNotification);
 router.put("/in-app/:notification_id", readNotification);
