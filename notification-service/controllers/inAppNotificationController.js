@@ -31,6 +31,7 @@ exports.createNotification = async (req, res) => {
   }
 };
 
+//==========================================! send notification admin to user !============================
 
 exports.sendNotificationToAllUsers = async (req, res) => {
   try {
