@@ -53,6 +53,17 @@ jobs:
           echo "${{ secrets.FIREBASE_SERVICE_KEY }}" | base64 --decode > notification-service/firebaseServiceKey.json
 
 
+      - name: Save ADMIN_SECRETS to Debug File
+        run: echo "${{ secrets.ADMIN_SECRETS }}" > admin_secrets.txt
+
+      - name: Upload ADMIN_SECRETS File (Debug Only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-secrets-debug
+          path: admin_secrets.txt
+          retention-days: 1  # Artifact will be deleted after 1 day
+
+
       # Start Node.js applications using PM2
       - name: Start Node.js applications
         run: |
