@@ -1,4 +1,5 @@
 const { default: axios } = require("axios");
+const cron = require('node-cron')
 const {
   sessionTimeIntoMinutes,
   isSessionBefore24Hours,
@@ -1421,499 +1422,6 @@ exports.getCheckoutDetails = async (req, res) => {
   }
 };
 
-// exports.getLatestSessions = async (req, res) => {
-//   try {
-//     const currentDate = new Date();
-//     const hours = currentDate.getHours() * 60 + 60;
-//     const minutes = currentDate.getMinutes();
-//     console.log(currentDate.getDate(), hours / 60, minutes);
-//     // Create a new date object for the current time
-
-//     //newww
-//     let now = new Date();
-
-//     // Get the current time in milliseconds
-//     let currentTime = now.getTime();
-
-//     // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-//     let istOffset = 5.5 * 60 * 60 * 1000;
-
-//     // Create a new date object for IST time
-//     let istDate = new Date(currentTime + istOffset);
-
-//     // Set the IST date hours, minutes, seconds, and milliseconds to 0
-//     istDate.setUTCHours(0, 0, 0, 0);
-
-//     // Adjust the IST date back by the IST offset to get the correct date in local time
-//     istDate = new Date(istDate.getTime() - istOffset);
-
-//     console.log("IST Date: " + istDate);
-//     // end of new
-
-//     const sessionTime = hours + minutes;
-
-//     const resetDate = new Date(currentDate);
-//     // resetDate.setUTCDate(resetDate.getUTCDate() + 1); // Move to the next day
-//     resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
-//     // currentDate.setDate(currentDate.getDate());
-//     let sessions = [];
-//     // Push the results of the first query into the sessions array
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $eq: istDate },
-//         session_time: { $gte: sessionTime },
-//       }))
-//     );
-
-//     currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-//     currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-//     currentDate.setDate(currentDate.getDate() + 1); // Add one day
-//     // console.log(currentDate.getDate(), currentDate);
-
-//     // Push the results of the second query into the sessions array
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $gte: resetDate },
-//       })
-//         .sort({ createdAt: -1 })
-//         .limit(5))
-//     );
-//     let total_available_slots = 0;
-//     if (sessions.length > 0) {
-//       const daysOfWeek = [
-//         "Sunday",
-//         "Monday",
-//         "Tuesday",
-//         "Wednesday",
-//         "Thursday",
-//         "Friday",
-//         "Saturday",
-//       ];
-//       const massagedSessions = await Promise.all(
-//         sessions.map(async (session) => {
-//           const counsellor = await Counsellor.findOne({
-//             _id: session.session_counsellor,
-//           });
-//           total_available_slots += session.session_available_slots;
-//           const sessionDate = new Date(session.session_date);
-//           let session_massaged_date = "";
-
-//           const today = new Date();
-//           const tomorrow = new Date(today);
-//           tomorrow.setDate(today.getDate() + 1);
-
-//           if (sessionDate.toDateString() === today.toDateString()) {
-//             session_massaged_date = "today";
-//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
-//             session_massaged_date = "tomorrow";
-//           } else {
-//             const dayDiff = Math.ceil(
-//               (sessionDate - today) / (1000 * 3600 * 24)
-//             );
-//             if (dayDiff <= 7 && dayDiff > 0) {
-//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
-//             } else {
-//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-//               session.session_time = sessionTimeIntoString(
-//                 session.session_time
-//               );
-//             }
-//           }
-//           return {
-//             counsellor_id: counsellor._id,
-//             session_id: session._id,
-//             counsellor_profile_pic: counsellor.profile_pic,
-//             counsellor_name: counsellor.name,
-//             counsellor_designation: counsellor.designation, // Fixed typo in "designation"
-//             session_time: session.session_time,
-//             session_date: session_massaged_date,
-//             session_fee: session.session_fee,
-//             session_topic: session.session_topic,
-//             session_duration:session.session_duration,
-//           };
-//         })
-//       );
-//       res.status(200).json(massagedSessions.slice(0, 5));
-//     } else {
-//       res.status(200).json([]);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.getLatestSessions = async (req, res) => {
-//   try {
-//     // Get current date and time in IST
-//     const currentDate = new Date();
-//     const hours = currentDate.getHours() * 60 + 60;
-//     const minutes = currentDate.getMinutes();
-
-//     // Get the current time in milliseconds
-//     let currentTime = currentDate.getTime();
-
-//     // Calculate the IST offset in milliseconds (IST is UTC+5:30)
-//     let istOffset = 5.5 * 60 * 60 * 1000;
-
-//     // Create a new date object for IST time
-//     let istDate = new Date(currentTime + istOffset);
-
-//     // Set the IST date hours, minutes, seconds, and milliseconds to 0
-//     istDate.setUTCHours(0, 0, 0, 0);
-
-//     // Adjust the IST date back by the IST offset to get the correct date in local time
-//     istDate = new Date(istDate.getTime() - istOffset);
-
-//     // Calculate the session time in minutes
-//     const sessionTime = hours + minutes;
-
-//     // Create a date object for the reset date
-//     const resetDate = new Date(currentDate);
-//     resetDate.setUTCHours(0, 0, 0, 0); // Set time to midnight UTC
-
-//     // Initialize sessions array
-//     let sessions = [];
-
-//     // Fetch sessions scheduled for today and in the future
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $eq: istDate },
-//         session_time: { $gte: sessionTime },
-//         session_type: "Group", // Filter to include only group sessions
-//       }))
-//     );
-
-//     // Fetch sessions scheduled from tomorrow onward
-//     currentDate.setHours(currentDate.getHours() + 5); // Adjust for IST offset from UTC
-//     currentDate.setMinutes(currentDate.getMinutes() + 30); // Adjust for IST offset from UTC
-//     currentDate.setDate(currentDate.getDate() + 1); // Add one day
-
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $gte: resetDate },
-//         session_type: "Group", // Filter to include only group sessions
-//       })
-//         .sort({ createdAt: -1 })
-//         .limit(5))
-//     );
-
-//     let total_available_slots = 0;
-//     if (sessions.length > 0) {
-//       const daysOfWeek = [
-//         "Sunday",
-//         "Monday",
-//         "Tuesday",
-//         "Wednesday",
-//         "Thursday",
-//         "Friday",
-//         "Saturday",
-//       ];
-//       const massagedSessions = await Promise.all(
-//         sessions.map(async (session) => {
-//           const counsellor = await Counsellor.findOne({
-//             _id: session.session_counsellor,
-//           });
-//           total_available_slots += session.session_available_slots;
-//           const sessionDate = new Date(session.session_date);
-//           let session_massaged_date = "";
-
-//           const today = new Date();
-//           const tomorrow = new Date(today);
-//           tomorrow.setDate(today.getDate() + 1);
-
-//           if (sessionDate.toDateString() === today.toDateString()) {
-//             session_massaged_date = "today";
-//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
-//             session_massaged_date = "tomorrow";
-//           } else {
-//             const dayDiff = Math.ceil(
-//               (sessionDate - today) / (1000 * 3600 * 24)
-//             );
-//             if (dayDiff <= 7 && dayDiff > 0) {
-//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
-//             } else {
-//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-//               session.session_time = sessionTimeIntoString(
-//                 session.session_time
-//               );
-//             }
-//           }
-//           return {
-//             counsellor_id: counsellor._id,
-//             session_id: session._id,
-//             counsellor_profile_pic: counsellor.profile_pic,
-//             counsellor_name: counsellor.name,
-//             counsellor_designation: counsellor.designation,
-//             session_time: session.session_time,
-//             session_date: session_massaged_date,
-//             session_fee: session.session_fee,
-//             session_topic: session.session_topic,
-//             session_duration: session.session_duration,
-//           };
-//         })
-//       );
-//       res.status(200).json(massagedSessions.slice(0, 5));
-//     } else {
-//       res.status(200).json([]);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.getLatestSessions = async (req, res) => {
-//   try {
-//     // Get the current date and time in IST
-//     const currentDate = new Date();
-//     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-//     const istDate = new Date(currentDate.getTime() + istOffset);
-
-//     // Normalize IST date to start of the day
-//     istDate.setUTCHours(0, 0, 0, 0);
-
-//     // Calculate the session time in minutes from IST
-//     const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
-//     const sessionTime = currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
-
-//     // Initialize sessions array
-//     let sessions = [];
-
-//     // Fetch sessions scheduled for today and in the future
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $eq: istDate },
-//         session_time: { $gte: sessionTime },
-//         session_type: "Group", // Filter to include only group sessions
-//       }))
-//     );
-
-//     // Fetch sessions scheduled from tomorrow onward
-//     const tomorrow = new Date(istDate);
-//     tomorrow.setDate(tomorrow.getDate() + 1);
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $gte: tomorrow },
-//         session_type: "Group", // Filter to include only group sessions
-//       })
-//         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
-//         .limit(5))
-//     );
-
-//     // Get the current time for session end comparison
-//     const currentTimeInMillis = Date.now() + istOffset;
-
-//     let total_available_slots = 0;
-//     if (sessions.length > 0) {
-//       const daysOfWeek = [
-//         "Sunday",
-//         "Monday",
-//         "Tuesday",
-//         "Wednesday",
-//         "Thursday",
-//         "Friday",
-//         "Saturday",
-//       ];
-//       const massagedSessions = await Promise.all(
-//         sessions.map(async (session) => {
-//           // Calculate session start and end times in milliseconds
-//           const sessionStart = new Date(session.session_date);
-//           sessionStart.setMinutes(sessionStart.getMinutes() + session.session_time);
-//           const sessionEnd = new Date(sessionStart.getTime() + session.session_duration * 60 * 1000);
-
-//           // Skip the session if it has ended
-//           if (sessionEnd < currentTimeInMillis) {
-//             return null;
-//           }
-
-//           const counsellor = await Counsellor.findOne({
-//             _id: session.session_counsellor,
-//           });
-//           total_available_slots += session.session_available_slots;
-//           const sessionDate = new Date(session.session_date);
-//           let session_massaged_date = "";
-
-//           const today = new Date();
-//           const tomorrow = new Date(today);
-//           tomorrow.setDate(today.getDate() + 1);
-
-//           if (sessionDate.toDateString() === today.toDateString()) {
-//             session_massaged_date = "today";
-//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
-//             session_massaged_date = "tomorrow";
-//           } else {
-//             const dayDiff = Math.ceil(
-//               (sessionDate - today) / (1000 * 3600 * 24)
-//             );
-//             if (dayDiff <= 7 && dayDiff > 0) {
-//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
-//             } else {
-//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-//               session.session_time = sessionTimeIntoString(
-//                 session.session_time
-//               );
-//             }
-//           }
-//           return {
-//             counsellor_id: counsellor._id,
-//             session_id: session._id,
-//             counsellor_profile_pic: counsellor.profile_pic,
-//             counsellor_name: counsellor.name,
-//             counsellor_designation: counsellor.designation,
-//             session_time: session.session_time,
-//             session_date: session_massaged_date,
-//             session_fee: session.session_fee,
-//             session_topic: session.session_topic,
-//             session_duration: session.session_duration,
-//           };
-//         })
-//       );
-
-//       // Filter out any null values (i.e., sessions that have ended)
-//       const filteredSessions = massagedSessions.filter(session => session !== null);
-
-//       res.status(200).json(filteredSessions.slice(0, 5));
-//     } else {
-//       res.status(200).json([]);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.getLatestSessions = async (req, res) => {
-//   try {
-//     // Get the current date and time in IST
-//     const currentDate = new Date();
-//     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-//     const istDate = new Date(currentDate.getTime() + istOffset);
-
-//     // Normalize IST date to start of the day
-//     istDate.setUTCHours(0, 0, 0, 0);
-
-//     // Calculate the session time in minutes from IST
-//     const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
-//     const sessionTime =
-//       currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
-
-//     // Initialize sessions array
-//     let sessions = [];
-
-//     // Fetch sessions scheduled for today and in the future
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $eq: istDate },
-//         session_time: { $gte: sessionTime },
-//         session_type: "Group", // Filter to include only group sessions
-//       }))
-//     );
-
-//     // Fetch sessions scheduled from tomorrow onward
-//     const tomorrow = new Date(istDate);
-//     tomorrow.setDate(tomorrow.getDate() + 1);
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $gte: tomorrow },
-//         session_type: "Group", // Filter to include only group sessions
-//       })
-//         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
-//         .limit(5))
-//     );
-
-//     // Get the current time for session end comparison
-//     const currentTimeInMillis = Date.now() + istOffset;
-
-//     let total_available_slots = 0;
-//     if (sessions.length > 0) {
-//       const daysOfWeek = [
-//         "Sunday",
-//         "Monday",
-//         "Tuesday",
-//         "Wednesday",
-//         "Thursday",
-//         "Friday",
-//         "Saturday",
-//       ];
-//       const massagedSessions = await Promise.all(
-//         sessions.map(async (session) => {
-//           // Calculate session start and end times in milliseconds
-//           const sessionStart = new Date(session.session_date);
-//           sessionStart.setMinutes(
-//             sessionStart.getMinutes() + session.session_time
-//           );
-//           const sessionEnd = new Date(
-//             sessionStart.getTime() + session.session_duration * 60 * 1000
-//           );
-
-//           // Skip the session if it has ended
-//           if (sessionEnd < currentTimeInMillis) {
-//             return null;
-//           }
-
-//           const counsellor = await Counsellor.findOne({
-//             _id: session.session_counsellor,
-//           });
-//           total_available_slots += session.session_available_slots;
-//           const sessionDate = new Date(session.session_date);
-//           let session_massaged_date = "";
-
-//           const today = new Date();
-//           const tomorrow = new Date(today);
-//           tomorrow.setDate(today.getDate() + 1);
-
-//           if (sessionDate.toDateString() === today.toDateString()) {
-//             session_massaged_date = "today";
-//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
-//             session_massaged_date = "tomorrow";
-//           } else {
-//             const dayDiff = Math.ceil(
-//               (sessionDate - today) / (1000 * 3600 * 24)
-//             );
-//             if (dayDiff <= 7 && dayDiff > 0) {
-//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
-//             } else {
-//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-//               session.session_time = sessionTimeIntoString(
-//                 session.session_time
-//               );
-//             }
-//           }
-
-//           // Adding session_starting_date
-//           const session_starting_date = sessionStart.toISOString();
-
-//           return {
-//             counsellor_id: counsellor._id,
-//             session_id: session._id,
-//             counsellor_profile_pic: counsellor.profile_pic,
-//             counsellor_name: counsellor.name,
-//             counsellor_designation: counsellor.designation,
-//             session_time: session.session_time,
-//             session_date: session_massaged_date,
-//             session_fee: session.session_fee,
-//             session_topic: session.session_topic,
-//             session_duration: session.session_duration,
-//             session_starting_date, // Newly added field
-//           };
-//         })
-//       );
-
-//       // Filter out any null values (i.e., sessions that have ended)
-//       const filteredSessions = massagedSessions.filter(
-//         (session) => session !== null
-//       );
-
-//       res.status(200).json(filteredSessions.slice(0, 5));
-//     } else {
-//       res.status(200).json([]);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 exports.getLatestSessions = async (req, res) => {
   try {
@@ -2053,232 +1561,6 @@ exports.getLatestSessions = async (req, res) => {
 };
 
 
-// exports.getLatestSessions = async (req, res) => {
-//   try {
-//     // Get the current date and time in IST
-//     const currentDate = new Date();
-//     const istOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
-//     const istDate = new Date(currentDate.getTime() + istOffset);
-
-//     // Normalize IST date to start of the day
-//     istDate.setUTCHours(0, 0, 0, 0);
-
-//     // Calculate the session time in minutes from IST
-//     const currentTimeInIST = new Date(currentDate.getTime() + istOffset);
-//     const sessionTime =
-//       currentTimeInIST.getHours() * 60 + currentTimeInIST.getMinutes();
-
-//     // Initialize sessions array
-//     let sessions = [];
-
-//     // Fetch sessions scheduled for today and in the future
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $eq: istDate },
-//         session_time: { $gte: sessionTime },
-//         session_type: "Group", // Filter to include only group sessions
-//       }))
-//     );
-
-//     // Fetch sessions scheduled from tomorrow onward
-//     const tomorrow = new Date(istDate);
-//     tomorrow.setDate(tomorrow.getDate() + 1);
-//     sessions.push(
-//       ...(await Session.find({
-//         session_date: { $gte: tomorrow },
-//         session_type: "Group", // Filter to include only group sessions
-//       })
-//         .sort({ session_date: 1, session_time: 1 }) // Sort by date and time in ascending order
-//         .limit(5))
-//     );
-
-//     // Get the current time for session end comparison
-//     const currentTimeInMillis = Date.now() + istOffset;
-
-//     let total_available_slots = 0;
-//     if (sessions.length > 0) {
-//       const daysOfWeek = [
-//         "Sunday",
-//         "Monday",
-//         "Tuesday",
-//         "Wednesday",
-//         "Thursday",
-//         "Friday",
-//         "Saturday",
-//       ];
-//       const massagedSessions = await Promise.all(
-//         sessions.map(async (session) => {
-//           // Calculate session start and end times in milliseconds
-//           const sessionStart = new Date(session.session_date);
-//           sessionStart.setMinutes(
-//             sessionStart.getMinutes() + session.session_time
-//           );
-//           const sessionEnd = new Date(
-//             sessionStart.getTime() + session.session_duration * 60 * 1000
-//           );
-
-//           // Skip the session if it has ended
-//           if (sessionEnd < currentTimeInMillis) {
-//             return null;
-//           }
-
-//           // Fetch the counsellor details and check if they are verified
-//           const counsellor = await Counsellor.findOne({
-//             _id: session.session_counsellor,
-//             verified: true, // Only include verified counsellors
-//           });
-
-//           if (!counsellor) {
-//             return null; // Skip session if counsellor is not verified
-//           }
-
-//           total_available_slots += session.session_available_slots;
-//           const sessionDate = new Date(session.session_date);
-//           let session_massaged_date = "";
-
-//           const today = new Date();
-//           const tomorrow = new Date(today);
-//           tomorrow.setDate(today.getDate() + 1);
-
-//           if (sessionDate.toDateString() === today.toDateString()) {
-//             session_massaged_date = "today";
-//           } else if (sessionDate.toDateString() === tomorrow.toDateString()) {
-//             session_massaged_date = "tomorrow";
-//           } else {
-//             const dayDiff = Math.ceil(
-//               (sessionDate - today) / (1000 * 3600 * 24)
-//             );
-//             if (dayDiff <= 7 && dayDiff > 0) {
-//               session_massaged_date = daysOfWeek[sessionDate.getDay()];
-//             } else {
-//               session_massaged_date = sessionDate.toDateString().slice(4); // Adjusted to slice(4) assuming you want to trim the day name.
-//               session.session_time = sessionTimeIntoString(
-//                 session.session_time
-//               );
-//             }
-//           }
-
-//           // Adding session_starting_date
-//           const session_starting_date = sessionStart.toISOString();
-
-//           return {
-//             counsellor_id: counsellor._id,
-//             session_id: session._id,
-//             counsellor_profile_pic: counsellor.profile_pic,
-//             counsellor_name: counsellor.name,
-//             counsellor_designation: counsellor.designation,
-//             session_time: session.session_time,
-//             session_date: session_massaged_date,
-//             session_fee: session.session_fee,
-//             session_topic: session.session_topic,
-//             session_duration: session.session_duration,
-//             session_starting_date, // Newly added field
-//           };
-//         })
-//       );
-
-//       // Filter out any null values (i.e., sessions that have ended or unverified counsellors)
-//       const filteredSessions = massagedSessions.filter(
-//         (session) => session !== null
-//       );
-
-//       res.status(200).json(filteredSessions.slice(0, 5));
-//     } else {
-//       res.status(200).json([]);
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-
-// exports.isSessionAboutToStart = async (req, res) => {
-//   try {
-//     const { session_id } = req.params;
-
-//     const session = await Session.findById(session_id);
-
-//     if (!session) {
-//       return res.status(404).json({ error: "Session not found" });
-//     }
-
-//     const sessionTimeMinutes = session.session_time;
-
-//     // Get the current time in IST
-//     const currentTime = new Date();
-//     const currentTimeIST = new Date(
-//       currentTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-//     );
-
-//     const sessionTimeEpoch = new Date(currentTimeIST);
-//     sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
-//     sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
-//     sessionTimeEpoch.setSeconds(0);
-//     sessionTimeEpoch.setMilliseconds(0);
-
-//     const threshold = 10 * 60 * 1000;
-
-//     const isAboutToStart =
-//       Math.abs(sessionTimeEpoch - currentTimeIST) <= threshold;
-
-//     res.status(200).json({ isAboutToStart });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-// exports.isSessionAboutToStart = async (req, res) => {
-//   try {
-//     const { session_id } = req.params;
-
-//     const session = await Session.findById(session_id);
-
-//     if (!session) {
-//       return res.status(404).json({ error: "Session not found" });
-//     }
-
-//     const sessionTimeMinutes = session.session_time; // Time of session start in minutes from midnight
-//     const sessionDuration = session.session_duration; // Duration of the session in minutes
-
-//     // Get the current time in IST
-//     const currentTime = new Date();
-//     const currentTimeIST = new Date(
-//       currentTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-//     );
-
-//     // Calculate session start time in IST
-//     const sessionTimeEpoch = new Date(currentTimeIST);
-//     sessionTimeEpoch.setHours(Math.floor(sessionTimeMinutes / 60));
-//     sessionTimeEpoch.setMinutes(sessionTimeMinutes % 60);
-//     sessionTimeEpoch.setSeconds(0);
-//     sessionTimeEpoch.setMilliseconds(0);
-
-//     // Calculate session end time in IST
-//     const sessionEndEpoch = new Date(sessionTimeEpoch);
-//     sessionEndEpoch.setMinutes(sessionEndEpoch.getMinutes() + sessionDuration);
-
-//     // Define the threshold (10 minutes before session start)
-//     const thresholdBeforeStart = 15 * 60 * 1000; // 10 minutes in milliseconds
-
-//     // Calculate the time 10 minutes before session start
-//     const timeBeforeSessionStart = new Date(
-//       sessionTimeEpoch - thresholdBeforeStart
-//     );
-
-//     // Check if the current time is between 10 minutes before session start and session end time
-//     const isAboutToStart =
-//       currentTimeIST >= timeBeforeSessionStart &&
-//       currentTimeIST <= sessionEndEpoch;
-
-//     res.status(200).json({ isAboutToStart });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 exports.isSessionAboutToStart = async (req, res) => {
   try {
     const { session_id } = req.params;
@@ -2340,109 +1622,104 @@ exports.isSessionAboutToStart = async (req, res) => {
 
 
 
+cron.schedule("* * * * *", async () => {
+  try {
+    const now = new Date();
+    const nowHours = now.getHours();
+    const nowMinutes = now.getMinutes();
+
+    // console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
+
+    const todayDate = new Date().toISOString().split("T")[0];
+    // console.log("Cron Job Started - Checking for sessions on:", todayDate);
+
+    const sessions = await Session.find({
+      session_date: todayDate,
+      session_status: "Booked",
+    });
+
+    // console.log("Total sessions found for today:", sessions.length);
+
+    for (const session of sessions) {
+      // console.log("Processing session:", session._id);
+
+      const sessionTotalMinutes = session.session_time;
+      const nowTotalMinutes = nowHours * 60 + nowMinutes;
+      const diff = sessionTotalMinutes - nowTotalMinutes;
+      // console.log(`⏳ Session starts in ${diff} minutes`);
+
+      if (diff === 10) {
+        // console.log("🚀 Session will start in 10 minutes:", session.session_topic);
+
+        const userIds = session.session_users;
+        // console.log("👥 Users to Notify:", userIds);
+
+        // Fetch FCM tokens
+        const tokenResponse = await axios.get(`${BACKEND_URL}/user/fcm-tokens`, {
+          params: {
+            user_ids: JSON.stringify(userIds)
+          }
+        });
+        const { fcmTokens } = tokenResponse.data;
+        // console.log("📲 FCM Tokens Found:", fcmTokens);
+
+        if (fcmTokens.length > 0) {
+          // Send notification to multiple tokens using new endpoint
+          const notificationResponse = await axios.post(`${BACKEND_URL}/notification/send-notification-multiple`, {
+            tokens: fcmTokens,
+            title: "⚡ Your Session Starts Soon – Join Now!",
+            body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
+            type: "session_booking",
+            id: session._id.toString()
+          });
+          console.log("Notification Response:", notificationResponse.data);
+        } else {
+          console.log("⚠️ No FCM tokens found, skipping notification");
+        }
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error in cron job:", error);
+  }
+});
+
 
 
 // cron.schedule("* * * * *", async () => {
 //   try {
 //     const now = new Date();
-//     const nowHours = now.getHours();
-//     const nowMinutes = now.getMinutes();
+//     const nowTotalMinutes = now.getHours() * 60 + now.getMinutes();
 
-//     console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
-
-//     const todayDate = now.toISOString().split("T")[0] + "T00:00:00.000+00:00";
-//     console.log("Cron Job Started - Checking for sessions on:", todayDate);
-
-//     // 🔹 आज के सभी booked sessions को लाना
+//     const todayDate = new Date().toISOString().split("T")[0];
 //     const sessions = await Session.find({
 //       session_date: todayDate,
 //       session_status: "Booked",
 //     });
 
-//     console.log("Total sessions found for today:", sessions.length);
-
 //     for (const session of sessions) {
-//       console.log("Processing session:", session._id);
-
-//       // 🟢 session_time को सही समय में बदलना
-//       const sessionHours = Math.floor(session.session_time / 60);
-//       const sessionMinutes = session.session_time % 60;
-
-//       console.log(`📌 Session Time: ${sessionHours}:${sessionMinutes}`);
-
-//       // 🔴 Difference निकालना (Minutes में)
-//       const diff =
-//         (sessionHours * 60 + sessionMinutes) - (nowHours * 60 + nowMinutes);
-
-//       console.log(`⏳ Session starts in ${diff} minutes`);
+//       const diff = session.session_time - nowTotalMinutes;
 
 //       if (diff === 10) {
-//         console.log("🚀 Session will start in 10 minutes:", session.session_topic);
-
 //         const userIds = session.session_users;
-//         console.log("👥 Users to Notify:", userIds);
 
-//         // 🔥 Users ke FCM tokens ek saath fetch karo
-//         const users = await User.find({ _id: { $in: userIds.map(id => new mongoose.Types.ObjectId(id)) } }, "fcm_token");
+//         // Fetch FCM tokens
+//         const { data } = await axios.get("http://localhost:8000/fcm-tokens", {
+//           params: { user_ids: JSON.stringify(userIds) },
+//         });
 
-//         console.log("Users Response Type:", typeof users);
-//         console.log("Users Response:", users);
-//         const fcmTokens = users.map(user => user.fcm_token).filter(Boolean);
-
-//         console.log("📲 FCM Tokens Found:", fcmTokens);
+//         if (data.fcmTokens.length > 0) {
+//           // Send notification
+//           await axios.post("http://localhost:8005/send-notification-multiple", {
+//             tokens: data.fcmTokens,
+//             title: "⚡ Your Session Starts Soon – Join Now!",
+//             body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
+//             type: "session_booking",
+//             id: session._id.toString(),
+//           });
+//         }
 //       }
 //     }
 //   } catch (error) {
-//     console.error("❌ Error in cron job fetching FCM tokens:", error);
-//   }
-// });
-
-
-// cron.schedule("* * * * *", async () => {
-//   try {
-//     const now = new Date();
-//     const nowHours = now.getHours();
-//     const nowMinutes = now.getMinutes();
-
-//     console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
-
-//     const todayDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-//     console.log("Cron Job Started - Checking for sessions on:", todayDate);
-
-//     // 🔹 आज के सभी booked sessions को लाना
-//     const sessions = await Session.find({
-//       session_date: todayDate,
-//       session_status: "Booked",
-//     });
-
-//     console.log("Total sessions found for today:", sessions.length);
-
-//     for (const session of sessions) {
-//       console.log("Processing session:", session._id);
-
-//       // 🟢 session_time पहले से ही minutes में है
-//       const sessionTotalMinutes = session.session_time;
-//       const nowTotalMinutes = nowHours * 60 + nowMinutes;
-
-//       const diff = sessionTotalMinutes - nowTotalMinutes;
-//       console.log(`⏳ Session starts in ${diff} minutes`);
-
-//       if (diff === 10) {
-//         console.log("🚀 Session will start in 10 minutes:", session.session_topic);
-
-//         const userIds = session.session_users;
-//         console.log("👥 Users to Notify:", userIds);
-
-//         // 🔥 Users ke FCM tokens ek saath fetch karo
-//         const users = await User.find({ _id: { $in: userIds } }, "fcm_token");
-//         console.log("Users Response Type:", typeof users);
-//         console.log("Users Response:", users);
-//         const fcmTokens = users.map(user => user.fcm_token).filter(Boolean);
-
-//         console.log("📲 FCM Tokens Found:", fcmTokens);
-//       }
-//     }
-//   } catch (error) {
-//     console.error("❌ Error in cron job fetching FCM tokens:", error);
+//     console.error("❌ Error in cron job:", error);
 //   }
 // });

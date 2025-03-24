@@ -249,6 +249,8 @@ exports.addWebinar = async (req, res) => {
     const [hours, minutes] = webinar_time.split(":");
     const combinedDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
+    
+
     const { data } = await axios.post(
       `https://api.zoom.us/v2/users/me/webinars`,
       {

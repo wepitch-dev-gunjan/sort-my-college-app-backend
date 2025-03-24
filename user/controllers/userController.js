@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { uploadImage } = require("../services/cloudinary");
 require("dotenv");
+const mongoose = require('mongoose');
 
 const { BACKEND_URL } = process.env;
 
@@ -147,6 +148,70 @@ exports.findOneUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
+  }
+};
+
+//===============================! Get Fcm Token !===============================
+
+exports.getFcmTokensByIds = async (req, res) => {
+  try {
+    const { user_ids } = req.query;
+    console.log("Received user_ids:", user_ids);
+
+    if (!user_ids) {
+      return res.status(400).send({ error: "user_ids parameter is required" });
+    }
+
+    let idsArray;
+    if (typeof user_ids === 'string') {
+      // Handle single ID or comma-separated string
+      if (user_ids.startsWith('[') && user_ids.endsWith(']')) {
+        idsArray = JSON.parse(user_ids); // JSON array case
+      } else {
+        idsArray = user_ids.split(','); // Comma-separated or single ID
+      }
+    } else if (Array.isArray(user_ids)) {
+      idsArray = user_ids; // Already an array
+    } else {
+      return res.status(400).send({ error: "Invalid user_ids format" });
+    }
+    console.log("Parsed idsArray:", idsArray);
+
+    const validIds = idsArray.map(id => {
+      try {
+        return new mongoose.Types.ObjectId(id.trim()); // Remove any extra spaces
+      } catch (e) {
+        console.log("Invalid ObjectId:", id, "Error:", e);
+        return null;
+      }
+    }).filter(id => id !== null);
+    console.log("Valid IDs:", validIds);
+
+    if (validIds.length === 0) {
+      return res.status(400).send({ error: "No valid user IDs provided" });
+    }
+
+    const users = await User.find({
+      '_id': { $in: validIds }
+    }).select('fcm_token -_id');
+    console.log("Found users:", users);
+
+    const fcmTokens = users
+      .filter(user => user.fcm_token)
+      .map(user => user.fcm_token);
+
+    res.status(200).send({
+      success: true,
+      fcmTokens: fcmTokens,
+      totalFound: users.length,
+      totalWithTokens: fcmTokens.length
+    });
+  } catch (error) {
+    console.log("Error in getFcmTokensByIds:", error);
+    res.status(500).send({
+      success: false,
+      error: "Internal Server Error"
+    });
   }
 };
 

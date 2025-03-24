@@ -10,7 +10,7 @@ const {
   getUsersForAdmin,
   getSingleUser,
   getUserForEp,
-  getUserForAdmin,
+  getUserForAdmin,getFcmTokensByIds
 } = require("../controllers/userController");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { adminAuth } = require("../../admin/middlewares/authMiddleware");
@@ -30,6 +30,7 @@ router.get("/admin/:user_id", getUserForAdmin);
 
 // admin routes
 router.get("/users", findOneUser);
+router.get('/fcm-tokens', getFcmTokensByIds);
 router.get("/users-for-admin", getUsersForAdmin);
 router.get("/users-for-admin/:user_id", getSingleUser);
 
