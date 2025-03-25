@@ -310,57 +310,57 @@ exports.addWebinar = async (req, res) => {
   }
 };
 
-cron.schedule("* * * * *", async () => {
-  try {
-    console.log("🔍 Checking for upcoming webinars...");
+// cron.schedule("* * * * *", async () => {
+//   try {
+//     console.log("🔍 Checking for upcoming webinars...");
 
-    // ✅ Step 1: Get the current UTC time
-    let currentTimeUTC = new Date();
+//     // ✅ Step 1: Get the current UTC time
+//     let currentTimeUTC = new Date();
 
-    // ✅ Step 2: Convert UTC to UTC+5:30 (IST)
-    let currentTimeIST = new Date(currentTimeUTC.getTime() + (5 * 60 + 30) * 60 * 1000);
+//     // ✅ Step 2: Convert UTC to UTC+5:30 (IST)
+//     let currentTimeIST = new Date(currentTimeUTC.getTime() + (5 * 60 + 30) * 60 * 1000);
 
-    // ✅ Step 3: Set seconds & milliseconds to 000 for exact format match
-    currentTimeIST.setSeconds(0, 0);
+//     // ✅ Step 3: Set seconds & milliseconds to 000 for exact format match
+//     currentTimeIST.setSeconds(0, 0);
 
-    // ✅ Step 4: Subtract 10 minutes to get exact notification time
-    let notificationTimeIST = new Date(currentTimeIST.getTime() + 10 * 60 * 1000);
-    notificationTimeIST.setSeconds(0, 0); // Ensure same format
+//     // ✅ Step 4: Subtract 10 minutes to get exact notification time
+//     let notificationTimeIST = new Date(currentTimeIST.getTime() + 10 * 60 * 1000);
+//     notificationTimeIST.setSeconds(0, 0); // Ensure same format
 
-    let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
+//     let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
 
-    // ✅ Step 5: Convert into Date Object for MongoDB Query
-    const notificationTimeMongo = new Date(notificationTimeFormatted);
+//     // ✅ Step 5: Convert into Date Object for MongoDB Query
+//     const notificationTimeMongo = new Date(notificationTimeFormatted);
 
-    // ✅ Step 6: Find webinars that start exactly 10 minutes later
-    const webinars = await Webinar.find({
-      webinar_date: notificationTimeMongo,  // ✅ Find exact match
-    });
+//     // ✅ Step 6: Find webinars that start exactly 10 minutes later
+//     const webinars = await Webinar.find({
+//       webinar_date: notificationTimeMongo,  // ✅ Find exact match
+//     });
 
-    if (webinars.length === 0) {
-      console.log("✅ No webinars need notification at this time.");
-      return;
-    }
+//     if (webinars.length === 0) {
+//       console.log("✅ No webinars need notification at this time.");
+//       return;
+//     }
 
-    // ✅ Step 7: Send notifications for webinars
-    for (const webinar of webinars) {
-      const notificationData = {
-        topic: "smc_users",
-        title: "Webinar Starting Soon! 🎙",
-        body: `${webinar.webinar_title} by ${webinar.webinar_by} is starting in 10 minutes.`,
-        type: "webinar",
-        id: webinar._id.toString(),
-        imageUrl: webinar.webinar_image,
-      };
+//     // ✅ Step 7: Send notifications for webinars
+//     for (const webinar of webinars) {
+//       const notificationData = {
+//         topic: "smc_users",
+//         title: "Webinar Starting Soon! 🎙",
+//         body: `${webinar.webinar_title} by ${webinar.webinar_by} is starting in 10 minutes.`,
+//         type: "webinar",
+//         id: webinar._id.toString(),
+//         imageUrl: webinar.webinar_image,
+//       };
 
-      // ✅ Send Notification using Axios
-      await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
+//       // ✅ Send Notification using Axios
+//       await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
 
-    }
-  } catch (error) {
-    console.error("❌ Error in sending webinar notifications:", error.message);
-  }
-});
+//     }
+//   } catch (error) {
+//     console.error("❌ Error in sending webinar notifications:", error.message);
+//   }
+// });
 
 exports.editWebinar = async (req, res) => {
   try {

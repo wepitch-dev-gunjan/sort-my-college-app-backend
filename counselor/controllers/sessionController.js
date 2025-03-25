@@ -1622,100 +1622,59 @@ exports.isSessionAboutToStart = async (req, res) => {
 
 
 
-cron.schedule("* * * * *", async () => {
-  try {
-    const now = new Date();
-    const nowHours = now.getHours();
-    const nowMinutes = now.getMinutes();
-
-    // console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
-
-    const todayDate = new Date().toISOString().split("T")[0];
-    // console.log("Cron Job Started - Checking for sessions on:", todayDate);
-
-    const sessions = await Session.find({
-      session_date: todayDate,
-      session_status: "Booked",
-    });
-
-    // console.log("Total sessions found for today:", sessions.length);
-
-    for (const session of sessions) {
-      // console.log("Processing session:", session._id);
-
-      const sessionTotalMinutes = session.session_time;
-      const nowTotalMinutes = nowHours * 60 + nowMinutes;
-      const diff = sessionTotalMinutes - nowTotalMinutes;
-      // console.log(`⏳ Session starts in ${diff} minutes`);
-
-      if (diff === 10) {
-        // console.log("🚀 Session will start in 10 minutes:", session.session_topic);
-
-        const userIds = session.session_users;
-        // console.log("👥 Users to Notify:", userIds);
-
-        // Fetch FCM tokens
-        const tokenResponse = await axios.get(`${BACKEND_URL}/user/fcm-tokens`, {
-          params: {
-            user_ids: JSON.stringify(userIds)
-          }
-        });
-        const { fcmTokens } = tokenResponse.data;
-        // console.log("📲 FCM Tokens Found:", fcmTokens);
-
-        if (fcmTokens.length > 0) {
-          // Send notification to multiple tokens using new endpoint
-          const notificationResponse = await axios.post(`${BACKEND_URL}/notification/send-notification-multiple`, {
-            tokens: fcmTokens,
-            title: "⚡ Your Session Starts Soon – Join Now!",
-            body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
-            type: "session_booking",
-            id: session._id.toString()
-          });
-          console.log("Notification Response:", notificationResponse.data);
-        } else {
-          console.log("⚠️ No FCM tokens found, skipping notification");
-        }
-      }
-    }
-  } catch (error) {
-    console.error("❌ Error in cron job:", error);
-  }
-});
-
-
-
 // cron.schedule("* * * * *", async () => {
 //   try {
 //     const now = new Date();
-//     const nowTotalMinutes = now.getHours() * 60 + now.getMinutes();
+//     const nowHours = now.getHours();
+//     const nowMinutes = now.getMinutes();
+
+//     // console.log(`🕒 Present Time: ${nowHours}:${nowMinutes}`);
 
 //     const todayDate = new Date().toISOString().split("T")[0];
+//     // console.log("Cron Job Started - Checking for sessions on:", todayDate);
+
 //     const sessions = await Session.find({
 //       session_date: todayDate,
 //       session_status: "Booked",
 //     });
 
+//     console.log("Total sessions found for today:", sessions.length);
+
 //     for (const session of sessions) {
-//       const diff = session.session_time - nowTotalMinutes;
+//       // console.log("Processing session:", session._id);
+
+//       const sessionTotalMinutes = session.session_time;
+//       const nowTotalMinutes = nowHours * 60 + nowMinutes;
+//       const diff = sessionTotalMinutes - nowTotalMinutes;
+//       console.log(`⏳ Session starts in ${diff} minutes`);
 
 //       if (diff === 10) {
+//         // console.log("🚀 Session will start in 10 minutes:", session.session_topic);
+
 //         const userIds = session.session_users;
+//         // console.log("👥 Users to Notify:", userIds);
 
 //         // Fetch FCM tokens
-//         const { data } = await axios.get("http://localhost:8000/fcm-tokens", {
-//           params: { user_ids: JSON.stringify(userIds) },
+//         const tokenResponse = await axios.get(`${BACKEND_URL}/user/fcm-tokens`, {
+//           params: {
+//             user_ids: JSON.stringify(userIds)
+//           }
 //         });
+//         const { fcmTokens } = tokenResponse.data;
+//         console.log("📲 FCM Tokens Found:", fcmTokens);
 
-//         if (data.fcmTokens.length > 0) {
-//           // Send notification
-//           await axios.post("http://localhost:8005/send-notification-multiple", {
-//             tokens: data.fcmTokens,
+//         if (fcmTokens.length > 0) {
+//           // Send notification to multiple tokens using new endpoint
+//           const notificationResponse = await axios.post(`${BACKEND_URL}/notification/send-notification-multiple`, {
+//             tokens: fcmTokens,
 //             title: "⚡ Your Session Starts Soon – Join Now!",
 //             body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
 //             type: "session_booking",
-//             id: session._id.toString(),
+//             id: session._id.toString()
 //           });
+//           console.log("Notification Response:", notificationResponse.data);
+//         } else {
+//           console.log("⚠️ No FCM tokens found, skipping notification");
 //         }
 //       }
 //     }
@@ -1723,3 +1682,5 @@ cron.schedule("* * * * *", async () => {
 //     console.error("❌ Error in cron job:", error);
 //   }
 // });
+
+
