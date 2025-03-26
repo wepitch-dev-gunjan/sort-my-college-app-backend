@@ -634,17 +634,35 @@ exports.addSession = async (req, res) => {
     // Extract counsellor name or fallback to "Unknown Counsellor"
     const counsellor_name = counsellor ? counsellor.name : "Unknown Counsellor";
 
+    // Convert session_date from YYYY-MM-DD to DD-MM-YYYY
+    const formattedDate = new Date(session_date).toLocaleDateString("en-GB");
 
+    // Convert session_time from 24-hour format to 12-hour format
+    const formattedTime = new Date(`1970-01-01T${session_time}`).toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
 
     // **Send notification to the counsellor**
     const notificationData = {
       topic: `counsellor_${counsellor_id}`, // Dynamic topic for each counsellor
       title: `New ${session_type} Session Added by ${counsellor_name}`,
-      body: `${session_topic} scheduled on ${session_date} at ${session_time}`,
+      body: `${session_topic} scheduled on ${formattedDate} at ${formattedTime}`,
       type: "session",
       id: counsellor_id.toString(),
-
     };
+
+
+    // // **Send notification to the counsellor**
+    // const notificationData = {
+    //   topic: `counsellor_${counsellor_id}`, // Dynamic topic for each counsellor
+    //   title: `New ${session_type} Session Added by ${counsellor_name}`,
+    //   body: `${session_topic} scheduled on ${session_date} at ${session_time}`,
+    //   type: "session",
+    //   id: counsellor_id.toString(),
+
+    // };
 
     await axios.post(
       `${BACKEND_URL}/notification/send-notification-to-topic`,
