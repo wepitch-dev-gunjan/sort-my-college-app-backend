@@ -174,7 +174,7 @@ exports.verifyOtpByPhoneForRegistration = async (req, res) => {
   }
 };
 
-
+//==============================! Verify Otp BY phone !======================================
 
 exports.verifyOtpByPhoneForLogIn = async (req, res) => {
   try {
