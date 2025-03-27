@@ -5,32 +5,6 @@ const mongoose = require('mongoose');
 
 const { BACKEND_URL } = process.env;
 
-// exports.register = async (req, res) => {
-//   try {
-//     const { user_id } = req;
-//     const { name, date_of_birth, gender, education_level } = req.body;
-
-//     if (!name || !date_of_birth || !gender || !education_level)
-//       return res.status(400).send({
-//         error: "Required fields not provided",
-//       });
-
-//     const user = await User.findOne({ _id: user_id });
-//     user.name = name;
-//     user.date_of_birth = date_of_birth;
-//     user.gender = gender;
-//     user.education_level = education_level;
-
-//     await user.save();
-
-//     res.status(200).send({
-//       message: "User registered successfully",
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: "Internal Server Error" });
-//   }
-// };
 
 exports.register = async (req, res) => {
   try {
