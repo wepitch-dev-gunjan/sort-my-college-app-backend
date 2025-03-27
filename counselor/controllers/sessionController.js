@@ -1693,18 +1693,81 @@ exports.isSessionAboutToStart = async (req, res) => {
 
 //=======================! For Live Server !===================================
 
+// cron.schedule("* * * * *", async () => {
+//   try {
+//     const now = new Date();
+
+//     // Use UTC time to avoid AWS time zone issues
+//     const nowHours = now.getUTCHours();
+//     const nowMinutes = now.getUTCMinutes();
+//     const nowTotalMinutes = nowHours * 60 + nowMinutes;
+
+//     console.log(`🕒 Current UTC Time: ${nowHours}:${nowMinutes}`);
+
+//     const todayDate = new Date().toISOString().split("T")[0];
+
+//     const sessions = await Session.find({
+//       session_date: todayDate,
+//       session_status: "Booked",
+//     });
+
+//     console.log("Total sessions found for today:", sessions.length);
+
+//     for (const session of sessions) {
+//       const sessionTotalMinutes = session.session_time; // Ensure session_time is in minutes
+//       const diff = sessionTotalMinutes - nowTotalMinutes;
+
+//       console.log(`⏳ Session starts in ${diff} minutes`);
+
+//       if (diff === 10) {
+//         console.log("🚀 Session will start in 10 minutes:", session.session_topic);
+
+//         const userIds = session.session_users;
+
+//         // Fetch FCM tokens
+//         const tokenResponse = await axios.get(`${BACKEND_URL}/user/fcm-tokens`, {
+//           params: { user_ids: JSON.stringify(userIds) },
+//         });
+//         const { fcmTokens } = tokenResponse.data;
+
+//         console.log("📲 FCM Tokens Found:", fcmTokens);
+
+//         if (fcmTokens.length > 0) {
+//           // Send notification
+//           await axios.post(`${BACKEND_URL}/notification/send-notification-multiple`, {
+//             tokens: fcmTokens,
+//             title: "⚡ Your Session Starts Soon – Join Now!",
+//             body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
+//             type: "session_booking",
+//             id: session._id.toString(),
+//           });
+//           console.log("✅ Notification sent successfully!");
+//         } else {
+//           console.log("⚠️ No FCM tokens found, skipping notification");
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     console.error("❌ Error in cron job:", error);
+//   }
+// });
+
+
+
 cron.schedule("* * * * *", async () => {
   try {
     const now = new Date();
 
-    // Use UTC time to avoid AWS time zone issues
-    const nowHours = now.getUTCHours();
-    const nowMinutes = now.getUTCMinutes();
+    // Convert UTC to IST by adding 5 hours 30 minutes
+    const nowIST = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+
+    const nowHours = nowIST.getHours();
+    const nowMinutes = nowIST.getMinutes();
     const nowTotalMinutes = nowHours * 60 + nowMinutes;
 
-    console.log(`🕒 Current UTC Time: ${nowHours}:${nowMinutes}`);
+    console.log(`🕒 Current IST Time: ${nowHours}:${nowMinutes}`);
 
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate = nowIST.toISOString().split("T")[0]; // Today's date in IST
 
     const sessions = await Session.find({
       session_date: todayDate,
