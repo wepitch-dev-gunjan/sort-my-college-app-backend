@@ -33,11 +33,62 @@ exports.createNotification = async (req, res) => {
 
 //==========================================! send notification admin to user !============================
 
+// exports.sendNotificationToAllUsers = async (req, res) => {
+//   try {
+//     const { title, message, recipientType } = req.body;
+//     const { file } = req; // Multer se aane wala file object
+
+//     if (!title || !message) {
+//       return res.status(400).json({ error: "Title and message are required fields." });
+//     }
+
+//     let imageUrl = null;
+
+//     if (file) {
+//       const fileName = `notification-image-${Date.now()}.jpeg`;
+//       const folderName = "notification-images";
+//       imageUrl = await uploadImage(file.buffer, fileName, folderName);
+//     }
+
+//     const newNotification = new Notification({
+//       title,
+//       message,
+//       recipientType,
+//       image: imageUrl || null,
+//     });
+
+//     await newNotification.save();
+
+//     const notificationData = {
+//       topic: "smc_users",
+//       title: title,
+//       body: message,
+//       type: "global",
+//       id: "1",
+//       imageUrl: imageUrl || undefined,
+//     };
+
+//     await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+
+//     return res.status(201).json({
+//       message: "Notification created & sent successfully.",
+//       notification: newNotification,
+//     });
+//   } catch (error) {
+//     console.error("Error creating notification:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+
 exports.sendNotificationToAllUsers = async (req, res) => {
   try {
-    const { title, message } = req.body;
-    const { file } = req; // Multer se aane wala file object
+    const { title, message, recipientType } = req.body;
+    const { file } = req; // Multer से आने वाला file object
 
+    console.log("title", title);
+    console.log("message", message);
+    console.log("message", message)
     if (!title || !message) {
       return res.status(400).json({ error: "Title and message are required fields." });
     }
@@ -53,28 +104,90 @@ exports.sendNotificationToAllUsers = async (req, res) => {
     const newNotification = new Notification({
       title,
       message,
+      recipientType,
       image: imageUrl || null,
     });
 
     await newNotification.save();
 
-    const notificationData = {
-      topic: "smc_users",
-      title: title,
-      body: message,
-      type: "global",
-      id: "1",
-      imageUrl: imageUrl || undefined,
-    };
+    console.log("==================================================================");
+    console.log("recipientType===", recipientType);
 
-    await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+    // if (recipientType === "user") {
+    //   const notificationData = {
+    //     topic: "testing",
+    //     title: title,
+    //     body: message,
+    //     type: "global",
+    //     id: "1",
+    //     imageUrl: imageUrl || undefined,
+    //   };
+
+    //   await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+    // }
 
     return res.status(201).json({
-      message: "Notification created & sent successfully.",
+      message: recipientType === "user" ? "Notification created & sent successfully." : "Notification saved successfully.",
       notification: newNotification,
     });
+
   } catch (error) {
     console.error("Error creating notification:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.getUserNotifications = async (req, res) => {
+
+  try {
+
+    const { recipientType } = req.params;
+
+    if (!["users", "counsellors"].includes(recipientType)) {
+      return res.status(400).json({ error: "Invalid recipient type " })
+    }
+
+    const notifications = await Notification.find({ recipientType });
+    return res.status(200).json({ success: true, notifications });
+
+  } catch (error) {
+    console.error("Error fetching notifications", error);
+
+    res.status(500).json({ error: "Internal Server Error" })
+
+  }
+}
+
+
+exports.markNotificationAsRead = async (req, res) => {
+  try {
+    const { userId, notificationId } = req.body;
+
+    console.log("Received userId:", userId);
+    console.log("Received notificationId:", notificationId);
+
+    if (!userId || !notificationId) {
+      return res.status(400).json({ error: "User ID & Notification ID are required." });
+    }
+
+    const notification = await Notification.findById(notificationId);
+
+    if (!notification) {
+      return res.status(404).json({ error: "Notification not found." });
+    }
+
+
+    if (notification.userReadStatus.includes(userId)) {
+      return res.status(200).json({ message: "Already marked as read.", notification });
+    }
+
+    notification.userReadStatus.push(userId);
+    await notification.save();
+
+    res.status(200).json({ message: "Notification marked as read.", notification });
+
+  } catch (error) {
+    console.error("Error updating notification:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

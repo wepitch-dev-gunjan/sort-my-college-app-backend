@@ -232,8 +232,6 @@ exports.addWebinar = async (req, res) => {
     } = req.body;
     const { file } = req;
 
-    console.log("//======================", webinar_date);
-
     if (!file)
       return res.status(404).send({ error: "Image file is required" });
     if (!webinar_title)
@@ -310,31 +308,34 @@ exports.addWebinar = async (req, res) => {
   }
 };
 
+
+//================! Send a webinar notification 10 minutes before the webinar starts.!=======================
+
 cron.schedule("*/10 * * * *", async () => {
   try {
     console.log("🔍 Checking for upcoming webinars...");
 
-    // ✅ Step 1: Get the current UTC time
+    // Get the current UTC time
     let currentTimeUTC = new Date();
 
-    // ✅ Step 2: Convert UTC to UTC+5:30 (IST)
+    // Convert UTC to UTC+5:30 (IST)
     let currentTimeIST = new Date(currentTimeUTC.getTime() + (5 * 60 + 30) * 60 * 1000);
 
-    // ✅ Step 3: Set seconds & milliseconds to 000 for exact format match
+    // Set seconds & milliseconds to 000 for exact format match
     currentTimeIST.setSeconds(0, 0);
 
-    // ✅ Step 4: Subtract 10 minutes to get exact notification time
+    // Subtract 10 minutes to get exact notification time
     let notificationTimeIST = new Date(currentTimeIST.getTime() + 10 * 60 * 1000);
     notificationTimeIST.setSeconds(0, 0); // Ensure same format
 
     let notificationTimeFormatted = notificationTimeIST.toISOString().replace("Z", "+00:00");
 
-    // ✅ Step 5: Convert into Date Object for MongoDB Query
+    // Convert into Date Object for MongoDB Query
     const notificationTimeMongo = new Date(notificationTimeFormatted);
 
-    // ✅ Step 6: Find webinars that start exactly 10 minutes later
+    // Find webinars that start exactly 10 minutes later
     const webinars = await Webinar.find({
-      webinar_date: notificationTimeMongo,  // ✅ Find exact match
+      webinar_date: notificationTimeMongo,  // Find exact match
     });
 
     if (webinars.length === 0) {
@@ -342,7 +343,7 @@ cron.schedule("*/10 * * * *", async () => {
       return;
     }
 
-    // ✅ Step 7: Send notifications for webinars
+    // Send notifications for webinars
     for (const webinar of webinars) {
       const notificationData = {
         topic: "smc_users",
@@ -353,12 +354,12 @@ cron.schedule("*/10 * * * *", async () => {
         imageUrl: webinar.webinar_image,
       };
 
-      // ✅ Send Notification using Axios
-      await axios.post('https://www.sortmycollegeapp.com/notification/send-notification-to-topic', notificationData);
+      // Send Notification using Axios
+      await axios.post(`${BACKEND_URL}/notification/send-notification-to-topic`, notificationData);
 
     }
   } catch (error) {
-    console.error("❌ Error in sending webinar notifications:", error.message);
+    console.error("Error in sending webinar notifications:", error.message);
   }
 });
 
@@ -543,6 +544,7 @@ exports.getSingleWebinarForAdmin = async (req, res) => {
 //     res.status(500).json({ error: "Internal Server Error" });
 //   }
 // };
+
 exports.getSingleWebinarForUser = async (req, res) => {
   const { webinar_id } = req.params;
   const { user_id } = req;

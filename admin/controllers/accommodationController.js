@@ -508,27 +508,57 @@ exports.getCitiesForAccommodation = async (req, res) => {
   }
 };
 
+// exports.getNearbyCollegesForAccommodation = async (req, res) => {
+//   try {
+//     // Using aggregation to unwind the nearby_locations.colleges array and get distinct values
+//     const colleges = await Accommodation.aggregate([
+//       { $unwind: "$nearby_locations.colleges" }, // Unwind the colleges array
+//       { $group: { _id: "$nearby_locations.colleges" } }, // Group by college name to get unique entries
+//       { $project: { _id: 0, college: "$_id" } } // Format the response to return only the college names
+//     ]);
+
+//     // If colleges are found, send them as response
+//     if (colleges.length > 0) {
+//       res.status(200).json({ colleges: colleges.map(college => college.college) });
+//     } else {
+//       res.status(404).json({ message: "No nearby colleges found" });
+//     }
+//   } catch (error) {
+//     console.error("Error fetching nearby colleges:", error);
+//     res.status(500).json({ message: "Failed to fetch nearby colleges" });
+//   }
+// };
+
+
+
+
 exports.getNearbyCollegesForAccommodation = async (req, res) => {
   try {
-    // Using aggregation to unwind the nearby_locations.colleges array and get distinct values
-    const colleges = await Accommodation.aggregate([
-      { $unwind: "$nearby_locations.colleges" }, // Unwind the colleges array
-      { $group: { _id: "$nearby_locations.colleges" } }, // Group by college name to get unique entries
-      { $project: { _id: 0, college: "$_id" } } // Format the response to return only the college names
-    ]);
+    const { city } = req.query;
 
-    // If colleges are found, send them as response
+    // Aggregation pipeline
+    const pipeline = [];
+
+    if (city) {
+      pipeline.push({ $match: { "address.city": city } });
+    }
+
+    pipeline.push(
+      { $unwind: "$nearby_locations.colleges" }, // Unwind the colleges array
+      { $group: { _id: "$nearby_locations.colleges" } }, // Get distinct colleges
+      { $project: { _id: 0, college: "$_id" } } // Format the output
+    );
+
+    const colleges = await Accommodation.aggregate(pipeline);
+
     if (colleges.length > 0) {
       res.status(200).json({ colleges: colleges.map(college => college.college) });
     } else {
-      res.status(404).json({ message: "No nearby colleges found" });
+      res.status(404).json({ message: city ? `No nearby colleges found in ${city}` : "No colleges found" });
     }
   } catch (error) {
     console.error("Error fetching nearby colleges:", error);
     res.status(500).json({ message: "Failed to fetch nearby colleges" });
   }
 };
-
-
-
 

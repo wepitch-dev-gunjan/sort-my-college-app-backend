@@ -17,7 +17,15 @@ const notificationSchema = new Schema({
   read: {
     type: Boolean,
     default: false
+  },
+  recipientType: {
+    type: String,
+  },
+  userReadStatus: {
+    type: [String],
+    default: []
   }
+
 }, {
   timestamps: true,
   strict: false
