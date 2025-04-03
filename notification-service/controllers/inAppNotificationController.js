@@ -84,11 +84,8 @@ exports.createNotification = async (req, res) => {
 exports.sendNotificationToAllUsers = async (req, res) => {
   try {
     const { title, message, recipientType } = req.body;
-    const { file } = req; // Multer से आने वाला file object
+    const { file } = req; 
 
-    console.log("title", title);
-    console.log("message", message);
-    console.log("message", message)
     if (!title || !message) {
       return res.status(400).json({ error: "Title and message are required fields." });
     }
@@ -110,21 +107,18 @@ exports.sendNotificationToAllUsers = async (req, res) => {
 
     await newNotification.save();
 
-    console.log("==================================================================");
-    console.log("recipientType===", recipientType);
+    if (recipientType === "users") {
+      const notificationData = {
+        topic: "smc_users",
+        title: title,
+        body: message,
+        type: "global",
+        id: "1",
+        imageUrl: imageUrl || undefined,
+      };
 
-    // if (recipientType === "user") {
-    //   const notificationData = {
-    //     topic: "testing",
-    //     title: title,
-    //     body: message,
-    //     type: "global",
-    //     id: "1",
-    //     imageUrl: imageUrl || undefined,
-    //   };
-
-    //   await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
-    // }
+      await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
+    }
 
     return res.status(201).json({
       message: recipientType === "user" ? "Notification created & sent successfully." : "Notification saved successfully.",
