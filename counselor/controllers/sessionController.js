@@ -1741,7 +1741,7 @@ cron.schedule("*/10 * * * *", async () => {
           await axios.post(`${BACKEND_URL}/notification/send-notification-multiple`, {
             tokens: fcmTokens,
             title: "⚡ Your Session Starts Soon – Join Now!",
-            body: `Your session, "${session.session_topic}" starts in 10 minutes! Don't be late! 🚀`,
+            body: `Your session, ${session.session_topic} starts in 10 minutes! Don't be late! 🚀`,
             type: "session_booking",
             id: session._id.toString(),
           });
