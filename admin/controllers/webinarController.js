@@ -217,6 +217,7 @@ exports.getTrendingWebinars = async (req, res) => {
   }
 };
 
+//==================! Add Webinar With Firebase Notification For Users !=======================================
 
 exports.addWebinar = async (req, res) => {
   try {
@@ -487,63 +488,6 @@ exports.getSingleWebinarForAdmin = async (req, res) => {
   }
 };
 
-// exports.getSingleWebinarForUser = async (req, res) => {
-//   const { webinar_id } = req.params;
-//   const { user_id } = req;
-//   try {
-//     const webinar = await Webinar.findOne({ _id: webinar_id });
-//     if (!webinar) {
-//       return res.status(404).json({ error: "No webinar found with this ID" });
-//     }
-//     const webinarDate = webinar.webinar_date;
-//     webinarDate.setUTCHours(0, 0, 0, 0);
-
-//     const currentDate = new Date();
-//     currentDate.setUTCHours(0, 0, 0, 0);
-
-//     const dateDifference = getDateDifference(webinarDate, currentDate);
-
-//     // const registered = webinar.registered_participants.includes(user_id);
-//   const registered = webinar.registered_participants.some(
-//   (participant) => participant._id === user_id
-// );
-
-//     const webinar_date = webinarDateModifier(webinar.webinar_date);
-
-//     const earlyJoinTime = new Date(webinar.webinar_date);
-//     earlyJoinTime.setMinutes(earlyJoinTime.getMinutes() - EARLY_JOIN_MINUTES);
-
-//     // Check if the user can join the webinar
-//     const now = new Date();
-//     now.setTime(now.getTime() + 5.5 * 60 * 60 * 1000);
-//     const canJoin = now >= earlyJoinTime;
-
-//     const massagedWebinar = {
-//       _id: webinar._id,
-//       webinar_title: webinar.webinar_title,
-//       webinar_details: webinar.webinar_details,
-//       what_will_you_learn: webinar.what_will_you_learn,
-//       webinar_date,
-//       speaker_profile: webinar.speaker_profile,
-//       webinar_by: webinar.webinar_by,
-//       webinar_image: webinar.webinar_image,
-//       webinar_join_url: webinar.webinar_join_url,
-//       webinar_password: webinar.webinar_password,
-//       webinar_total_slots: webinar.webinar_total_slots,
-//       registered_participants: webinar.registered_participants,
-//       attended_participants: webinar.attended_participants,
-//       webinar_starting_in_day: dateDifference,
-//       registered,
-//       registered_date: webinar.webinar_date,
-//       can_join: canJoin
-//     };
-
-//     res.status(200).send(massagedWebinar);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
 
 exports.getSingleWebinarForUser = async (req, res) => {
   const { webinar_id } = req.params;

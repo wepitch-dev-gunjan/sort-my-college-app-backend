@@ -718,6 +718,7 @@ exports.unfollowInstitute = async (req, res) => {
 };
 
 exports.editInstituteProfile = async (req, res) => {
+
   try {
     const { file } = req;
     const { institute_id } = req.params;

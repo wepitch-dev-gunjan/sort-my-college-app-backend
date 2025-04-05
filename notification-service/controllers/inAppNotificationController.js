@@ -33,54 +33,6 @@ exports.createNotification = async (req, res) => {
 
 //==========================================! send notification admin to user !============================
 
-// exports.sendNotificationToAllUsers = async (req, res) => {
-//   try {
-//     const { title, message, recipientType } = req.body;
-//     const { file } = req; // Multer se aane wala file object
-
-//     if (!title || !message) {
-//       return res.status(400).json({ error: "Title and message are required fields." });
-//     }
-
-//     let imageUrl = null;
-
-//     if (file) {
-//       const fileName = `notification-image-${Date.now()}.jpeg`;
-//       const folderName = "notification-images";
-//       imageUrl = await uploadImage(file.buffer, fileName, folderName);
-//     }
-
-//     const newNotification = new Notification({
-//       title,
-//       message,
-//       recipientType,
-//       image: imageUrl || null,
-//     });
-
-//     await newNotification.save();
-
-//     const notificationData = {
-//       topic: "smc_users",
-//       title: title,
-//       body: message,
-//       type: "global",
-//       id: "1",
-//       imageUrl: imageUrl || undefined,
-//     };
-
-//     await axios.post("https://www.sortmycollegeapp.com/notification/send-notification-to-topic", notificationData);
-
-//     return res.status(201).json({
-//       message: "Notification created & sent successfully.",
-//       notification: newNotification,
-//     });
-//   } catch (error) {
-//     console.error("Error creating notification:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
-
-
 exports.sendNotificationToAllUsers = async (req, res) => {
   try {
     const { title, message, recipientType } = req.body;

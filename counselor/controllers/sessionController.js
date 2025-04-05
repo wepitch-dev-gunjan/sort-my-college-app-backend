@@ -208,7 +208,7 @@ exports.getSession = async (req, res) => {
   }
 };
 
-
+//======================= Add Session With Firebase Notificaion for Users !=========================
 
 exports.addSession = async (req, res) => {
   try {
@@ -540,7 +540,7 @@ exports.bookSessionValidation = async (req, res) => {
 //   }
 // };
 
-//======================================================! Notification Implement !=============================================
+//=================! Book Session With Firebase Notifcataion !=============================================
 
 exports.bookSession = async (req, res) => {
   try {
@@ -1279,7 +1279,7 @@ exports.isSessionAboutToStart = async (req, res) => {
 
 
 
-//=======================! For Live Server !===================================
+//=======================! Send Notification 10 minutes before the session starts !===================================
 
 cron.schedule("*/10 * * * *", async () => {
   try {

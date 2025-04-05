@@ -143,8 +143,7 @@ exports.postNotification = (req, res) => {
         wait: true,
       },
       function (err, response, metadata) {
-        // Response is response from notification
-        // Metadata contains activationType, activationAt, deliveredAt
+      
       }
     );
 
