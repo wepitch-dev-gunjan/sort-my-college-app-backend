@@ -16,6 +16,6 @@ router.get("/in-app/:notification_id", getNotification);
 router.put("/in-app/:notification_id", readNotification);
 router.delete("/in-app", deleteNotifications);
 router.get("/get-notifications/:recipientType", getUserNotifications);
-router.put("/mark-as-read", markNotificationAsRead);
+router.put("/mark-as-read", markNotificationAsRead);  
 
 module.exports = router;

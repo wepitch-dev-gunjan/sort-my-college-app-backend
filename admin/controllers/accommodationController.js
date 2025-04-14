@@ -532,15 +532,51 @@ exports.getCitiesForAccommodation = async (req, res) => {
 
 
 
+// exports.getNearbyCollegesForAccommodation = async (req, res) => {
+//   try {
+//     const { city } = req.query;
+
+//     // Aggregation pipeline
+//     const pipeline = [];
+
+//     if (city) {
+//       pipeline.push({ $match: { "address.city": city } });
+//     }
+
+//     pipeline.push(
+//       { $unwind: "$nearby_locations.colleges" }, // Unwind the colleges array
+//       { $group: { _id: "$nearby_locations.colleges" } }, // Get distinct colleges
+//       { $project: { _id: 0, college: "$_id" } } // Format the output
+//     );
+
+//     const colleges = await Accommodation.aggregate(pipeline);
+
+//     if (colleges.length > 0) {
+//       res.status(200).json({ colleges: colleges.map(college => college.college) });
+//     } else {
+//       res.status(404).json({ message: city ? `No nearby colleges found in ${city}` : "No colleges found" });
+//     }
+//   } catch (error) {
+//     console.error("Error fetching nearby colleges:", error);
+//     res.status(500).json({ message: "Failed to fetch nearby colleges" });
+//   }
+// };
+
+
 exports.getNearbyCollegesForAccommodation = async (req, res) => {
   try {
-    const { city } = req.query;
+    let { city } = req.query;
+
+    // If city is a comma-separated string, split into array
+    if (city) {
+      city = city.split(',').map(c => c.trim());
+    }
 
     // Aggregation pipeline
     const pipeline = [];
 
-    if (city) {
-      pipeline.push({ $match: { "address.city": city } });
+    if (city && city.length > 0) {
+      pipeline.push({ $match: { "address.city": { $in: city } } });
     }
 
     pipeline.push(
@@ -554,11 +590,11 @@ exports.getNearbyCollegesForAccommodation = async (req, res) => {
     if (colleges.length > 0) {
       res.status(200).json({ colleges: colleges.map(college => college.college) });
     } else {
-      res.status(404).json({ message: city ? `No nearby colleges found in ${city}` : "No colleges found" });
+      const cityList = city?.join(', ') || "specified";
+      res.status(404).json({ message: `No nearby colleges found in ${cityList}` });
     }
   } catch (error) {
     console.error("Error fetching nearby colleges:", error);
     res.status(500).json({ message: "Failed to fetch nearby colleges" });
   }
 };
-
